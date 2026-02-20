@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libTransBase.a CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o CMakeFiles/TransBase.dir/DataBlock.cpp.o CMakeFiles/TransBase.dir/DataBuffer.cpp.o CMakeFiles/TransBase.dir/MuxInterface.cpp.o CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o CMakeFiles/TransBase.dir/TransportInterface.cpp.o
+/usr/bin/ranlib ../../lib/libTransBase.a

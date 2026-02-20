@@ -1,0 +1,353 @@
+
+========================================
+>> Application Started
+   [(t  0)  Sat May 12 16:27:48-391430]
+========================================
+
+[(t  0)  Sat May 12 16:27:48-391781] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sat May 12 16:27:48-391951] Debug: SysThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-392280] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392413] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392460] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392504] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392553] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392599] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-392656] Debug: SysThread::run invoked.
+[(t  0)  Sat May 12 16:27:48-393529] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sat May 12 16:27:48-393470] Debug: SysThread::redirector invoked.
+[(t  0)  Sat May 12 16:27:48-394040] Debug: Configuration::initialize invoked.
+[(t  1)  Sat May 12 16:27:48-394046] Debug: ++> Thread started with ID: 1026 - Process ID: 2724
+[(t  0)  Sat May 12 16:27:48-394197] Debug: Configuration::copyConfigElementList invoked.
+[(t  1)  Sat May 12 16:27:48-394295]  Info: Signal monitor thread is process ID: 2724
+[(t  1)  Sat May 12 16:27:48-394359] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sat May 12 16:27:48-395081] Debug: EnvironMap::load invoked.
+[(t  0)  Sat May 12 16:27:48-396362] Debug: ConfigFile::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-396522] Debug: ArgumentMap::load invoked
+Arg Count: 13
+
+[(t  0)  Sat May 12 16:27:48-396592] Debug: Added option: logFile=server.log
+[(t  0)  Sat May 12 16:27:48-396646] Debug: Added option: logLevel=Debug
+[(t  0)  Sat May 12 16:27:48-396698] Debug: Added option: ipAddress=192.168.1.1
+[(t  0)  Sat May 12 16:27:48-396750] Debug: Added option: port=9000
+[(t  0)  Sat May 12 16:27:48-396803] Debug: Added option: interfaceContext=/alpine/servers/logic
+[(t  0)  Sat May 12 16:27:48-396858] Debug: Added option: ORBInitRef=NameService=file:///projects/alpine/release/runtime/corba/naming-service/ior.txt
+[(t  0)  Sat May 12 16:27:48-396948] Debug: Configuration::populateValues invoked.
+[(t  0)  Sat May 12 16:27:48-396988] Debug: Loading configuration settings.
+[(t  0)  Sat May 12 16:27:48-397041] Debug: Configuration::locateValue invoked.
+[(t  0)  Sat May 12 16:27:48-397082] Debug: Locating value for config element name: IP Address
+[(t  0)  Sat May 12 16:27:48-397137] Debug: ArgumentMap::get invoked for option name: ipAddress
+[(t  0)  Sat May 12 16:27:48-397184] Debug: Located in config file, value: 192.168.1.1
+[(t  0)  Sat May 12 16:27:48-397243] Debug: Configuration::locateValue invoked.
+[(t  0)  Sat May 12 16:27:48-397284] Debug: Locating value for config element name: Port
+[(t  0)  Sat May 12 16:27:48-397323] Debug: ArgumentMap::get invoked for option name: port
+[(t  0)  Sat May 12 16:27:48-397363] Debug: Located in config file, value: 9000
+[(t  0)  Sat May 12 16:27:48-397407] Debug: Configuration::locateValue invoked.
+[(t  0)  Sat May 12 16:27:48-397446] Debug: Locating value for config element name: Interface Context
+[(t  0)  Sat May 12 16:27:48-397485] Debug: ArgumentMap::get invoked for option name: interfaceContext
+[(t  0)  Sat May 12 16:27:48-397526] Debug: Located in config file, value: /alpine/servers/logic
+[(t  0)  Sat May 12 16:27:48-397658] Debug: Configuration::getValue invoked.
+[(t  0)  Sat May 12 16:27:48-397786] Debug: Configuration::getValue invoked.
+[(t  0)  Sat May 12 16:27:48-397866] Debug: Configuration::getValue invoked.
+[(t  0)  Sat May 12 16:27:48-397983]  Info: Starting ALPINE server-
+IP: 192.168.1.1
+Port: 9000
+Interface Context: /alpine/servers/logic
+
+[(t  0)  Sat May 12 16:27:48-398150] Debug: AlpineStackConfig constructor invoked.
+[(t  0)  Sat May 12 16:27:48-398419] Debug: AlpineStackConfig::setLocalEndpoint invoked.  Values: 
+ IP Address: 192.168.1.1
+ Port: 10275
+
+[(t  0)  Sat May 12 16:27:48-398537] Debug: AlpineStackConfig::setMaxConcurrentQueries invoked.  Max: 10
+[(t  0)  Sat May 12 16:27:48-398608] Debug: AlpineStack::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-398675] Debug: AlpineStackConfig::getLocalEndpoint invoked.
+[(t  0)  Sat May 12 16:27:48-398724] Debug: AlpineStackConfig::getMaxConcurrentQueries invoked.
+[(t  0)  Sat May 12 16:27:48-398810] Debug: AlpineStackConfig copy constructor invoked.
+[(t  0)  Sat May 12 16:27:48-410455] Debug: DtcpStack::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-436379] Debug: DtcpBroadcastMgr::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-503949] Debug: DtcpBaseUdpTransport constructor invoked.  Parameters:
+ipAddress: 192.168.1.1
+port: 9000
+
+[(t  0)  Sat May 12 16:27:48-506139] Debug: AlpineDtcpUdpTransport constructor invoked.
+[(t  0)  Sat May 12 16:27:48-507206] Debug: DtcpBaseUdpTransport::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-507443] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-507574] Debug: AlpineDtcpUdpTransport::createMux invoked.
+[(t  0)  Sat May 12 16:27:48-509140] Debug: DtcpBaseConnMux constructor invoked.
+[(t  0)  Sat May 12 16:27:48-509320] Debug: DtcpConnectionMap constructor invoked.
+[(t  0)  Sat May 12 16:27:48-521383] Debug: AlpineDtcpConnMux constructor invoked.
+[(t  0)  Sat May 12 16:27:48-521440] Debug: DtcpBaseConnMux::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-523075] Debug: AlpineDtcpConnMux::createAcceptor invoked.
+[(t  0)  Sat May 12 16:27:48-523165] Debug: DtcpBaseConnAcceptor constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523207] Debug: AlpineDtcpConnAcceptor constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523473] Debug: DtcpThreadTable constructor invoked.
+MaxThreads: 25
+MaxRecords: 100
+MaxBuffers: 10000
+
+[(t  0)  Sat May 12 16:27:48-523557] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523662] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523788] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523851] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523894] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523949] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-523990] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524052] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524108] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524170] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524213] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524267] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524309] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524368] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524411] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524473] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524515] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524571] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524614] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524675] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524718] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524772] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524815] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524878] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-524922] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525098] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525143] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525198] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525241] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525302] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525359] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525448] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525494] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525549] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525591] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525652] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525694] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525752] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525794] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525851] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525897] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-525960] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526004] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526059] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526101] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526162] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526204] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526265] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526309] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526366] Debug: DtcpPacket constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526408] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526480] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526568] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526630] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526694] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526759] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526819] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-526885] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527069] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527139] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527206] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527266] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527335] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527407] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527468] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527538] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527630] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527712] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527777] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527850] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527926] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-527994] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528063] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528132] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528198] Debug: DataBuffer constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528365] Debug: AutoThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528438] Debug: DtcpSocketThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528501] Debug: AutoThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528541] Debug: DtcpMonitorThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-528602] Debug: AutoThread::create invoked.
+[(t  0)  Sat May 12 16:27:48-528828] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sat May 12 16:27:48-528988] Debug: AutoThread::create invoked.
+[(t  2)  Sat May 12 16:27:48-529104] Debug: AutoThread::redirector invoked.
+[(t  0)  Sat May 12 16:27:48-529127] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sat May 12 16:27:48-529310] Debug: AutoThread::redirector invoked.
+[(t  0)  Sat May 12 16:27:48-529387] Debug: DtcpPendingAckMap constructor invoked.
+[(t  0)  Sat May 12 16:27:48-531695] Debug: DtcpSendQueue constructor invoked.
+[(t  0)  Sat May 12 16:27:48-531833] Debug: AlpineGroupMgr::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-531901] Debug: AlpineGroup constructor invoked.
+[(t  0)  Sat May 12 16:27:48-531987] Debug: AlpinePeerProfileIndex constructor invoked.  Reserve: 1024
+[(t  0)  Sat May 12 16:27:48-536540] Debug: AlpinePeerMgr::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-536701] Debug: AlpinePeerProfileIndex constructor invoked.  Reserve: 1024
+[(t  0)  Sat May 12 16:27:48-537322] Debug: AlpineQueryMgr::initialize invoked.  MaxConcurrentQueries: 10
+[(t  0)  Sat May 12 16:27:48-555657] Debug: SysThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-555826] Debug: SysThread::setDeleteOnExit invoked.
+[(t  0)  Sat May 12 16:27:48-555889] Debug: SysThread::run invoked.
+[(t  0)  Sat May 12 16:27:48-556082] Debug: ThreadUtils::addThread invoked.
+[(t  4)  Sat May 12 16:27:48-556082] Debug: SysThread::redirector invoked.
+[(t  0)  Sat May 12 16:27:48-556202] Debug: DtcpBaseUdpTransport::activate invoked.
+[(t  4)  Sat May 12 16:27:48-556456] Debug: ++> Thread started with ID: 4101 - Process ID: 2727
+[(t  4)  Sat May 12 16:27:48-556542] Debug: AlpineStack::processEvents invoked.
+[(t  0)  Sat May 12 16:27:48-556776] Debug: UdpConnection::nonBlocking invoked.
+[(t  0)  Sat May 12 16:27:48-556863] Debug: NetUtils::nonBlocking invoked.
+[(t  0)  Sat May 12 16:27:48-556954] Debug: AutoThread::resume invoked.
+[(t  0)  Sat May 12 16:27:48-557004] Debug: AutoThread::resume invoked.
+[(t  2)  Sat May 12 16:27:48-557093] Debug: ++> Thread started with ID: 2051 - Process ID: 2725
+[(t  2)  Sat May 12 16:27:48-557151] Debug: DtcpSocketThread::threadMain invoked.
+[(t  0)  Sat May 12 16:27:48-557151] Debug: DtcpStack::registerUdpTransport invoked.
+[(t  0)  Sat May 12 16:27:48-557272] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sat May 12 16:27:48-557331] Debug: ApplCore::addSignalHandler invoked.
+[(t  2)  Sat May 12 16:27:48-557357] Debug: DtcpBroadcastMgr::getBroadcastStates invoked.
+[(t  2)  Sat May 12 16:27:48-557461] Debug: DtcpBroadcastStates constructor invoked.
+[(t  0)  Sat May 12 16:27:48-557503] Debug: CorbaAdmin::initialize invoked.
+[(t  2)  Sat May 12 16:27:48-557651] Debug: Creating poll set.
+[(t  0)  Sat May 12 16:27:48-557839] Debug: OrbUtils::initialize invoked.  Thread pool size: 1
+[(t  3)  Sat May 12 16:27:48-557810] Debug: ++> Thread started with ID: 3076 - Process ID: 2726
+[(t  3)  Sat May 12 16:27:48-557984] Debug: DtcpMonitorThread::threadMain invoked.
+[(t  3)  Sat May 12 16:27:48-558045] Debug: DtcpBaseUdpTransport::processTimedEvents invoked.
+[(t  0)  Sat May 12 16:27:48-572105] Debug: SysThread constructor invoked.
+[(t  0)  Sat May 12 16:27:48-572239] Debug: SysThread::run invoked.
+[(t  0)  Sat May 12 16:27:48-572418] Debug: SysThread::redirector invoked.
+[(t  0)  Sat May 12 16:27:48-572425] Debug: ThreadUtils::addThread invoked.
+[(t  5)  Sat May 12 16:27:48-572586] Debug: ++> Thread started with ID: 5126 - Process ID: 2728
+[(t  0)  Sat May 12 16:27:48-572692] Debug: CosNamingUtils::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-582417] Debug: CorbaAdmin::activateAlpineCorbaServer invoked.
+[(t  0)  Sat May 12 16:27:48-582682] Debug: AlpineCorbaServer::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-582789] Debug: AlpineCorba_impl consturctor invoked.
+[(t  0)  Sat May 12 16:27:48-582883] Debug: AlpineCorba_impl::initialize invoked.
+[(t  0)  Sat May 12 16:27:48-583000] Debug: AlpineCorba_impl::DtcpPeerMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-597166] Debug: AlpineCorba_impl::DtcpStackMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-597663] Debug: AlpineCorba_impl::DtcpStackStatus constructor invoked.
+[(t  0)  Sat May 12 16:27:48-597973] Debug: AlpineCorba_impl::AlpineStackMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-598254] Debug: AlpineCorba_impl::AlpineStackStatus constructor invoked.
+[(t  0)  Sat May 12 16:27:48-598570] Debug: AlpineCorba_impl::AlpineGroupMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-598888] Debug: AlpineCorba_impl::AlpinePeerMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-599185] Debug: AlpineCorba_impl::AlpineQuery constructor invoked.
+[(t  0)  Sat May 12 16:27:48-599512] Debug: AlpineCorba_impl::AlpineModuleMgmt constructor invoked.
+[(t  0)  Sat May 12 16:27:48-599962] Debug: CorbaAdmin::bindDtcpPeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpPeerMgmtInterface
+
+[(t  0)  Sat May 12 16:27:48-600079] Debug: AlpineCorbaServer::getDtcpPeerMgmt invoked.
+[(t  0)  Sat May 12 16:27:48-600144] Debug: AlpineCorba_impl::getDtcpPeerMgmt invoked.
+[(t  0)  Sat May 12 16:27:48-600219] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:48-636581] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sat May 12 16:27:48-637066] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:48-637384] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:48-822507] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sat May 12 16:27:48-822607] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:48-822660] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:48-825503] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:48-825639] Debug: CorbaAdmin::bindDtcpStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackMgmtInterface
+
+[(t  0)  Sat May 12 16:27:48-825692] Debug: AlpineCorbaServer::getDtcpStackMgmt invoked.
+[(t  0)  Sat May 12 16:27:48-825746] Debug: AlpineCorba_impl::getDtcpStackMgmt invoked.
+[(t  0)  Sat May 12 16:27:48-825805] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:48-825857] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sat May 12 16:27:48-825898] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:48-825952] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-090505] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sat May 12 16:27:49-090649] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-090706] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-093649] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:49-093819] Debug: CorbaAdmin::bindDtcpStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackStatusInterface
+
+[(t  0)  Sat May 12 16:27:49-093877] Debug: AlpineCorbaServer::getDtcpStackStatus invoked.
+[(t  0)  Sat May 12 16:27:49-093933] Debug: AlpineCorba_impl::getDtcpStackStatus invoked.
+[(t  0)  Sat May 12 16:27:49-093993] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:49-094048] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sat May 12 16:27:49-094091] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-094144] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-246962] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sat May 12 16:27:49-247060] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-247113] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-249693] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:49-249833] Debug: CorbaAdmin::bindAlpineStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackMgmtInterface
+
+[(t  0)  Sat May 12 16:27:49-249890] Debug: AlpineCorbaServer::getAlpineStackMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-249944] Debug: AlpineCorba_impl::getAlpineStackMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-250025] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:49-250082] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sat May 12 16:27:49-250125] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-250178] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-482270] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sat May 12 16:27:49-482367] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-482421] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-485047] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:49-485184] Debug: CorbaAdmin::bindAlpineStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackStatusInterface
+
+[(t  0)  Sat May 12 16:27:49-485241] Debug: AlpineCorbaServer::getAlpineStackStatus invoked.
+[(t  0)  Sat May 12 16:27:49-485293] Debug: AlpineCorba_impl::getAlpineStackStatus invoked.
+[(t  0)  Sat May 12 16:27:49-485362] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:49-485415] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sat May 12 16:27:49-485456] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-485509] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-644530] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sat May 12 16:27:49-644624] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-644677] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-647335] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:49-647474] Debug: CorbaAdmin::bindAlpineGroupMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineGroupMgmtInterface
+
+[(t  0)  Sat May 12 16:27:49-647536] Debug: AlpineCorbaServer::getAlpineGroupMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-647591] Debug: AlpineCorba_impl::getAlpineGroupMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-647653] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:49-647705] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sat May 12 16:27:49-647747] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-647799] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-813302] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sat May 12 16:27:49-813397] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-813450] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:49-816310] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:49-816457] Debug: CorbaAdmin::bindAlpinePeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpinePeerMgmtInterface
+
+[(t  0)  Sat May 12 16:27:49-816510] Debug: AlpineCorbaServer::getAlpinePeerMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-816562] Debug: AlpineCorba_impl::getAlpinePeerMgmt invoked.
+[(t  0)  Sat May 12 16:27:49-816623] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:49-816675] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sat May 12 16:27:49-816717] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:49-816770] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-020074] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sat May 12 16:27:50-020166] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-020220] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-024178] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:50-024341] Debug: CorbaAdmin::bindAlpineQueryReference invoked.
+Binding Path: /alpine/servers/logic/AlpineQueryInterface
+
+[(t  0)  Sat May 12 16:27:50-024398] Debug: AlpineCorbaServer::getAlpineQuery invoked.
+[(t  0)  Sat May 12 16:27:50-024452] Debug: AlpineCorba_impl::getAlpineQuery invoked.
+[(t  0)  Sat May 12 16:27:50-024514] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:50-024568] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sat May 12 16:27:50-024611] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-024667] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-227182] Debug: CosNamingUtils::updateBinding invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sat May 12 16:27:50-227282] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-227337] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-229898] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sat May 12 16:27:50-230045] Debug: CorbaAdmin::bindAlpineModuleMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineModuleMgmtInterface
+
+[(t  0)  Sat May 12 16:27:50-230104] Debug: AlpineCorbaServer::getAlpineModuleMgmt invoked.
+[(t  0)  Sat May 12 16:27:50-230156] Debug: AlpineCorba_impl::getAlpineModuleMgmt invoked.
+[(t  0)  Sat May 12 16:27:50-230216] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sat May 12 16:27:50-230269] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineModuleMgmtInterface
+[(t  0)  Sat May 12 16:27:50-230311] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-230365] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-250450] Error: Caught corba exception: IDL:omg.org/CosNaming/NamingContext/NotFound:1.0 during resolve.  Assuming object does not exist.
+[(t  0)  Sat May 12 16:27:50-250685] Debug: CosNamingUtils::addBinding invoked for name: /alpine/servers/logic/AlpineModuleMgmtInterface
+[(t  0)  Sat May 12 16:27:50-250739] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-250897] Debug: CosNamingUtils::generateContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-250964] Debug: CosNamingUtils::createContext invoked for name: /alpine/servers/logic
+[(t  0)  Sat May 12 16:27:50-251007] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sat May 12 16:27:50-251067] Debug: CosNamingUtils::generateCosNameList invoked.
+[(t  0)  Sat May 12 16:27:50-251154] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-251233] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-251296] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-261088] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sat May 12 16:27:50-263889] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  1)  Sat May 12 16:29:00-321272] Debug: Received signal 'interrupt' (2)
+[(t  1)  Sat May 12 16:29:00-321448] Debug: ApplCore::handleSignal invoked.
+[(t  1)  Sat May 12 16:29:00-321533] Debug: ApplCore::defaultInterruptHandler invoked.
+[(t  1)  Sat May 12 16:29:00-321577]  Info: Received SIGINT, exiting process.

@@ -1,0 +1,45 @@
+# Cross-compile Alpine for Windows x86_64 using MinGW-w64
+#
+# Usage:
+#   docker build -f docker/Dockerfile.windows -t alpine-win64 .
+#   docker run --rm -v $(pwd)/out:/out alpine-win64
+#
+# Output: AlpineRestBridge.exe + *.dll in ./out/
+
+# ---------------------------------------------------------------------------
+# Builder stage — cross-compile with MinGW-w64
+# ---------------------------------------------------------------------------
+FROM ubuntu:24.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        cmake \
+        make \
+        g++-mingw-w64-x86-64 \
+        mingw-w64-x86-64-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY . .
+
+RUN cmake -B _build-win64 \
+        -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-w64.cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DALPINE_ENABLE_CORBA=OFF \
+        -DALPINE_BUILD_TESTS=OFF \
+    && cmake --build _build-win64 --parallel "$(nproc)"
+
+# Strip debug symbols from Windows binaries
+RUN x86_64-w64-mingw32-strip _build-win64/bin/*.exe _build-win64/lib/*.dll 2>/dev/null || true
+
+# ---------------------------------------------------------------------------
+# Output stage — copy artifacts to /out
+# ---------------------------------------------------------------------------
+FROM ubuntu:24.04 AS output
+
+COPY --from=builder /src/_build-win64/bin/*.exe /artifacts/bin/
+COPY --from=builder /src/_build-win64/lib/*.dll /artifacts/lib/
+
+# Default command: copy artifacts to mounted volume
+CMD ["sh", "-c", "cp -r /artifacts/* /out/ && echo 'Windows build artifacts copied to /out/'"]

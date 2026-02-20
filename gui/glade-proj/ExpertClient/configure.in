@@ -1,0 +1,22 @@
+# generated 2001/2/4 21:41:01 CST by root@logic.
+# using glademm V0.5_11
+
+AC_INIT(src/alpine.cc)
+AM_INIT_AUTOMAKE(alpine, 0.0)
+AM_CONFIG_HEADER(config.h)
+
+AC_ISC_POSIX
+AC_PROG_CC
+AM_PROG_CC_STDC
+AC_HEADER_STDC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AM_PROG_LIBTOOL
+
+AC_LANG_CPLUSPLUS
+
+AM_PATH_GTKMM(1.2.4,,
+        AC_MSG_ERROR(Cannot find GTK--: Please install Version 1.2.4+))
+
+AC_OUTPUT(Makefile src/Makefile )

@@ -1,0 +1,1058 @@
+
+========================================
+>> Application Started
+   [(t  0)  Sun Mar 11 01:52:01-217548]
+========================================
+
+[(t  0)  Sun Mar 11 01:52:01-217912] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 01:52:01-218073] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-218403] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218534] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218581] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218625] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218670] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218714] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:52:01-218771] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 01:52:01-219358] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sun Mar 11 01:52:01-219292] Debug: SysThread::redirector invoked.
+[(t  1)  Sun Mar 11 01:52:01-219940] Debug: ++> Thread started with ID: 1026 - Process ID: 31260
+[(t  0)  Sun Mar 11 01:52:01-220083] Debug: Configuration::initialize invoked.
+[(t  1)  Sun Mar 11 01:52:01-220152]  Info: Signal monitor thread is process ID: 31260
+[(t  1)  Sun Mar 11 01:52:01-220217] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 01:52:01-220299] Debug: Configuration::copyConfigElementList invoked.
+[(t  0)  Sun Mar 11 01:52:01-221090] Debug: EnvironMap::load invoked.
+[(t  0)  Sun Mar 11 01:52:01-222440] Debug: ConfigFile::initialize invoked.
+[(t  0)  Sun Mar 11 01:52:01-222584] Debug: ArgumentMap::load invoked
+Arg Count: 16
+
+[(t  0)  Sun Mar 11 01:52:01-222656] Debug: Added option: ORBDebugLevel=10
+[(t  0)  Sun Mar 11 01:52:01-222708] Debug: Added null option name: verbose
+[(t  0)  Sun Mar 11 01:52:01-222759] Debug: Added option: logFile=getstatus.log
+[(t  0)  Sun Mar 11 01:52:01-222811] Debug: Added option: logLevel=Debug
+[(t  0)  Sun Mar 11 01:52:01-222863] Debug: Added option: interfaceContext=/alpine/servers/logic
+[(t  0)  Sun Mar 11 01:52:01-222917] Debug: Added option: ORBInitRef=NameService=file:///projects/alpine/release/runtime/corba/naming-service/ior.txt
+[(t  0)  Sun Mar 11 01:52:01-223002] Debug: Added option: command=getDtcpPeerStatus
+[(t  0)  Sun Mar 11 01:52:01-223078] Debug: Added option: peerId=1
+[(t  0)  Sun Mar 11 01:52:01-223136] Debug: Configuration::populateValues invoked.
+[(t  0)  Sun Mar 11 01:52:01-223175] Debug: Loading configuration settings.
+[(t  0)  Sun Mar 11 01:52:01-223227] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-223268] Debug: Locating value for config element name: Interface Context
+[(t  0)  Sun Mar 11 01:52:01-223322] Debug: ArgumentMap::get invoked for option name: interfaceContext
+[(t  0)  Sun Mar 11 01:52:01-223366] Debug: Located in config file, value: /alpine/servers/logic
+[(t  0)  Sun Mar 11 01:52:01-223426] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-223467] Debug: Locating value for config element name: Command
+[(t  0)  Sun Mar 11 01:52:01-223506] Debug: ArgumentMap::get invoked for option name: command
+[(t  0)  Sun Mar 11 01:52:01-223547] Debug: Located in config file, value: getDtcpPeerStatus
+[(t  0)  Sun Mar 11 01:52:01-223591] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-223631] Debug: Locating value for config element name: Verbose
+[(t  0)  Sun Mar 11 01:52:01-223670] Debug: ArgumentMap::get invoked for option name: verbose
+[(t  0)  Sun Mar 11 01:52:01-223710] Debug: Located in config file, value: 
+[(t  0)  Sun Mar 11 01:52:01-223753] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-223793] Debug: Locating value for config element name: IP Address
+[(t  0)  Sun Mar 11 01:52:01-223833] Debug: ArgumentMap::get invoked for option name: ipAddress
+[(t  0)  Sun Mar 11 01:52:01-223884] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-223942] Error: No value found for element option name: IP Address
+[(t  0)  Sun Mar 11 01:52:01-223988] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-224043] Debug: Locating value for config element name: Port
+[(t  0)  Sun Mar 11 01:52:01-224083] Debug: ArgumentMap::get invoked for option name: port
+[(t  0)  Sun Mar 11 01:52:01-224122] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-224162] Error: No value found for element option name: Port
+[(t  0)  Sun Mar 11 01:52:01-224205] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-224244] Debug: Locating value for config element name: Peer ID
+[(t  0)  Sun Mar 11 01:52:01-224283] Debug: ArgumentMap::get invoked for option name: peerId
+[(t  0)  Sun Mar 11 01:52:01-224324] Debug: Located in config file, value: 1
+[(t  0)  Sun Mar 11 01:52:01-224367] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-224406] Debug: Locating value for config element name: Subnet IP Address
+[(t  0)  Sun Mar 11 01:52:01-224446] Debug: ArgumentMap::get invoked for option name: subnetIpAddress
+[(t  0)  Sun Mar 11 01:52:01-224485] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-224525] Error: No value found for element option name: Subnet IP Address
+[(t  0)  Sun Mar 11 01:52:01-224568] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-224608] Debug: Locating value for config element name: Subnet Mask
+[(t  0)  Sun Mar 11 01:52:01-224647] Debug: ArgumentMap::get invoked for option name: subnetMask
+[(t  0)  Sun Mar 11 01:52:01-224686] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-224726] Error: No value found for element option name: Subnet Mask
+[(t  0)  Sun Mar 11 01:52:01-224768] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-224808] Debug: Locating value for config element name: Required
+[(t  0)  Sun Mar 11 01:52:01-224847] Debug: ArgumentMap::get invoked for option name: required
+[(t  0)  Sun Mar 11 01:52:01-224886] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-224926] Error: No value found for element option name: Required
+[(t  0)  Sun Mar 11 01:52:01-224969] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-225008] Debug: Locating value for config element name: Kbits/sec
+[(t  0)  Sun Mar 11 01:52:01-225047] Debug: ArgumentMap::get invoked for option name: Kbits/sec
+[(t  0)  Sun Mar 11 01:52:01-225086] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-225126] Error: No value found for element option name: Kbits/sec
+[(t  0)  Sun Mar 11 01:52:01-225169] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-225208] Debug: Locating value for config element name: Limit
+[(t  0)  Sun Mar 11 01:52:01-225247] Debug: ArgumentMap::get invoked for option name: limit
+[(t  0)  Sun Mar 11 01:52:01-225286] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-225327] Error: No value found for element option name: Limit
+[(t  0)  Sun Mar 11 01:52:01-225369] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-225409] Debug: Locating value for config element name: Group Name
+[(t  0)  Sun Mar 11 01:52:01-225448] Debug: ArgumentMap::get invoked for option name: groupName
+[(t  0)  Sun Mar 11 01:52:01-225487] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-225527] Error: No value found for element option name: Group Name
+[(t  0)  Sun Mar 11 01:52:01-225570] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-225609] Debug: Locating value for config element name: Group ID
+[(t  0)  Sun Mar 11 01:52:01-225648] Debug: ArgumentMap::get invoked for option name: groupId
+[(t  0)  Sun Mar 11 01:52:01-225687] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-225728] Error: No value found for element option name: Group ID
+[(t  0)  Sun Mar 11 01:52:01-225770] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-225810] Debug: Locating value for config element name: Alias
+[(t  0)  Sun Mar 11 01:52:01-225849] Debug: ArgumentMap::get invoked for option name: alias
+[(t  0)  Sun Mar 11 01:52:01-225888] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-225928] Error: No value found for element option name: Alias
+[(t  0)  Sun Mar 11 01:52:01-225983] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-226023] Debug: Locating value for config element name: Description
+[(t  0)  Sun Mar 11 01:52:01-226063] Debug: ArgumentMap::get invoked for option name: description
+[(t  0)  Sun Mar 11 01:52:01-226102] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-226142] Error: No value found for element option name: Description
+[(t  0)  Sun Mar 11 01:52:01-226184] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-226224] Debug: Locating value for config element name: Rating
+[(t  0)  Sun Mar 11 01:52:01-226263] Debug: ArgumentMap::get invoked for option name: rating
+[(t  0)  Sun Mar 11 01:52:01-226302] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-226342] Error: No value found for element option name: Rating
+[(t  0)  Sun Mar 11 01:52:01-226385] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-226425] Debug: Locating value for config element name: Public
+[(t  0)  Sun Mar 11 01:52:01-226464] Debug: ArgumentMap::get invoked for option name: public
+[(t  0)  Sun Mar 11 01:52:01-226503] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-226543] Error: No value found for element option name: Public
+[(t  0)  Sun Mar 11 01:52:01-226585] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-226625] Debug: Locating value for config element name: Private
+[(t  0)  Sun Mar 11 01:52:01-226664] Debug: ArgumentMap::get invoked for option name: private
+[(t  0)  Sun Mar 11 01:52:01-226704] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-226744] Error: No value found for element option name: Private
+[(t  0)  Sun Mar 11 01:52:01-226786] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-226827] Debug: Locating value for config element name: Auto Halt Limit
+[(t  0)  Sun Mar 11 01:52:01-226866] Debug: ArgumentMap::get invoked for option name: autoHaltLimit
+[(t  0)  Sun Mar 11 01:52:01-226905] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-226945] Error: No value found for element option name: Auto Halt Limit
+[(t  0)  Sun Mar 11 01:52:01-226988] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-227028] Debug: Locating value for config element name: Options
+[(t  0)  Sun Mar 11 01:52:01-227067] Debug: ArgumentMap::get invoked for option name: options
+[(t  0)  Sun Mar 11 01:52:01-227106] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-227146] Error: No value found for element option name: Options
+[(t  0)  Sun Mar 11 01:52:01-227189] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-227228] Debug: Locating value for config element name: Auto Download
+[(t  0)  Sun Mar 11 01:52:01-227267] Debug: ArgumentMap::get invoked for option name: autoDownload
+[(t  0)  Sun Mar 11 01:52:01-227307] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-227346] Error: No value found for element option name: Auto Download
+[(t  0)  Sun Mar 11 01:52:01-227389] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-227428] Debug: Locating value for config element name: Peer Description Limit
+[(t  0)  Sun Mar 11 01:52:01-227468] Debug: ArgumentMap::get invoked for option name: peerDescriptionLimit
+[(t  0)  Sun Mar 11 01:52:01-227507] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-227546] Error: No value found for element option name: Peer Description Limit
+[(t  0)  Sun Mar 11 01:52:01-227589] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-227629] Debug: Locating value for config element name: Query String
+[(t  0)  Sun Mar 11 01:52:01-227668] Debug: ArgumentMap::get invoked for option name: queryString
+[(t  0)  Sun Mar 11 01:52:01-227707] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-227747] Error: No value found for element option name: Query String
+[(t  0)  Sun Mar 11 01:52:01-227789] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-227840] Debug: Locating value for config element name: Query ID
+[(t  0)  Sun Mar 11 01:52:01-227881] Debug: ArgumentMap::get invoked for option name: queryId
+[(t  0)  Sun Mar 11 01:52:01-227920] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:52:01-227960] Error: No value found for element option name: Query ID
+[(t  0)  Sun Mar 11 01:52:01-228080] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-228171] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-228217] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-228337]  Info: Starting ALPINE Command Interface-
+Interface Context: /alpine/servers/logic
+Command: getDtcpPeerStatus
+Verbose mode ON
+
+[(t  0)  Sun Mar 11 01:52:01-228503] Debug: CorbaServant::initialize invoked.
+[(t  0)  Sun Mar 11 01:52:01-228698] Debug: OrbUtils::initialize invoked.  Thread pool size: 1
+[(t  0)  Sun Mar 11 01:52:01-245393] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-245529] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 01:52:01-245717] Debug: ThreadUtils::addThread invoked.
+[(t  2)  Sun Mar 11 01:52:01-245717] Debug: SysThread::redirector invoked.
+[(t  0)  Sun Mar 11 01:52:01-245901] Debug: CosNamingUtils::initialize invoked.
+[(t  2)  Sun Mar 11 01:52:01-245920] Debug: ++> Thread started with ID: 2051 - Process ID: 31261
+[(t  0)  Sun Mar 11 01:52:01-264117] Debug: CorbaServant::intializeAlpineClientInterface invoked.
+[(t  0)  Sun Mar 11 01:52:01-264351] Debug: CorbaServant::resolveDtcpPeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpPeerMgmtInterface
+
+[(t  0)  Sun Mar 11 01:52:01-264455] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-264532] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-264620] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-264864] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-274443] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-274570] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-274627] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-283629] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-283790] Debug: CorbaServant::resolveDtcpStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackMgmtInterface
+
+[(t  0)  Sun Mar 11 01:52:01-283839] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-283900] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-283943] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-284002] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-310188] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-310288] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-311057] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-318777] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-319018] Debug: CorbaServant::resolveDtcpStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackStatusInterface
+
+[(t  0)  Sun Mar 11 01:52:01-319200] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-319271] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 01:52:01-319314] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-319372] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-326804] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 01:52:01-326939] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-326997] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-333458] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-333603] Debug: CorbaServant::resolveAlpineStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackMgmtInterface
+
+[(t  0)  Sun Mar 11 01:52:01-333655] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-333716] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-333760] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-333817] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-342623] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-342769] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-343034] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-350214] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-350509] Debug: CorbaServant::resolveAlpineStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackStatusInterface
+
+[(t  0)  Sun Mar 11 01:52:01-350559] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-350683] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 01:52:01-350820] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-350881] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-358632] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 01:52:01-358749] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-358806] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-365330] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-365478] Debug: CorbaServant::resolveAlpineGroupMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineGroupMgmtInterface
+
+[(t  0)  Sun Mar 11 01:52:01-365527] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-365587] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-365630] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-365687] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-373330] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-373428] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-373490] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-380510] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-380724] Debug: CorbaServant::resolveAlpinePeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpinePeerMgmtInterface
+
+[(t  0)  Sun Mar 11 01:52:01-380942] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-381018] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-381061] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-381117] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-387587] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 01:52:01-387699] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-387756] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-394818] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-394989] Debug: CorbaServant::resolveAlpineQueryReference invoked.
+Binding Path: /alpine/servers/logic/AlpineQueryInterface
+
+[(t  0)  Sun Mar 11 01:52:01-395037] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-395097] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 01:52:01-395140] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-395197] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-404576] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 01:52:01-404735] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:52:01-404795] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:52:01-413103] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:52:01-413358] Debug: AlpineCorbaClient::initialize invoked.
+[(t  0)  Sun Mar 11 01:52:01-413586] Debug: performGetDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:52:01-413632] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:52:01-413728] Debug: DtcpPeerMgmtIntf::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:52:01-413788] Debug: AlpineCorbaClient::DtcpPeerMgmt::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:52:01-457603] Error: Caught corba exception: IDL:omg.org/CORBA/UNKNOWN:1.0 from DtcpPeerMgmt::getDtcpPeerStatus.
+[(t  0)  Sun Mar 11 01:52:01-457820] Error: DtcpPeerMgmtIntf::getDtcpPeerStatus call failed!
+
+========================================
+>> Application Started
+   [(t  0)  Sun Mar 11 01:56:52-667460]
+========================================
+
+[(t  0)  Sun Mar 11 01:56:52-667776] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 01:56:52-667935] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-668314] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668443] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668489] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668534] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668579] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668623] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 01:56:52-668680] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 01:56:52-669264] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sun Mar 11 01:56:52-669205] Debug: SysThread::redirector invoked.
+[(t  1)  Sun Mar 11 01:56:52-669730] Debug: ++> Thread started with ID: 1026 - Process ID: 31419
+[(t  0)  Sun Mar 11 01:56:52-669832] Debug: Configuration::initialize invoked.
+[(t  1)  Sun Mar 11 01:56:52-669886]  Info: Signal monitor thread is process ID: 31419
+[(t  1)  Sun Mar 11 01:56:52-670005] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 01:56:52-670009] Debug: Configuration::copyConfigElementList invoked.
+[(t  0)  Sun Mar 11 01:56:52-670793] Debug: EnvironMap::load invoked.
+[(t  0)  Sun Mar 11 01:56:52-672065] Debug: ConfigFile::initialize invoked.
+[(t  0)  Sun Mar 11 01:56:52-672214] Debug: ArgumentMap::load invoked
+Arg Count: 16
+
+[(t  0)  Sun Mar 11 01:56:52-672285] Debug: Added option: ORBDebugLevel=10
+[(t  0)  Sun Mar 11 01:56:52-672337] Debug: Added null option name: verbose
+[(t  0)  Sun Mar 11 01:56:52-672387] Debug: Added option: logFile=getstatus.log
+[(t  0)  Sun Mar 11 01:56:52-672439] Debug: Added option: logLevel=Debug
+[(t  0)  Sun Mar 11 01:56:52-672491] Debug: Added option: interfaceContext=/alpine/servers/logic
+[(t  0)  Sun Mar 11 01:56:52-672545] Debug: Added option: ORBInitRef=NameService=file:///projects/alpine/release/runtime/corba/naming-service/ior.txt
+[(t  0)  Sun Mar 11 01:56:52-672630] Debug: Added option: command=getDtcpPeerStatus
+[(t  0)  Sun Mar 11 01:56:52-672705] Debug: Added option: peerId=1
+[(t  0)  Sun Mar 11 01:56:52-672764] Debug: Configuration::populateValues invoked.
+[(t  0)  Sun Mar 11 01:56:52-672833] Debug: Loading configuration settings.
+[(t  0)  Sun Mar 11 01:56:52-672886] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-672927] Debug: Locating value for config element name: Interface Context
+[(t  0)  Sun Mar 11 01:56:52-672982] Debug: ArgumentMap::get invoked for option name: interfaceContext
+[(t  0)  Sun Mar 11 01:56:52-673025] Debug: Located in config file, value: /alpine/servers/logic
+[(t  0)  Sun Mar 11 01:56:52-673084] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-673125] Debug: Locating value for config element name: Command
+[(t  0)  Sun Mar 11 01:56:52-673164] Debug: ArgumentMap::get invoked for option name: command
+[(t  0)  Sun Mar 11 01:56:52-673205] Debug: Located in config file, value: getDtcpPeerStatus
+[(t  0)  Sun Mar 11 01:56:52-673248] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-673287] Debug: Locating value for config element name: Verbose
+[(t  0)  Sun Mar 11 01:56:52-673326] Debug: ArgumentMap::get invoked for option name: verbose
+[(t  0)  Sun Mar 11 01:56:52-673367] Debug: Located in config file, value: 
+[(t  0)  Sun Mar 11 01:56:52-673409] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-673449] Debug: Locating value for config element name: IP Address
+[(t  0)  Sun Mar 11 01:56:52-673488] Debug: ArgumentMap::get invoked for option name: ipAddress
+[(t  0)  Sun Mar 11 01:56:52-673540] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-673598] Error: No value found for element option name: IP Address
+[(t  0)  Sun Mar 11 01:56:52-673644] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-673683] Debug: Locating value for config element name: Port
+[(t  0)  Sun Mar 11 01:56:52-673723] Debug: ArgumentMap::get invoked for option name: port
+[(t  0)  Sun Mar 11 01:56:52-673762] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-673802] Error: No value found for element option name: Port
+[(t  0)  Sun Mar 11 01:56:52-673844] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-673883] Debug: Locating value for config element name: Peer ID
+[(t  0)  Sun Mar 11 01:56:52-673923] Debug: ArgumentMap::get invoked for option name: peerId
+[(t  0)  Sun Mar 11 01:56:52-673963] Debug: Located in config file, value: 1
+[(t  0)  Sun Mar 11 01:56:52-674006] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-674045] Debug: Locating value for config element name: Subnet IP Address
+[(t  0)  Sun Mar 11 01:56:52-674085] Debug: ArgumentMap::get invoked for option name: subnetIpAddress
+[(t  0)  Sun Mar 11 01:56:52-674124] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-674164] Error: No value found for element option name: Subnet IP Address
+[(t  0)  Sun Mar 11 01:56:52-674207] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-674247] Debug: Locating value for config element name: Subnet Mask
+[(t  0)  Sun Mar 11 01:56:52-674286] Debug: ArgumentMap::get invoked for option name: subnetMask
+[(t  0)  Sun Mar 11 01:56:52-674325] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-674365] Error: No value found for element option name: Subnet Mask
+[(t  0)  Sun Mar 11 01:56:52-674407] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-674447] Debug: Locating value for config element name: Required
+[(t  0)  Sun Mar 11 01:56:52-674486] Debug: ArgumentMap::get invoked for option name: required
+[(t  0)  Sun Mar 11 01:56:52-674525] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-674572] Error: No value found for element option name: Required
+[(t  0)  Sun Mar 11 01:56:52-674614] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-674653] Debug: Locating value for config element name: Kbits/sec
+[(t  0)  Sun Mar 11 01:56:52-674693] Debug: ArgumentMap::get invoked for option name: Kbits/sec
+[(t  0)  Sun Mar 11 01:56:52-674732] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-674772] Error: No value found for element option name: Kbits/sec
+[(t  0)  Sun Mar 11 01:56:52-674826] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-674867] Debug: Locating value for config element name: Limit
+[(t  0)  Sun Mar 11 01:56:52-674906] Debug: ArgumentMap::get invoked for option name: limit
+[(t  0)  Sun Mar 11 01:56:52-674945] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-674985] Error: No value found for element option name: Limit
+[(t  0)  Sun Mar 11 01:56:52-675028] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-675067] Debug: Locating value for config element name: Group Name
+[(t  0)  Sun Mar 11 01:56:52-675107] Debug: ArgumentMap::get invoked for option name: groupName
+[(t  0)  Sun Mar 11 01:56:52-675146] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-675186] Error: No value found for element option name: Group Name
+[(t  0)  Sun Mar 11 01:56:52-675228] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-675268] Debug: Locating value for config element name: Group ID
+[(t  0)  Sun Mar 11 01:56:52-675307] Debug: ArgumentMap::get invoked for option name: groupId
+[(t  0)  Sun Mar 11 01:56:52-675346] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-675386] Error: No value found for element option name: Group ID
+[(t  0)  Sun Mar 11 01:56:52-675428] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-675468] Debug: Locating value for config element name: Alias
+[(t  0)  Sun Mar 11 01:56:52-675507] Debug: ArgumentMap::get invoked for option name: alias
+[(t  0)  Sun Mar 11 01:56:52-675546] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-675586] Error: No value found for element option name: Alias
+[(t  0)  Sun Mar 11 01:56:52-675628] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-675668] Debug: Locating value for config element name: Description
+[(t  0)  Sun Mar 11 01:56:52-675708] Debug: ArgumentMap::get invoked for option name: description
+[(t  0)  Sun Mar 11 01:56:52-675747] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-675787] Error: No value found for element option name: Description
+[(t  0)  Sun Mar 11 01:56:52-675829] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-675868] Debug: Locating value for config element name: Rating
+[(t  0)  Sun Mar 11 01:56:52-675908] Debug: ArgumentMap::get invoked for option name: rating
+[(t  0)  Sun Mar 11 01:56:52-675947] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-675987] Error: No value found for element option name: Rating
+[(t  0)  Sun Mar 11 01:56:52-676029] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-676069] Debug: Locating value for config element name: Public
+[(t  0)  Sun Mar 11 01:56:52-676108] Debug: ArgumentMap::get invoked for option name: public
+[(t  0)  Sun Mar 11 01:56:52-676147] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-676187] Error: No value found for element option name: Public
+[(t  0)  Sun Mar 11 01:56:52-676229] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-676269] Debug: Locating value for config element name: Private
+[(t  0)  Sun Mar 11 01:56:52-676308] Debug: ArgumentMap::get invoked for option name: private
+[(t  0)  Sun Mar 11 01:56:52-676347] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-676388] Error: No value found for element option name: Private
+[(t  0)  Sun Mar 11 01:56:52-676430] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-676470] Debug: Locating value for config element name: Auto Halt Limit
+[(t  0)  Sun Mar 11 01:56:52-676509] Debug: ArgumentMap::get invoked for option name: autoHaltLimit
+[(t  0)  Sun Mar 11 01:56:52-676548] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-676588] Error: No value found for element option name: Auto Halt Limit
+[(t  0)  Sun Mar 11 01:56:52-676631] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-676671] Debug: Locating value for config element name: Options
+[(t  0)  Sun Mar 11 01:56:52-676710] Debug: ArgumentMap::get invoked for option name: options
+[(t  0)  Sun Mar 11 01:56:52-676760] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-676801] Error: No value found for element option name: Options
+[(t  0)  Sun Mar 11 01:56:52-676844] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-676883] Debug: Locating value for config element name: Auto Download
+[(t  0)  Sun Mar 11 01:56:52-676922] Debug: ArgumentMap::get invoked for option name: autoDownload
+[(t  0)  Sun Mar 11 01:56:52-676962] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-677002] Error: No value found for element option name: Auto Download
+[(t  0)  Sun Mar 11 01:56:52-677044] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677084] Debug: Locating value for config element name: Peer Description Limit
+[(t  0)  Sun Mar 11 01:56:52-677123] Debug: ArgumentMap::get invoked for option name: peerDescriptionLimit
+[(t  0)  Sun Mar 11 01:56:52-677162] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-677202] Error: No value found for element option name: Peer Description Limit
+[(t  0)  Sun Mar 11 01:56:52-677245] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677285] Debug: Locating value for config element name: Query String
+[(t  0)  Sun Mar 11 01:56:52-677324] Debug: ArgumentMap::get invoked for option name: queryString
+[(t  0)  Sun Mar 11 01:56:52-677363] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-677403] Error: No value found for element option name: Query String
+[(t  0)  Sun Mar 11 01:56:52-677445] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677485] Debug: Locating value for config element name: Query ID
+[(t  0)  Sun Mar 11 01:56:52-677524] Debug: ArgumentMap::get invoked for option name: queryId
+[(t  0)  Sun Mar 11 01:56:52-677563] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 01:56:52-677603] Error: No value found for element option name: Query ID
+[(t  0)  Sun Mar 11 01:56:52-677725] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677820] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677866] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-677987]  Info: Starting ALPINE Command Interface-
+Interface Context: /alpine/servers/logic
+Command: getDtcpPeerStatus
+Verbose mode ON
+
+[(t  0)  Sun Mar 11 01:56:52-678153] Debug: CorbaServant::initialize invoked.
+[(t  0)  Sun Mar 11 01:56:52-678349] Debug: OrbUtils::initialize invoked.  Thread pool size: 1
+[(t  0)  Sun Mar 11 01:56:52-695020] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-695154] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 01:56:52-695344] Debug: ThreadUtils::addThread invoked.
+[(t  2)  Sun Mar 11 01:56:52-695345] Debug: SysThread::redirector invoked.
+[(t  0)  Sun Mar 11 01:56:52-695525] Debug: CosNamingUtils::initialize invoked.
+[(t  2)  Sun Mar 11 01:56:52-695543] Debug: ++> Thread started with ID: 2051 - Process ID: 31420
+[(t  0)  Sun Mar 11 01:56:52-713807] Debug: CorbaServant::intializeAlpineClientInterface invoked.
+[(t  0)  Sun Mar 11 01:56:52-714040] Debug: CorbaServant::resolveDtcpPeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpPeerMgmtInterface
+
+[(t  0)  Sun Mar 11 01:56:52-714171] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-714248] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-714338] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-714587] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-724050] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-724176] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-724233] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-732159] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-732336] Debug: CorbaServant::resolveDtcpStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackMgmtInterface
+
+[(t  0)  Sun Mar 11 01:56:52-732406] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-732466] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-732510] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-732572] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-762659] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-762814] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-763000] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-769819] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-770017] Debug: CorbaServant::resolveDtcpStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackStatusInterface
+
+[(t  0)  Sun Mar 11 01:56:52-770065] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-770124] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 01:56:52-770168] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-770227] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-779758] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 01:56:52-779874] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-779931] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-788489] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-788615] Debug: CorbaServant::resolveAlpineStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackMgmtInterface
+
+[(t  0)  Sun Mar 11 01:56:52-788665] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-788722] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-788765] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-788820] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-797105] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-797204] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-797258] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-804601] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-804859] Debug: CorbaServant::resolveAlpineStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackStatusInterface
+
+[(t  0)  Sun Mar 11 01:56:52-805020] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-805087] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 01:56:52-805130] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-805186] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-813345] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 01:56:52-813462] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-813519] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-819880] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-820031] Debug: CorbaServant::resolveAlpineGroupMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineGroupMgmtInterface
+
+[(t  0)  Sun Mar 11 01:56:52-820080] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-820161] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-820206] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-822335] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-828899] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-829014] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-829071] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-837846] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-838050] Debug: CorbaServant::resolveAlpinePeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpinePeerMgmtInterface
+
+[(t  0)  Sun Mar 11 01:56:52-838265] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-838349] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-838392] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-838448] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-845550] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 01:56:52-845676] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-845735] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-853161] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-853301] Debug: CorbaServant::resolveAlpineQueryReference invoked.
+Binding Path: /alpine/servers/logic/AlpineQueryInterface
+
+[(t  0)  Sun Mar 11 01:56:52-853348] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-853407] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 01:56:52-853450] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-853505] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-859730] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 01:56:52-859844] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 01:56:52-859901] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 01:56:52-866213] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 01:56:52-866446] Debug: AlpineCorbaClient::initialize invoked.
+[(t  0)  Sun Mar 11 01:56:52-867535] Debug: performGetDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:56:52-867606] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 01:56:52-867739] Debug: DtcpPeerMgmtIntf::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:56:52-867826] Debug: AlpineCorbaClient::DtcpPeerMgmt::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 01:56:52-909668] Error: Caught corba exception: IDL:Alpine/e_DtcpStackError:1.0 from DtcpPeerMgmt::getDtcpPeerStatus.
+[(t  0)  Sun Mar 11 01:56:52-909942] Error: DtcpPeerMgmtIntf::getDtcpPeerStatus call failed!
+
+========================================
+>> Application Started
+   [(t  0)  Sun Mar 11 07:15:28-943276]
+========================================
+
+[(t  0)  Sun Mar 11 07:15:28-960227] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 07:15:28-960462] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 07:15:28-960836] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-960971] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-961018] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-961063] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-961108] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-961152] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 07:15:28-961388] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 07:15:28-966694] Debug: SysThread::redirector invoked.
+[(t  0)  Sun Mar 11 07:15:28-966733] Debug: ThreadUtils::addThread invoked.
+[(t  1)  Sun Mar 11 07:15:28-967307] Debug: ++> Thread started with ID: 1026 - Process ID: 9566
+[(t  0)  Sun Mar 11 07:15:28-967465] Debug: Configuration::initialize invoked.
+[(t  0)  Sun Mar 11 07:15:28-967662] Debug: Configuration::copyConfigElementList invoked.
+[(t  1)  Sun Mar 11 07:15:28-967850]  Info: Signal monitor thread is process ID: 9566
+[(t  1)  Sun Mar 11 07:15:28-967965] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 07:15:28-968673] Debug: EnvironMap::load invoked.
+[(t  0)  Sun Mar 11 07:15:28-969978] Debug: ConfigFile::initialize invoked.
+[(t  0)  Sun Mar 11 07:15:28-970132] Debug: ArgumentMap::load invoked
+Arg Count: 16
+
+[(t  0)  Sun Mar 11 07:15:28-970218] Debug: Added option: ORBDebugLevel=10
+[(t  0)  Sun Mar 11 07:15:28-970270] Debug: Added null option name: verbose
+[(t  0)  Sun Mar 11 07:15:28-970320] Debug: Added option: logFile=getstatus.log
+[(t  0)  Sun Mar 11 07:15:28-970371] Debug: Added option: logLevel=Debug
+[(t  0)  Sun Mar 11 07:15:28-970446] Debug: Added option: interfaceContext=/alpine/servers/logic
+[(t  0)  Sun Mar 11 07:15:28-970503] Debug: Added option: ORBInitRef=NameService=file:///projects/alpine/release/runtime/corba/naming-service/ior.txt
+[(t  0)  Sun Mar 11 07:15:28-970590] Debug: Added option: command=getDtcpPeerStatus
+[(t  0)  Sun Mar 11 07:15:28-970643] Debug: Added option: peerId=1
+[(t  0)  Sun Mar 11 07:15:28-970699] Debug: Configuration::populateValues invoked.
+[(t  0)  Sun Mar 11 07:15:28-970739] Debug: Loading configuration settings.
+[(t  0)  Sun Mar 11 07:15:28-970790] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-970831] Debug: Locating value for config element name: Interface Context
+[(t  0)  Sun Mar 11 07:15:28-970885] Debug: ArgumentMap::get invoked for option name: interfaceContext
+[(t  0)  Sun Mar 11 07:15:28-970929] Debug: Located in config file, value: /alpine/servers/logic
+[(t  0)  Sun Mar 11 07:15:28-970988] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971029] Debug: Locating value for config element name: Command
+[(t  0)  Sun Mar 11 07:15:28-971068] Debug: ArgumentMap::get invoked for option name: command
+[(t  0)  Sun Mar 11 07:15:28-971108] Debug: Located in config file, value: getDtcpPeerStatus
+[(t  0)  Sun Mar 11 07:15:28-971151] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971220] Debug: Locating value for config element name: Verbose
+[(t  0)  Sun Mar 11 07:15:28-971261] Debug: ArgumentMap::get invoked for option name: verbose
+[(t  0)  Sun Mar 11 07:15:28-971301] Debug: Located in config file, value: 
+[(t  0)  Sun Mar 11 07:15:28-971344] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971384] Debug: Locating value for config element name: IP Address
+[(t  0)  Sun Mar 11 07:15:28-971423] Debug: ArgumentMap::get invoked for option name: ipAddress
+[(t  0)  Sun Mar 11 07:15:28-971475] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-971537] Error: No value found for element option name: IP Address
+[(t  0)  Sun Mar 11 07:15:28-971583] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971623] Debug: Locating value for config element name: Port
+[(t  0)  Sun Mar 11 07:15:28-971662] Debug: ArgumentMap::get invoked for option name: port
+[(t  0)  Sun Mar 11 07:15:28-971701] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-971741] Error: No value found for element option name: Port
+[(t  0)  Sun Mar 11 07:15:28-971785] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971825] Debug: Locating value for config element name: Peer ID
+[(t  0)  Sun Mar 11 07:15:28-971864] Debug: ArgumentMap::get invoked for option name: peerId
+[(t  0)  Sun Mar 11 07:15:28-971904] Debug: Located in config file, value: 1
+[(t  0)  Sun Mar 11 07:15:28-971946] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-971986] Debug: Locating value for config element name: Subnet IP Address
+[(t  0)  Sun Mar 11 07:15:28-972052] Debug: ArgumentMap::get invoked for option name: subnetIpAddress
+[(t  0)  Sun Mar 11 07:15:28-972094] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-972137] Error: No value found for element option name: Subnet IP Address
+[(t  0)  Sun Mar 11 07:15:28-972184] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-972225] Debug: Locating value for config element name: Subnet Mask
+[(t  0)  Sun Mar 11 07:15:28-972265] Debug: ArgumentMap::get invoked for option name: subnetMask
+[(t  0)  Sun Mar 11 07:15:28-972304] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-972344] Error: No value found for element option name: Subnet Mask
+[(t  0)  Sun Mar 11 07:15:28-972387] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-972427] Debug: Locating value for config element name: Required
+[(t  0)  Sun Mar 11 07:15:28-972467] Debug: ArgumentMap::get invoked for option name: required
+[(t  0)  Sun Mar 11 07:15:28-972507] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-972718] Error: No value found for element option name: Required
+[(t  0)  Sun Mar 11 07:15:28-972825] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-972979] Debug: Locating value for config element name: Kbits/sec
+[(t  0)  Sun Mar 11 07:15:28-973122] Debug: ArgumentMap::get invoked for option name: Kbits/sec
+[(t  0)  Sun Mar 11 07:15:28-973212] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-973338] Error: No value found for element option name: Kbits/sec
+[(t  0)  Sun Mar 11 07:15:28-973399] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-973440] Debug: Locating value for config element name: Limit
+[(t  0)  Sun Mar 11 07:15:28-973481] Debug: ArgumentMap::get invoked for option name: limit
+[(t  0)  Sun Mar 11 07:15:28-973521] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-973563] Error: No value found for element option name: Limit
+[(t  0)  Sun Mar 11 07:15:28-973607] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-973647] Debug: Locating value for config element name: Group Name
+[(t  0)  Sun Mar 11 07:15:28-973687] Debug: ArgumentMap::get invoked for option name: groupName
+[(t  0)  Sun Mar 11 07:15:28-973727] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-973768] Error: No value found for element option name: Group Name
+[(t  0)  Sun Mar 11 07:15:28-973812] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-973853] Debug: Locating value for config element name: Group ID
+[(t  0)  Sun Mar 11 07:15:28-973942] Debug: ArgumentMap::get invoked for option name: groupId
+[(t  0)  Sun Mar 11 07:15:28-973983] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-974024] Error: No value found for element option name: Group ID
+[(t  0)  Sun Mar 11 07:15:28-974067] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-974108] Debug: Locating value for config element name: Alias
+[(t  0)  Sun Mar 11 07:15:28-974148] Debug: ArgumentMap::get invoked for option name: alias
+[(t  0)  Sun Mar 11 07:15:28-974187] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-974228] Error: No value found for element option name: Alias
+[(t  0)  Sun Mar 11 07:15:28-974271] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-974311] Debug: Locating value for config element name: Description
+[(t  0)  Sun Mar 11 07:15:28-974352] Debug: ArgumentMap::get invoked for option name: description
+[(t  0)  Sun Mar 11 07:15:28-974454] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-974496] Error: No value found for element option name: Description
+[(t  0)  Sun Mar 11 07:15:28-974544] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-974585] Debug: Locating value for config element name: Rating
+[(t  0)  Sun Mar 11 07:15:28-974625] Debug: ArgumentMap::get invoked for option name: rating
+[(t  0)  Sun Mar 11 07:15:28-974666] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-974722] Error: No value found for element option name: Rating
+[(t  0)  Sun Mar 11 07:15:28-974769] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-974809] Debug: Locating value for config element name: Public
+[(t  0)  Sun Mar 11 07:15:28-974850] Debug: ArgumentMap::get invoked for option name: public
+[(t  0)  Sun Mar 11 07:15:28-974889] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-974930] Error: No value found for element option name: Public
+[(t  0)  Sun Mar 11 07:15:28-974974] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-975014] Debug: Locating value for config element name: Private
+[(t  0)  Sun Mar 11 07:15:28-975054] Debug: ArgumentMap::get invoked for option name: private
+[(t  0)  Sun Mar 11 07:15:28-975094] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-975136] Error: No value found for element option name: Private
+[(t  0)  Sun Mar 11 07:15:28-975180] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-975221] Debug: Locating value for config element name: Auto Halt Limit
+[(t  0)  Sun Mar 11 07:15:28-975261] Debug: ArgumentMap::get invoked for option name: autoHaltLimit
+[(t  0)  Sun Mar 11 07:15:28-975301] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-975342] Error: No value found for element option name: Auto Halt Limit
+[(t  0)  Sun Mar 11 07:15:28-975386] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-975426] Debug: Locating value for config element name: Options
+[(t  0)  Sun Mar 11 07:15:28-975466] Debug: ArgumentMap::get invoked for option name: options
+[(t  0)  Sun Mar 11 07:15:28-975506] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-975546] Error: No value found for element option name: Options
+[(t  0)  Sun Mar 11 07:15:28-975590] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-975630] Debug: Locating value for config element name: Auto Download
+[(t  0)  Sun Mar 11 07:15:28-975670] Debug: ArgumentMap::get invoked for option name: autoDownload
+[(t  0)  Sun Mar 11 07:15:28-975710] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-975750] Error: No value found for element option name: Auto Download
+[(t  0)  Sun Mar 11 07:15:28-975794] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-975847] Debug: Locating value for config element name: Peer Description Limit
+[(t  0)  Sun Mar 11 07:15:28-975888] Debug: ArgumentMap::get invoked for option name: peerDescriptionLimit
+[(t  0)  Sun Mar 11 07:15:28-975928] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-975968] Error: No value found for element option name: Peer Description Limit
+[(t  0)  Sun Mar 11 07:15:28-976012] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-976052] Debug: Locating value for config element name: Query String
+[(t  0)  Sun Mar 11 07:15:28-976092] Debug: ArgumentMap::get invoked for option name: queryString
+[(t  0)  Sun Mar 11 07:15:28-976131] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-976172] Error: No value found for element option name: Query String
+[(t  0)  Sun Mar 11 07:15:28-976215] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-976256] Debug: Locating value for config element name: Query ID
+[(t  0)  Sun Mar 11 07:15:28-976297] Debug: ArgumentMap::get invoked for option name: queryId
+[(t  0)  Sun Mar 11 07:15:28-976336] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 07:15:28-976376] Error: No value found for element option name: Query ID
+[(t  0)  Sun Mar 11 07:15:28-976514] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-976614] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-976661] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 07:15:28-976794]  Info: Starting ALPINE Command Interface-
+Interface Context: /alpine/servers/logic
+Command: getDtcpPeerStatus
+Verbose mode ON
+
+[(t  0)  Sun Mar 11 07:15:28-976978] Debug: CorbaServant::initialize invoked.
+[(t  0)  Sun Mar 11 07:15:28-977195] Debug: OrbUtils::initialize invoked.  Thread pool size: 1
+[(t  0)  Sun Mar 11 07:15:29-016282] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-016461] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 07:15:29-016907] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sun Mar 11 07:15:29-017057] Debug: CosNamingUtils::initialize invoked.
+[(t  2)  Sun Mar 11 07:15:29-020119] Debug: SysThread::redirector invoked.
+[(t  2)  Sun Mar 11 07:15:29-020283] Debug: ++> Thread started with ID: 2051 - Process ID: 9567
+[(t  0)  Sun Mar 11 07:15:29-031136] Debug: CorbaServant::intializeAlpineClientInterface invoked.
+[(t  0)  Sun Mar 11 07:15:29-032841] Debug: CorbaServant::resolveDtcpPeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpPeerMgmtInterface
+
+[(t  0)  Sun Mar 11 07:15:29-033079] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-033198] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-033390] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-033698] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-043603] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-043747] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-043807] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-051024] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-051157] Debug: CorbaServant::resolveDtcpStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackMgmtInterface
+
+[(t  0)  Sun Mar 11 07:15:29-051235] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-053464] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-053510] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-053569] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-062812] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-062932] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-063044] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-070434] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-070563] Debug: CorbaServant::resolveDtcpStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackStatusInterface
+
+[(t  0)  Sun Mar 11 07:15:29-070610] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-070668] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 07:15:29-070711] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-070766] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-078140] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 07:15:29-078259] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-078318] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-085980] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-086142] Debug: CorbaServant::resolveAlpineStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackMgmtInterface
+
+[(t  0)  Sun Mar 11 07:15:29-086323] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-086386] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-086430] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-086485] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-105950] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-106046] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-106100] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-114423] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-114736] Debug: CorbaServant::resolveAlpineStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackStatusInterface
+
+[(t  0)  Sun Mar 11 07:15:29-114814] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-114955] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 07:15:29-115084] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-115173] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-122519] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 07:15:29-122617] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-122673] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-131848] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-132002] Debug: CorbaServant::resolveAlpineGroupMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineGroupMgmtInterface
+
+[(t  0)  Sun Mar 11 07:15:29-132051] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-132106] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-132149] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-132205] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-143163] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-143423] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-143589] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-150757] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-150914] Debug: CorbaServant::resolveAlpinePeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpinePeerMgmtInterface
+
+[(t  0)  Sun Mar 11 07:15:29-150963] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-151025] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-151068] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-151127] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-158637] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 07:15:29-158754] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-158818] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-167325] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-167478] Debug: CorbaServant::resolveAlpineQueryReference invoked.
+Binding Path: /alpine/servers/logic/AlpineQueryInterface
+
+[(t  0)  Sun Mar 11 07:15:29-167528] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-167590] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 07:15:29-167634] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-167692] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-175482] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 07:15:29-175631] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 07:15:29-175715] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 07:15:29-183157] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 07:15:29-183427] Debug: AlpineCorbaClient::initialize invoked.
+[(t  0)  Sun Mar 11 07:15:29-183678] Debug: performGetDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 07:15:29-183724] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 07:15:29-183821] Debug: DtcpPeerMgmtIntf::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 07:15:29-183889] Debug: AlpineCorbaClient::DtcpPeerMgmt::getDtcpPeerStatus invoked.
+
+========================================
+>> Application Started
+   [(t  0)  Sun Mar 11 15:43:28-890548]
+========================================
+
+[(t  0)  Sun Mar 11 15:43:28-900322] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 15:43:28-900524] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-901204] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901359] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901407] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901453] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901498] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901543] Debug: ApplCore::addSignalHandler invoked.
+[(t  0)  Sun Mar 11 15:43:28-901602] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 15:43:28-902268] Debug: ThreadUtils::addThread invoked.
+[(t  0)  Sun Mar 11 15:43:28-902838] Debug: Configuration::initialize invoked.
+[(t  0)  Sun Mar 11 15:43:28-903015] Debug: Configuration::copyConfigElementList invoked.
+[(t  0)  Sun Mar 11 15:43:28-903763] Debug: EnvironMap::load invoked.
+[(t  1)  Sun Mar 11 15:43:28-905791] Debug: SysThread::redirector invoked.
+[(t  1)  Sun Mar 11 15:43:28-906339] Debug: ++> Thread started with ID: 1026 - Process ID: 26903
+[(t  1)  Sun Mar 11 15:43:28-906842]  Info: Signal monitor thread is process ID: 26903
+[(t  0)  Sun Mar 11 15:43:28-906861] Debug: ConfigFile::initialize invoked.
+[(t  1)  Sun Mar 11 15:43:28-906953] Debug: ThreadSigMask::setSigMask invoked.
+[(t  0)  Sun Mar 11 15:43:28-907047] Debug: ArgumentMap::load invoked
+Arg Count: 16
+
+[(t  0)  Sun Mar 11 15:43:28-907138] Debug: Added option: ORBDebugLevel=10
+[(t  0)  Sun Mar 11 15:43:28-907190] Debug: Added null option name: verbose
+[(t  0)  Sun Mar 11 15:43:28-907242] Debug: Added option: logFile=getstatus.log
+[(t  0)  Sun Mar 11 15:43:28-907294] Debug: Added option: logLevel=Debug
+[(t  0)  Sun Mar 11 15:43:28-907346] Debug: Added option: interfaceContext=/alpine/servers/logic
+[(t  0)  Sun Mar 11 15:43:28-907401] Debug: Added option: ORBInitRef=NameService=file:///projects/alpine/release/runtime/corba/naming-service/ior.txt
+[(t  0)  Sun Mar 11 15:43:28-907487] Debug: Added option: command=getDtcpPeerStatus
+[(t  0)  Sun Mar 11 15:43:28-907574] Debug: Added option: peerId=1
+[(t  0)  Sun Mar 11 15:43:28-907634] Debug: Configuration::populateValues invoked.
+[(t  0)  Sun Mar 11 15:43:28-907674] Debug: Loading configuration settings.
+[(t  0)  Sun Mar 11 15:43:28-907728] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-907770] Debug: Locating value for config element name: Interface Context
+[(t  0)  Sun Mar 11 15:43:28-907828] Debug: ArgumentMap::get invoked for option name: interfaceContext
+[(t  0)  Sun Mar 11 15:43:28-907872] Debug: Located in config file, value: /alpine/servers/logic
+[(t  0)  Sun Mar 11 15:43:28-907935] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-907977] Debug: Locating value for config element name: Command
+[(t  0)  Sun Mar 11 15:43:28-908017] Debug: ArgumentMap::get invoked for option name: command
+[(t  0)  Sun Mar 11 15:43:28-908058] Debug: Located in config file, value: getDtcpPeerStatus
+[(t  0)  Sun Mar 11 15:43:28-908102] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-908143] Debug: Locating value for config element name: Verbose
+[(t  0)  Sun Mar 11 15:43:28-908183] Debug: ArgumentMap::get invoked for option name: verbose
+[(t  0)  Sun Mar 11 15:43:28-912397] Debug: Located in config file, value: 
+[(t  0)  Sun Mar 11 15:43:28-912464] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-912506] Debug: Locating value for config element name: IP Address
+[(t  0)  Sun Mar 11 15:43:28-912682] Debug: ArgumentMap::get invoked for option name: ipAddress
+[(t  0)  Sun Mar 11 15:43:28-912765] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-912939] Error: No value found for element option name: IP Address
+[(t  0)  Sun Mar 11 15:43:28-913113] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-913187] Debug: Locating value for config element name: Port
+[(t  0)  Sun Mar 11 15:43:28-913318] Debug: ArgumentMap::get invoked for option name: port
+[(t  0)  Sun Mar 11 15:43:28-913363] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-913406] Error: No value found for element option name: Port
+[(t  0)  Sun Mar 11 15:43:28-913455] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-913496] Debug: Locating value for config element name: Peer ID
+[(t  0)  Sun Mar 11 15:43:28-913535] Debug: ArgumentMap::get invoked for option name: peerId
+[(t  0)  Sun Mar 11 15:43:28-913577] Debug: Located in config file, value: 1
+[(t  0)  Sun Mar 11 15:43:28-913620] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-913660] Debug: Locating value for config element name: Subnet IP Address
+[(t  0)  Sun Mar 11 15:43:28-913700] Debug: ArgumentMap::get invoked for option name: subnetIpAddress
+[(t  0)  Sun Mar 11 15:43:28-913739] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-913780] Error: No value found for element option name: Subnet IP Address
+[(t  0)  Sun Mar 11 15:43:28-913824] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-913864] Debug: Locating value for config element name: Subnet Mask
+[(t  0)  Sun Mar 11 15:43:28-913903] Debug: ArgumentMap::get invoked for option name: subnetMask
+[(t  0)  Sun Mar 11 15:43:28-913943] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-913983] Error: No value found for element option name: Subnet Mask
+[(t  0)  Sun Mar 11 15:43:28-914026] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-914067] Debug: Locating value for config element name: Required
+[(t  0)  Sun Mar 11 15:43:28-914106] Debug: ArgumentMap::get invoked for option name: required
+[(t  0)  Sun Mar 11 15:43:28-914145] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-914186] Error: No value found for element option name: Required
+[(t  0)  Sun Mar 11 15:43:28-914230] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-914270] Debug: Locating value for config element name: Kbits/sec
+[(t  0)  Sun Mar 11 15:43:28-914309] Debug: ArgumentMap::get invoked for option name: Kbits/sec
+[(t  0)  Sun Mar 11 15:43:28-914349] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-914389] Error: No value found for element option name: Kbits/sec
+[(t  0)  Sun Mar 11 15:43:28-914432] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-914473] Debug: Locating value for config element name: Limit
+[(t  0)  Sun Mar 11 15:43:28-914512] Debug: ArgumentMap::get invoked for option name: limit
+[(t  0)  Sun Mar 11 15:43:28-914551] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-914592] Error: No value found for element option name: Limit
+[(t  0)  Sun Mar 11 15:43:28-914635] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-914676] Debug: Locating value for config element name: Group Name
+[(t  0)  Sun Mar 11 15:43:28-914715] Debug: ArgumentMap::get invoked for option name: groupName
+[(t  0)  Sun Mar 11 15:43:28-914754] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-914795] Error: No value found for element option name: Group Name
+[(t  0)  Sun Mar 11 15:43:28-914838] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-914878] Debug: Locating value for config element name: Group ID
+[(t  0)  Sun Mar 11 15:43:28-914937] Debug: ArgumentMap::get invoked for option name: groupId
+[(t  0)  Sun Mar 11 15:43:28-914978] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-915020] Error: No value found for element option name: Group ID
+[(t  0)  Sun Mar 11 15:43:28-915064] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-915104] Debug: Locating value for config element name: Alias
+[(t  0)  Sun Mar 11 15:43:28-915143] Debug: ArgumentMap::get invoked for option name: alias
+[(t  0)  Sun Mar 11 15:43:28-915182] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-915223] Error: No value found for element option name: Alias
+[(t  0)  Sun Mar 11 15:43:28-915266] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-915307] Debug: Locating value for config element name: Description
+[(t  0)  Sun Mar 11 15:43:28-915352] Debug: ArgumentMap::get invoked for option name: description
+[(t  0)  Sun Mar 11 15:43:28-915391] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-915432] Error: No value found for element option name: Description
+[(t  0)  Sun Mar 11 15:43:28-915476] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-915516] Debug: Locating value for config element name: Rating
+[(t  0)  Sun Mar 11 15:43:28-915555] Debug: ArgumentMap::get invoked for option name: rating
+[(t  0)  Sun Mar 11 15:43:28-915595] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-915635] Error: No value found for element option name: Rating
+[(t  0)  Sun Mar 11 15:43:28-915679] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-915720] Debug: Locating value for config element name: Public
+[(t  0)  Sun Mar 11 15:43:28-915759] Debug: ArgumentMap::get invoked for option name: public
+[(t  0)  Sun Mar 11 15:43:28-915798] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-915839] Error: No value found for element option name: Public
+[(t  0)  Sun Mar 11 15:43:28-915882] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-915922] Debug: Locating value for config element name: Private
+[(t  0)  Sun Mar 11 15:43:28-915962] Debug: ArgumentMap::get invoked for option name: private
+[(t  0)  Sun Mar 11 15:43:28-916002] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-916043] Error: No value found for element option name: Private
+[(t  0)  Sun Mar 11 15:43:28-916086] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-916127] Debug: Locating value for config element name: Auto Halt Limit
+[(t  0)  Sun Mar 11 15:43:28-916166] Debug: ArgumentMap::get invoked for option name: autoHaltLimit
+[(t  0)  Sun Mar 11 15:43:28-916205] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-916246] Error: No value found for element option name: Auto Halt Limit
+[(t  0)  Sun Mar 11 15:43:28-916292] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-916332] Debug: Locating value for config element name: Options
+[(t  0)  Sun Mar 11 15:43:28-916372] Debug: ArgumentMap::get invoked for option name: options
+[(t  0)  Sun Mar 11 15:43:28-916411] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-916452] Error: No value found for element option name: Options
+[(t  0)  Sun Mar 11 15:43:28-916495] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-916535] Debug: Locating value for config element name: Auto Download
+[(t  0)  Sun Mar 11 15:43:28-916574] Debug: ArgumentMap::get invoked for option name: autoDownload
+[(t  0)  Sun Mar 11 15:43:28-916614] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-916654] Error: No value found for element option name: Auto Download
+[(t  0)  Sun Mar 11 15:43:28-916698] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-916738] Debug: Locating value for config element name: Peer Description Limit
+[(t  0)  Sun Mar 11 15:43:28-916777] Debug: ArgumentMap::get invoked for option name: peerDescriptionLimit
+[(t  0)  Sun Mar 11 15:43:28-916817] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-916857] Error: No value found for element option name: Peer Description Limit
+[(t  0)  Sun Mar 11 15:43:28-916914] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-916955] Debug: Locating value for config element name: Query String
+[(t  0)  Sun Mar 11 15:43:28-916994] Debug: ArgumentMap::get invoked for option name: queryString
+[(t  0)  Sun Mar 11 15:43:28-917034] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-917074] Error: No value found for element option name: Query String
+[(t  0)  Sun Mar 11 15:43:28-917118] Debug: Configuration::locateValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-917158] Debug: Locating value for config element name: Query ID
+[(t  0)  Sun Mar 11 15:43:28-917197] Debug: ArgumentMap::get invoked for option name: queryId
+[(t  0)  Sun Mar 11 15:43:28-917236] Debug: EnvironMap::get invoked.
+[(t  0)  Sun Mar 11 15:43:28-917276] Error: No value found for element option name: Query ID
+[(t  0)  Sun Mar 11 15:43:28-917418] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-917519] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-917566] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 15:43:28-917703]  Info: Starting ALPINE Command Interface-
+Interface Context: /alpine/servers/logic
+Command: getDtcpPeerStatus
+Verbose mode ON
+
+[(t  0)  Sun Mar 11 15:43:28-917897] Debug: CorbaServant::initialize invoked.
+[(t  0)  Sun Mar 11 15:43:28-918104] Debug: OrbUtils::initialize invoked.  Thread pool size: 1
+[(t  0)  Sun Mar 11 15:43:28-934770] Debug: SysThread constructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-934907] Debug: SysThread::run invoked.
+[(t  0)  Sun Mar 11 15:43:28-935101] Debug: ThreadUtils::addThread invoked.
+[(t  2)  Sun Mar 11 15:43:28-935099] Debug: SysThread::redirector invoked.
+[(t  0)  Sun Mar 11 15:43:28-935282] Debug: CosNamingUtils::initialize invoked.
+[(t  2)  Sun Mar 11 15:43:28-935297] Debug: ++> Thread started with ID: 2051 - Process ID: 26904
+[(t  0)  Sun Mar 11 15:43:28-950795] Debug: CorbaServant::intializeAlpineClientInterface invoked.
+[(t  0)  Sun Mar 11 15:43:28-952757] Debug: CorbaServant::resolveDtcpPeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpPeerMgmtInterface
+
+[(t  0)  Sun Mar 11 15:43:28-952990] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-953103] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 15:43:28-953698] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:28-955116] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:28-966637] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpPeerMgmtInterface
+[(t  0)  Sun Mar 11 15:43:28-966768] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:28-966825] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:28-973628] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-973791] Debug: CorbaServant::resolveDtcpStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackMgmtInterface
+
+[(t  0)  Sun Mar 11 15:43:28-973842] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-973903] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 15:43:28-973948] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:28-974005] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:28-992181] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackMgmtInterface
+[(t  0)  Sun Mar 11 15:43:28-992306] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:28-992364] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:28-999718] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-999884] Debug: CorbaServant::resolveDtcpStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/DtcpStackStatusInterface
+
+[(t  0)  Sun Mar 11 15:43:28-999964] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:28-000039] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 15:43:28-000084] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:28-000140] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-007693] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/DtcpStackStatusInterface
+[(t  0)  Sun Mar 11 15:43:29-007824] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-007884] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-014465] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-014620] Debug: CorbaServant::resolveAlpineStackMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackMgmtInterface
+
+[(t  0)  Sun Mar 11 15:43:29-014673] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-014736] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-014781] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-014839] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-021296] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-021426] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-021483] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-027757] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-027921] Debug: CorbaServant::resolveAlpineStackStatusReference invoked.
+Binding Path: /alpine/servers/logic/AlpineStackStatusInterface
+
+[(t  0)  Sun Mar 11 15:43:29-027983] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-028046] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 15:43:29-028089] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-028146] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-034867] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineStackStatusInterface
+[(t  0)  Sun Mar 11 15:43:29-034993] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-035049] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-041522] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-041685] Debug: CorbaServant::resolveAlpineGroupMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpineGroupMgmtInterface
+
+[(t  0)  Sun Mar 11 15:43:29-041733] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-041797] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-041841] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-041898] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-048326] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineGroupMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-048425] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-048481] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-054935] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-055092] Debug: CorbaServant::resolveAlpinePeerMgmtReference invoked.
+Binding Path: /alpine/servers/logic/AlpinePeerMgmtInterface
+
+[(t  0)  Sun Mar 11 15:43:29-055141] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-055204] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-055269] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-055328] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-062299] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpinePeerMgmtInterface
+[(t  0)  Sun Mar 11 15:43:29-062422] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-062479] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-069065] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-069190] Debug: CorbaServant::resolveAlpineQueryReference invoked.
+Binding Path: /alpine/servers/logic/AlpineQueryInterface
+
+[(t  0)  Sun Mar 11 15:43:29-069237] Debug: CosNamingUtils::CosNamingUtils constructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-069294] Debug: CosNamingUtils::bindingExists invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 15:43:29-069337] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-069393] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-075870] Debug: CosNamingUtils::resolve invoked for name: /alpine/servers/logic/AlpineQueryInterface
+[(t  0)  Sun Mar 11 15:43:29-076003] Debug: CosNamingUtils::parseContextPath invoked.
+[(t  0)  Sun Mar 11 15:43:29-076063] Debug: CosNamingUtils::generateCosName invoked.
+[(t  0)  Sun Mar 11 15:43:29-083535] Debug: CosNamingUtils::CosNamingUtils destructor invoked.
+[(t  0)  Sun Mar 11 15:43:29-083819] Debug: AlpineCorbaClient::initialize invoked.
+[(t  0)  Sun Mar 11 15:43:29-084070] Debug: performGetDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 15:43:29-084117] Debug: Configuration::getValue invoked.
+[(t  0)  Sun Mar 11 15:43:29-084216] Debug: DtcpPeerMgmtIntf::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 15:43:29-084278] Debug: AlpineCorbaClient::DtcpPeerMgmt::getDtcpPeerStatus invoked.
+[(t  0)  Sun Mar 11 15:43:29-127346] Error: Caught corba exception: IDL:Alpine/e_DtcpStackError:1.0 from DtcpPeerMgmt::getDtcpPeerStatus.
+[(t  0)  Sun Mar 11 15:43:29-127621] Error: DtcpPeerMgmtIntf::getDtcpPeerStatus call failed!

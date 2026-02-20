@@ -1,0 +1,131 @@
+///////
+///
+///  Copyright (C) 2026  sonoransun
+///
+///  Permission is hereby granted, free of charge, to any person obtaining a copy
+///  of this software and associated documentation files (the "Software"), to deal
+///  in the Software without restriction, including without limitation the rights
+///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+///  copies of the Software, and to permit persons to whom the Software is
+///  furnished to do so, subject to the following conditions:
+///
+///  The above copyright notice and this permission notice shall be included in all
+///  copies or substantial portions of the Software.
+///
+///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+///  SOFTWARE.
+///
+///////
+
+
+#include <Common.h>
+#include <iostream>
+#include <Log.h>
+#include <StringUtils.h>
+#include <TestThread.h>
+#include <list>
+#include <unistd.h>
+
+
+int 
+main (int argc, char *argv[])
+{
+    string logFilename;
+    int debugLevel;
+
+    if (argc != 4) {
+        cerr << "Usage: " << argv[0] << " <debug filename> <debugLevel 1-4> <thread count>" << endl;
+        return 1;
+    }
+    logFilename = argv[1];
+    debugLevel = atoi (argv[2]);
+
+    if (debugLevel == 1) {
+        Log::initialize (logFilename, Log::t_LogLevel::Silent);
+    }
+    else if (debugLevel == 2) {
+        Log::initialize (logFilename, Log::t_LogLevel::Error);
+    }
+    else if (debugLevel == 3) {
+        Log::initialize (logFilename, Log::t_LogLevel::Info);
+    }
+    else if (debugLevel == 4) {
+        Log::initialize (logFilename, Log::t_LogLevel::Debug);
+    }
+    else {
+        cout << "Invalid log level." << endl;
+        return 1;
+    }
+    int threadCount;
+    threadCount = atol(argv[3]);
+
+
+
+    Log::Info ("Starting thread test."s +
+               "\nThreads to Create: "s + std::to_string (threadCount));
+
+    
+    using t_ThreadList = list<TestThread *>;
+
+    t_ThreadList  threadList;
+    TestThread *  currThread;
+
+    Log::Debug ("Creating thread objects...");
+
+    int i;
+    for (i = 0; i < threadCount; i++) {
+
+        string currMsg = "This is thread number: "s + std::to_string(i+1);
+        currThread = new TestThread (currMsg);
+
+        threadList.push_back (currThread);
+    }
+
+    Log::Debug ("Starting threads...");
+
+       
+    bool status;
+    i = 1;
+
+    for (auto& item : threadList) {
+        status = item->create ();
+
+        if (!status) {
+            Log::Error ("Start failed for thread "s + std::to_string(i));
+            return false;
+        }
+
+        i++;
+    }
+
+    Log::Debug ("\n\n   ...Pausing...\n");
+
+    sleep (10);
+
+    Log::Debug ("Resuming threads...");
+
+    i = 1;
+    for (auto& item : threadList) {
+        status = item->resume ();
+
+        if (!status) {
+            Log::Error ("Start failed for thread "s + std::to_string(i));
+            return false;
+        }
+
+        i++;
+    }
+
+    Log::Debug ("Finished.  Pausing in main thread.");
+    sleep (10);
+    Log::Debug ("Done, exitin.");
+ 
+    return 0;
+}
+
+

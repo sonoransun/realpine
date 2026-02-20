@@ -1,0 +1,889 @@
+///////
+///
+///  Copyright (C) 2026  sonoransun
+///
+///  Permission is hereby granted, free of charge, to any person obtaining a copy
+///  of this software and associated documentation files (the "Software"), to deal
+///  in the Software without restriction, including without limitation the rights
+///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+///  copies of the Software, and to permit persons to whom the Software is
+///  furnished to do so, subject to the following conditions:
+///
+///  The above copyright notice and this permission notice shall be included in all
+///  copies or substantial portions of the Software.
+///
+///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+///  SOFTWARE.
+///
+///////
+
+
+#pragma prefix  "alpine.net"
+
+
+module Alpine
+{
+
+    exception  e_InvalidAddress {};
+
+    exception  e_PeerAlreadyExists {};
+
+    exception  e_PeerDoesNotExists {};
+
+    exception  e_InvalidPeerId {};
+
+    exception  e_DtcpStackError {};
+
+    exception  e_AlpineStackError {};
+
+    exception  e_InvalidValue {};
+
+    exception  e_GroupAlreadyExists {};
+
+    exception  e_InvalidGroupId {};
+
+
+
+
+    typedef sequence<string>  t_IpAddressList;
+
+    typedef sequence<unsigned long>  t_DtcpPeerIdList;
+
+
+    struct  s_DtcpPeerLocation {
+        string          ipAddress;
+        unsigned short  port;
+    };
+
+    typedef s_DtcpPeerLocation   t_DtcpPeerLocation;
+
+    typedef sequence<t_DtcpPeerLocation>  t_DtcpPeerLocationList;
+
+
+    struct  s_DtcpPeerStatus {
+        string          ipAddress;
+        unsigned short  port;
+        unsigned long   lastRecvTime;
+        unsigned long   lastSendTime;
+        unsigned long   avgBandwidth;
+        unsigned long   peakBandwidth;
+    };
+
+    typedef s_DtcpPeerStatus    t_DtcpPeerStatus;
+
+
+    struct  s_SubnetAddress {
+        string   ipAddress;
+        string   netMask;
+    };
+
+    typedef s_SubnetAddress   t_SubnetAddress;
+
+    typedef sequence<t_SubnetAddress>  t_SubnetAddressList;
+
+
+
+    ////
+    //
+    //   DTCP Peer Management Interface
+    //
+    //   This interface provides access to the various
+    //   operations required to connect, manage, and
+    //   configure peer connections.
+    //
+    interface DtcpPeerMgmt {
+
+        // Add peer
+        //
+        void  addDtcpPeer (in string          ipAddress,
+                           in unsigned short  port)
+
+            raises (e_InvalidAddress,
+                    e_PeerAlreadyExists,
+                    e_DtcpStackError);
+
+
+
+        // Get peer/transport ID for a given endpoint
+        //
+        unsigned long  getDtcpPeerId (in string          ipAddress,
+                                      in unsigned short  port)
+
+            raises (e_InvalidAddress,
+                    e_PeerDoesNotExists,
+                    e_DtcpStackError);
+
+
+
+        // Get status information for peer/transport
+        //
+        void  getDtcpPeerStatus (in  unsigned long     peerId,
+                                 out t_DtcpPeerStatus  status)
+
+            raises (e_PeerDoesNotExists,
+                    e_DtcpStackError);
+
+
+
+        // Get list of peer IDs for all known peers
+        //
+        void  getAllDtcpPeerIds (out t_DtcpPeerIdList  peerIdList)
+
+            raises (e_DtcpStackError);
+
+
+
+        // Activate peer that has been deactivated/idled
+        //
+        void  activateDtcpPeer (in  unsigned long  peerId)
+
+            raises (e_DtcpStackError);
+
+
+
+        // Deactivate peer.
+        //
+        void  deactivateDtcpPeer (in  unsigned long  peerId)
+
+            raises (e_DtcpStackError);
+
+
+
+        // Ping peer, determine if actively processing packets
+        //
+        boolean  pingDtcpPeer (in  unsigned long  peerId)
+
+            raises (e_PeerDoesNotExists,
+                    e_DtcpStackError);
+
+
+
+        // Exclude a host / filter
+        //
+        void  excludeHost (in  string  ipAddress)
+
+            raises (e_InvalidAddress,
+                    e_DtcpStackError);
+
+
+
+        // Exclude a subnet / filter
+        //
+        void  excludeSubnet (in  string  subnetIpAddress,
+                             in  string  subnetMask)
+
+            raises (e_InvalidAddress,
+                    e_DtcpStackError);
+
+
+
+        // Remove ban on host
+        //
+        void  allowHost (in  string  ipAddress)
+
+            raises (e_InvalidAddress,
+                    e_DtcpStackError);
+
+
+
+        // Remove ban on subnet
+        //
+        void  allowSubnet (in  string  subnetIpAddress)
+
+            raises (e_InvalidAddress,
+                    e_DtcpStackError);
+
+
+
+        // List all excluded hosts
+        //
+        void  listExcludedHosts (out  t_IpAddressList  ipAddressList)
+
+            raises (e_DtcpStackError);
+
+
+
+        // List all excluded subnets
+        //
+        void  listExcludedSubnets (out  t_SubnetAddressList  subnetAddressList)
+
+            raises (e_DtcpStackError);
+
+    };
+
+
+
+    ////
+    //
+    //   DTCP Stack Management Interface
+    //
+    //   This interface provides access to various configurable
+    //   settings to manage the DTCP stack.  These values affect
+    //   all DTCP connections to all peers.
+    //
+    interface DtcpStackMgmt {
+
+        // Perform NAT dicovery and adaptation
+        //
+        void  natDiscovery (in boolean  isRequired)
+
+            raises (e_DtcpStackError);
+
+
+
+        // Check for NAT discovery
+        //
+        boolean  natDiscoveryRequired ()
+
+            raises (e_DtcpStackError);
+
+
+
+        // Outgoing data throttling (_bits_ / sec)  (0 == no limit)
+        //
+        void  setDataSendingLimit (in unsigned long  bpsLimit)
+
+            raises (e_DtcpStackError);
+
+
+        unsigned long  getDataSendingLimit ()
+
+            raises (e_DtcpStackError);
+
+
+
+        // Threading limits
+        //
+        void  setStackThreadLimit (in unsigned long  threadLimit)
+
+            raises (e_DtcpStackError);
+
+
+        unsigned long  getStackThreadLimit ()
+
+            raises (e_DtcpStackError);
+
+
+
+        // Receive buffer limit (number of buffers available for receiving data)
+        //
+        void  setReceiveBufferLimit (in unsigned long  recvBufferLimit)
+
+            raises (e_InvalidValue,
+                    e_DtcpStackError);
+
+
+        unsigned long  getReceiveBufferLimit ()
+
+            raises (e_DtcpStackError);
+
+
+
+        // Send buffer limit (number of buffers available for sending data)
+        //
+        void  setSendBufferLimit (in unsigned long  sendBufferLimit)
+
+            raises (e_InvalidValue,
+                    e_DtcpStackError);
+
+
+        unsigned long  getSendBufferLimit ()
+
+            raises (e_DtcpStackError);
+
+    };
+
+
+
+
+    struct s_DtcpStackBufferStats {
+        unsigned long  numSendBuffers;
+        unsigned long  peakSendBuffersUsed;
+        unsigned long  numReceiveBuffers;
+        unsigned long  peakReceiveBuffersUsed;
+        unsigned long  numThreadBuffers;
+    };
+
+    typedef s_DtcpStackBufferStats    t_DtcpStackBufferStats;
+
+
+    ////
+    //
+    //   DTCP Stack Status Information Interface
+    //
+    //   This interface provides access to the current status
+    //   values for the DTCP stack.  These values can be used
+    //   to tune performance and identify problems in configuration.
+    //
+    interface  DtcpStackStatus {
+
+        // Get transfer buffer stats
+        //
+        void  getBufferStats (out t_DtcpStackBufferStats  stats)
+
+            raises (e_DtcpStackError);
+
+    };
+
+
+
+
+    ////
+    //
+    //   ALPINE Stack Management Interface
+    //
+    //   This interface provides access to operations required
+    //   for configuration and management of the ALPINE stack.
+    //
+    interface AlpineStackMgmt {
+
+        // Transaction data transfer limits
+        //
+        void  setTotalTransferLimit (in unsigned long  transferLimit)
+
+            raises (e_InvalidValue,
+                    e_AlpineStackError);
+
+
+        unsigned long  getTotalTransferLimit ()
+
+            raises (e_AlpineStackError);
+
+
+
+        // Per user concurrent transaction data transfer limits (i.e. num per user)
+        //
+        void  setPeerTransferLimit (in unsigned long  transferLimit)
+
+            raises (e_InvalidValue,
+                    e_AlpineStackError);
+
+
+        unsigned long  getPeerTransferLimit ()
+
+            raises (e_AlpineStackError);
+
+    };
+
+
+
+
+    struct s_AlpineStackTransferStats {
+        unsigned long  totalTransfers;
+        unsigned long  peakTransfers;
+    };
+
+    typedef s_AlpineStackTransferStats    t_AlpineStackTransferStats;
+
+    ////
+    //
+    //   ALPINE Stack Status Information Interface
+    //
+    //   This interface provides access to the current status
+    //   values for the ALPINE stack.  These values can be used
+    //   to tune performance and identify problems in configuration.
+    //
+    interface AlpineStackStatus {
+
+        // Get Alpine transfer stats
+        //
+        void  getTransferStats (out t_AlpineStackTransferStats  stats)
+
+            raises (e_AlpineStackError);
+
+    };
+
+
+
+
+    struct s_AlpineGroupInfo {
+        string         name;
+        unsigned long  id;
+        string         description;
+        boolean        open;
+    };
+
+    typedef s_AlpineGroupInfo    t_AlpineGroupInfo;
+
+    typedef sequence<t_AlpineGroupInfo>  t_AlpineGroupInfoList;
+
+    ////
+    //
+    //   ALPINE Grouping Management Interface
+    //
+    //   This interface provides access to the grouping contructs
+    //   within the ALPINE stack.  Creating, modifying, and 
+    //   deleting groups in supported through this interface.
+    //
+    interface AlpineGroupMgmt {
+
+        // List user defined groups
+        //
+        void  getUserGroupList (out t_AlpineGroupInfoList  groupInfoList)
+
+            raises (e_AlpineStackError);
+
+
+
+        // Create new group (returns created group ID)
+        //
+        unsigned long  createUserGroup (in string  groupName,
+                                        in string  description)
+
+            raises (e_GroupAlreadyExists,
+                    e_AlpineStackError);
+
+
+
+
+        // Destroy user group
+        //
+        void  destroyUserGroup (in unsigned long  groupId)
+
+            raises (e_InvalidGroupId,
+                    e_AlpineStackError);
+
+
+
+        // List groups peer is a member of
+        //
+        void  getPeerUserGroupList (in  unsigned long           peerId,
+                                    out t_AlpineGroupInfoList  groupInfoList)
+
+            raises (e_InvalidPeerId,
+                    e_AlpineStackError);
+
+
+
+        // Add peer to specific group
+        //
+        void  addPeerToGroup (in unsigned long  peerId,
+                              in unsigned long  groupId)
+
+            raises (e_InvalidPeerId,
+                    e_InvalidGroupId,
+                    e_AlpineStackError);
+
+
+
+        // Remove peer from specific group
+        //
+        void  removePeerFromGroup (in unsigned long  peerId,
+                                   in unsigned long  groupId)
+
+            raises (e_InvalidPeerId,
+                    e_InvalidGroupId,
+                    e_AlpineStackError);
+
+    };
+
+
+
+
+    struct s_AlpinePeerInfo {
+        unsigned long  id;
+        string         alias;
+        string         description;
+        unsigned long  dateConnected;
+        unsigned long  qualityPosition;
+        long           relativeQualityRating;
+        unsigned long  totalShared;
+    };
+
+    typedef s_AlpinePeerInfo    t_AlpinePeerInfo;
+
+    typedef sequence<t_AlpinePeerInfo>  t_AlpinePeerInfoList;
+
+    ////
+    //
+    //   ALPINE Peer Management Interface
+    //
+    //   This interface provides access to the peer management
+    //   functions within the ALPINE stack.  Creating aliases
+    //   for peers, providing details and maintining stats
+    //   are provided via this interface.
+    //
+    interface AlpinePeerMgmt {
+
+        // List peers with extended information
+        //
+        void  getExtendedPeerList (out t_DtcpPeerIdList  peerIdList)
+
+            raises (e_AlpineStackError);
+
+
+
+        // Get information for a specific peer
+        //
+        void  getPeerInformation (out t_AlpinePeerInfo  peerInfo)
+
+            raises (e_InvalidPeerId,
+                    e_AlpineStackError);
+
+
+
+        // Update information for a specific peer
+        //
+        void updatePeerInformation (in t_AlpinePeerInfo  peerInfo)
+
+            raises (e_InvalidPeerId,
+                    e_AlpineStackError);
+
+    };
+
+
+
+
+    struct s_QueryOptions {
+        string         groupName;
+        unsigned long  autoHaltLimit;
+        boolean        autoDownload;
+        unsigned long  peerDescMax;
+        unsigned long  optionId;
+        string         optionData;
+    };
+
+    typedef s_QueryOptions  t_QueryOptions;
+
+
+    struct s_QueryStatus {
+        unsigned long  totalPeers;
+        unsigned long  peersQueried;
+        unsigned long  numPeerResponses;
+        unsigned long  totalHits;
+    };
+
+    typedef s_QueryStatus  t_QueryStatus;
+
+
+    struct s_ResourceDesc {
+        unsigned long  resourceId;
+        unsigned long  size;
+        string         locator;
+        string         description;
+        unsigned long  optionId;
+        string         optionData;
+    };
+
+    typedef s_ResourceDesc  t_ResourceDesc;
+
+    typedef sequence<t_ResourceDesc>  t_ResourceDescList;
+
+    struct s_PeerResources {
+        unsigned long       peerId;
+        t_ResourceDescList  resourceDescList;
+    };
+
+    typedef s_PeerResources  t_PeerResources;
+
+    typedef sequence<t_PeerResources>  t_PeerResourcesList;
+
+    typedef sequence<unsigned long>  t_QueryIdList;
+
+
+    exception  e_InvalidQueryOptions {};
+
+    exception  e_InvalidQueryId {};
+
+    exception  e_InvalidQueryOperation {};
+
+
+
+    ////
+    //
+    //   ALPINE Query Interface
+    //
+    //   This interface provides access to the query functions 
+    //   within the ALPINE network.  
+    //
+    interface AlpineQuery {
+
+        // Get default options for queries
+        //
+        void  getDefaultOptions (out t_QueryOptions  options)
+
+            raises (e_AlpineStackError);
+
+
+
+        // Set default options for queries
+        //
+        void  setDefaultOptions (in t_QueryOptions  options)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryOptions);
+
+
+
+        // Create query
+        //
+        void  startQuery (in t_QueryOptions  options,
+                          in string          queryString,
+                          out unsigned long  queryId)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryOptions);
+    
+
+
+        // Check query in progress
+        //               
+        boolean  inProgress (in unsigned long  queryId)
+
+            raises (e_InvalidQueryId); 
+
+
+
+        // Get query status information
+        //
+        void  getQueryStatus (in unsigned long   queryId,
+                              out t_QueryStatus  status)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryId,
+                    e_InvalidQueryOperation);
+
+
+
+        // Pause active query
+        //
+        void  pauseQuery (in unsigned long  queryId)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryId,
+                    e_InvalidQueryOperation);
+
+
+
+        // Resume paused query
+        //
+        void  resumeQuery (in unsigned long  queryId)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryId,
+                    e_InvalidQueryOperation);
+
+
+
+        // Cancel query
+        //
+        void  cancelQuery (in unsigned long  queryId)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryId,
+                    e_InvalidQueryOperation);
+
+
+
+        // Get query results
+        //
+        void  getQueryResults (in unsigned long         queryId,
+                               out t_PeerResourcesList  results)
+
+            raises (e_AlpineStackError,
+                    e_InvalidQueryId,
+                    e_InvalidQueryOperation);
+
+
+
+        // Get a list of active query IDs
+        //
+        void  getActiveQueryIdList (out  t_QueryIdList  queryIdList)
+
+            raises (e_AlpineStackError);
+
+
+
+        // Get a list of past query IDs
+        //
+        void  getPastQueryIdList (out  t_QueryIdList  queryIdList)
+
+            raises (e_AlpineStackError);
+
+
+    };
+
+
+
+
+    enum  e_ConfigElementType { String, Number, StringList, NumberList };
+
+    union  u_ConfigDataElementValue switch (e_ConfigElementType) {
+      //
+      // All four types of configuration data elements are
+      // represented in a type safe union for correct marshalling
+      // into internal ConfigData objects.  The 'Any' type is 
+      // currently too much overhead to justify its use.
+      //
+      case String:
+        string             strValue;
+
+      case Number:
+        long               numValue;
+
+      case StringList:
+        sequence<string>   strListValue;
+
+      case NumberList:
+        sequence<long>     numListValue;
+    };
+        
+    typedef u_ConfigDataElementValue  t_ConfigDataElementValue;
+
+    struct  s_ConfigDataElement {
+        string                     name;
+        string                     fileOptionName;
+        string                     argOptionName;
+        string                     envOptionName;
+        e_ConfigElementType        optionType;
+        boolean                    required;
+        t_ConfigDataElementValue   value;
+    };
+
+    typedef   s_ConfigDataElement  t_ConfigDataElement;
+
+    typedef sequence<t_ConfigDataElement>  t_ConfigData;
+
+
+    struct  s_AlpineModuleInfo {
+        unsigned long  moduleId;
+        string         moduleName;
+        string         description;
+        string         version;
+        string         libraryPath;
+        string         bootstrapSymbol;
+        unsigned long  activeTime;
+    };
+
+    typedef s_AlpineModuleInfo  t_AlpineModuleInfo;
+
+
+    typedef sequence<unsigned long>  t_ModuleIdList;
+
+
+    exception  e_InvalidModuleId {};
+
+    exception  e_ModuleAlreadyExists {};
+
+    exception  e_InvalidLibraryPath {};
+
+    exception  e_InvalidLibraryPermissions {};
+
+    exception  e_ModuleError {};
+
+    exception  e_ModuleNotActive {};
+
+    exception  e_ModuleActive {};
+
+
+
+    ////
+    //
+    //   ALPINE Module Management Interface
+    //
+    //   This interface provides access to the module management
+    //   and administration operations for ALPINE Modules.  These
+    //   modules are loaded and unloaded dynamically to support
+    //   various extensions to the ALPINE Server, such as 
+    //   protocol optional extensions, query processing, and
+    //   data transport server and client functionality.
+    //
+    interface AlpineModuleMgmt {
+
+        // Register a new ALPINE Server module
+        //
+        void  registerModule (in string          libraryPath,
+                              in string          boostrapSymbol,
+                              out unsigned long  moduleId)
+
+            raises (e_ModuleAlreadyExists,
+                    e_InvalidLibraryPath,
+                    e_InvalidLibraryPermissions,
+                    e_ModuleError);
+
+
+
+        // Unregister a module
+        //
+        void  unregisterModule (in unsigned long  moduleId)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleActive,
+                    e_ModuleError);
+
+
+
+        // Set configuration values for registered module
+        //
+        void  setConfiguration (in unsigned long  moduleId,
+                                in t_ConfigData   configData)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleError);
+
+
+
+        // Get current configuration values for module
+        //
+        void  getConfiguration (in  unsigned long  moduleId,
+                                out t_ConfigData   configData)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleError);
+
+
+
+        // Get module information
+        //
+        void  getModuleInfo (in  unsigned long       moduleId,
+                             out t_AlpineModuleInfo  moduleInfo)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleError);
+
+
+
+        // Load a registered module (i.e. activate it)
+        //
+        void  loadModule (in  unsigned long  moduleId)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleActive,
+                    e_ModuleError);
+
+
+
+        // Unload module (deactivate)
+        //
+        void  unloadModule (in  unsigned long  moduleId)
+
+            raises (e_InvalidModuleId,
+                    e_ModuleNotActive,
+                    e_ModuleError);
+
+
+
+        // List all active/loaded modules
+        //
+        void  listActiveModules (out  t_ModuleIdList  idList)
+
+            raises (e_ModuleError);
+
+
+
+        // List all modules
+        //
+        void  listAllModules (out  t_ModuleIdList  idList)
+
+            raises (e_ModuleError);
+
+
+    };
+
+};
+

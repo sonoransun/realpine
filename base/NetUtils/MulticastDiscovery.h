@@ -1,0 +1,65 @@
+///////
+///
+///  Copyright (C) 2026  sonoransun
+///
+///  Permission is hereby granted, free of charge, to any person obtaining a copy
+///  of this software and associated documentation files (the "Software"), to deal
+///  in the Software without restriction, including without limitation the rights
+///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+///  copies of the Software, and to permit persons to whom the Software is
+///  furnished to do so, subject to the following conditions:
+///
+///  The above copyright notice and this permission notice shall be included in all
+///  copies or substantial portions of the Software.
+///
+///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+///  SOFTWARE.
+///
+///////
+
+
+#pragma once
+#include <Common.h>
+#include <SysThread.h>
+
+
+class MulticastDiscovery : public SysThread
+{
+  public:
+
+    MulticastDiscovery ();
+    ~MulticastDiscovery ();
+
+    bool  initialize (const string & multicastGroup, ushort multicastPort,
+                      const string & peerId, const string & ipAddress,
+                      ushort port, ushort restPort, uint capabilities,
+                      int announceIntervalSec, int peerTimeoutSec);
+
+    void  threadMain ();
+
+
+  private:
+
+    void  sendAnnouncement ();
+    void  handleReceived (const byte * data, uint length,
+                          ulong srcIp, ushort srcPort);
+
+    static const int  POLL_TIMEOUT_MS = 1000;
+
+    int     mcastFd_;
+    string  multicastGroup_;
+    ushort  multicastPort_;
+    string  peerId_;
+    string  ipAddress_;
+    ushort  port_;
+    ushort  restPort_;
+    uint    capabilities_;
+    int     announceIntervalSec_;
+    int     peerTimeoutSec_;
+
+};

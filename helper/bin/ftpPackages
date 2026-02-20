@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+use Net::FTP;
+
+
+#
+# Main
+#
+
+$alpineRoot = $ENV{'ALPINE_ROOT'};
+$packageDir = $alpineRoot . '/release/devel/';
+
+#$ftpHost = 'cubicmetercrystal.com';
+$ftpHost = 'ftp.business.earthlink.net';
+$ftpDirHttp = '/www/alpine/release/devel/';
+$ftpDirFtp = '/pub/';
+
+@packageFiles = ( "alpine-devel.tar.gz" );
+
+if ($alpineRoot eq '') {
+    print STDERR "Error: ALPINE_ROOT env variable is not set.";
+    exit (1);
+}
+
+print "Connecting to server...\n";
+
+$ftp = Net::FTP->new ($ftpHost, Debug => 0);
+$ftp->login ();
+$ftp->binary ();
+
+
+
+print "Starting transfer to HTTP location...\n";
+
+# Send...
+#
+$ftp->cwd ($ftpDirHttp);
+
+foreach $file (@packageFiles) {
+
+    $localFile = $packageDir . $file;
+    print "Sending file: $localFile \n";
+
+    $ftp->put ($localFile);
+}
+
+
+
+print "Starting transfer to FTP location...\n";
+
+$ftp->cwd ($ftpDirFtp);
+
+foreach $file (@packageFiles) {
+
+    $localFile = $packageDir . $file;
+    print "Sending file: $localFile \n";
+
+    $ftp->put ($localFile);
+}
+
+
+exit (0);
+
+

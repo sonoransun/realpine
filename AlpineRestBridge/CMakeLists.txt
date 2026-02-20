@@ -1,0 +1,36 @@
+add_executable(AlpineRestBridge
+    JsonWriter.cpp
+    JsonReader.cpp
+    XmlWriter.cpp
+    HttpRequest.cpp
+    HttpResponse.cpp
+    HttpRouter.cpp
+    HttpServer.cpp
+    RestBridgeConfig.cpp
+    DiscoveryBeacon.cpp
+    BroadcastQueryHandler.cpp
+    TorHiddenService.cpp
+    TorTunnel.cpp
+    ContentStore.cpp
+    DlnaHandler.cpp
+    MediaStreamer.cpp
+    DlnaServer.cpp
+    SsdpService.cpp
+    MdnsService.cpp
+    QueryHandler.cpp
+    PeerHandler.cpp
+    StatusHandler.cpp
+    AlpineRestBridge.cpp
+)
+target_include_directories(AlpineRestBridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(AlpineRestBridge PRIVATE
+    Alpine::ApplCore
+    Alpine::AlpineStackInterface
+    Alpine::DtcpStackInterface
+    Alpine::AlpineProtocol
+    Alpine::AlpineTransport
+    Alpine::AppUtils
+    Alpine::NetUtils
+    Alpine::ThreadUtils
+    Alpine::ConfigUtils
+)

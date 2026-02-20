@@ -1,0 +1,22 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/user/sonoranpub/realpine/_build/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/base/AppUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/base/SysUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/base/ThreadUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/base/NetUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/base/ConfigUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/transport/TransBase/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/transport/Dtcp/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/transport/Alpine/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/protocols/Alpine/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/applcore/ApplCore/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/interfaces/AlpineStackInterface/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/interfaces/DtcpStackInterface/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/AlpineServer/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/AlpineCmdIf/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/_build/AlpineRestBridge/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

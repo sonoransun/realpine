@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+
+if (scalar(@ARGV) != 2) {
+    # invalid args
+    print STDERR "Invalid argument count: " . $ARGC . "\n";
+    exit (1);
+}
+
+$prefix = $ARGV[0];
+$fileName = $ARGV[1];
+
+$tempFile = "/tmp/temp_" . $$ . "_.txt";
+
+open(INFILE, "<$fileName");
+open(OUTFILE,">$tempFile");
+
+@lines = <INFILE>;
+chomp(@lines);
+
+print OUTFILE $prefix;
+
+foreach $line (@lines) {
+    print OUTFILE $line . "\n";
+}
+
+close (INFILE);
+close (OUTFILE);
+
+system("mv $tempFile $fileName");
+

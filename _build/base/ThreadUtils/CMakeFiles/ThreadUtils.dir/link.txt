@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libThreadUtils.a CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o CMakeFiles/ThreadUtils.dir/Mutex.cpp.o CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o CMakeFiles/ThreadUtils.dir/SysThread.cpp.o CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o
+/usr/bin/ranlib ../../lib/libThreadUtils.a

@@ -1,0 +1,32 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/user/sonoranpub/realpine/build_dir/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/base/AppUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/base/SysUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/base/ThreadUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/base/NetUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/base/ConfigUtils/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/transport/TransBase/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/transport/Dtcp/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/transport/Alpine/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/protocols/Alpine/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/applcore/ApplCore/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/interfaces/AlpineStackInterface/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/interfaces/DtcpStackInterface/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/AlpineServer/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/AlpineCmdIf/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/AlpineRestBridge/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/auto_thread_test/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/sys_thread_test/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/map_test/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/spawn_process/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/tcp_conn_test/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/udp_send_test/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/udp_socket_conn/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/dtcp_stack/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/dl_test/DynLib/cmake_install.cmake",
+		"/Users/user/sonoranpub/realpine/build_dir/test/dl_test/DynamicLoaderTest/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

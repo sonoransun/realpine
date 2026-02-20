@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+if (scalar(@ARGV) != 2) {
+    # invalid args
+    print STDERR "Invalid argument count: " . $ARGC . "\n";
+    exit (1);
+}
+
+$rule = $ARGV[0];
+$fileName = $ARGV[1];
+
+open(OUTFILE,">>$fileName");
+
+print OUTFILE "\t$rule\n";
+
+close (OUTFILE);
+

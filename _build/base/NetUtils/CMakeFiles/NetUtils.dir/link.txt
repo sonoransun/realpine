@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libNetUtils.a CMakeFiles/NetUtils.dir/CovertChannel.cpp.o CMakeFiles/NetUtils.dir/NetUtils.cpp.o CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o CMakeFiles/NetUtils.dir/TcpConnector.cpp.o CMakeFiles/NetUtils.dir/TcpTransport.cpp.o CMakeFiles/NetUtils.dir/UdpConnection.cpp.o
+/usr/bin/ranlib ../../lib/libNetUtils.a

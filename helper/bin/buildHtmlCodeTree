@@ -1,0 +1,278 @@
+#!/usr/bin/perl
+
+#
+# Main
+#
+
+$fileExts = '*.cc *.hh *.xml *.m4 *.cpp *.h *.idl *.c *.i *.inl Makefile *.mk *.pl *.glade';
+
+$alpineRoot = $ENV{'ALPINE_ROOT'};
+
+if ($alpineRoot eq '') {
+    print STDERR "Error: ALPINE_ROOT env variable is not set.";
+    exit (1);
+}
+
+$codeHtmlDir = $alpineRoot . '/gen_html/';
+$rootDir = $alpineRoot . '/';
+$prefix = '<i>$ALPINE_ROOT</i>/';
+$date = `date`;
+
+$dirLinkCols = 3;
+$srcLinkCols = 2;
+$currDirLinkIndex = 0;
+$currSrcLinkIndex = 0;
+
+$htmlHeaderImg = '"http://cubicmetercrystal.com/alpine/image/sourceCodeIndex.jpg"';
+$htmlButton = '"http://cubicmetercrystal.com/alpine/image/button.jpg"';
+
+
+
+print "Starting html generation in dir: $rootDir\nOutput HTML files to dir: $codeHtmlDir\n\n";
+
+$retVal;
+$retVal = &generateCodeIndex ($rootDir, $codeHtmlDir, $prefix);
+
+exit ($retVal);
+
+
+
+
+#
+# Recurser
+#
+sub  generateCodeIndex
+{
+    my ($sourceDir, $htmlDir, $currPrefix) = @_;
+    my (@dirs, $dir, $newSourceDir, $newHtmlDir);
+    my (@tempDirList, $tempCodeDir, $tempHtmlDir, $tempPrefix);
+    my (@files, $file, $lang);
+    my ($sourceFile, $htmlFile);
+    my ($link);
+    my ($retVal);
+
+
+    if ( ! -d $htmlDir ) {
+        `mkdir $htmlDir`;
+    }
+
+
+    @dirs = `cd $sourceDir;ls -1 -F | grep /`;
+    @tempDirList = ();
+    chomp (@dirs);
+
+    # Check for subdirectories to recurse into...
+    #
+    foreach $dir (@dirs) {
+
+        $tempCodeDir = $sourceDir . $dir;
+        $tempHtmlDir = $htmlDir . $dir;
+        $tempPrefix = $currPrefix . $dir;
+
+        # Check for '.NO_HTML_GEN' file in directory
+        #
+        if ( -f "$tempCodeDir/.NO_HTML_GEN" ) {
+            next;
+        }
+
+        if ( ($dir eq '.') || ($dir eq '..') ) {
+            next;
+        }
+
+        # Push into temp dir list and recurse...
+        #
+        push (@tempDirList, $dir);
+
+        $retVal = &generateCodeIndex ($tempCodeDir, $tempHtmlDir, $tempPrefix);
+
+        if ($retVal != 0) {
+            return ($retVal);
+        }
+    }
+
+    @dirs = @tempDirList;
+
+
+    # Start generation of HTML files and index
+    #
+    @files = `cd $sourceDir;ls -1 $fileExts 2>/dev/null`;
+    chomp(@files);
+
+    if ( (scalar(@files) == 0) && (scalar(@dirs) == 0) ) {
+        # Nothing to do here..  
+        return (0);
+    }
+
+    print "\n\n >>> Current Directory: $sourceDir\n";
+    print "Starting HTML conversions (file count: " . scalar(@files) . ") :\n";
+
+    foreach $file (@files) {
+
+        print "Creating HTML conversion for ${file}...\n";
+
+        $sourceFile = $sourceDir . $file;
+        $htmlFile = $htmlDir . $file . '.html';
+
+        # check language
+        #
+        $_ = $file;
+        if ( ( /.*\.cpp$/ ) ||
+             ( /.*\.h$/ ) ||
+             ( /.*\.i$/ ) ||
+             ( /.*\.inl$/ ) ||
+             ( /.*\.cc$/ ) ||
+             ( /.*\.hh$/ ) ||
+             ( /.*\.idl$/ ) )   {
+
+            $lang = "-lcpp";
+        }
+        if ( ( /Makefile/ ) ||
+             ( /.*\.mk$/ ) )     {
+
+            $lang = "-lmake";
+        }
+        if ( /.*\.m4$/ ) {
+            $lang = "-lm4";
+        }
+        if ( /.*\.pl$/ ) {
+            $lang = "-lperl";
+        }
+        if ( ( /.*\.xml$/ ) ||
+             ( /.*\.glade$/ ) ) {
+            $lang = "-lplain";
+        }
+
+        $cmd = "code2html -n -N $lang $sourceFile $htmlFile";
+        system($cmd);
+    }
+
+    print "Finished.\n\nCreating code index...\n";
+
+    $currDirLinkIndex = 0;
+    $currSrcLinkIndex = 0;
+
+    $tmpFileName = $htmlDir . 'index.html';
+    open( OUT, ">$tmpFileName");
+
+    &printHtmlHeader ($currPrefix);
+
+    if (scalar (@dirs) > 0) {
+        &printDirHeader;
+
+        foreach $dir (@dirs) {
+            &printDirLink ($dir, $dir);
+        }
+
+        &printDirFooter;
+    }
+
+    if (scalar (@files) > 0) {
+        &printCodeHeader;
+
+        foreach $file (@files) {
+            $htmlFile = "${file}.html";
+            &printCodeLink ($file, $htmlFile);
+        }
+
+        &printCodeFooter;
+    }
+
+    &printHtmlFooter;
+
+    close (OUT);
+
+
+    return (0);
+}
+
+
+sub printHtmlHeader
+{
+    my ($prefix) = @_;
+
+    print OUT '<html><head><title>ALPINE Source Code Index</title></head>' . "\n";
+    print OUT '<body bgcolor="#ffffff" link="#6e6e6e" vlink="#6e6e6e" alink="#6e6e6e">' . "\n";
+    print OUT '<center><br><br><img src='. $htmlHeaderImg .'><br>'. "\n";
+    print OUT '<h2>' . $prefix . '</h2>' . "\n";
+    print OUT '<b>Generated on: ' . $date . '</b><br><hr size=5><br><br>' . "\n";
+}
+
+sub printDirHeader
+{
+    print OUT '<table align="center" width="75%" frame="void" border="0" rules="none" cellspacing="0">' . "\n";
+    print OUT '<tr align="center"><td colspan=' . $dirLinkCols . '><h2>Sub Directories</h2></td></tr>' . "\n";
+    print OUT '<tr><td colspan=' . $dirLinkCols . '><hr></td></tr>' . "\n";
+    print OUT '<br><br>' . "\n";
+}
+
+sub printDirLink
+{
+    my($name, $link) = @_;
+
+    if ($currDirLinkIndex == 0) {
+        # Print column prefix
+        print OUT '<tr align="left">' . "\n";
+    }
+
+    print OUT '    <td><h3><img src='. $htmlButton .'><a href="'. $link .'index.html"> '. $name .'</a></h3></td>'. "\n";
+    $currDirLinkIndex++;
+
+    if ($currDirLinkIndex == $dirLinkCols) {
+        # Print column trailer and reset index...
+        print OUT '</tr>' . "\n";
+        $currDirLinkIndex = 0;
+    }
+}
+
+sub printDirFooter
+{
+    if ($currDirLinkIndex != 0) {
+        # cleanup previous column
+        print OUT '</tr>' . "\n";
+    }
+
+    print OUT '</table><br><br><br><br>' . "\n";
+}
+
+sub printCodeHeader
+{
+    print OUT '<table align="center" width="75%" frame="void" border="0" rules="none" cellspacing="0">' . "\n";
+    print OUT '<tr align="center"><td colspan=' . $srcLinkCols . '><h2>Source Files</h2></td></tr>' . "\n";
+    print OUT '<tr><td colspan=' . $srcLinkCols . '><hr></td></tr><br><br>' . "\n";
+}
+
+sub printCodeLink
+{
+    my($name, $link) = @_;
+
+    if ($currSrcLinkIndex == 0) {
+        # Print column prefix
+        print OUT '<tr align="left">' . "\n";
+    }
+
+    print OUT '    <td><h3><img src='. $htmlButton .'><a href="'. $link .'"> '. $name .'</a></h3></td>'. "\n";
+    $currSrcLinkIndex++;
+
+    if ($currSrcLinkIndex == $srcLinkCols) {
+        # Print column trailer and reset index...
+        print OUT '</tr>' . "\n";
+        $currSrcLinkIndex = 0;
+    }
+}
+
+sub printCodeFooter
+{
+    if ($currSrcLinkIndex != 0) {
+        # cleanup previous column
+        print OUT '</tr>' . "\n";
+    }
+
+    print OUT '</table><br><br><br><br>' . "\n";
+}
+
+sub printHtmlFooter
+{
+    print OUT '<br></center></body></html>' . "\n";
+}
+
+

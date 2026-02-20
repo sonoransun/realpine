@@ -1,0 +1,40 @@
+[root@logic udp_socket_conn]# traceroute -n 209.140.64.67
+traceroute to 209.140.64.67 (209.140.64.67), 30 hops max, 40 byte packets
+ 1  64.216.154.198  17 ms  17 ms  17 ms
+ 2  151.164.8.67  16 ms  16 ms  17 ms
+ 3  151.164.8.246  16 ms  17 ms  16 ms
+ 4  160.81.18.233  17 ms  17 ms  16 ms
+ 5  144.232.23.244  16 ms  17 ms  17 ms
+ 6  144.232.18.126  48 ms  49 ms  50 ms
+ 7  144.232.9.242  52 ms  49 ms  50 ms
+ 8  144.232.25.6  50 ms  49 ms  50 ms
+ 9  160.81.221.14  51 ms  49 ms  50 ms
+10  65.36.0.130  62 ms  63 ms  63 ms
+11  209.54.51.238  109 ms  110 ms  109 ms
+12  209.140.5.6  110 ms  109 ms  110 ms
+13  209.140.64.67  109 ms  109 ms  112 ms
+[root@logic udp_socket_conn]# traceroute 209.140.64.67
+traceroute to 209.140.64.67 (209.140.64.67), 30 hops max, 40 byte packets
+ 1  adsl-64-216-154-198.dsl.kscymo.swbell.net (64.216.154.198)  31 ms  22 ms  33 ms
+ 2  core2-vlan20.kscymo.swbell.net (151.164.8.67)  17 ms  17 ms  16 ms
+ 3  bb1-g8-0.kscymo.swbell.net (151.164.8.246)  16 ms  19 ms  16 ms
+ 4  sl-gw9-kc-2-0.sprintlink.net (160.81.18.233)  17 ms  17 ms  17 ms
+ 5  144.232.23.244 (144.232.23.244)  16 ms  16 ms  17 ms
+ 6  sl-bb21-kc-12-0.sprintlink.net (144.232.18.126)  47 ms  47 ms  49 ms
+ 7  sl-bb21-rly-12-0.sprintlink.net (144.232.9.242)  52 ms  51 ms  49 ms
+ 8  sl-gw19-rly-10-0.sprintlink.net (144.232.25.6)  50 ms  51 ms  50 ms
+ 9  sl-wwinc-2-0-0.sprintlink.net (160.81.221.14)  50 ms  50 ms  50 ms
+10  7.atm8-0.vienna-0.winstar.net (65.36.0.130)  65 ms  97 ms  64 ms
+11  2.ATM1-0.BB0.SLC-0.GOOD.NET (209.54.51.238)  109 ms  108 ms  109 ms
+12  inconnect.salt-lake.good.net (209.140.5.6)  112 ms  113 ms  123 ms
+13  keydisk.net (209.140.64.67)  113 ms  111 ms  111 ms
+
+
+
+./client.sh 32 100  TOTALS:  PacketsRecv = 23       DataRecv = 736
+
+./client.sh 1024 100  TOTALS:  PacketsRecv = 24       DataRecv = 24576
+
+./client.sh 10240 100 TOTALS:  PacketsRecv = 3       DataRecv = 30720
+
+

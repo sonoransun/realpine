@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+
+use Net::FTP;
+
+
+#
+# Main
+#
+
+$alpineRoot = $ENV{'ALPINE_ROOT'};
+$codeHtmlDir = $alpineRoot . '/gen_html/';
+
+#$ftpHost = 'cubicmetercrystal.com';
+$ftpHost = 'ftp.business.earthlink.net';
+$ftpBaseDir = '/www/alpine/gen_html/';
+
+if ($alpineRoot eq '') {
+    print STDERR "Error: ALPINE_ROOT env variable is not set.";
+    exit (1);
+}
+
+print "Connecting to server...\n";
+
+$ftp = Net::FTP->new ($ftpHost, Debug => 0);
+$ftp->timeout (180);
+$ftp->login ();
+
+print "Starting FTP synchronization for HTML files in directory tree: $codeHtmlDir \n";
+
+$retVal = &updateCodeIndex ($codeHtmlDir, $ftpBaseDir);
+
+exit ($retVal);
+
+
+
+
+#
+# Recurser
+#
+sub  updateCodeIndex
+{
+    my ($htmlDir, $ftpDir) = @_;
+    my (@dirs, $dir, $newHtmlDir, $newFtpDir);
+    my (@files, $file, @tempFileList);
+    my ($htmlFile);
+    my ($retVal);
+
+
+    $ftp->mkdir ($ftpDir);
+    $ftp->cwd ($ftpDir);
+
+
+    @files = `cd $htmlDir;ls -1 2>/dev/null`;
+    chomp(@files);
+    @tempFileList = ();
+
+    foreach $file (@files) {
+        $htmlFile = $htmlDir . $file;
+        if ( -f $htmlFile ) {
+            push (@tempFileList, $file);
+        }
+    }
+
+    @files = @tempFileList;
+
+
+    print "\n\nSending files in directory: $htmlDir\n";
+
+    foreach $file (@files) {
+
+        $htmlFile = $htmlDir . $file;
+        print "Sending file: $htmlFile \n";
+
+        $ftp->put ($htmlFile);
+    }
+
+
+
+    @dirs = `cd $htmlDir;ls -1 -F | grep /`;
+    chomp (@dirs);
+
+    # Check for subdirectories to recurse into...
+    #
+    foreach $dir (@dirs) {
+
+        if ( ($dir eq '.') || ($dir eq '..') ) {
+            next;
+        }
+
+        $newHtmlDir = $htmlDir . $dir;
+        $newFtpDir = $ftpDir . $dir;
+
+        $retVal = &updateCodeIndex ($newHtmlDir, $newFtpDir);
+
+        if ($retVal != 0) {
+            return ($retVal);
+        }
+    }
+
+
+    return (0);
+}
+
+
+
+

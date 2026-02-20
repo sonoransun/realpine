@@ -1,0 +1,12 @@
+A sincere word of appreciation to the folloing people for their efforts with
+this project:
+
+Steven Little - sl198@doc.ic.ac.uk
+	Modification of the ThreadUtils to support native pthreads interfaces.
+
+Denis A. Baldwin - dbaldwin@caeinc.com
+	Technical writing and documentation.
+
+
+
+Thank You!

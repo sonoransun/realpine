@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libApplCore.a CMakeFiles/ApplCore.dir/ApplCore.cpp.o CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o
+/usr/bin/ranlib ../../lib/libApplCore.a

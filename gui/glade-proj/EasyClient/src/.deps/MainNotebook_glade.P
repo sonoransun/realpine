@@ -1,0 +1,279 @@
+MainNotebook_glade.o: MainNotebook_glade.cc MainNotebook.hh \
+ MainNotebook_glade.hh /usr/local/include/gtk--/notebook.h \
+ /usr/local/include/gtk--/container.h \
+ /usr/local/include/gtk--/widget.h /usr/local/include/gtk--/object.h \
+ /usr/local/include/gtk--/base.h \
+ /usr/local/lib/gtkmm/include/gtk--config.h /usr/include/g++/string \
+ /usr/include/g++/std/bastring.h /usr/include/g++/cstddef \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stddef.h \
+ /usr/include/g++/std/straits.h /usr/include/g++/cctype \
+ /usr/include/ctype.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/gnu/stubs.h /usr/include/bits/types.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/g++/cstring /usr/include/string.h \
+ /usr/include/g++/alloc.h /usr/include/g++/stl_config.h \
+ /usr/include/_G_config.h /usr/include/g++/stl_alloc.h \
+ /usr/include/g++/iostream.h /usr/include/g++/streambuf.h \
+ /usr/include/libio.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stdarg.h \
+ /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h \
+ /usr/include/alloca.h /usr/include/assert.h /usr/include/pthread.h \
+ /usr/include/sched.h /usr/include/bits/sched.h \
+ /usr/include/bits/time.h /usr/include/signal.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/sigthread.h \
+ /usr/include/g++/iterator /usr/include/g++/stl_relops.h \
+ /usr/include/g++/stl_iterator.h /usr/include/g++/std/bastring.cc \
+ /usr/local/include/gdk--.h /usr/local/include/gdk/gdk.h \
+ /usr/local/include/gdk/gdktypes.h /usr/local/include/glib.h \
+ /usr/local/include/glibconfig.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/limits.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/float.h \
+ /usr/local/include/gdk/gdkcursors.h /usr/local/include/gdk/gdkrgb.h \
+ /usr/local/include/gdk--/types.h \
+ /usr/local/lib/gtkmm/include/gdk--config.h \
+ /usr/local/include/gtk/gtkfeatures.h /usr/local/include/gdk--/color.h \
+ /usr/local/include/gdk--/main.h /usr/local/include/gdk--/colormap.h \
+ /usr/local/include/gdk--/visual.h /usr/local/include/gdk--/gc.h \
+ /usr/local/include/gdk--/font.h /usr/local/include/gdk--/drawable.h \
+ /usr/local/include/gdk--/window.h /usr/local/include/gdk--/list.h \
+ /usr/local/include/gdk--/pixmap.h /usr/local/include/gdk--/bitmap.h \
+ /usr/local/include/gdk--/image.h /usr/local/include/gdk--/cursor.h \
+ /usr/local/include/gtk--/proxy.h \
+ /usr/local/include/sigc++/signal_system.h \
+ /usr/local/include/sigc++/slot.h \
+ /usr/local/lib/sigc++/include/sigc++config.h \
+ /usr/local/include/sigc++/type.h /usr/local/include/sigc++/object.h \
+ /usr/local/include/sigc++/scope.h /usr/local/include/sigc++/handle.h \
+ /usr/local/include/sigc++/object_slot.h \
+ /usr/local/include/sigc++/func_slot.h \
+ /usr/local/include/sigc++/basic_signal.h \
+ /usr/local/include/sigc++/marshal.h \
+ /usr/local/include/sigc++/thread.h /usr/local/include/sigc++/bind.h \
+ /usr/local/include/sigc++/adaptor.h \
+ /usr/local/include/sigc++/convert.h \
+ /usr/local/include/gtk/gtkobject.h /usr/local/include/gtk/gtkarg.h \
+ /usr/local/include/gtk/gtktypeutils.h \
+ /usr/local/include/gtk/gtktypebuiltins.h \
+ /usr/local/include/gtk/gtkenums.h /usr/local/include/gtk/gtkdebug.h \
+ /usr/local/include/gtk/gtksignal.h \
+ /usr/local/include/gtk/gtkmarshal.h \
+ /usr/local/include/gtk--/marshal.h /usr/local/include/gtk/gtkdnd.h \
+ /usr/local/include/gtk/gtkwidget.h \
+ /usr/local/include/gtk/gtkaccelgroup.h \
+ /usr/local/include/gtk/gtkadjustment.h \
+ /usr/local/include/gtk/gtkdata.h /usr/local/include/gtk/gtkstyle.h \
+ /usr/local/include/gtk/gtkselection.h \
+ /usr/local/include/gtk/gtkcontainer.h \
+ /usr/local/include/gtk--/label.h /usr/local/include/gtk--/misc.h \
+ /usr/local/include/gtk/gtkmisc.h /usr/local/include/gtk/gtklabel.h \
+ /usr/local/include/gtk/gtknotebook.h /usr/local/include/gtk--/entry.h \
+ /usr/local/include/gtk--/editable.h \
+ /usr/local/include/gtk/gtkeditable.h \
+ /usr/local/include/gtk/gtkentry.h /usr/local/include/gtk--/button.h \
+ /usr/local/include/gtk--/bin.h /usr/local/include/gtk/gtkbin.h \
+ /usr/local/include/gtk/gtkbutton.h /usr/local/include/gtk--/box.h \
+ /usr/local/include/gtk/gtkbox.h /usr/local/include/gtk/gtkvbox.h \
+ /usr/local/include/gtk/gtkhbox.h /usr/local/include/gtk--/separator.h \
+ /usr/local/include/gtk/gtkseparator.h \
+ /usr/local/include/gtk/gtkhseparator.h \
+ /usr/local/include/gtk/gtkvseparator.h \
+ /usr/local/include/gtk--/clist.h /usr/local/include/gtk/gtkclist.h \
+ /usr/local/include/gtk/gtkalignment.h \
+ /usr/local/include/gtk/gtkhscrollbar.h \
+ /usr/local/include/gtk/gtkscrollbar.h \
+ /usr/local/include/gtk/gtkrange.h \
+ /usr/local/include/gtk/gtkvscrollbar.h \
+ /usr/local/include/gtk--/scrolledwindow.h \
+ /usr/local/include/gtk/gtkscrolledwindow.h \
+ /usr/local/include/gtk/gtkviewport.h \
+ /usr/local/include/gtk--/alignment.h /usr/local/include/gtk--/frame.h \
+ /usr/local/include/gtk/gtkframe.h /usr/local/include/gtk--/combo.h \
+ /usr/local/include/gtk--/window.h /usr/local/include/gtk/gtkwindow.h \
+ /usr/local/include/gtk--/list.h /usr/local/include/gtk--/listitem.h \
+ /usr/local/include/gtk--/item.h /usr/local/include/gtk/gtkitem.h \
+ /usr/local/include/gtk/gtklistitem.h /usr/local/include/gtk/gtklist.h \
+ /usr/local/include/gtk/gtkcombo.h \
+ /usr/local/include/gtk--/spinbutton.h \
+ /usr/local/include/gtk/gtkspinbutton.h \
+ /usr/local/include/gtk--/adjustment.h /usr/local/include/gtk--/data.h \
+ /usr/local/include/gtk--/text.h /usr/local/include/gtk/gtktext.h \
+ /usr/local/include/gtk--/checkbutton.h \
+ /usr/local/include/gtk--/togglebutton.h \
+ /usr/local/include/gtk/gtktogglebutton.h \
+ /usr/local/include/gtk/gtkcheckbutton.h
+MainNotebook_glade.cc :
+MainNotebook.hh :
+MainNotebook_glade.hh :
+/usr/local/include/gtk--/notebook.h :
+/usr/local/include/gtk--/container.h :
+/usr/local/include/gtk--/widget.h :
+/usr/local/include/gtk--/object.h :
+/usr/local/include/gtk--/base.h :
+/usr/local/lib/gtkmm/include/gtk--config.h :
+/usr/include/g++/string :
+/usr/include/g++/std/bastring.h :
+/usr/include/g++/cstddef :
+/usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stddef.h :
+/usr/include/g++/std/straits.h :
+/usr/include/g++/cctype :
+/usr/include/ctype.h :
+/usr/include/features.h :
+/usr/include/sys/cdefs.h :
+/usr/include/gnu/stubs.h :
+/usr/include/bits/types.h :
+/usr/include/endian.h :
+/usr/include/bits/endian.h :
+/usr/include/g++/cstring :
+/usr/include/string.h :
+/usr/include/g++/alloc.h :
+/usr/include/g++/stl_config.h :
+/usr/include/_G_config.h :
+/usr/include/g++/stl_alloc.h :
+/usr/include/g++/iostream.h :
+/usr/include/g++/streambuf.h :
+/usr/include/libio.h :
+/usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stdarg.h :
+/usr/include/stdlib.h :
+/usr/include/sys/types.h :
+/usr/include/time.h :
+/usr/include/sys/select.h :
+/usr/include/bits/select.h :
+/usr/include/bits/sigset.h :
+/usr/include/sys/sysmacros.h :
+/usr/include/alloca.h :
+/usr/include/assert.h :
+/usr/include/pthread.h :
+/usr/include/sched.h :
+/usr/include/bits/sched.h :
+/usr/include/bits/time.h :
+/usr/include/signal.h :
+/usr/include/bits/pthreadtypes.h :
+/usr/include/bits/sigthread.h :
+/usr/include/g++/iterator :
+/usr/include/g++/stl_relops.h :
+/usr/include/g++/stl_iterator.h :
+/usr/include/g++/std/bastring.cc :
+/usr/local/include/gdk--.h :
+/usr/local/include/gdk/gdk.h :
+/usr/local/include/gdk/gdktypes.h :
+/usr/local/include/glib.h :
+/usr/local/include/glibconfig.h :
+/usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/limits.h :
+/usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/syslimits.h :
+/usr/include/limits.h :
+/usr/include/bits/posix1_lim.h :
+/usr/include/bits/local_lim.h :
+/usr/include/linux/limits.h :
+/usr/include/bits/posix2_lim.h :
+/usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/float.h :
+/usr/local/include/gdk/gdkcursors.h :
+/usr/local/include/gdk/gdkrgb.h :
+/usr/local/include/gdk--/types.h :
+/usr/local/lib/gtkmm/include/gdk--config.h :
+/usr/local/include/gtk/gtkfeatures.h :
+/usr/local/include/gdk--/color.h :
+/usr/local/include/gdk--/main.h :
+/usr/local/include/gdk--/colormap.h :
+/usr/local/include/gdk--/visual.h :
+/usr/local/include/gdk--/gc.h :
+/usr/local/include/gdk--/font.h :
+/usr/local/include/gdk--/drawable.h :
+/usr/local/include/gdk--/window.h :
+/usr/local/include/gdk--/list.h :
+/usr/local/include/gdk--/pixmap.h :
+/usr/local/include/gdk--/bitmap.h :
+/usr/local/include/gdk--/image.h :
+/usr/local/include/gdk--/cursor.h :
+/usr/local/include/gtk--/proxy.h :
+/usr/local/include/sigc++/signal_system.h :
+/usr/local/include/sigc++/slot.h :
+/usr/local/lib/sigc++/include/sigc++config.h :
+/usr/local/include/sigc++/type.h :
+/usr/local/include/sigc++/object.h :
+/usr/local/include/sigc++/scope.h :
+/usr/local/include/sigc++/handle.h :
+/usr/local/include/sigc++/object_slot.h :
+/usr/local/include/sigc++/func_slot.h :
+/usr/local/include/sigc++/basic_signal.h :
+/usr/local/include/sigc++/marshal.h :
+/usr/local/include/sigc++/thread.h :
+/usr/local/include/sigc++/bind.h :
+/usr/local/include/sigc++/adaptor.h :
+/usr/local/include/sigc++/convert.h :
+/usr/local/include/gtk/gtkobject.h :
+/usr/local/include/gtk/gtkarg.h :
+/usr/local/include/gtk/gtktypeutils.h :
+/usr/local/include/gtk/gtktypebuiltins.h :
+/usr/local/include/gtk/gtkenums.h :
+/usr/local/include/gtk/gtkdebug.h :
+/usr/local/include/gtk/gtksignal.h :
+/usr/local/include/gtk/gtkmarshal.h :
+/usr/local/include/gtk--/marshal.h :
+/usr/local/include/gtk/gtkdnd.h :
+/usr/local/include/gtk/gtkwidget.h :
+/usr/local/include/gtk/gtkaccelgroup.h :
+/usr/local/include/gtk/gtkadjustment.h :
+/usr/local/include/gtk/gtkdata.h :
+/usr/local/include/gtk/gtkstyle.h :
+/usr/local/include/gtk/gtkselection.h :
+/usr/local/include/gtk/gtkcontainer.h :
+/usr/local/include/gtk--/label.h :
+/usr/local/include/gtk--/misc.h :
+/usr/local/include/gtk/gtkmisc.h :
+/usr/local/include/gtk/gtklabel.h :
+/usr/local/include/gtk/gtknotebook.h :
+/usr/local/include/gtk--/entry.h :
+/usr/local/include/gtk--/editable.h :
+/usr/local/include/gtk/gtkeditable.h :
+/usr/local/include/gtk/gtkentry.h :
+/usr/local/include/gtk--/button.h :
+/usr/local/include/gtk--/bin.h :
+/usr/local/include/gtk/gtkbin.h :
+/usr/local/include/gtk/gtkbutton.h :
+/usr/local/include/gtk--/box.h :
+/usr/local/include/gtk/gtkbox.h :
+/usr/local/include/gtk/gtkvbox.h :
+/usr/local/include/gtk/gtkhbox.h :
+/usr/local/include/gtk--/separator.h :
+/usr/local/include/gtk/gtkseparator.h :
+/usr/local/include/gtk/gtkhseparator.h :
+/usr/local/include/gtk/gtkvseparator.h :
+/usr/local/include/gtk--/clist.h :
+/usr/local/include/gtk/gtkclist.h :
+/usr/local/include/gtk/gtkalignment.h :
+/usr/local/include/gtk/gtkhscrollbar.h :
+/usr/local/include/gtk/gtkscrollbar.h :
+/usr/local/include/gtk/gtkrange.h :
+/usr/local/include/gtk/gtkvscrollbar.h :
+/usr/local/include/gtk--/scrolledwindow.h :
+/usr/local/include/gtk/gtkscrolledwindow.h :
+/usr/local/include/gtk/gtkviewport.h :
+/usr/local/include/gtk--/alignment.h :
+/usr/local/include/gtk--/frame.h :
+/usr/local/include/gtk/gtkframe.h :
+/usr/local/include/gtk--/combo.h :
+/usr/local/include/gtk--/window.h :
+/usr/local/include/gtk/gtkwindow.h :
+/usr/local/include/gtk--/list.h :
+/usr/local/include/gtk--/listitem.h :
+/usr/local/include/gtk--/item.h :
+/usr/local/include/gtk/gtkitem.h :
+/usr/local/include/gtk/gtklistitem.h :
+/usr/local/include/gtk/gtklist.h :
+/usr/local/include/gtk/gtkcombo.h :
+/usr/local/include/gtk--/spinbutton.h :
+/usr/local/include/gtk/gtkspinbutton.h :
+/usr/local/include/gtk--/adjustment.h :
+/usr/local/include/gtk--/data.h :
+/usr/local/include/gtk--/text.h :
+/usr/local/include/gtk/gtktext.h :
+/usr/local/include/gtk--/checkbutton.h :
+/usr/local/include/gtk--/togglebutton.h :
+/usr/local/include/gtk/gtktogglebutton.h :
+/usr/local/include/gtk/gtkcheckbutton.h :

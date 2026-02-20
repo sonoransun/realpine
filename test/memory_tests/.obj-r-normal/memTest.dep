@@ -1,0 +1,151 @@
+.obj-r-normal/memTest.o : memTest.cpp DtcpMemTest.h /projects/alpine/base/Common.h \
+ /usr/include/g++/string /usr/include/g++/std/bastring.h \
+ /usr/include/g++/cstddef \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stddef.h \
+ /usr/include/g++/std/straits.h /usr/include/g++/cctype \
+ /usr/include/ctype.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/gnu/stubs.h /usr/include/bits/types.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/g++/cstring /usr/include/string.h \
+ /usr/include/g++/alloc.h /usr/include/g++/stl_config.h \
+ /usr/include/_G_config.h /usr/include/g++/stl_alloc.h \
+ /usr/include/g++/iostream.h /usr/include/g++/streambuf.h \
+ /usr/include/libio.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/stdarg.h \
+ /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/sys/sysmacros.h \
+ /usr/include/alloca.h /usr/include/assert.h /usr/include/pthread.h \
+ /usr/include/sched.h /usr/include/bits/sched.h \
+ /usr/include/bits/time.h /usr/include/signal.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/sigthread.h \
+ /usr/include/g++/iterator /usr/include/g++/stl_relops.h \
+ /usr/include/g++/stl_iterator.h /usr/include/g++/std/bastring.cc \
+ /usr/include/g++/list /usr/include/g++/stl_algobase.h \
+ /usr/include/g++/stl_pair.h /usr/include/g++/type_traits.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/limits.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/syslimits.h \
+ /usr/include/limits.h /usr/include/bits/posix1_lim.h \
+ /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
+ /usr/include/bits/posix2_lim.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/new.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/new \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/exception \
+ /usr/include/g++/stl_construct.h /usr/include/g++/stl_uninitialized.h \
+ /usr/include/g++/stl_list.h /projects/alpine/base/AppUtils/OptHash.h \
+ /projects/alpine/base/AppUtils/AgedQueue.h /usr/include/g++/hash_map \
+ /usr/include/g++/stl_hashtable.h /usr/include/g++/stl_tempbuf.h \
+ /usr/include/g++/stl_algo.h /usr/include/g++/stl_heap.h \
+ /usr/include/g++/stl_function.h /usr/include/g++/stl_vector.h \
+ /usr/include/g++/stl_hash_fun.h /usr/include/g++/stl_hash_map.h \
+ /usr/include/g++/vector /usr/include/g++/stl_bvector.h \
+ /usr/include/sys/time.h /usr/include/unistd.h \
+ /usr/include/bits/posix_opt.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h /projects/alpine/base/AppUtils/Log.h \
+ /projects/alpine/base/ThreadUtils/Mutex.h \
+ /projects/ace/release/include/ace/Synch.h \
+ /projects/ace/release/include/ace/pre.h \
+ /projects/ace/release/include/ace/ACE.h \
+ /projects/ace/release/include/ace/OS.h \
+ /projects/ace/release/include/ace/config-all.h \
+ /projects/ace/release/include/ace/config.h \
+ /projects/ace/release/include/ace/ACE_export.h \
+ /projects/ace/release/include/ace/svc_export.h \
+ /projects/ace/release/include/ace/ace_wchar.h /usr/include/wchar.h \
+ /usr/include/stdio.h /projects/ace/release/include/ace/ace_wchar.inl \
+ /projects/ace/release/include/ace/OS_Errno.h \
+ /projects/ace/release/include/ace/OS_Export.h /usr/include/errno.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h \
+ /projects/ace/release/include/ace/OS_Errno.inl \
+ /projects/ace/release/include/ace/post.h \
+ /projects/ace/release/include/ace/OS_Dirent.h /usr/include/dirent.h \
+ /usr/include/bits/dirent.h \
+ /projects/ace/release/include/ace/OS_Dirent.inl \
+ /projects/ace/release/include/ace/OS_String.h \
+ /projects/ace/release/include/ace/OS_String.inl \
+ /usr/include/strings.h /projects/ace/release/include/ace/OS_Memory.h \
+ /projects/ace/release/include/ace/OS_Memory.inl \
+ /projects/ace/release/include/ace/OS_TLI.h \
+ /projects/ace/release/include/ace/OS_TLI.inl \
+ /projects/ace/release/include/ace/Min_Max.h \
+ /usr/include/bits/signum.h /usr/include/bits/siginfo.h \
+ /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
+ /usr/include/asm/sigcontext.h /usr/include/bits/sigstack.h \
+ /usr/include/sys/procfs.h /usr/include/sys/ucontext.h \
+ /usr/include/sys/user.h /usr/include/sys/elf.h \
+ /usr/include/sys/stat.h /usr/include/bits/stat.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/stdio.h \
+ /usr/include/fcntl.h /usr/include/bits/fcntl.h \
+ /usr/lib/gcc-lib/i486-suse-linux/2.95.2/include/float.h \
+ /projects/ace/release/include/ace/streams.h \
+ /usr/include/g++/fstream.h /usr/include/g++/iomanip.h \
+ /usr/include/g++/strstream.h /usr/include/g++/strfile.h \
+ /projects/ace/release/include/ace/Basic_Types.h \
+ /projects/ace/release/include/ace/Basic_Types.i /usr/include/utime.h \
+ /usr/include/sys/socket.h /usr/include/bits/socket.h \
+ /usr/include/bits/sockaddr.h /usr/include/asm/socket.h \
+ /usr/include/asm/sockios.h /usr/include/netdb.h \
+ /usr/include/rpc/netdb.h /usr/include/net/if.h \
+ /usr/include/netinet/in.h /usr/include/stdint.h \
+ /usr/include/bits/wordsize.h /usr/include/bits/in.h \
+ /usr/include/bits/byteswap.h /usr/include/arpa/inet.h \
+ /usr/include/netinet/tcp.h /usr/include/sys/uio.h \
+ /usr/include/bits/uio.h /usr/include/sys/ipc.h \
+ /usr/include/bits/ipc.h /usr/include/sys/shm.h \
+ /usr/include/bits/shm.h /usr/include/sys/sem.h \
+ /usr/include/bits/sem.h /usr/include/sys/file.h \
+ /usr/include/sys/resource.h /usr/include/bits/resource.h \
+ /usr/include/sys/wait.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/pwd.h \
+ /usr/include/sys/ioctl.h /usr/include/bits/ioctls.h \
+ /usr/include/asm/ioctls.h /usr/include/asm/ioctl.h \
+ /usr/include/bits/ioctl-types.h /usr/include/sys/ttydefaults.h \
+ /usr/include/sys/termios.h /usr/include/termios.h \
+ /usr/include/bits/termios.h /usr/include/aio.h \
+ /usr/include/sys/param.h /usr/include/linux/param.h \
+ /usr/include/asm/param.h /usr/include/sys/un.h \
+ /usr/include/ucontext.h /usr/include/poll.h /usr/include/sys/poll.h \
+ /usr/include/bits/poll.h /usr/include/stropts.h \
+ /usr/include/bits/stropts.h /usr/include/dlfcn.h \
+ /usr/include/bits/dlfcn.h /usr/include/sys/mman.h \
+ /usr/include/bits/mman.h /usr/include/sys/msg.h \
+ /usr/include/bits/msq.h /usr/include/sys/utsname.h \
+ /usr/include/bits/utsname.h /projects/ace/release/include/ace/Trace.h \
+ /projects/ace/release/include/ace/OS.i /usr/include/g++/libc.h \
+ /usr/include/g++/osfcn.h /usr/include/g++/std.h \
+ /usr/include/g++/cstdlib /usr/include/g++/cstdio \
+ /usr/include/g++/cerrno /usr/include/g++/sysent.h \
+ /usr/include/malloc.h /usr/include/sys/syscall.h \
+ /usr/include/asm/unistd.h /usr/include/bits/syscall.h \
+ /projects/ace/release/include/ace/Flag_Manip.h \
+ /projects/ace/release/include/ace/Flag_Manip.i \
+ /projects/ace/release/include/ace/Handle_Ops.h \
+ /projects/ace/release/include/ace/Handle_Ops.i \
+ /projects/ace/release/include/ace/Lib_Find.h \
+ /projects/ace/release/include/ace/Lib_Find.i \
+ /projects/ace/release/include/ace/Init_ACE.h \
+ /projects/ace/release/include/ace/Init_ACE.i \
+ /projects/ace/release/include/ace/Sock_Connect.h \
+ /projects/ace/release/include/ace/Sock_Connect.i \
+ /projects/ace/release/include/ace/ACE.i \
+ /projects/ace/release/include/ace/Synch.i \
+ /projects/ace/release/include/ace/Synch_T.h \
+ /projects/ace/release/include/ace/Synch_T.i \
+ /projects/ace/release/include/ace/Thread.h \
+ /projects/ace/release/include/ace/Thread_Adapter.h \
+ /projects/ace/release/include/ace/Base_Thread_Adapter.h \
+ /projects/ace/release/include/ace/OS_Log_Msg_Attributes.h \
+ /projects/ace/release/include/ace/OS_Log_Msg_Attributes.inl \
+ /projects/ace/release/include/ace/Base_Thread_Adapter.inl \
+ /projects/ace/release/include/ace/Thread_Adapter.inl \
+ /projects/ace/release/include/ace/Thread.i \
+ /projects/ace/release/include/ace/Atomic_Op.i \
+ /projects/ace/release/include/ace/Synch_T.cpp \
+ /projects/ace/release/include/ace/Log_Msg.h \
+ /projects/ace/release/include/ace/Log_Record.h \
+ /projects/ace/release/include/ace/Log_Priority.h \
+ /projects/ace/release/include/ace/Log_Record.i \
+ /projects/alpine/base/AppUtils/StringUtils.h
+	@echo "$(CXX) $(CPPFLAGS) -c $< -o $@"
+	@$(CXX) $(CPPFLAGS) -c $< -o $@

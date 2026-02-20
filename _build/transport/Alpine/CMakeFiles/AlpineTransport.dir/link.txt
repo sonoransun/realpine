@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libAlpineTransport.a CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o
+/usr/bin/ranlib ../../lib/libAlpineTransport.a
