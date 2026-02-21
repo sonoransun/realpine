@@ -114,11 +114,116 @@ AlpineServer/CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.s"
 	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineServer/ServerSigMethods.cpp -o CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.s
 
+AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o: /Users/user/sonoranpub/realpine/AlpineServer/JsonRpcHandler.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o -MF CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o.d -o CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o -c /Users/user/sonoranpub/realpine/AlpineServer/JsonRpcHandler.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineServer/JsonRpcHandler.cpp > CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineServer/JsonRpcHandler.cpp -o CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpServer.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpServer.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpServer.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpServer.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRouter.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRouter.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRouter.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRouter.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRequest.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRequest.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRequest.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRequest.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpResponse.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpResponse.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpResponse.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpResponse.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.s
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/flags.make
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o: AlpineServer/CMakeFiles/AlpineServer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o -MF CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o.d -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp > CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.i
+
+AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/AlpineServer && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp -o CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.s
+
 # Object files for target AlpineServer
 AlpineServer_OBJECTS = \
 "CMakeFiles/AlpineServer.dir/AlpineConfig.cpp.o" \
 "CMakeFiles/AlpineServer.dir/AlpineServer.cpp.o" \
-"CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.o"
+"CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.o" \
+"CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o" \
+"CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o"
 
 # External object files for target AlpineServer
 AlpineServer_EXTERNAL_OBJECTS =
@@ -126,6 +231,13 @@ AlpineServer_EXTERNAL_OBJECTS =
 bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/AlpineConfig.cpp.o
 bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/AlpineServer.cpp.o
 bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpServer.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRouter.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonWriter.cpp.o
+bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/JsonReader.cpp.o
 bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/build.make
 bin/AlpineServer: lib/libApplCore.a
 bin/AlpineServer: lib/libAlpineStackInterface.a
@@ -142,7 +254,7 @@ bin/AlpineServer: lib/libSysUtils.a
 bin/AlpineServer: lib/libTransBase.a
 bin/AlpineServer: lib/libAppUtils.a
 bin/AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable ../bin/AlpineServer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable ../bin/AlpineServer"
 	cd /Users/user/sonoranpub/realpine/build/AlpineServer && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AlpineServer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

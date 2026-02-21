@@ -38,6 +38,10 @@
 #include <CorbaAdmin.h>
 #endif
 
+#include <HttpRouter.h>
+#include <HttpServer.h>
+#include <JsonRpcHandler.h>
+
 #include <AlpineConfig.h>
 #include <AlpineStackConfig.h>
 #include <AlpineStack.h>
@@ -238,12 +242,34 @@ main (int argc, char *argv[])
 #endif
 
 
-
-    // Initialization complete, should call pthread_exit here...
+    // Load RPC configuration
     //
-    while (true) {
-        sleep (3600);
+    string  rpcPortStr;
+    string  rpcBindAddressStr;
+    ushort  rpcPort = 8600;
+    ulong   rpcBindAddress = 0;  // all interfaces
+
+    if (Configuration::getValue ("RPC Port", rpcPortStr))
+        rpcPort = static_cast<ushort>(atoi(rpcPortStr.c_str()));
+
+    if (Configuration::getValue ("RPC Bind Address", rpcBindAddressStr)) {
+        if (!NetUtils::stringIpToLong(rpcBindAddressStr, rpcBindAddress)) {
+            Log::Error ("Invalid RPC Bind Address.  Using all interfaces.");
+            rpcBindAddress = 0;
+        }
     }
+
+    // Start JSON-RPC server (blocking main loop)
+    //
+    HttpRouter rpcRouter;
+    JsonRpcHandler::registerRoutes(rpcRouter);
+
+    HttpServer rpcServer(rpcRouter);
+
+    Log::Info ("Starting JSON-RPC server on port "s +
+               std::to_string(rpcPort));
+
+    rpcServer.start(rpcBindAddress, rpcPort);
 
 
     Log::Info ("Server finished.  Exiting.");

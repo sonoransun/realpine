@@ -138,11 +138,11 @@ clean: AlpineRestBridge/clean
 # Directory level rules for directory AlpineCmdIf
 
 # Recursive "all" directory target.
-AlpineCmdIf/all:
+AlpineCmdIf/all: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all
 .PHONY : AlpineCmdIf/all
 
 # Recursive "codegen" directory target.
-AlpineCmdIf/codegen:
+AlpineCmdIf/codegen: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen
 .PHONY : AlpineCmdIf/codegen
 
 # Recursive "preinstall" directory target.
@@ -150,7 +150,7 @@ AlpineCmdIf/preinstall:
 .PHONY : AlpineCmdIf/preinstall
 
 # Recursive "clean" directory target.
-AlpineCmdIf/clean:
+AlpineCmdIf/clean: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean
 .PHONY : AlpineCmdIf/clean
 
 #=============================================================================
@@ -426,12 +426,12 @@ transport/TransBase/clean: transport/TransBase/CMakeFiles/TransBase.dir/clean
 base/AppUtils/CMakeFiles/AppUtils.dir/all:
 	$(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=47,48,49,50,51 "Built target AppUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=52,53,54,55 "Built target AppUtils"
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/all
 
 # Build rule for subdir invocation for target.
 base/AppUtils/CMakeFiles/AppUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 4
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/CMakeFiles/AppUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/rule
@@ -443,7 +443,7 @@ AppUtils: base/AppUtils/CMakeFiles/AppUtils.dir/rule
 # codegen rule for target.
 base/AppUtils/CMakeFiles/AppUtils.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=47,48,49,50,51 "Finished codegen for target AppUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=52,53,54,55 "Finished codegen for target AppUtils"
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/codegen
 
 # clean rule for target.
@@ -458,12 +458,12 @@ base/AppUtils/CMakeFiles/AppUtils.dir/clean:
 base/SysUtils/CMakeFiles/SysUtils.dir/all: base/AppUtils/CMakeFiles/AppUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=84,85,86,87 "Built target SysUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=85,86,87,88 "Built target SysUtils"
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/all
 
 # Build rule for subdir invocation for target.
 base/SysUtils/CMakeFiles/SysUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/CMakeFiles/SysUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/rule
@@ -475,7 +475,7 @@ SysUtils: base/SysUtils/CMakeFiles/SysUtils.dir/rule
 # codegen rule for target.
 base/SysUtils/CMakeFiles/SysUtils.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=84,85,86,87 "Finished codegen for target SysUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=85,86,87,88 "Finished codegen for target SysUtils"
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/codegen
 
 # clean rule for target.
@@ -491,12 +491,12 @@ base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all: base/AppUtils/CMakeFiles/AppUti
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all: base/SysUtils/CMakeFiles/SysUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build.make base/ThreadUtils/CMakeFiles/ThreadUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build.make base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=88,89,90,91,92,93,94 "Built target ThreadUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=89,90,91,92,93,94 "Built target ThreadUtils"
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all
 
 # Build rule for subdir invocation for target.
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/rule
@@ -508,7 +508,7 @@ ThreadUtils: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/rule
 # codegen rule for target.
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build.make base/ThreadUtils/CMakeFiles/ThreadUtils.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=88,89,90,91,92,93,94 "Finished codegen for target ThreadUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=89,90,91,92,93,94 "Finished codegen for target ThreadUtils"
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/codegen
 
 # clean rule for target.
@@ -525,12 +525,12 @@ base/NetUtils/CMakeFiles/NetUtils.dir/all: base/SysUtils/CMakeFiles/SysUtils.dir
 base/NetUtils/CMakeFiles/NetUtils.dir/all: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=76,77,78,79,80,81,82,83 "Built target NetUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=78,79,80,81,82,83,84 "Built target NetUtils"
 .PHONY : base/NetUtils/CMakeFiles/NetUtils.dir/all
 
 # Build rule for subdir invocation for target.
 base/NetUtils/CMakeFiles/NetUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 21
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/CMakeFiles/NetUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : base/NetUtils/CMakeFiles/NetUtils.dir/rule
@@ -542,7 +542,7 @@ NetUtils: base/NetUtils/CMakeFiles/NetUtils.dir/rule
 # codegen rule for target.
 base/NetUtils/CMakeFiles/NetUtils.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=76,77,78,79,80,81,82,83 "Finished codegen for target NetUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=78,79,80,81,82,83,84 "Finished codegen for target NetUtils"
 .PHONY : base/NetUtils/CMakeFiles/NetUtils.dir/codegen
 
 # clean rule for target.
@@ -559,12 +559,12 @@ base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all: base/SysUtils/CMakeFiles/SysUti
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/depend
 	$(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=54,55,56,57 "Built target ConfigUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=58,59,60 "Built target ConfigUtils"
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all
 
 # Build rule for subdir invocation for target.
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 20
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 17
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
@@ -576,7 +576,7 @@ ConfigUtils: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
 # codegen rule for target.
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=54,55,56,57 "Finished codegen for target ConfigUtils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=58,59,60 "Finished codegen for target ConfigUtils"
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/codegen
 
 # clean rule for target.
@@ -596,7 +596,7 @@ transport/TransBase/CMakeFiles/TransBase.dir/all: base/AppUtils/CMakeFiles/AppUt
 
 # Build rule for subdir invocation for target.
 transport/TransBase/CMakeFiles/TransBase.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 11
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/CMakeFiles/TransBase.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/rule
@@ -627,12 +627,12 @@ transport/Dtcp/CMakeFiles/Dtcp.dir/all: base/NetUtils/CMakeFiles/NetUtils.dir/al
 transport/Dtcp/CMakeFiles/Dtcp.dir/all: transport/TransBase/CMakeFiles/TransBase.dir/all
 	$(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/depend
 	$(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74 "Built target Dtcp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76 "Built target Dtcp"
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/all
 
 # Build rule for subdir invocation for target.
 transport/Dtcp/CMakeFiles/Dtcp.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 47
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 43
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/CMakeFiles/Dtcp.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/rule
@@ -644,7 +644,7 @@ Dtcp: transport/Dtcp/CMakeFiles/Dtcp.dir/rule
 # codegen rule for target.
 transport/Dtcp/CMakeFiles/Dtcp.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74 "Finished codegen for target Dtcp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76 "Finished codegen for target Dtcp"
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/codegen
 
 # clean rule for target.
@@ -664,12 +664,12 @@ transport/Alpine/CMakeFiles/AlpineTransport.dir/all: transport/TransBase/CMakeFi
 transport/Alpine/CMakeFiles/AlpineTransport.dir/all: transport/Dtcp/CMakeFiles/Dtcp.dir/all
 	$(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/depend
 	$(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=43,44,45,46 "Built target AlpineTransport"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=48,49,50,51 "Built target AlpineTransport"
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/all
 
 # Build rule for subdir invocation for target.
 transport/Alpine/CMakeFiles/AlpineTransport.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 51
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 47
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/CMakeFiles/AlpineTransport.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
@@ -681,7 +681,7 @@ AlpineTransport: transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
 # codegen rule for target.
 transport/Alpine/CMakeFiles/AlpineTransport.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=43,44,45,46 "Finished codegen for target AlpineTransport"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=48,49,50,51 "Finished codegen for target AlpineTransport"
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/codegen
 
 # clean rule for target.
@@ -702,12 +702,12 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/all: transport/TransBase/CMakeFil
 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/all: transport/Dtcp/CMakeFiles/Dtcp.dir/all
 	$(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/depend
 	$(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 "Built target AlpineProtocol"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24 "Built target AlpineProtocol"
 .PHONY : protocols/Alpine/CMakeFiles/AlpineProtocol.dir/all
 
 # Build rule for subdir invocation for target.
 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 73
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 67
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
@@ -719,7 +719,7 @@ AlpineProtocol: protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
 # codegen rule for target.
 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22 "Finished codegen for target AlpineProtocol"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24 "Finished codegen for target AlpineProtocol"
 .PHONY : protocols/Alpine/CMakeFiles/AlpineProtocol.dir/codegen
 
 # clean rule for target.
@@ -738,12 +738,12 @@ applcore/ApplCore/CMakeFiles/ApplCore.dir/all: base/NetUtils/CMakeFiles/NetUtils
 applcore/ApplCore/CMakeFiles/ApplCore.dir/all: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all
 	$(MAKE) $(MAKESILENT) -f applcore/ApplCore/CMakeFiles/ApplCore.dir/build.make applcore/ApplCore/CMakeFiles/ApplCore.dir/depend
 	$(MAKE) $(MAKESILENT) -f applcore/ApplCore/CMakeFiles/ApplCore.dir/build.make applcore/ApplCore/CMakeFiles/ApplCore.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=52,53 "Built target ApplCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=56,57 "Built target ApplCore"
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/all
 
 # Build rule for subdir invocation for target.
 applcore/ApplCore/CMakeFiles/ApplCore.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 30
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 26
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 applcore/ApplCore/CMakeFiles/ApplCore.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/rule
@@ -755,7 +755,7 @@ ApplCore: applcore/ApplCore/CMakeFiles/ApplCore.dir/rule
 # codegen rule for target.
 applcore/ApplCore/CMakeFiles/ApplCore.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f applcore/ApplCore/CMakeFiles/ApplCore.dir/build.make applcore/ApplCore/CMakeFiles/ApplCore.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=52,53 "Finished codegen for target ApplCore"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=56,57 "Finished codegen for target ApplCore"
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/codegen
 
 # clean rule for target.
@@ -777,12 +777,12 @@ interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/all: transpo
 interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/all: protocols/Alpine/CMakeFiles/AlpineProtocol.dir/all
 	$(MAKE) $(MAKESILENT) -f interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/build.make interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/depend
 	$(MAKE) $(MAKESILENT) -f interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/build.make interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=42 "Built target AlpineStackInterface"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=47 "Built target AlpineStackInterface"
 .PHONY : interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/all
 
 # Build rule for subdir invocation for target.
 interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 74
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 68
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/rule
@@ -794,7 +794,7 @@ AlpineStackInterface: interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInte
 # codegen rule for target.
 interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/build.make interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=42 "Finished codegen for target AlpineStackInterface"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=47 "Finished codegen for target AlpineStackInterface"
 .PHONY : interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/codegen
 
 # clean rule for target.
@@ -814,12 +814,12 @@ interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all: transport/T
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all: transport/Dtcp/CMakeFiles/Dtcp.dir/all
 	$(MAKE) $(MAKESILENT) -f interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build.make interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/depend
 	$(MAKE) $(MAKESILENT) -f interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build.make interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=75 "Built target DtcpStackInterface"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=77 "Built target DtcpStackInterface"
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all
 
 # Build rule for subdir invocation for target.
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 48
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 44
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/rule
@@ -831,7 +831,7 @@ DtcpStackInterface: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.
 # codegen rule for target.
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build.make interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=75 "Finished codegen for target DtcpStackInterface"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=77 "Finished codegen for target DtcpStackInterface"
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/codegen
 
 # clean rule for target.
@@ -857,12 +857,12 @@ AlpineServer/CMakeFiles/AlpineServer.dir/all: interfaces/AlpineStackInterface/CM
 AlpineServer/CMakeFiles/AlpineServer.dir/all: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all
 	$(MAKE) $(MAKESILENT) -f AlpineServer/CMakeFiles/AlpineServer.dir/build.make AlpineServer/CMakeFiles/AlpineServer.dir/depend
 	$(MAKE) $(MAKESILENT) -f AlpineServer/CMakeFiles/AlpineServer.dir/build.make AlpineServer/CMakeFiles/AlpineServer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=39,40,41 "Built target AlpineServer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=40,41,42,43,44,45,46 "Built target AlpineServer"
 .PHONY : AlpineServer/CMakeFiles/AlpineServer.dir/all
 
 # Build rule for subdir invocation for target.
 AlpineServer/CMakeFiles/AlpineServer.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 84
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 82
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineServer/CMakeFiles/AlpineServer.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : AlpineServer/CMakeFiles/AlpineServer.dir/rule
@@ -874,13 +874,50 @@ AlpineServer: AlpineServer/CMakeFiles/AlpineServer.dir/rule
 # codegen rule for target.
 AlpineServer/CMakeFiles/AlpineServer.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f AlpineServer/CMakeFiles/AlpineServer.dir/build.make AlpineServer/CMakeFiles/AlpineServer.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=39,40,41 "Finished codegen for target AlpineServer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=40,41,42,43,44,45,46 "Finished codegen for target AlpineServer"
 .PHONY : AlpineServer/CMakeFiles/AlpineServer.dir/codegen
 
 # clean rule for target.
 AlpineServer/CMakeFiles/AlpineServer.dir/clean:
 	$(MAKE) $(MAKESILENT) -f AlpineServer/CMakeFiles/AlpineServer.dir/build.make AlpineServer/CMakeFiles/AlpineServer.dir/clean
 .PHONY : AlpineServer/CMakeFiles/AlpineServer.dir/clean
+
+#=============================================================================
+# Target rules for target AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir
+
+# All Build rule for target.
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: base/AppUtils/CMakeFiles/AppUtils.dir/all
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: base/SysUtils/CMakeFiles/SysUtils.dir/all
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/all
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: base/NetUtils/CMakeFiles/NetUtils.dir/all
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/all
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all: applcore/ApplCore/CMakeFiles/ApplCore.dir/all
+	$(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/depend
+	$(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=1,2,3 "Built target AlpineCmdIf"
+.PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all
+
+# Build rule for subdir invocation for target.
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 29
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+.PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule
+
+# Convenience name for target.
+AlpineCmdIf: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule
+.PHONY : AlpineCmdIf
+
+# codegen rule for target.
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=1,2,3 "Finished codegen for target AlpineCmdIf"
+.PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen
+
+# clean rule for target.
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean:
+	$(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean
+.PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean
 
 #=============================================================================
 # Target rules for target AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir
@@ -900,12 +937,12 @@ AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/all: interfaces/AlpineStackInte
 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/all: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/all
 	$(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/depend
 	$(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38 "Built target AlpineRestBridge"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=25,26,27,28,29,30,31,32,33,34,35,36,37,38,39 "Built target AlpineRestBridge"
 .PHONY : AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/all
 
 # Build rule for subdir invocation for target.
 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 97
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 90
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
 .PHONY : AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
@@ -917,7 +954,7 @@ AlpineRestBridge: AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
 # codegen rule for target.
 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38 "Finished codegen for target AlpineRestBridge"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=25,26,27,28,29,30,31,32,33,34,35,36,37,38,39 "Finished codegen for target AlpineRestBridge"
 .PHONY : AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/codegen
 
 # clean rule for target.

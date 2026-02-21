@@ -51,11 +51,20 @@ AlpineConfig::createConfigElements ()
     // add configuration elements for test application
     //
 
-    // CORBA interface naming context
+    // JSON-RPC server address
     currElement = new ConfigData::t_ConfigElement;
-    currElement->elementName   = "Interface Context";
-    currElement->argOptionName = "interfaceContext";
-    currElement->envOptionName = "INTF_CONTEXT";
+    currElement->elementName   = "Server Address";
+    currElement->argOptionName = "serverAddress";
+    currElement->envOptionName = "SERVER_ADDRESS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = true;
+    configElements_s->push_back (currElement);
+
+    // JSON-RPC server port
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Server Port";
+    currElement->argOptionName = "serverPort";
+    currElement->envOptionName = "SERVER_PORT";
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = true;
     configElements_s->push_back (currElement);

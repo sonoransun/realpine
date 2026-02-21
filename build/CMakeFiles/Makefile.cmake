@@ -98,5 +98,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "interfaces/AlpineStackInterface/CMakeFiles/AlpineStackInterface.dir/DependInfo.cmake"
   "interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DependInfo.cmake"
   "AlpineServer/CMakeFiles/AlpineServer.dir/DependInfo.cmake"
+  "AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/DependInfo.cmake"
   "AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DependInfo.cmake"
   )

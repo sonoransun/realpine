@@ -26,6 +26,9 @@
 
 #include <time.h>
 #include <stdlib.h>
+#include <iostream>
+
+using std::cout; using std::endl;
 
 #include <Log.h>
 #include <StringUtils.h>
@@ -35,8 +38,9 @@
 #include <ApplCore.h>
 #include <Configuration.h>
 
-#include <CorbaServant.h>
-#include <DtcpPeerMgmtIntf.h>
+#include <JsonRpcClient.h>
+#include <JsonReader.h>
+#include <JsonWriter.h>
 
 #include <AlpineConfig.h>
 
@@ -59,7 +63,7 @@ using t_DispatchTablePair = std::pair<string, t_Handler>;
 static t_DispatchTable *  dispatchTable_s = nullptr;
 static bool  verbose_s = false;
 
-                 
+
 bool buildDispatchTable ();
 
 bool commandExists (const string &  command);
@@ -78,7 +82,7 @@ bool handleCommand (const string &  command);
 //   2 - Invalid Operation / Command
 //   3 - Request Failed
 //
-int 
+int
 main (int argc, char *argv[])
 {
     bool status;
@@ -107,8 +111,8 @@ main (int argc, char *argv[])
     AlpineConfig::createConfigElements ();
     AlpineConfig::getConfigElements (configElements);
 
-    status = Configuration::initialize (argc, 
-                                        argv, 
+    status = Configuration::initialize (argc,
+                                        argv,
                                         *configElements,
                                         AlpineConfig::configFile_s);
 
@@ -120,13 +124,23 @@ main (int argc, char *argv[])
 
     // Load configuration settings
     //
-    string  interfaceContext;
-    status = Configuration::getValue ("Interface Context", interfaceContext);
+    string  serverAddress;
+    status = Configuration::getValue ("Server Address", serverAddress);
 
     if (!status) {
-        Log::Error ("No Interface Context value!  Exiting.");
+        Log::Error ("No Server Address value!  Exiting.");
         return 1;
     }
+
+    string  serverPortStr;
+    status = Configuration::getValue ("Server Port", serverPortStr);
+
+    if (!status) {
+        Log::Error ("No Server Port value!  Exiting.");
+        return 1;
+    }
+
+    ushort serverPort = static_cast<ushort>(atoi(serverPortStr.c_str()));
 
     string command;
     status = Configuration::getValue ("Command", command);
@@ -151,19 +165,19 @@ main (int argc, char *argv[])
 
 
     Log::Info ("Starting ALPINE Command Interface-"s +
-               "\nInterface Context: "s + interfaceContext +
+               "\nServer: "s + serverAddress + ":" + serverPortStr +
                "\nCommand: "s +  command +
                "\n"s + verboseValue +
                "\n");
 
 
 
-    // start CORBA interface
+    // Initialize JSON-RPC client
     //
-    status = CorbaServant::initialize (argc, argv);
+    status = JsonRpcClient::initialize (serverAddress, serverPort);
 
     if (!status) {
-        string msg("Initializing CorbaServant failed.  Exiting.");
+        string msg("Initializing JsonRpcClient failed.  Exiting.");
         Log::Error (msg);
 
         if (verbose_s) {
@@ -172,18 +186,7 @@ main (int argc, char *argv[])
 
         return 1;
     }
-    status = CorbaServant::intializeAlpineClientInterface (interfaceContext);
 
-    if (!status) {
-        string  msg("Initialization of client CORBA interface failed.  Exiting.");
-        Log::Error (msg);
-
-        if (verbose_s) {
-            cout << msg << endl;
-        }
-
-        return 1;
-    }
     // Perform requested command...
     //
     status = commandExists (command);
@@ -227,22 +230,6 @@ bool  performAllowHost ();
 bool  performAllowSubnet ();
 bool  performListExcludedHosts ();
 bool  performListExcludedSubnets ();
-bool  performNatDiscovery ();
-bool  performNatDiscoveryQuery (); // required?
-bool  performSetDataSendingLimit ();
-bool  performGetDataSendingLimit ();
-bool  performSetStackThreadLimit ();
-bool  performGetStackThreadLimit ();
-bool  performSetReceiveBufferLimit ();
-bool  performGetReceiveBufferLimit ();
-bool  performSetSendBufferLimit ();
-bool  performGetSendBufferLimit ();
-bool  performGetBufferStats ();
-bool  performSetTotalTransferLimit ();
-bool  performGetTotalTransferLimit ();
-bool  performSetPeerTransferLimit ();
-bool  performGetPeerTransferLimit ();
-bool  performGetTransferStats ();
 bool  performGetUserGroupList ();
 bool  performCreateUserGroup ();
 bool  performDestroyUserGroup ();
@@ -250,10 +237,6 @@ bool  performGetPeerUserGroupList ();
 bool  performAddPeerToGroup ();
 bool  performRemovePeerFromGroup ();
 bool  performGetExtendedPeerList ();
-bool  performGetPeerInformation ();
-bool  performUpdatePeerInformation ();
-bool  performSetDefaultQueryOptions ();
-bool  performGetDefaultQueryOptions ();
 bool  performStartQuery ();
 bool  performGetQueryStatus ();
 bool  performPauseQuery ();
@@ -262,17 +245,17 @@ bool  performCancelQuery ();
 bool  performGetQueryResults ();
 bool  performRegisterModule ();
 bool  performUnregisterModule ();
-bool  performSetModuleConfiguration ();
-bool  performGetModuleConfiguration ();
 bool  performLoadModule ();
 bool  performUnloadModule ();
 bool  performListActiveModules ();
 bool  performListAllModules ();
+bool  performGetModuleInfo ();
+bool  performGetStatus ();
 
 
 // Initialize dispatch table
-//                 
-bool 
+//
+bool
 buildDispatchTable ()
 {
     dispatchTable_s = new t_DispatchTable;
@@ -289,22 +272,6 @@ buildDispatchTable ()
     dispatchTable_s->emplace ("allowSubnet", &performAllowSubnet);
     dispatchTable_s->emplace ("listExcludedHosts", &performListExcludedHosts);
     dispatchTable_s->emplace ("listExcludedSubnets", &performListExcludedSubnets);
-    dispatchTable_s->emplace ("natDiscovery", &performNatDiscovery);
-    dispatchTable_s->emplace ("natDiscoveryQuery", &performNatDiscoveryQuery);
-    dispatchTable_s->emplace ("setDataSendingLimit", &performSetDataSendingLimit);
-    dispatchTable_s->emplace ("getDataSendingLimit", &performGetDataSendingLimit);
-    dispatchTable_s->emplace ("setStackThreadLimit", &performSetStackThreadLimit);
-    dispatchTable_s->emplace ("getStackThreadLimit", &performGetStackThreadLimit);
-    dispatchTable_s->emplace ("setReceiveBufferLimit", &performSetReceiveBufferLimit);
-    dispatchTable_s->emplace ("getReceiveBufferLimit", &performGetReceiveBufferLimit);
-    dispatchTable_s->emplace ("setSendBufferLimit", &performSetSendBufferLimit);
-    dispatchTable_s->emplace ("getSendBufferLimit", &performGetSendBufferLimit);
-    dispatchTable_s->emplace ("getBufferStats", &performGetBufferStats);
-    dispatchTable_s->emplace ("setTotalTransferLimit", &performSetTotalTransferLimit);
-    dispatchTable_s->emplace ("getTotalTransferLimit", &performGetTotalTransferLimit);
-    dispatchTable_s->emplace ("setPeerTransferLimit", &performSetPeerTransferLimit);
-    dispatchTable_s->emplace ("getPeerTransferLimit", &performGetPeerTransferLimit);
-    dispatchTable_s->emplace ("getTransferStats", &performGetTransferStats);
     dispatchTable_s->emplace ("getUserGroupList", &performGetUserGroupList);
     dispatchTable_s->emplace ("createUserGroup", &performCreateUserGroup);
     dispatchTable_s->emplace ("destroyUserGroup", &performDestroyUserGroup);
@@ -312,10 +279,6 @@ buildDispatchTable ()
     dispatchTable_s->emplace ("addPeerToGroup", &performAddPeerToGroup);
     dispatchTable_s->emplace ("removePeerFromGroup", &performRemovePeerFromGroup);
     dispatchTable_s->emplace ("getExtendedPeerList", &performGetExtendedPeerList);
-    dispatchTable_s->emplace ("getPeerInformation", &performGetPeerInformation);
-    dispatchTable_s->emplace ("updatePeerInformation", &performUpdatePeerInformation);
-    dispatchTable_s->emplace ("setDefaultQueryOptions", &performSetDefaultQueryOptions);
-    dispatchTable_s->emplace ("getDefaultQueryOptions", &performGetDefaultQueryOptions);
     dispatchTable_s->emplace ("beginQuery", &performStartQuery);
     dispatchTable_s->emplace ("getQueryStatus", &performGetQueryStatus);
     dispatchTable_s->emplace ("pauseQuery", &performPauseQuery);
@@ -324,12 +287,12 @@ buildDispatchTable ()
     dispatchTable_s->emplace ("getQueryResults", &performGetQueryResults);
     dispatchTable_s->emplace ("registerModule", &performRegisterModule);
     dispatchTable_s->emplace ("unregisterModule", &performUnregisterModule);
-    dispatchTable_s->emplace ("setModuleConfiguration", &performSetModuleConfiguration);
-    dispatchTable_s->emplace ("getModuleConfiguration", &performGetModuleConfiguration);
     dispatchTable_s->emplace ("loadModule", &performLoadModule);
     dispatchTable_s->emplace ("unloadModule", &performUnloadModule);
     dispatchTable_s->emplace ("listActiveModules", &performListActiveModules);
     dispatchTable_s->emplace ("listAllModules", &performListAllModules);
+    dispatchTable_s->emplace ("getModuleInfo", &performGetModuleInfo);
+    dispatchTable_s->emplace ("getStatus", &performGetStatus);
 
 
     return true;
@@ -337,7 +300,7 @@ buildDispatchTable ()
 
 
 
-bool 
+bool
 commandExists (const string &  command)
 {
     return dispatchTable_s->find (command) != dispatchTable_s->end ();
@@ -375,14 +338,17 @@ handleCommand (const string &  command)
 
 
 
-bool  
+// ---------------------------------------------------------------------------
+//  Peer commands
+// ---------------------------------------------------------------------------
+
+bool
 performAddDtcpPeer ()
 {
     Log::Debug ("performAddDtcpPeer invoked.");
 
     string  ipAddress;
     string  portStr;
-    ushort  port;
 
     bool status;
     status = Configuration::getValue ("IP Address", ipAddress);
@@ -397,14 +363,20 @@ performAddDtcpPeer ()
         Log::Error ("No Port value given!");
         return false;
     }
-    port = atoi (portStr.c_str());
-    port = htons(port);
 
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("ipAddress");
+    writer.value(ipAddress);
+    writer.key("port");
+    writer.value(strtoul(portStr.c_str(), 0, 0));
+    writer.endObject();
 
-    status = DtcpPeerMgmtIntf::addDtcpPeer (ipAddress, port);
+    string result;
+    status = JsonRpcClient::call("addPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::addDtcpPeer call failed!");
+        Log::Error ("addPeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -416,14 +388,13 @@ performAddDtcpPeer ()
 
 
 
-bool  
+bool
 performGetDtcpPeerId ()
 {
     Log::Debug ("performGetDtcpPeerId invoked.");
 
     string  ipAddress;
     string  portStr;
-    ushort  port;
 
     bool status;
     status = Configuration::getValue ("IP Address", ipAddress);
@@ -438,20 +409,27 @@ performGetDtcpPeerId ()
         Log::Error ("No Port value given!");
         return false;
     }
-    port = atoi (portStr.c_str());
-    port = htons(port);
 
-    ulong  peerId;
-    status = DtcpPeerMgmtIntf::getDtcpPeerId (ipAddress,
-                                              port,
-                                              peerId);
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("ipAddress");
+    writer.value(ipAddress);
+    writer.key("port");
+    writer.value(strtoul(portStr.c_str(), 0, 0));
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("getPeerId", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::getDtcpPeerId call failed!");
+        Log::Error ("getPeerId RPC call failed!");
         return false;
     }
-    // Display result of operation
-    //
+
+    JsonReader reader(result);
+    ulong peerId = 0;
+    reader.getUlong("peerId", peerId);
+
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Peer ID: " << peerId << endl;
@@ -465,7 +443,7 @@ performGetDtcpPeerId ()
 
 
 
-bool  
+bool
 performGetDtcpPeerStatus ()
 {
     Log::Debug ("performGetDtcpPeerStatus invoked.");
@@ -482,34 +460,48 @@ performGetDtcpPeerStatus ()
     }
     peerId = strtoul (peerIdString.c_str(), 0, 0);
 
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
 
-    DtcpPeerMgmtIntf::t_DtcpPeerStatus  dtcpStatus;
-    status = DtcpPeerMgmtIntf::getDtcpPeerStatus (peerId, dtcpStatus);
+    string result;
+    status = JsonRpcClient::call("getPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::getDtcpPeerStatus call failed!");
+        Log::Error ("getPeer RPC call failed!");
         return false;
     }
-    // Display result of operation
-    //
+
+    JsonReader reader(result);
+    string ipAddr;
+    ulong port = 0, lastRecv = 0, lastSend = 0, avgBw = 0, peakBw = 0;
+    reader.getString("ipAddress", ipAddr);
+    reader.getUlong("port", port);
+    reader.getUlong("lastRecvTime", lastRecv);
+    reader.getUlong("lastSendTime", lastSend);
+    reader.getUlong("avgBandwidth", avgBw);
+    reader.getUlong("peakBandwidth", peakBw);
+
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "- Dtcp Peer Status:\n";
-        cout << "IpAddress: " << dtcpStatus.ipAddress << endl;
-        cout << "Port: " << dtcpStatus.port << endl;
-        cout << "Last Receive Time: " << ctime ((time_t *)&dtcpStatus.lastRecvTime) << endl;
-        cout << "Last Send Time: " << ctime ((time_t *)&dtcpStatus.lastSendTime) << endl;
-        cout << "Average Bandwidth: " << dtcpStatus.avgBandwidth << " Kbps" << endl;
-        cout << "Peak Bandwidth: " << dtcpStatus.peakBandwidth << " Kbps" << endl;
+        cout << "IpAddress: " << ipAddr << endl;
+        cout << "Port: " << port << endl;
+        cout << "Last Receive Time: " << lastRecv << endl;
+        cout << "Last Send Time: " << lastSend << endl;
+        cout << "Average Bandwidth: " << avgBw << " Kbps" << endl;
+        cout << "Peak Bandwidth: " << peakBw << " Kbps" << endl;
         cout << "---\n\n";
     }
     else {
-        cout << dtcpStatus.ipAddress << " ";
-        cout << dtcpStatus.port << " ";
-        cout << dtcpStatus.lastRecvTime << " ";
-        cout << dtcpStatus.lastSendTime << " ";
-        cout << dtcpStatus.avgBandwidth << " ";
-        cout << dtcpStatus.peakBandwidth << " ";
+        cout << ipAddr << " ";
+        cout << port << " ";
+        cout << lastRecv << " ";
+        cout << lastSend << " ";
+        cout << avgBw << " ";
+        cout << peakBw << " ";
         cout << endl;
     }
 
@@ -518,7 +510,7 @@ performGetDtcpPeerStatus ()
 
 
 
-bool  
+bool
 performActivateDtcpPeer ()
 {
     Log::Debug ("performActivateDtcpPeer invoked.");
@@ -535,11 +527,17 @@ performActivateDtcpPeer ()
     }
     peerId = strtoul (peerIdString.c_str(), 0, 0);
 
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
 
-    status = DtcpPeerMgmtIntf::activateDtcpPeer (peerId);
+    string result;
+    status = JsonRpcClient::call("activatePeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::activateDtcpPeer call failed!");
+        Log::Error ("activatePeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -551,7 +549,7 @@ performActivateDtcpPeer ()
 
 
 
-bool  
+bool
 performDeactivateDtcpPeer ()
 {
     Log::Debug ("performDeactivateDtcpPeer invoked.");
@@ -568,11 +566,17 @@ performDeactivateDtcpPeer ()
     }
     peerId = strtoul (peerIdString.c_str(), 0, 0);
 
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
 
-    status = DtcpPeerMgmtIntf::deactivateDtcpPeer (peerId);
+    string result;
+    status = JsonRpcClient::call("deactivatePeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::deactivateDtcpPeer call failed!");
+        Log::Error ("deactivatePeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -584,7 +588,7 @@ performDeactivateDtcpPeer ()
 
 
 
-bool  
+bool
 performPingDtcpPeer ()
 {
     Log::Debug ("performPingDtcpPeer invoked.");
@@ -601,11 +605,17 @@ performPingDtcpPeer ()
     }
     peerId = strtoul (peerIdString.c_str(), 0, 0);
 
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
 
-    status = DtcpPeerMgmtIntf::pingDtcpPeer (peerId);
+    string result;
+    status = JsonRpcClient::call("pingPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::pingDtcpPeer call failed!");
+        Log::Error ("pingPeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -617,7 +627,11 @@ performPingDtcpPeer ()
 
 
 
-bool  
+// ---------------------------------------------------------------------------
+//  Network filter commands
+// ---------------------------------------------------------------------------
+
+bool
 performExcludeHost ()
 {
     Log::Debug ("performExcludeHost invoked.");
@@ -631,10 +645,18 @@ performExcludeHost ()
         Log::Error ("No IP Address value given!");
         return false;
     }
-    status = DtcpPeerMgmtIntf::excludeHost (ipAddress);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("ipAddress");
+    writer.value(ipAddress);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("excludeHost", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::excludeHost call failed!");
+        Log::Error ("excludeHost RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -646,17 +668,17 @@ performExcludeHost ()
 
 
 
-bool  
+bool
 performExcludeSubnet ()
 {
     Log::Debug ("performExcludeSubnet invoked.");
 
     bool status;
-    string subnetIpAddress; 
+    string subnetIpAddress;
     string subnetMask;
-    
+
     status = Configuration::getValue ("Subnet IP Address", subnetIpAddress);
-    
+
     if (!status) {
         Log::Error ("No Subnet IP Address value given!");
         return false;
@@ -667,10 +689,20 @@ performExcludeSubnet ()
         Log::Error ("No Subnet Mask value given!");
         return false;
     }
-    status = DtcpPeerMgmtIntf::excludeSubnet (subnetIpAddress, subnetMask);
-    
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("subnetIpAddress");
+    writer.value(subnetIpAddress);
+    writer.key("subnetMask");
+    writer.value(subnetMask);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("excludeSubnet", writer.result(), result);
+
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::excludeSubnet call failed!");
+        Log::Error ("excludeSubnet RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -682,7 +714,7 @@ performExcludeSubnet ()
 
 
 
-bool  
+bool
 performAllowHost ()
 {
     Log::Debug ("performAllowHost invoked.");
@@ -696,10 +728,18 @@ performAllowHost ()
         Log::Error ("No IP Address value given!");
         return false;
     }
-    status = DtcpPeerMgmtIntf::allowHost (ipAddress);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("ipAddress");
+    writer.value(ipAddress);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("allowHost", writer.result(), result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::allowHost call failed!");
+        Log::Error ("allowHost RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -711,24 +751,32 @@ performAllowHost ()
 
 
 
-bool  
+bool
 performAllowSubnet ()
 {
     Log::Debug ("performAllowSubnet invoked.");
 
     bool status;
-    string subnetIpAddress; 
-    
+    string subnetIpAddress;
+
     status = Configuration::getValue ("Subnet IP Address", subnetIpAddress);
-    
+
     if (!status) {
         Log::Error ("No Subnet IP Address value given!");
         return false;
     }
-    status = DtcpPeerMgmtIntf::allowSubnet (subnetIpAddress);
-    
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("subnetIpAddress");
+    writer.value(subnetIpAddress);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("allowSubnet", writer.result(), result);
+
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::allowSubnet call failed!");
+        Log::Error ("allowSubnet RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -740,382 +788,141 @@ performAllowSubnet ()
 
 
 
-bool  
+bool
 performListExcludedHosts ()
 {
     Log::Debug ("performListExcludedHosts invoked.");
 
-    bool status;
-    DtcpPeerMgmtIntf::t_IpAddressList  hostList;
-
-    status = DtcpPeerMgmtIntf::listExcludedHosts (hostList);
+    string result;
+    bool status = JsonRpcClient::call("listExcludedHosts", "{}", result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::listExcludedHosts call failed!");
+        Log::Error ("listExcludedHosts RPC call failed!");
         return false;
     }
-    // Display result of operation
-    //
+
+    // Parse the hosts array from result
+    // Result is: {"hosts":["ip1","ip2",...]}
+    // Simple extraction: find each quoted string inside the array
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "- Excluded hosts:\n";
+    }
 
-        for (auto& host : hostList) {
-            cout << "   " << host << endl;
+    // Find the array content
+    ulong arrStart = result.find('[');
+    ulong arrEnd = result.rfind(']');
+    if (arrStart != string::npos && arrEnd != string::npos && arrEnd > arrStart)
+    {
+        string arrContent = result.substr(arrStart + 1, arrEnd - arrStart - 1);
+        ulong pos = 0;
+        while (pos < arrContent.length())
+        {
+            ulong qStart = arrContent.find('"', pos);
+            if (qStart == string::npos)
+                break;
+            ulong qEnd = arrContent.find('"', qStart + 1);
+            if (qEnd == string::npos)
+                break;
+            string host = arrContent.substr(qStart + 1, qEnd - qStart - 1);
+            if (verbose_s)
+                cout << "   " << host << endl;
+            else
+                cout << host << endl;
+            pos = qEnd + 1;
         }
+    }
 
+    if (verbose_s)
         cout << "---\n\n";
-    }
-    else {
-        for (auto& host : hostList) {
-            cout << host << endl;
-        }
-        return;
-    }
-
 
     return true;
 }
 
 
 
-bool  
+bool
 performListExcludedSubnets ()
 {
     Log::Debug ("performListExcludedSubnets invoked.");
 
-    bool status;
-    DtcpPeerMgmtIntf::t_SubnetAddressList  subnetList;
-
-    status = DtcpPeerMgmtIntf::listExcludedSubnets (subnetList);
+    string result;
+    bool status = JsonRpcClient::call("listExcludedSubnets", "{}", result);
 
     if (!status) {
-        Log::Error ("DtcpPeerMgmtIntf::listExcludedSubnets call failed!");
+        Log::Error ("listExcludedSubnets RPC call failed!");
         return false;
     }
-    // Display result of operation
-    //
+
+    // Result contains {"subnets":[{"ipAddress":"...","netMask":"..."},...]]}
+    // Parse using JsonReader on each object within the array
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "- Excluded subnets:\n";
+    }
 
-        for (auto& subnet : subnetList) {
-            cout << "   Subnet Address: " << subnet.ipAddress
-                 << " \tSubnet Mask: " << subnet.netMask << endl;
+    // Simple parsing — find each {"ipAddress":"...","netMask":"..."} pair
+    ulong searchPos = 0;
+    while (searchPos < result.length())
+    {
+        ulong objStart = result.find('{', searchPos);
+        if (objStart == string::npos)
+            break;
+        ulong objEnd = result.find('}', objStart);
+        if (objEnd == string::npos)
+            break;
+
+        string objStr = result.substr(objStart, objEnd - objStart + 1);
+        JsonReader objReader(objStr);
+
+        string ipAddr;
+        string netMask;
+        if (objReader.getString("ipAddress", ipAddr) &&
+            objReader.getString("netMask", netMask))
+        {
+            if (verbose_s) {
+                cout << "   Subnet Address: " << ipAddr
+                     << " \tSubnet Mask: " << netMask << endl;
+            }
+            else {
+                cout << ipAddr << "/" << netMask << endl;
+            }
         }
 
+        searchPos = objEnd + 1;
+    }
+
+    if (verbose_s)
         cout << "---\n\n";
-    }
-    else {
-        for (auto& subnet : subnetList) {
-            cout << subnet.ipAddress << "/" << subnet.netMask << endl;
-        }
-        return;
-    }
 
     return true;
 }
 
 
 
-bool  
-performNatDiscovery ()
-{
-    Log::Debug ("performNatDiscovery invoked.");
-
-
-    if (verbose_s) {
-        cout << "NAT discovery request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performNatDiscoveryQuery ()
-{
-    Log::Debug ("performNatDiscoveryQuery invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetDataSendingLimit ()
-{
-    Log::Debug ("performSetDataSendingLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetDataSendingLimit ()
-{
-    Log::Debug ("performGetDataSendingLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetStackThreadLimit ()
-{
-    Log::Debug ("performSetStackThreadLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetStackThreadLimit ()
-{
-    Log::Debug ("performGetStackThreadLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetReceiveBufferLimit ()
-{
-    Log::Debug ("performSetReceiveBufferLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetReceiveBufferLimit ()
-{
-    Log::Debug ("performGetReceiveBufferLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetSendBufferLimit ()
-{
-    Log::Debug ("performSetSendBufferLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetSendBufferLimit ()
-{
-    Log::Debug ("performGetSendBufferLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetBufferStats ()
-{
-    Log::Debug ("performGetBufferStats invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetTotalTransferLimit ()
-{
-    Log::Debug ("performSetTotalTransferLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetTotalTransferLimit ()
-{
-    Log::Debug ("performGetTotalTransferLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performSetPeerTransferLimit ()
-{
-    Log::Debug ("performSetPeerTransferLimit invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetPeerTransferLimit ()
-{
-    Log::Debug ("performGetPeerTransferLimit invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetTransferStats ()
-{
-    Log::Debug ("performGetTransferStats invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
+// ---------------------------------------------------------------------------
+//  Group commands
+// ---------------------------------------------------------------------------
+
+bool
 performGetUserGroupList ()
 {
     Log::Debug ("performGetUserGroupList invoked.");
 
+    string result;
+    bool status = JsonRpcClient::call("listGroups", "{}", result);
 
-    // Display result of operation
-    //
+    if (!status) {
+        Log::Error ("listGroups RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
@@ -1123,19 +930,48 @@ performGetUserGroupList ()
 
 
 
-bool  
+bool
 performCreateUserGroup ()
 {
     Log::Debug ("performCreateUserGroup invoked.");
 
+    string groupName;
+    string description;
 
-    // Display result of operation
-    //
+    bool status = Configuration::getValue ("Group Name", groupName);
+    if (!status) {
+        Log::Error ("No Group Name value given!");
+        return false;
+    }
+
+    Configuration::getValue ("Description", description);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("name");
+    writer.value(groupName);
+    writer.key("description");
+    writer.value(description);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("createGroup", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("createGroup RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    ulong groupId = 0;
+    reader.getUlong("groupId", groupId);
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Group ID: " << groupId << endl;
     }
     else {
-        cout << endl;
+        cout << groupId << endl;
     }
 
     return true;
@@ -1143,12 +979,33 @@ performCreateUserGroup ()
 
 
 
-bool  
+bool
 performDestroyUserGroup ()
 {
     Log::Debug ("performDestroyUserGroup invoked.");
 
+    string groupIdStr;
+    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    if (!status) {
+        Log::Error ("No Group ID value given!");
+        return false;
+    }
 
+    ulong groupId = strtoul(groupIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("groupId");
+    writer.value(groupId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("deleteGroup", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("deleteGroup RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Destroy group successful.\n";
     }
@@ -1158,19 +1015,40 @@ performDestroyUserGroup ()
 
 
 
-bool  
+bool
 performGetPeerUserGroupList ()
 {
     Log::Debug ("performGetPeerUserGroupList invoked.");
 
+    string groupIdStr;
+    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    if (!status) {
+        Log::Error ("No Group ID value given!");
+        return false;
+    }
 
-    // Display result of operation
-    //
+    ulong groupId = strtoul(groupIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("groupId");
+    writer.value(groupId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("getGroupPeerList", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("getGroupPeerList RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
@@ -1178,12 +1056,44 @@ performGetPeerUserGroupList ()
 
 
 
-bool  
+bool
 performAddPeerToGroup ()
 {
     Log::Debug ("performAddPeerToGroup invoked.");
 
+    string groupIdStr;
+    string peerIdStr;
 
+    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    if (!status) {
+        Log::Error ("No Group ID value given!");
+        return false;
+    }
+
+    status = Configuration::getValue ("Peer ID", peerIdStr);
+    if (!status) {
+        Log::Error ("No Peer ID value given!");
+        return false;
+    }
+
+    ulong groupId = strtoul(groupIdStr.c_str(), 0, 0);
+    ulong peerId = strtoul(peerIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("groupId");
+    writer.value(groupId);
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("addPeerToGroup", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("addPeerToGroup RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Add peer to group successful.\n";
     }
@@ -1193,12 +1103,44 @@ performAddPeerToGroup ()
 
 
 
-bool  
+bool
 performRemovePeerFromGroup ()
 {
     Log::Debug ("performRemovePeerFromGroup invoked.");
 
+    string groupIdStr;
+    string peerIdStr;
 
+    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    if (!status) {
+        Log::Error ("No Group ID value given!");
+        return false;
+    }
+
+    status = Configuration::getValue ("Peer ID", peerIdStr);
+    if (!status) {
+        Log::Error ("No Peer ID value given!");
+        return false;
+    }
+
+    ulong groupId = strtoul(groupIdStr.c_str(), 0, 0);
+    ulong peerId = strtoul(peerIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("groupId");
+    writer.value(groupId);
+    writer.key("peerId");
+    writer.value(peerId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("removePeerFromGroup", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("removePeerFromGroup RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Remove peer from group successful.\n";
     }
@@ -1208,19 +1150,25 @@ performRemovePeerFromGroup ()
 
 
 
-bool  
+bool
 performGetExtendedPeerList ()
 {
     Log::Debug ("performGetExtendedPeerList invoked.");
 
+    string result;
+    bool status = JsonRpcClient::call("getAllPeers", "{}", result);
 
-    // Display result of operation
-    //
+    if (!status) {
+        Log::Error ("getAllPeers RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
@@ -1228,84 +1176,65 @@ performGetExtendedPeerList ()
 
 
 
-bool  
-performGetPeerInformation ()
-{
-    Log::Debug ("performGetPeerInformation invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
-performUpdatePeerInformation ()
-{
-    Log::Debug ("performUpdatePeerInformation invoked.");
-
-
-    if (verbose_s) {
-        cout << "Peer update successful.\n";
-    }
-
-    return true;
-}
-
-
+// ---------------------------------------------------------------------------
+//  Query commands
+// ---------------------------------------------------------------------------
 
 bool
-performSetDefaultQueryOptions ()
-{
-    Log::Debug ("performSetDefaultQueryOptions invoked.");
-
-
-    if (verbose_s) {
-        cout << "Set default query options successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool
-performGetDefaultQueryOptions ()
-{
-    Log::Debug ("performGetDefaultQueryOptions invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
 performStartQuery ()
 {
     Log::Debug ("performStartQuery invoked.");
 
+    string queryString;
+    bool status = Configuration::getValue ("Query String", queryString);
+    if (!status) {
+        Log::Error ("No Query String value given!");
+        return false;
+    }
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryString");
+    writer.value(queryString);
+
+    string groupName;
+    if (Configuration::getValue ("Group Name", groupName)) {
+        writer.key("groupName");
+        writer.value(groupName);
+    }
+
+    string autoHaltStr;
+    if (Configuration::getValue ("Auto Halt Limit", autoHaltStr)) {
+        writer.key("autoHaltLimit");
+        writer.value(strtoul(autoHaltStr.c_str(), 0, 0));
+    }
+
+    string peerDescStr;
+    if (Configuration::getValue ("Peer Description Limit", peerDescStr)) {
+        writer.key("peerDescMax");
+        writer.value(strtoul(peerDescStr.c_str(), 0, 0));
+    }
+
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("startQuery", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("startQuery RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    ulong queryId = 0;
+    reader.getUlong("queryId", queryId);
 
     if (verbose_s) {
         cout << "Query start successful.\n";
+        cout << "Query ID: " << queryId << endl;
+    }
+    else {
+        cout << queryId << endl;
     }
 
     return true;
@@ -1313,19 +1242,55 @@ performStartQuery ()
 
 
 
-bool  
+bool
 performGetQueryStatus ()
 {
     Log::Debug ("performGetQueryStatus invoked.");
 
+    string queryIdStr;
+    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    if (!status) {
+        Log::Error ("No Query ID value given!");
+        return false;
+    }
 
-    // Display result of operation
-    //
+    ulong queryId = strtoul(queryIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("getQueryStatus", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("getQueryStatus RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    ulong totalPeers = 0, peersQueried = 0, numResponses = 0, totalHits = 0;
+    reader.getUlong("totalPeers", totalPeers);
+    reader.getUlong("peersQueried", peersQueried);
+    reader.getUlong("numPeerResponses", numResponses);
+    reader.getUlong("totalHits", totalHits);
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "- Query Status:\n";
+        cout << "Total Peers: " << totalPeers << endl;
+        cout << "Peers Queried: " << peersQueried << endl;
+        cout << "Peer Responses: " << numResponses << endl;
+        cout << "Total Hits: " << totalHits << endl;
+        cout << "---\n\n";
     }
     else {
-        cout << endl;
+        cout << totalPeers << " ";
+        cout << peersQueried << " ";
+        cout << numResponses << " ";
+        cout << totalHits << endl;
     }
 
     return true;
@@ -1333,12 +1298,33 @@ performGetQueryStatus ()
 
 
 
-bool  
+bool
 performPauseQuery ()
 {
     Log::Debug ("performPauseQuery invoked.");
 
+    string queryIdStr;
+    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    if (!status) {
+        Log::Error ("No Query ID value given!");
+        return false;
+    }
 
+    ulong queryId = strtoul(queryIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("pauseQuery", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("pauseQuery RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Query pause successful.\n";
     }
@@ -1348,12 +1334,33 @@ performPauseQuery ()
 
 
 
-bool  
+bool
 performResumeQuery ()
 {
     Log::Debug ("performResumeQuery invoked.");
 
+    string queryIdStr;
+    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    if (!status) {
+        Log::Error ("No Query ID value given!");
+        return false;
+    }
 
+    ulong queryId = strtoul(queryIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("resumeQuery", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("resumeQuery RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Query resume successful.\n";
     }
@@ -1363,12 +1370,33 @@ performResumeQuery ()
 
 
 
-bool  
+bool
 performCancelQuery ()
 {
     Log::Debug ("performCancelQuery invoked.");
 
+    string queryIdStr;
+    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    if (!status) {
+        Log::Error ("No Query ID value given!");
+        return false;
+    }
 
+    ulong queryId = strtoul(queryIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("cancelQuery", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("cancelQuery RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Query cancel successful.\n";
     }
@@ -1378,19 +1406,40 @@ performCancelQuery ()
 
 
 
-bool  
+bool
 performGetQueryResults ()
 {
     Log::Debug ("performGetQueryResults invoked.");
 
+    string queryIdStr;
+    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    if (!status) {
+        Log::Error ("No Query ID value given!");
+        return false;
+    }
 
-    // Display result of operation
-    //
+    ulong queryId = strtoul(queryIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("getQueryResults", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("getQueryResults RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
@@ -1398,14 +1447,56 @@ performGetQueryResults ()
 
 
 
-bool  
+// ---------------------------------------------------------------------------
+//  Module commands
+// ---------------------------------------------------------------------------
+
+bool
 performRegisterModule ()
 {
     Log::Debug ("performRegisterModule invoked.");
 
+    string libPath;
+    string symbol;
+
+    bool status = Configuration::getValue ("Module Lib Path", libPath);
+    if (!status) {
+        Log::Error ("No Module Lib Path value given!");
+        return false;
+    }
+
+    status = Configuration::getValue ("Module Symbol", symbol);
+    if (!status) {
+        Log::Error ("No Module Symbol value given!");
+        return false;
+    }
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("libraryPath");
+    writer.value(libPath);
+    writer.key("bootstrapSymbol");
+    writer.value(symbol);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("registerModule", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("registerModule RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    ulong moduleId = 0;
+    reader.getUlong("moduleId", moduleId);
 
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Module ID: " << moduleId << endl;
+    }
+    else {
+        cout << moduleId << endl;
     }
 
     return true;
@@ -1413,12 +1504,33 @@ performRegisterModule ()
 
 
 
-bool  
+bool
 performUnregisterModule ()
 {
     Log::Debug ("performUnregisterModule invoked.");
 
+    string moduleIdStr;
+    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    if (!status) {
+        Log::Error ("No Module ID value given!");
+        return false;
+    }
 
+    ulong moduleId = strtoul(moduleIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("moduleId");
+    writer.value(moduleId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("unregisterModule", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("unregisterModule RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Request successful.\n";
     }
@@ -1428,47 +1540,33 @@ performUnregisterModule ()
 
 
 
-bool  
-performSetModuleConfiguration ()
-{
-    Log::Debug ("performSetModuleConfiguration invoked.");
-
-
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-
-    return true;
-}
-
-
-
-bool  
-performGetModuleConfiguration ()
-{
-    Log::Debug ("performGetModuleConfiguration invoked.");
-
-
-    // Display result of operation
-    //
-    if (verbose_s) {
-        cout << "Request successful.\n";
-    }
-    else {
-        cout << endl;
-    }
-
-    return true;
-}
-
-
-
-bool  
+bool
 performLoadModule ()
 {
     Log::Debug ("performLoadModule invoked.");
 
+    string moduleIdStr;
+    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    if (!status) {
+        Log::Error ("No Module ID value given!");
+        return false;
+    }
 
+    ulong moduleId = strtoul(moduleIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("moduleId");
+    writer.value(moduleId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("loadModule", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("loadModule RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Request successful.\n";
     }
@@ -1478,12 +1576,33 @@ performLoadModule ()
 
 
 
-bool  
+bool
 performUnloadModule ()
 {
     Log::Debug ("performUnloadModule invoked.");
 
+    string moduleIdStr;
+    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    if (!status) {
+        Log::Error ("No Module ID value given!");
+        return false;
+    }
 
+    ulong moduleId = strtoul(moduleIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("moduleId");
+    writer.value(moduleId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("unloadModule", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("unloadModule RPC call failed!");
+        return false;
+    }
     if (verbose_s) {
         cout << "Request successful.\n";
     }
@@ -1493,19 +1612,25 @@ performUnloadModule ()
 
 
 
-bool  
+bool
 performListActiveModules ()
 {
     Log::Debug ("performListActiveModules invoked.");
 
+    string result;
+    bool status = JsonRpcClient::call("listActiveModules", "{}", result);
 
-    // Display result of operation
-    //
+    if (!status) {
+        Log::Error ("listActiveModules RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
@@ -1513,23 +1638,127 @@ performListActiveModules ()
 
 
 
-bool  
+bool
 performListAllModules ()
 {
     Log::Debug ("performListAllModules invoked.");
 
+    string result;
+    bool status = JsonRpcClient::call("listAllModules", "{}", result);
 
-    // Display result of operation
-    //
+    if (!status) {
+        Log::Error ("listAllModules RPC call failed!");
+        return false;
+    }
+
     if (verbose_s) {
         cout << "Request successful.\n";
+        cout << "Result: " << result << endl;
     }
     else {
-        cout << endl;
+        cout << result << endl;
     }
 
     return true;
 }
 
+
+
+bool
+performGetModuleInfo ()
+{
+    Log::Debug ("performGetModuleInfo invoked.");
+
+    string moduleIdStr;
+    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    if (!status) {
+        Log::Error ("No Module ID value given!");
+        return false;
+    }
+
+    ulong moduleId = strtoul(moduleIdStr.c_str(), 0, 0);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("moduleId");
+    writer.value(moduleId);
+    writer.endObject();
+
+    string result;
+    status = JsonRpcClient::call("getModuleInfo", writer.result(), result);
+
+    if (!status) {
+        Log::Error ("getModuleInfo RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    string modName, modDesc, modVer, modLib, modSym;
+    ulong modId = 0, activeTime = 0;
+    reader.getUlong("moduleId", modId);
+    reader.getString("moduleName", modName);
+    reader.getString("description", modDesc);
+    reader.getString("version", modVer);
+    reader.getString("libraryPath", modLib);
+    reader.getString("bootstrapSymbol", modSym);
+    reader.getUlong("activeTime", activeTime);
+
+    if (verbose_s) {
+        cout << "Request successful.\n";
+        cout << "- Module Info:\n";
+        cout << "Module ID: " << modId << endl;
+        cout << "Name: " << modName << endl;
+        cout << "Description: " << modDesc << endl;
+        cout << "Version: " << modVer << endl;
+        cout << "Library: " << modLib << endl;
+        cout << "Symbol: " << modSym << endl;
+        cout << "Active Time: " << activeTime << endl;
+        cout << "---\n\n";
+    }
+    else {
+        cout << modId << " " << modName << " " << modVer << endl;
+    }
+
+    return true;
+}
+
+
+
+// ---------------------------------------------------------------------------
+//  Status commands
+// ---------------------------------------------------------------------------
+
+bool
+performGetStatus ()
+{
+    Log::Debug ("performGetStatus invoked.");
+
+    string result;
+    bool status = JsonRpcClient::call("getStatus", "{}", result);
+
+    if (!status) {
+        Log::Error ("getStatus RPC call failed!");
+        return false;
+    }
+
+    JsonReader reader(result);
+    string serverStatus;
+    string version;
+    reader.getString("status", serverStatus);
+    reader.getString("version", version);
+
+    if (verbose_s) {
+        cout << "Request successful.\n";
+        cout << "- Server Status:\n";
+        cout << "Status: " << serverStatus << endl;
+        cout << "Version: " << version << endl;
+        cout << "---\n\n";
+    }
+    else {
+        cout << serverStatus << " " << version << endl;
+    }
+
+    return true;
+}
 
 

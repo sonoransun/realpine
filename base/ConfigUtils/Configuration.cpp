@@ -272,11 +272,11 @@ Configuration::populateValues ()
             if (currElement->required) {
                 Log::Error ("Could not locate required configuration element: "s +
                              currElement->elementName);
-           
+
                 return false;
 
             }
-            return false;
+            continue;
         }
 
 

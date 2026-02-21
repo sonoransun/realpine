@@ -646,6 +646,13 @@ AlpineServer/CMakeFiles/AlpineServer.dir/AlpineServer.cpp.o: \
   /Users/user/sonoranpub/realpine/base/AppUtils/OptHash.h \
   /Users/user/sonoranpub/realpine/base/ConfigUtils/Configuration.h \
   /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigData.h \
+  /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRouter.h \
+  /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpRequest.h \
+  /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpResponse.h \
+  /Users/user/sonoranpub/realpine/AlpineRestBridge/HttpServer.h \
+  /Users/user/sonoranpub/realpine/base/NetUtils/TcpAcceptor.h \
+  /Users/user/sonoranpub/realpine/base/NetUtils/TcpTransport.h \
+  /Users/user/sonoranpub/realpine/AlpineServer/JsonRpcHandler.h \
   /Users/user/sonoranpub/realpine/AlpineServer/AlpineConfig.h \
   /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStackConfig.h \
   /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStack.h \

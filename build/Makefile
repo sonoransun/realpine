@@ -286,6 +286,19 @@ AlpineServer/fast:
 .PHONY : AlpineServer/fast
 
 #=============================================================================
+# Target rules for targets named AlpineCmdIf
+
+# Build rule for target.
+AlpineCmdIf: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineCmdIf
+.PHONY : AlpineCmdIf
+
+# fast build rule for target.
+AlpineCmdIf/fast:
+	$(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build
+.PHONY : AlpineCmdIf/fast
+
+#=============================================================================
 # Target rules for targets named AlpineRestBridge
 
 # Build rule for target.
@@ -306,6 +319,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... AlpineCmdIf"
 	@echo "... AlpineProtocol"
 	@echo "... AlpineRestBridge"
 	@echo "... AlpineServer"

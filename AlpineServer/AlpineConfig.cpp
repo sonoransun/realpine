@@ -158,6 +158,24 @@ AlpineConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back (currElement);
+
+    // RPC Port (JSON-RPC over HTTP)
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "RPC Port";
+    currElement->argOptionName = "rpcPort";
+    currElement->envOptionName = "RPC_PORT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // RPC Bind Address
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "RPC Bind Address";
+    currElement->argOptionName = "rpcBindAddress";
+    currElement->envOptionName = "RPC_BIND_ADDRESS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
 }
 
 

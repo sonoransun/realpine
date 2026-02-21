@@ -116,6 +116,140 @@ depend:
 	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule
+.PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule
+
+# Convenience name for target.
+AlpineCmdIf: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/rule
+.PHONY : AlpineCmdIf
+
+# fast build rule for target.
+AlpineCmdIf/fast:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build
+.PHONY : AlpineCmdIf/fast
+
+AlpineCmdIf.o: AlpineCmdIf.cpp.o
+.PHONY : AlpineCmdIf.o
+
+# target to build an object file
+AlpineCmdIf.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o
+.PHONY : AlpineCmdIf.cpp.o
+
+AlpineCmdIf.i: AlpineCmdIf.cpp.i
+.PHONY : AlpineCmdIf.i
+
+# target to preprocess a source file
+AlpineCmdIf.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.i
+.PHONY : AlpineCmdIf.cpp.i
+
+AlpineCmdIf.s: AlpineCmdIf.cpp.s
+.PHONY : AlpineCmdIf.s
+
+# target to generate assembly for a file
+AlpineCmdIf.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.s
+.PHONY : AlpineCmdIf.cpp.s
+
+AlpineConfig.o: AlpineConfig.cpp.o
+.PHONY : AlpineConfig.o
+
+# target to build an object file
+AlpineConfig.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o
+.PHONY : AlpineConfig.cpp.o
+
+AlpineConfig.i: AlpineConfig.cpp.i
+.PHONY : AlpineConfig.i
+
+# target to preprocess a source file
+AlpineConfig.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.i
+.PHONY : AlpineConfig.cpp.i
+
+AlpineConfig.s: AlpineConfig.cpp.s
+.PHONY : AlpineConfig.s
+
+# target to generate assembly for a file
+AlpineConfig.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.s
+.PHONY : AlpineConfig.cpp.s
+
+JsonRpcClient.o: JsonRpcClient.cpp.o
+.PHONY : JsonRpcClient.o
+
+# target to build an object file
+JsonRpcClient.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o
+.PHONY : JsonRpcClient.cpp.o
+
+JsonRpcClient.i: JsonRpcClient.cpp.i
+.PHONY : JsonRpcClient.i
+
+# target to preprocess a source file
+JsonRpcClient.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.i
+.PHONY : JsonRpcClient.cpp.i
+
+JsonRpcClient.s: JsonRpcClient.cpp.s
+.PHONY : JsonRpcClient.s
+
+# target to generate assembly for a file
+JsonRpcClient.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.s
+.PHONY : JsonRpcClient.cpp.s
+
+__/AlpineRestBridge/JsonReader.o: __/AlpineRestBridge/JsonReader.cpp.o
+.PHONY : __/AlpineRestBridge/JsonReader.o
+
+# target to build an object file
+__/AlpineRestBridge/JsonReader.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o
+.PHONY : __/AlpineRestBridge/JsonReader.cpp.o
+
+__/AlpineRestBridge/JsonReader.i: __/AlpineRestBridge/JsonReader.cpp.i
+.PHONY : __/AlpineRestBridge/JsonReader.i
+
+# target to preprocess a source file
+__/AlpineRestBridge/JsonReader.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.i
+.PHONY : __/AlpineRestBridge/JsonReader.cpp.i
+
+__/AlpineRestBridge/JsonReader.s: __/AlpineRestBridge/JsonReader.cpp.s
+.PHONY : __/AlpineRestBridge/JsonReader.s
+
+# target to generate assembly for a file
+__/AlpineRestBridge/JsonReader.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.s
+.PHONY : __/AlpineRestBridge/JsonReader.cpp.s
+
+__/AlpineRestBridge/JsonWriter.o: __/AlpineRestBridge/JsonWriter.cpp.o
+.PHONY : __/AlpineRestBridge/JsonWriter.o
+
+# target to build an object file
+__/AlpineRestBridge/JsonWriter.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o
+.PHONY : __/AlpineRestBridge/JsonWriter.cpp.o
+
+__/AlpineRestBridge/JsonWriter.i: __/AlpineRestBridge/JsonWriter.cpp.i
+.PHONY : __/AlpineRestBridge/JsonWriter.i
+
+# target to preprocess a source file
+__/AlpineRestBridge/JsonWriter.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.i
+.PHONY : __/AlpineRestBridge/JsonWriter.cpp.i
+
+__/AlpineRestBridge/JsonWriter.s: __/AlpineRestBridge/JsonWriter.cpp.s
+.PHONY : __/AlpineRestBridge/JsonWriter.s
+
+# target to generate assembly for a file
+__/AlpineRestBridge/JsonWriter.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build.make AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.s
+.PHONY : __/AlpineRestBridge/JsonWriter.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -124,6 +258,22 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... AlpineCmdIf"
+	@echo "... AlpineCmdIf.o"
+	@echo "... AlpineCmdIf.i"
+	@echo "... AlpineCmdIf.s"
+	@echo "... AlpineConfig.o"
+	@echo "... AlpineConfig.i"
+	@echo "... AlpineConfig.s"
+	@echo "... JsonRpcClient.o"
+	@echo "... JsonRpcClient.i"
+	@echo "... JsonRpcClient.s"
+	@echo "... __/AlpineRestBridge/JsonReader.o"
+	@echo "... __/AlpineRestBridge/JsonReader.i"
+	@echo "... __/AlpineRestBridge/JsonReader.s"
+	@echo "... __/AlpineRestBridge/JsonWriter.o"
+	@echo "... __/AlpineRestBridge/JsonWriter.i"
+	@echo "... __/AlpineRestBridge/JsonWriter.s"
 .PHONY : help
 
 
