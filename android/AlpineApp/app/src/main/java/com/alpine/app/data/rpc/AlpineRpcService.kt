@@ -10,19 +10,25 @@ import com.alpine.app.data.model.QueryStatusResponse
 import com.alpine.app.data.model.ResourceDesc
 import com.alpine.app.data.model.ServerStatus
 import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 
 class AlpineRpcService(
     baseUrl: String,
     tlsConfig: TlsConfig = TlsConfig(),
-    host: String = ""
+    host: String = "",
+    apiKey: String = ""
 ) {
-    private val client = JsonRpcClient(baseUrl, tlsConfig, host)
+    private val client = JsonRpcClient(baseUrl, tlsConfig, host, apiKey)
+
+    private fun JsonElement.safeAsJsonObject(): JsonObject =
+        takeIf { it.isJsonObject }?.asJsonObject
+            ?: throw JsonRpcException(-32603, "Invalid response format")
 
     // --- Status ---
 
     suspend fun getStatus(): ServerStatus {
-        val result = client.call("getStatus").asJsonObject
+        val result = client.call("getStatus").safeAsJsonObject()
         return ServerStatus(
             status = result.get("status")?.asString ?: "unknown",
             version = result.get("version")?.asString ?: "unknown"
@@ -43,19 +49,19 @@ class AlpineRpcService(
             addProperty("autoHaltLimit", autoHaltLimit)
             addProperty("peerDescMax", peerDescMax)
         }
-        val result = client.call("startQuery", params).asJsonObject
+        val result = client.call("startQuery", params).safeAsJsonObject()
         return result.get("queryId").asLong
     }
 
     suspend fun queryInProgress(queryId: Long): Boolean {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("queryInProgress", params).asJsonObject
+        val result = client.call("queryInProgress", params).safeAsJsonObject()
         return result.get("inProgress").asBoolean
     }
 
     suspend fun getQueryStatus(queryId: Long): QueryStatusResponse {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("getQueryStatus", params).asJsonObject
+        val result = client.call("getQueryStatus", params).safeAsJsonObject()
         return QueryStatusResponse(
             inProgress = true,
             totalPeers = result.get("totalPeers")?.asLong ?: 0,
@@ -67,7 +73,7 @@ class AlpineRpcService(
 
     suspend fun getQueryResults(queryId: Long): QueryResultsResponse {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("getQueryResults", params).asJsonObject
+        val result = client.call("getQueryResults", params).safeAsJsonObject()
         val peers = result.getAsJsonArray("peers")?.map { peerEl ->
             val peer = peerEl.asJsonObject
             val resources = peer.getAsJsonArray("resources")?.map { resEl ->
@@ -90,32 +96,32 @@ class AlpineRpcService(
 
     suspend fun pauseQuery(queryId: Long): Boolean {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("pauseQuery", params).asJsonObject
+        val result = client.call("pauseQuery", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun resumeQuery(queryId: Long): Boolean {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("resumeQuery", params).asJsonObject
+        val result = client.call("resumeQuery", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun cancelQuery(queryId: Long): Boolean {
         val params = JsonObject().apply { addProperty("queryId", queryId) }
-        val result = client.call("cancelQuery", params).asJsonObject
+        val result = client.call("cancelQuery", params).safeAsJsonObject()
         return result.get("cancelled")?.asBoolean ?: false
     }
 
     // --- Peers ---
 
     suspend fun getAllPeers(): List<Long> {
-        val result = client.call("getAllPeers").asJsonObject
+        val result = client.call("getAllPeers").safeAsJsonObject()
         return result.getAsJsonArray("peerIds")?.map { it.asLong } ?: emptyList()
     }
 
     suspend fun getPeer(peerId: Long): PeerDetail {
         val params = JsonObject().apply { addProperty("peerId", peerId) }
-        val result = client.call("getPeer", params).asJsonObject
+        val result = client.call("getPeer", params).safeAsJsonObject()
         return PeerDetail(
             peerId = result.get("peerId")?.asLong ?: peerId,
             ipAddress = result.get("ipAddress")?.asString ?: "",
@@ -132,7 +138,7 @@ class AlpineRpcService(
             addProperty("ipAddress", ipAddress)
             addProperty("port", port)
         }
-        val result = client.call("addPeer", params).asJsonObject
+        val result = client.call("addPeer", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -141,25 +147,25 @@ class AlpineRpcService(
             addProperty("ipAddress", ipAddress)
             addProperty("port", port)
         }
-        val result = client.call("getPeerId", params).asJsonObject
+        val result = client.call("getPeerId", params).safeAsJsonObject()
         return result.get("peerId")?.asLong ?: 0
     }
 
     suspend fun activatePeer(peerId: Long): Boolean {
         val params = JsonObject().apply { addProperty("peerId", peerId) }
-        val result = client.call("activatePeer", params).asJsonObject
+        val result = client.call("activatePeer", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun deactivatePeer(peerId: Long): Boolean {
         val params = JsonObject().apply { addProperty("peerId", peerId) }
-        val result = client.call("deactivatePeer", params).asJsonObject
+        val result = client.call("deactivatePeer", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun pingPeer(peerId: Long): Boolean {
         val params = JsonObject().apply { addProperty("peerId", peerId) }
-        val result = client.call("pingPeer", params).asJsonObject
+        val result = client.call("pingPeer", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -167,7 +173,7 @@ class AlpineRpcService(
 
     suspend fun excludeHost(ipAddress: String): Boolean {
         val params = JsonObject().apply { addProperty("ipAddress", ipAddress) }
-        val result = client.call("excludeHost", params).asJsonObject
+        val result = client.call("excludeHost", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -176,13 +182,13 @@ class AlpineRpcService(
             addProperty("subnetIpAddress", subnetIpAddress)
             addProperty("subnetMask", subnetMask)
         }
-        val result = client.call("excludeSubnet", params).asJsonObject
+        val result = client.call("excludeSubnet", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun allowHost(ipAddress: String): Boolean {
         val params = JsonObject().apply { addProperty("ipAddress", ipAddress) }
-        val result = client.call("allowHost", params).asJsonObject
+        val result = client.call("allowHost", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -191,17 +197,17 @@ class AlpineRpcService(
             addProperty("subnetIpAddress", subnetIpAddress)
             addProperty("subnetMask", subnetMask)
         }
-        val result = client.call("allowSubnet", params).asJsonObject
+        val result = client.call("allowSubnet", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun listExcludedHosts(): List<String> {
-        val result = client.call("listExcludedHosts").asJsonObject
+        val result = client.call("listExcludedHosts").safeAsJsonObject()
         return result.getAsJsonArray("hosts")?.map { it.asString } ?: emptyList()
     }
 
     suspend fun listExcludedSubnets(): List<FilterModels.Subnet> {
-        val result = client.call("listExcludedSubnets").asJsonObject
+        val result = client.call("listExcludedSubnets").safeAsJsonObject()
         return result.getAsJsonArray("subnets")?.map { el ->
             val obj = el.asJsonObject
             FilterModels.Subnet(
@@ -218,33 +224,33 @@ class AlpineRpcService(
             addProperty("name", name)
             if (description.isNotBlank()) addProperty("description", description)
         }
-        val result = client.call("createGroup", params).asJsonObject
+        val result = client.call("createGroup", params).safeAsJsonObject()
         return result.get("groupId").asLong
     }
 
     suspend fun deleteGroup(groupId: Long): Boolean {
         val params = JsonObject().apply { addProperty("groupId", groupId) }
-        val result = client.call("deleteGroup", params).asJsonObject
+        val result = client.call("deleteGroup", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun listGroups(): List<Long> {
-        val result = client.call("listGroups").asJsonObject
+        val result = client.call("listGroups").safeAsJsonObject()
         return result.getAsJsonArray("groupIds")?.map { it.asLong } ?: emptyList()
     }
 
     suspend fun getGroupInfo(groupId: Long): GroupInfo {
         val params = JsonObject().apply { addProperty("groupId", groupId) }
-        return parseGroupInfo(client.call("getGroupInfo", params).asJsonObject)
+        return parseGroupInfo(client.call("getGroupInfo", params).safeAsJsonObject())
     }
 
     suspend fun getDefaultGroupInfo(): GroupInfo {
-        return parseGroupInfo(client.call("getDefaultGroupInfo").asJsonObject)
+        return parseGroupInfo(client.call("getDefaultGroupInfo").safeAsJsonObject())
     }
 
     suspend fun getGroupPeerList(groupId: Long): List<Long> {
         val params = JsonObject().apply { addProperty("groupId", groupId) }
-        val result = client.call("getGroupPeerList", params).asJsonObject
+        val result = client.call("getGroupPeerList", params).safeAsJsonObject()
         return result.getAsJsonArray("peerIds")?.map { it.asLong } ?: emptyList()
     }
 
@@ -253,7 +259,7 @@ class AlpineRpcService(
             addProperty("groupId", groupId)
             addProperty("peerId", peerId)
         }
-        val result = client.call("addPeerToGroup", params).asJsonObject
+        val result = client.call("addPeerToGroup", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -262,7 +268,7 @@ class AlpineRpcService(
             addProperty("groupId", groupId)
             addProperty("peerId", peerId)
         }
-        val result = client.call("removePeerFromGroup", params).asJsonObject
+        val result = client.call("removePeerFromGroup", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
@@ -273,41 +279,41 @@ class AlpineRpcService(
             addProperty("libraryPath", libraryPath)
             addProperty("bootstrapSymbol", bootstrapSymbol)
         }
-        val result = client.call("registerModule", params).asJsonObject
+        val result = client.call("registerModule", params).safeAsJsonObject()
         return result.get("moduleId").asLong
     }
 
     suspend fun unregisterModule(moduleId: Long): Boolean {
         val params = JsonObject().apply { addProperty("moduleId", moduleId) }
-        val result = client.call("unregisterModule", params).asJsonObject
+        val result = client.call("unregisterModule", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun loadModule(moduleId: Long): Boolean {
         val params = JsonObject().apply { addProperty("moduleId", moduleId) }
-        val result = client.call("loadModule", params).asJsonObject
+        val result = client.call("loadModule", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun unloadModule(moduleId: Long): Boolean {
         val params = JsonObject().apply { addProperty("moduleId", moduleId) }
-        val result = client.call("unloadModule", params).asJsonObject
+        val result = client.call("unloadModule", params).safeAsJsonObject()
         return result.get("success")?.asBoolean ?: false
     }
 
     suspend fun listActiveModules(): List<Long> {
-        val result = client.call("listActiveModules").asJsonObject
+        val result = client.call("listActiveModules").safeAsJsonObject()
         return result.getAsJsonArray("moduleIds")?.map { it.asLong } ?: emptyList()
     }
 
     suspend fun listAllModules(): List<Long> {
-        val result = client.call("listAllModules").asJsonObject
+        val result = client.call("listAllModules").safeAsJsonObject()
         return result.getAsJsonArray("moduleIds")?.map { it.asLong } ?: emptyList()
     }
 
     suspend fun getModuleInfo(moduleId: Long): ModuleInfo {
         val params = JsonObject().apply { addProperty("moduleId", moduleId) }
-        val result = client.call("getModuleInfo", params).asJsonObject
+        val result = client.call("getModuleInfo", params).safeAsJsonObject()
         return ModuleInfo(
             moduleId = result.get("moduleId")?.asLong ?: moduleId,
             moduleName = result.get("moduleName")?.asString ?: "",

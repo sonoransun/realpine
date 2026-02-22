@@ -9,6 +9,8 @@ import com.alpine.app.data.model.ServerStatus
 import com.alpine.app.data.rpc.AlpineRpcService
 import com.alpine.app.data.rpc.TlsConfig
 import com.alpine.app.data.rpc.TlsMode
+import com.alpine.app.data.storage.SecureStorage
+import com.alpine.app.data.util.sanitizeError
 import com.alpine.app.ui.screens.settings.dataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +60,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 val port = prefs[stringPreferencesKey("port")] ?: "8080"
                 val tlsEnabled = prefs[stringPreferencesKey("tls_enabled")] == "true"
                 val tlsModeStr = prefs[stringPreferencesKey("tls_mode")] ?: "SYSTEM_CA"
-                val certFingerprint = prefs[stringPreferencesKey("tls_cert_fingerprint")] ?: ""
+                val certFingerprint = SecureStorage.read(getApplication(), "tls_cert_fingerprint")
+                    ?: prefs[stringPreferencesKey("tls_cert_fingerprint")] ?: ""
 
                 val tlsConfig = TlsConfig(
                     enabled = tlsEnabled,
@@ -68,8 +71,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 )
 
                 val baseUrl = tlsConfig.buildUrl(host, port)
+                val apiKey = SecureStorage.read(getApplication(), "api_key") ?: ""
                 rpcService?.shutdown()
-                rpcService = AlpineRpcService(baseUrl, tlsConfig, host)
+                rpcService = AlpineRpcService(baseUrl, tlsConfig, host, apiKey)
 
                 val status = rpcService!!.getStatus()
                 _serverStatus.value = status
@@ -88,7 +92,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                 _isLoading.value = false
             } catch (e: Exception) {
                 _isConnected.value = false
-                _error.value = e.message ?: "Connection failed"
+                _error.value = sanitizeError(e)
                 _isLoading.value = false
             }
         }

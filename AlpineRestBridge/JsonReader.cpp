@@ -8,6 +8,8 @@
 JsonReader::JsonReader (const string & json)
     : json_(json)
 {
+    if (json_.length() > 65536)
+        json_.resize(65536);
 }
 
 
@@ -74,6 +76,9 @@ JsonReader::getString (const string & key, string & value)
 
     while (pos < json_.length() && json_[pos] != '"')
     {
+        if (value.length() >= MAX_STRING_LENGTH)
+            return false;
+
         if (json_[pos] == '\\' && (pos + 1) < json_.length())
         {
             ++pos;

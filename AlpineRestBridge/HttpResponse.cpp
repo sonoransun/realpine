@@ -5,6 +5,26 @@
 #include <cstdio>
 
 
+string HttpResponse::corsOrigin_s;
+
+
+static string escapeJson(const string& s) {
+    string result;
+    result.reserve(s.length());
+    for (char c : s) {
+        switch (c) {
+            case '"':  result += "\\\""; break;
+            case '\\': result += "\\\\"; break;
+            case '\n': result += "\\n";  break;
+            case '\r': result += "\\r";  break;
+            case '\t': result += "\\t";  break;
+            default:   result += c;      break;
+        }
+    }
+    return result;
+}
+
+
 HttpResponse::HttpResponse (int            statusCode,
                             const string & statusText)
     : statusCode_(statusCode),
@@ -20,10 +40,20 @@ HttpResponse::HttpResponse (int            statusCode,
 void
 HttpResponse::addCorsHeaders ()
 {
-    headers_["Access-Control-Allow-Origin"]  = "*";
+    if (!corsOrigin_s.empty())
+        headers_["Access-Control-Allow-Origin"] = corsOrigin_s;
     headers_["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS";
-    headers_["Access-Control-Allow-Headers"] = "Content-Type";
+    headers_["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
+    headers_["X-Content-Type-Options"]       = "nosniff";
+    headers_["X-Frame-Options"]              = "DENY";
     headers_["Connection"]                   = "close";
+}
+
+
+void
+HttpResponse::setCorsOrigin (const string & origin)
+{
+    corsOrigin_s = origin;
 }
 
 
@@ -108,7 +138,7 @@ HttpResponse
 HttpResponse::badRequest (const string & message)
 {
     HttpResponse resp(400, "Bad Request");
-    resp.setJsonBody("{\"error\":\"" + message + "\"}");
+    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
     return resp;
 }
 
@@ -126,6 +156,6 @@ HttpResponse
 HttpResponse::serverError (const string & message)
 {
     HttpResponse resp(500, "Internal Server Error");
-    resp.setJsonBody("{\"error\":\"" + message + "\"}");
+    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
     return resp;
 }

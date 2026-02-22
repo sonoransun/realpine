@@ -4,6 +4,9 @@
 #include <HttpServer.h>
 #include <Log.h>
 #include <cstdio>
+#include <thread>
+#include <sys/socket.h>
+#include <sys/time.h>
 
 
 HttpServer::HttpServer (HttpRouter & router)
@@ -43,7 +46,22 @@ HttpServer::start (ulong   ipAddress,
             continue;
         }
 
-        handleConnection(transport.get());
+        if (activeConnections_.load() >= MAX_CONNECTIONS)
+        {
+            HttpResponse resp(503, "Service Unavailable");
+            resp.setJsonBody("{\"error\":\"Too many connections\"}");
+            string responseStr = resp.build();
+            transport->send((const byte*)responseStr.c_str(), responseStr.length());
+            continue;
+        }
+
+        TcpTransport* rawTransport = transport.release();
+        activeConnections_.fetch_add(1);
+        std::thread([this, rawTransport]() {
+            handleConnection(rawTransport);
+            delete rawTransport;
+            activeConnections_.fetch_sub(1);
+        }).detach();
     }
 
     return true;
@@ -61,19 +79,73 @@ HttpServer::stop ()
 void
 HttpServer::handleConnection (TcpTransport * transport)
 {
-    byte buffer[8192];
-    ulong bytesRead = 0;
+    // Set socket receive timeout
+    struct timeval tv;
+    tv.tv_sec = 30;
+    tv.tv_usec = 0;
+    setsockopt(transport->getFd(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
+    static constexpr ulong MAX_BODY_SIZE = 65536;
+    byte buffer[8192];
+    ulong totalRead = 0;
+    string rawData;
+
+    // First read to get headers
+    ulong bytesRead = 0;
     if (!transport->receive(buffer, sizeof(buffer), bytesRead))
         return;
+    rawData.append((const char*)buffer, bytesRead);
+    totalRead = bytesRead;
+
+    // Check for Content-Length and read more if needed
+    ulong headerEnd = rawData.find("\r\n\r\n");
+    if (headerEnd != string::npos) {
+        // Extract Content-Length from raw headers
+        ulong clPos = rawData.find("content-length:");
+        if (clPos == string::npos)
+            clPos = rawData.find("Content-Length:");
+
+        ulong contentLength = 0;
+        if (clPos != string::npos) {
+            ulong valStart = clPos + 15; // length of "content-length:"
+            while (valStart < rawData.length() && rawData[valStart] == ' ')
+                ++valStart;
+            string clStr;
+            while (valStart < rawData.length() && rawData[valStart] >= '0' && rawData[valStart] <= '9') {
+                clStr += rawData[valStart];
+                ++valStart;
+            }
+            if (!clStr.empty())
+                contentLength = strtoul(clStr.c_str(), nullptr, 10);
+        }
+
+        if (contentLength > MAX_BODY_SIZE) {
+            HttpResponse resp(413, "Payload Too Large");
+            resp.setJsonBody("{\"error\":\"Request body too large\"}");
+            string responseStr = resp.build();
+            transport->send((const byte*)responseStr.c_str(), responseStr.length());
+            return;
+        }
+
+        ulong bodyStart = headerEnd + 4;
+        ulong expectedTotal = bodyStart + contentLength;
+
+        while (totalRead < expectedTotal && totalRead < MAX_BODY_SIZE + 8192) {
+            bytesRead = 0;
+            if (!transport->receive(buffer, sizeof(buffer), bytesRead))
+                break;
+            rawData.append((const char*)buffer, bytesRead);
+            totalRead += bytesRead;
+        }
+    }
 
     HttpRequest request;
-
-    if (!HttpRequest::parse(buffer, bytesRead, request))
+    if (!HttpRequest::parse((const byte*)rawData.c_str(), rawData.length(), request))
     {
         HttpResponse resp = HttpResponse::badRequest("Malformed request");
         string responseStr = resp.build();
-        transport->send((const byte *)responseStr.c_str(), responseStr.length());
+        transport->send((const byte*)responseStr.c_str(), responseStr.length());
+        return;
     }
 
     Log::Debug("HttpServer: "s + request.method + " " + request.path);

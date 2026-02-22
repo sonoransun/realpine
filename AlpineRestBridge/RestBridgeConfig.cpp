@@ -268,6 +268,42 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back (currElement);
+
+    // API Key
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "API Key";
+    currElement->argOptionName = "apiKey";
+    currElement->envOptionName = "ALPINE_API_KEY";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // CORS Origin
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "CORS Origin";
+    currElement->argOptionName = "corsOrigin";
+    currElement->envOptionName = "CORS_ORIGIN";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // Module Registration Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Module Registration Enabled";
+    currElement->argOptionName = "moduleRegistration";
+    currElement->envOptionName = "MODULE_REGISTRATION";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // Module Directory
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Module Directory";
+    currElement->argOptionName = "moduleDirectory";
+    currElement->envOptionName = "MODULE_DIRECTORY";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 

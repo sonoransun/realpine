@@ -9,6 +9,7 @@ add_executable(AlpineServer
     ../AlpineRestBridge/HttpResponse.cpp
     ../AlpineRestBridge/JsonWriter.cpp
     ../AlpineRestBridge/JsonReader.cpp
+    ../AlpineRestBridge/ApiKeyAuth.cpp
 )
 target_include_directories(AlpineServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

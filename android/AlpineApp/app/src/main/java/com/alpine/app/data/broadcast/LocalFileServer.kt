@@ -55,8 +55,15 @@ class LocalFileServer(
                     return
                 }
 
+                // Reject path traversal
+                if (path.split("/").any { it == ".." }) {
+                    sendResponse(socket, 403, "Forbidden", "Access denied")
+                    return
+                }
+
                 val file = File(sharedDirectory, path.removePrefix("/files/"))
-                if (!file.canonicalPath.startsWith(sharedDirectory.canonicalPath)) {
+                if (!file.canonicalPath.startsWith(sharedDirectory.canonicalPath + File.separator)
+                    && file.canonicalPath != sharedDirectory.canonicalPath) {
                     sendResponse(socket, 403, "Forbidden", "Access denied")
                     return
                 }

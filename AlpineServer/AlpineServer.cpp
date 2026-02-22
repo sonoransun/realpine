@@ -19,6 +19,7 @@
 #include <HttpRouter.h>
 #include <HttpServer.h>
 #include <JsonRpcHandler.h>
+#include <ApiKeyAuth.h>
 
 #include <AlpineConfig.h>
 #include <AlpineStackConfig.h>
@@ -241,6 +242,14 @@ main (int argc, char *argv[])
     //
     HttpRouter rpcRouter;
     JsonRpcHandler::registerRoutes(rpcRouter);
+
+    // Initialize API key authentication
+    string apiKeyConfig;
+    if (Configuration::getValue("API Key", apiKeyConfig))
+        setenv("ALPINE_API_KEY", apiKeyConfig.c_str(), 0);
+    ApiKeyAuth::initialize();
+    rpcRouter.setAuthMiddleware(ApiKeyAuth::validate);
+    Log::Info("API key authentication enabled (key: "s + ApiKeyAuth::getKey().substr(0, 8) + "...)");
 
     HttpServer rpcServer(rpcRouter);
 

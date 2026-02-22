@@ -7,7 +7,10 @@
 #include <JsonReader.h>
 #include <JsonWriter.h>
 #include <Log.h>
+#include <Configuration.h>
+#include <NetUtils.h>
 #include <cstdlib>
+#include <climits>
 
 
 
@@ -18,10 +21,21 @@
 static string
 jsonRpcError (int code, const string & message, const string & id)
 {
-    // Build the error response with negative code embedded directly
+    string escaped;
+    escaped.reserve(message.length());
+    for (char c : message) {
+        switch (c) {
+            case '"':  escaped += "\\\""; break;
+            case '\\': escaped += "\\\\"; break;
+            case '\n': escaped += "\\n";  break;
+            case '\r': escaped += "\\r";  break;
+            case '\t': escaped += "\\t";  break;
+            default:   escaped += c;      break;
+        }
+    }
     string codeStr = std::to_string(code);
     return "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":"s + codeStr +
-           ",\"message\":\""s + message + "\"},\"id\":"s + id + "}";
+           ",\"message\":\""s + escaped + "\"},\"id\":"s + id + "}";
 }
 
 
@@ -48,6 +62,9 @@ rpcStartQuery (const string & body, string & result)
 
     string queryString;
     if (!reader.getString("queryString", queryString))
+        return false;
+
+    if (queryString.length() > 1024)
         return false;
 
     AlpineStackInterface::t_QueryOptions options;
@@ -339,6 +356,14 @@ rpcAddPeer (const string & body, string & result)
     ulong portVal = 0;
     if (!reader.getUlong("port", portVal))
         return false;
+
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(ipAddress, validatedIp))
+        return false;
+
+    if (portVal == 0 || portVal > 65535)
+        return false;
+
     ushort port = static_cast<ushort>(portVal);
     port = htons(port);
 
@@ -367,6 +392,13 @@ rpcGetPeerId (const string & body, string & result)
     ulong portVal = 0;
     if (!reader.getUlong("port", portVal))
         return false;
+
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(ipAddress, validatedIp))
+        return false;
+    if (portVal == 0 || portVal > 65535)
+        return false;
+
     ushort port = static_cast<ushort>(portVal);
     port = htons(port);
 
@@ -463,6 +495,10 @@ rpcExcludeHost (const string & body, string & result)
     if (!reader.getString("ipAddress", ipAddress))
         return false;
 
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(ipAddress, validatedIp))
+        return false;
+
     if (!DtcpStackInterface::excludeHost(ipAddress))
         return false;
 
@@ -489,6 +525,13 @@ rpcExcludeSubnet (const string & body, string & result)
     if (!reader.getString("subnetMask", subnetMask))
         return false;
 
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(subnetIpAddress, validatedIp))
+        return false;
+    ulong validatedMask = 0;
+    if (!NetUtils::stringIpToLong(subnetMask, validatedMask))
+        return false;
+
     if (!DtcpStackInterface::excludeSubnet(subnetIpAddress, subnetMask))
         return false;
 
@@ -511,6 +554,10 @@ rpcAllowHost (const string & body, string & result)
     if (!reader.getString("ipAddress", ipAddress))
         return false;
 
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(ipAddress, validatedIp))
+        return false;
+
     if (!DtcpStackInterface::allowHost(ipAddress))
         return false;
 
@@ -531,6 +578,10 @@ rpcAllowSubnet (const string & body, string & result)
 
     string subnetIpAddress;
     if (!reader.getString("subnetIpAddress", subnetIpAddress))
+        return false;
+
+    ulong validatedIp = 0;
+    if (!NetUtils::stringIpToLong(subnetIpAddress, validatedIp))
         return false;
 
     if (!DtcpStackInterface::allowSubnet(subnetIpAddress))
@@ -830,6 +881,22 @@ rpcRegisterModule (const string & body, string & result)
     if (!reader.getString("libraryPath", libraryPath))
         return false;
 
+    // Reject paths containing directory traversal
+    if (libraryPath.find("..") != string::npos)
+        return false;
+
+    // If module directory is configured, require path starts with it
+    string allowedDir;
+    if (Configuration::getValue("Module Directory", allowedDir) && !allowedDir.empty()) {
+        char resolvedPath[PATH_MAX];
+        char resolvedAllowed[PATH_MAX];
+        if (!realpath(libraryPath.c_str(), resolvedPath) ||
+            !realpath(allowedDir.c_str(), resolvedAllowed))
+            return false;
+        if (string(resolvedPath).find(resolvedAllowed) != 0)
+            return false;
+    }
+
     string bootstrapSymbol;
     if (!reader.getString("bootstrapSymbol", bootstrapSymbol))
         return false;
@@ -1074,8 +1141,15 @@ initMethodTable ()
     methodTable_s.emplace("addPeerToGroup",        rpcAddPeerToGroup);
     methodTable_s.emplace("removePeerFromGroup",   rpcRemovePeerFromGroup);
 
-    // Module
-    methodTable_s.emplace("registerModule",    rpcRegisterModule);
+    // Module — registerModule gated by config
+    {
+        string moduleRegistrationEnabled;
+        if (Configuration::getValue("Module Registration Enabled", moduleRegistrationEnabled) &&
+            (moduleRegistrationEnabled == "true" || moduleRegistrationEnabled == "1"))
+        {
+            methodTable_s.emplace("registerModule", rpcRegisterModule);
+        }
+    }
     methodTable_s.emplace("unregisterModule",  rpcUnregisterModule);
     methodTable_s.emplace("loadModule",        rpcLoadModule);
     methodTable_s.emplace("unloadModule",      rpcUnloadModule);

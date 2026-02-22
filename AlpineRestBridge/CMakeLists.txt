@@ -6,6 +6,7 @@ add_executable(AlpineRestBridge
     HttpResponse.cpp
     HttpRouter.cpp
     HttpServer.cpp
+    ApiKeyAuth.cpp
     RestBridgeConfig.cpp
     DiscoveryBeacon.cpp
     BroadcastQueryHandler.cpp

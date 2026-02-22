@@ -8,6 +8,9 @@ import com.alpine.app.data.model.PeerDetail
 import com.alpine.app.data.rpc.AlpineRpcService
 import com.alpine.app.data.rpc.TlsConfig
 import com.alpine.app.data.rpc.TlsMode
+import com.alpine.app.data.storage.SecureStorage
+import com.alpine.app.data.util.sanitizeError
+import com.alpine.app.data.validation.InputValidator
 import com.alpine.app.ui.screens.settings.dataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +46,7 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
                 val details = peerIds.map { svc.getPeer(it) }
                 _peers.value = details
             } catch (e: Exception) {
-                _message.value = "Failed to load peers: ${e.message}"
+                _message.value = sanitizeError(e)
             }
             _isLoading.value = false
         }
@@ -51,12 +54,20 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addPeer(ipAddress: String, port: Long) {
         viewModelScope.launch {
+            if (!InputValidator.isValidIpAddress(ipAddress)) {
+                _message.value = "Invalid IP address"
+                return@launch
+            }
+            if (port < 1 || port > 65535) {
+                _message.value = "Invalid port (must be 1-65535)"
+                return@launch
+            }
             try {
                 getService().addPeer(ipAddress, port)
                 _message.value = "Peer added"
                 loadPeers()
             } catch (e: Exception) {
-                _message.value = "Failed: ${e.message}"
+                _message.value = sanitizeError(e)
             }
         }
     }
@@ -67,7 +78,7 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
                 val ok = getService().pingPeer(peerId)
                 _message.value = if (ok) "Ping sent" else "Ping failed"
             } catch (e: Exception) {
-                _message.value = "Ping error: ${e.message}"
+                _message.value = sanitizeError(e)
             }
         }
     }
@@ -78,7 +89,7 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
                 getService().activatePeer(peerId)
                 _message.value = "Peer activated"
             } catch (e: Exception) {
-                _message.value = "Failed: ${e.message}"
+                _message.value = sanitizeError(e)
             }
         }
     }
@@ -89,7 +100,7 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
                 getService().deactivatePeer(peerId)
                 _message.value = "Peer deactivated"
             } catch (e: Exception) {
-                _message.value = "Failed: ${e.message}"
+                _message.value = sanitizeError(e)
             }
         }
     }
@@ -105,14 +116,16 @@ class PeersViewModel(application: Application) : AndroidViewModel(application) {
             val port = prefs[stringPreferencesKey("port")] ?: "8080"
             val tlsEnabled = prefs[stringPreferencesKey("tls_enabled")] == "true"
             val tlsModeStr = prefs[stringPreferencesKey("tls_mode")] ?: "SYSTEM_CA"
-            val certFp = prefs[stringPreferencesKey("tls_cert_fingerprint")] ?: ""
+            val certFp = SecureStorage.read(getApplication(), "tls_cert_fingerprint")
+                ?: prefs[stringPreferencesKey("tls_cert_fingerprint")] ?: ""
             val tlsConfig = TlsConfig(
                 enabled = tlsEnabled,
                 mode = try { TlsMode.valueOf(tlsModeStr) } catch (_: Exception) { TlsMode.SYSTEM_CA },
                 certFingerprint = certFp,
                 hostname = host
             )
-            rpcService = AlpineRpcService(tlsConfig.buildUrl(host, port), tlsConfig, host)
+            val apiKey = SecureStorage.read(getApplication(), "api_key") ?: ""
+            rpcService = AlpineRpcService(tlsConfig.buildUrl(host, port), tlsConfig, host, apiKey)
         }
         return rpcService!!
     }

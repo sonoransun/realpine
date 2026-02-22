@@ -1,5 +1,6 @@
 package com.alpine.app.data.rpc
 
+import com.alpine.app.BuildConfig
 import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import java.security.SecureRandom
@@ -40,6 +41,10 @@ data class TlsConfig(
             }
 
             TlsMode.TRUST_ALL -> {
+                if (!BuildConfig.DEBUG) {
+                    android.util.Log.w("TlsConfig", "TRUST_ALL mode not available in release builds, falling back to SYSTEM_CA")
+                    return builder
+                }
                 val trustAllManager = object : X509TrustManager {
                     override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
                     override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}

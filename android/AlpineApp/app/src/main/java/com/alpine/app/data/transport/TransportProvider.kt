@@ -8,6 +8,7 @@ import com.alpine.app.AlpineApp
 import com.alpine.app.data.rpc.AlpineRpcService
 import com.alpine.app.data.rpc.TlsConfig
 import com.alpine.app.data.rpc.TlsMode
+import com.alpine.app.data.storage.SecureStorage
 import kotlinx.coroutines.flow.first
 
 object TransportProvider {
@@ -30,9 +31,11 @@ object TransportProvider {
             TransportMode.REST_BRIDGE -> {
                 val host = prefs[hostKey] ?: "10.0.2.2"
                 val port = prefs[portKey] ?: "8080"
-                val tlsConfig = buildTlsConfig(prefs, host)
+                val certFp = SecureStorage.read(application, "tls_cert_fingerprint") ?: prefs[tlsCertFingerprintKey] ?: ""
+                val tlsConfig = buildTlsConfig(prefs, host, certFp)
                 val baseUrl = tlsConfig.buildUrl(host, port)
-                val rpcService = AlpineRpcService(baseUrl, tlsConfig, host)
+                val apiKey = SecureStorage.read(application, "api_key") ?: ""
+                val rpcService = AlpineRpcService(baseUrl, tlsConfig, host, apiKey)
                 JsonRpcTransport(rpcService)
             }
             TransportMode.WIFI_BROADCAST -> (application as AlpineApp).broadcastTransport
@@ -47,10 +50,10 @@ object TransportProvider {
             ?: TransportMode.REST_BRIDGE
     }
 
-    fun buildTlsConfig(prefs: Preferences, host: String): TlsConfig {
+    fun buildTlsConfig(prefs: Preferences, host: String, certFpOverride: String? = null): TlsConfig {
         val tlsEnabled = prefs[tlsEnabledKey] == "true"
         val tlsModeStr = prefs[tlsModeKey] ?: "SYSTEM_CA"
-        val certFp = prefs[tlsCertFingerprintKey] ?: ""
+        val certFp = certFpOverride ?: prefs[tlsCertFingerprintKey] ?: ""
         return TlsConfig(
             enabled = tlsEnabled,
             mode = try { TlsMode.valueOf(tlsModeStr) } catch (_: Exception) { TlsMode.SYSTEM_CA },

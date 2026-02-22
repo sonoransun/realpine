@@ -15,7 +15,10 @@ import com.alpine.app.data.discovery.WifiDiscoveryManager
 import com.alpine.app.data.rpc.AlpineRpcService
 import com.alpine.app.data.rpc.TlsConfig
 import com.alpine.app.data.rpc.TlsMode
+import com.alpine.app.data.storage.SecureStorage
 import com.alpine.app.data.transport.TransportMode
+import com.alpine.app.data.util.sanitizeError
+import com.alpine.app.data.validation.InputValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +41,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val tlsEnabledKey = stringPreferencesKey("tls_enabled")
     private val tlsModeKey = stringPreferencesKey("tls_mode")
     private val tlsCertFingerprintKey = stringPreferencesKey("tls_cert_fingerprint")
+    private val apiKeyKey = stringPreferencesKey("api_key")
 
     private val _host = MutableStateFlow("10.0.2.2")
     val host: StateFlow<String> = _host.asStateFlow()
@@ -79,6 +83,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _tlsCertFingerprint = MutableStateFlow("")
     val tlsCertFingerprint: StateFlow<String> = _tlsCertFingerprint.asStateFlow()
 
+    // API key
+    private val _apiKey = MutableStateFlow("")
+    val apiKey: StateFlow<String> = _apiKey.asStateFlow()
+
+    // Debounce test connection
+    private var lastTestTime = 0L
+
     init {
         viewModelScope.launch {
             val prefs = dataStore.data.first()
@@ -97,6 +108,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 } catch (_: Exception) {}
             }
             prefs[tlsCertFingerprintKey]?.let { _tlsCertFingerprint.value = it }
+            prefs[apiKeyKey]?.let { _apiKey.value = it }
+
+            // Override with secure storage values if available
+            SecureStorage.read(application, "tls_cert_fingerprint")?.let { _tlsCertFingerprint.value = it }
+            SecureStorage.read(application, "api_key")?.let { _apiKey.value = it }
         }
     }
 
@@ -128,6 +144,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _tlsCertFingerprint.value = fingerprint
     }
 
+    fun updateApiKey(key: String) {
+        _apiKey.value = key
+    }
+
     fun startDiscovery() {
         discoveryManager.start(viewModelScope)
     }
@@ -142,9 +162,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun testConnection() {
+        val now = System.currentTimeMillis()
+        if (now - lastTestTime < 2000) return
+        lastTestTime = now
+
         viewModelScope.launch {
             _connectionStatus.value = ConnectionStatus.Testing
             _statusMessage.value = ""
+
+            if (!InputValidator.isValidHost(_host.value) || !InputValidator.isValidPort(_port.value)) {
+                _connectionStatus.value = ConnectionStatus.Failed
+                _statusMessage.value = "Invalid host or port"
+                return@launch
+            }
 
             try {
                 val tlsConfig = TlsConfig(
@@ -154,14 +184,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     hostname = _host.value
                 )
                 val baseUrl = tlsConfig.buildUrl(_host.value, _port.value)
-                val rpc = AlpineRpcService(baseUrl, tlsConfig, _host.value)
+                val rpc = AlpineRpcService(baseUrl, tlsConfig, _host.value, _apiKey.value)
                 val status = rpc.getStatus()
                 _connectionStatus.value = ConnectionStatus.Connected
                 _statusMessage.value = "Connected via JSON-RPC - ${status.version}"
                 rpc.shutdown()
             } catch (e: Exception) {
                 _connectionStatus.value = ConnectionStatus.Failed
-                _statusMessage.value = e.message ?: "Connection failed"
+                _statusMessage.value = sanitizeError(e)
             }
         }
     }
@@ -179,7 +209,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         broadcastServiceManager.updateSharedDirectory(_sharedDirectory.value)
     }
 
-    fun saveAndContinue() {
+    fun saveAndContinue(): Boolean {
+        if (_transportMode.value == TransportMode.REST_BRIDGE) {
+            if (!InputValidator.isValidHost(_host.value)) {
+                _statusMessage.value = "Invalid host address"
+                return false
+            }
+            if (!InputValidator.isValidPort(_port.value)) {
+                _statusMessage.value = "Invalid port (must be 1-65535)"
+                return false
+            }
+            if (_tlsEnabled.value && _tlsMode.value == TlsMode.PINNED &&
+                !InputValidator.isValidFingerprint(_tlsCertFingerprint.value)) {
+                _statusMessage.value = "Invalid certificate fingerprint"
+                return false
+            }
+        }
         viewModelScope.launch {
             dataStore.edit { prefs ->
                 prefs[hostKey] = _host.value
@@ -188,12 +233,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 prefs[sharedDirectoryKey] = _sharedDirectory.value
                 prefs[tlsEnabledKey] = if (_tlsEnabled.value) "true" else "false"
                 prefs[tlsModeKey] = _tlsMode.value.name
-                prefs[tlsCertFingerprintKey] = _tlsCertFingerprint.value
             }
+            // Store secrets in encrypted storage
+            SecureStorage.store(getApplication(), "tls_cert_fingerprint", _tlsCertFingerprint.value)
+            SecureStorage.store(getApplication(), "api_key", _apiKey.value)
+
             if (_transportMode.value == TransportMode.WIFI_BROADCAST) {
                 broadcastServiceManager.updateSharedDirectory(_sharedDirectory.value)
             }
         }
+        return true
     }
 
     override fun onCleared() {

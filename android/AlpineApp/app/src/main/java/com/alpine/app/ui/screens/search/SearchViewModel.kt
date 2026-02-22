@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.alpine.app.data.model.QueryRequest
 import com.alpine.app.data.transport.TransportMode
 import com.alpine.app.data.transport.TransportProvider
+import com.alpine.app.data.util.sanitizeError
+import com.alpine.app.data.validation.InputValidator
 import com.alpine.app.ui.screens.settings.dataStore
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +54,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun updateQueryString(value: String) {
-        _queryString.value = value
+        _queryString.value = InputValidator.sanitizeQueryString(value)
     }
 
     fun updateGroupName(value: String) {
@@ -92,7 +94,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
                 _navigateToResults.emit(response.queryId)
             }.onFailure { e ->
                 _isLoading.value = false
-                _error.value = e.message ?: "Search failed"
+                _error.value = sanitizeError(e)
             }
         }
     }

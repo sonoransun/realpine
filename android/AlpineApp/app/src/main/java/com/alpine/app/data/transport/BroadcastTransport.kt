@@ -20,6 +20,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 class BroadcastTransport : QueryTransport {
@@ -62,8 +63,8 @@ class BroadcastTransport : QueryTransport {
     private fun checkTimeouts() {
         val now = System.currentTimeMillis()
         for (state in queries.values) {
-            if (state.inProgress && now - state.startTime > QUERY_TIMEOUT_MS) {
-                state.inProgress = false
+            if (state.inProgress.get() && now - state.startTime > QUERY_TIMEOUT_MS) {
+                state.inProgress.set(false)
             }
         }
     }
@@ -74,7 +75,7 @@ class BroadcastTransport : QueryTransport {
             if (json.get("type")?.asString != "alpine_response") return
             val queryId = json.get("queryId")?.asLong ?: return
             val state = queries[queryId] ?: return
-            if (!state.inProgress) return
+            if (!state.inProgress.get()) return
 
             val responderId = json.get("responderId")?.asString ?: return
             val resources = gson.fromJson(
@@ -85,7 +86,7 @@ class BroadcastTransport : QueryTransport {
             state.results[responderId] = PeerResources(peerId, resources)
 
             if (state.results.values.sumOf { it.resources.size } >= state.request.autoHaltLimit) {
-                state.inProgress = false
+                state.inProgress.compareAndSet(true, false)
             }
         } catch (_: Exception) {}
     }
@@ -128,7 +129,7 @@ class BroadcastTransport : QueryTransport {
         val state = queries[queryId]
             ?: return Result.failure(Exception("Query $queryId not found"))
         return Result.success(QueryStatusResponse(
-            inProgress = state.inProgress,
+            inProgress = state.inProgress.get(),
             totalPeers = 0,
             peersQueried = 0,
             numPeerResponses = state.results.size.toLong(),
@@ -143,7 +144,7 @@ class BroadcastTransport : QueryTransport {
     }
 
     override suspend fun cancelQuery(queryId: Long): Result<Unit> {
-        queries[queryId]?.inProgress = false
+        queries[queryId]?.inProgress?.set(false)
         try {
             sendBroadcast(JsonObject().apply {
                 addProperty("type", "alpine_cancel")
@@ -164,6 +165,6 @@ class BroadcastTransport : QueryTransport {
         val request: QueryRequest,
         val startTime: Long = System.currentTimeMillis(),
         val results: ConcurrentHashMap<String, PeerResources> = ConcurrentHashMap(),
-        @Volatile var inProgress: Boolean = true
+        val inProgress: AtomicBoolean = AtomicBoolean(true)
     )
 }

@@ -36,6 +36,8 @@ class HttpResponse
 
     static HttpResponse  serverError (const string & message);
 
+    static void  setCorsOrigin (const string & origin);
+
 
   private:
 
@@ -46,5 +48,7 @@ class HttpResponse
     string  body_;
 
     std::unordered_map<string, string>  headers_;
+
+    static string  corsOrigin_s;
 
 };

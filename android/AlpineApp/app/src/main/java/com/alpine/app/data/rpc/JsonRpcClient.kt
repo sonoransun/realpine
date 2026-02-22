@@ -11,13 +11,15 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
+import com.alpine.app.BuildConfig
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 class JsonRpcClient(
     private val baseUrl: String,
     tlsConfig: TlsConfig = TlsConfig(),
-    host: String = ""
+    host: String = "",
+    private val apiKey: String = ""
 ) {
     private val gson = Gson()
     private val requestId = AtomicLong(1)
@@ -28,9 +30,19 @@ class JsonRpcClient(
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
+        if (apiKey.isNotBlank()) {
+            builder.addInterceptor { chain ->
+                val newRequest = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer $apiKey")
+                    .build()
+                chain.proceed(newRequest)
+            }
+        }
+        if (BuildConfig.DEBUG) {
+            builder.addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.HEADERS
             })
+        }
         tlsConfig.applyTo(builder, host)
         builder.build()
     }
@@ -62,7 +74,11 @@ class JsonRpcClient(
                 )
             }
 
-            val json = JsonParser.parseString(responseBody).asJsonObject
+            val json = try {
+                JsonParser.parseString(responseBody).asJsonObject
+            } catch (e: Exception) {
+                throw JsonRpcException(-32603, "Invalid JSON response: ${e.message}")
+            }
 
             if (json.has("error")) {
                 val error = json.getAsJsonObject("error")

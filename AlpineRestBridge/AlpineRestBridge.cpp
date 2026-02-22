@@ -17,6 +17,8 @@
 
 #include <HttpRouter.h>
 #include <HttpServer.h>
+#include <HttpResponse.h>
+#include <ApiKeyAuth.h>
 #include <QueryHandler.h>
 #include <PeerHandler.h>
 #include <StatusHandler.h>
@@ -139,6 +141,19 @@ main (int argc, char *argv[])
     QueryHandler::registerRoutes(router);
     PeerHandler::registerRoutes(router);
     StatusHandler::registerRoutes(router);
+
+    // Initialize API key authentication
+    string apiKeyConfig;
+    if (Configuration::getValue("API Key", apiKeyConfig))
+        setenv("ALPINE_API_KEY", apiKeyConfig.c_str(), 0);
+    ApiKeyAuth::initialize();
+    router.setAuthMiddleware(ApiKeyAuth::validate);
+    Log::Info("API key authentication enabled (key: "s + ApiKeyAuth::getKey().substr(0, 8) + "...)");
+
+    // Configure CORS origin
+    string corsOrigin;
+    if (Configuration::getValue("CORS Origin", corsOrigin))
+        HttpResponse::setCorsOrigin(corsOrigin);
 
 
     // Start discovery beacon (non-fatal if it fails)

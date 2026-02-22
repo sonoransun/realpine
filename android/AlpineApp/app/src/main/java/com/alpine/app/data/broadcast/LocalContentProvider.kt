@@ -25,18 +25,19 @@ class LocalContentProvider(private var sharedDirectory: File) {
     fun search(queryString: String, localAddress: String, fileServerPort: Int): List<ResourceDesc> {
         if (queryString.isBlank()) return emptyList()
 
+        val sanitized = queryString.take(256)
         val pattern = try {
-            Regex(
-                queryString.replace(".", "\\.").replace("*", ".*").replace("?", "."),
-                RegexOption.IGNORE_CASE
-            )
+            val escaped = Regex.escape(sanitized)
+            val globPattern = escaped.replace("\\*", ".*").replace("\\?", ".")
+            Regex(globPattern, RegexOption.IGNORE_CASE)
         } catch (_: Exception) { null }
 
         return indexedFiles
             .filter { file ->
                 pattern?.containsMatchIn(file.name)
-                    ?: file.name.contains(queryString, ignoreCase = true)
+                    ?: file.name.contains(sanitized, ignoreCase = true)
             }
+            .take(500)
             .mapIndexed { index, file ->
                 ResourceDesc(
                     resourceId = (index + 1).toLong(),

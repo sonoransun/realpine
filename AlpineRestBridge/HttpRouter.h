@@ -6,6 +6,9 @@
 #include <HttpRequest.h>
 #include <HttpResponse.h>
 #include <unordered_map>
+#include <functional>
+
+using AuthMiddleware = std::function<bool(const HttpRequest&, HttpResponse&)>;
 
 
 typedef HttpResponse (*RouteHandler)(const HttpRequest & request,
@@ -25,6 +28,8 @@ class HttpRouter
 
     HttpResponse  dispatch (const HttpRequest & request);
 
+    void  setAuthMiddleware (AuthMiddleware middleware);
+
 
   private:
 
@@ -42,5 +47,6 @@ class HttpRouter
                              std::unordered_map<string, string> &    params);
 
     vector<Route>  routes_;
+    AuthMiddleware authMiddleware_;
 
 };

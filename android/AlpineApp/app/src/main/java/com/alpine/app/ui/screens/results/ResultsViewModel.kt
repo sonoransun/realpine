@@ -8,6 +8,7 @@ import com.alpine.app.data.model.PeerResources
 import com.alpine.app.data.model.QueryStatusResponse
 import com.alpine.app.data.transport.QueryTransport
 import com.alpine.app.data.transport.TransportProvider
+import com.alpine.app.data.util.sanitizeError
 import com.alpine.app.ui.screens.settings.dataStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -55,7 +56,7 @@ class ResultsViewModel(
                     _queryStatus.value = status
                     _isLoading.value = false
                 }.onFailure { e ->
-                    _error.value = e.message ?: "Failed to get status"
+                    _error.value = sanitizeError(e)
                     _isLoading.value = false
                     return@launch
                 }

@@ -11,6 +11,7 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 class BroadcastResponder(
     private val contentProvider: LocalContentProvider,
@@ -22,6 +23,12 @@ class BroadcastResponder(
     private var listenJob: Job? = null
     private val gson = Gson()
     private val responderId = UUID.randomUUID().toString().take(8)
+    private val queryTimestamps = ConcurrentHashMap<String, MutableList<Long>>()
+
+    companion object {
+        private const val RATE_LIMIT_WINDOW_MS = 10_000L
+        private const val MAX_QUERIES_PER_WINDOW = 5
+    }
 
     fun start(scope: CoroutineScope) {
         listenJob = scope.launch(Dispatchers.IO) {
@@ -55,6 +62,15 @@ class BroadcastResponder(
 
             val queryString = json.get("queryString")?.asString ?: return
             val senderAddress = json.get("senderAddress")?.asString ?: return
+
+            // Rate limit per sender
+            val now = System.currentTimeMillis()
+            val timestamps = queryTimestamps.getOrPut(senderAddress) { mutableListOf() }
+            synchronized(timestamps) {
+                timestamps.removeAll { now - it > RATE_LIMIT_WINDOW_MS }
+                if (timestamps.size >= MAX_QUERIES_PER_WINDOW) return
+                timestamps.add(now)
+            }
             val senderPort = json.get("senderPort")?.asInt ?: return
             val queryId = json.get("queryId")?.asLong ?: return
 

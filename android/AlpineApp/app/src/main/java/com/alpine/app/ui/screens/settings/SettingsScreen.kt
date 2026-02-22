@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.alpine.app.BuildConfig
 import com.alpine.app.data.rpc.TlsMode
 import com.alpine.app.data.transport.TransportMode
 import com.alpine.app.ui.components.ConnectionIndicator
@@ -59,6 +60,7 @@ fun SettingsScreen(
     val tlsEnabled by viewModel.tlsEnabled.collectAsState()
     val tlsMode by viewModel.tlsMode.collectAsState()
     val tlsCertFingerprint by viewModel.tlsCertFingerprint.collectAsState()
+    val apiKey by viewModel.apiKey.collectAsState()
 
     DisposableEffect(Unit) {
         viewModel.startDiscovery()
@@ -196,6 +198,25 @@ fun SettingsScreen(
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider()
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Authentication",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = apiKey,
+                        onValueChange = { viewModel.updateApiKey(it) },
+                        label = { Text("API Key") },
+                        placeholder = { Text("Enter server API key") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
@@ -252,9 +273,10 @@ fun SettingsScreen(
 
             Button(
                 onClick = {
-                    viewModel.saveAndContinue()
-                    navController.navigate("dashboard") {
-                        popUpTo("settings") { inclusive = true }
+                    if (viewModel.saveAndContinue()) {
+                        navController.navigate("dashboard") {
+                            popUpTo("settings") { inclusive = true }
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -316,7 +338,9 @@ private fun TlsSettingsSection(
                 TlsMode.SYSTEM_CA to ("System CA" to "Verify using device trusted certificates"),
                 TlsMode.PINNED to ("Certificate Pinning" to "Pin to a specific certificate fingerprint"),
                 TlsMode.TRUST_ALL to ("Trust All (Dev)" to "Accept any certificate — insecure")
-            )
+            ).let { list ->
+                if (BuildConfig.DEBUG) list else list.filter { it.first != TlsMode.TRUST_ALL }
+            }
 
             modes.forEach { (mode, labelDesc) ->
                 val (label, description) = labelDesc

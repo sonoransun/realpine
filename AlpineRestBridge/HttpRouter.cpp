@@ -25,6 +25,13 @@ HttpRouter::addRoute (const string &  method,
 
 
 void
+HttpRouter::setAuthMiddleware (AuthMiddleware middleware)
+{
+    authMiddleware_ = std::move(middleware);
+}
+
+
+void
 HttpRouter::splitPath (const string &     path,
                        vector<string> &   segments)
 {
@@ -87,6 +94,12 @@ HttpRouter::dispatch (const HttpRequest & request)
     if (request.method == "OPTIONS")
     {
         return HttpResponse(200, "OK");
+    }
+
+    if (authMiddleware_) {
+        HttpResponse authResp(401, "Unauthorized");
+        if (!authMiddleware_(request, authResp))
+            return authResp;
     }
 
     vector<string> pathParts;

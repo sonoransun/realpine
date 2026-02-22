@@ -9,6 +9,8 @@ class JsonReader
 {
   public:
 
+    static constexpr ulong MAX_STRING_LENGTH = 4096;
+
     JsonReader (const string & json);
     ~JsonReader () = default;
 
