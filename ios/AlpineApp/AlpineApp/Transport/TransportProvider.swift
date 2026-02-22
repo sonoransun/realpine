@@ -4,10 +4,10 @@ import Foundation
 enum TransportProvider {
 
     /// Creates a QueryTransport for query operations.
-    static func createTransport(settings: SettingsStore, secureStorage: SecureStorage) -> QueryTransport {
+    static func createTransport(settings: SettingsStore, secureStorage: SecureStorage, authManager: AuthManager? = nil) -> QueryTransport {
         switch settings.transportMode {
         case .restBridge:
-            let service = createApiService(settings: settings, secureStorage: secureStorage)
+            let service = createApiService(settings: settings, secureStorage: secureStorage, authManager: authManager)
             return RestApiTransport(apiService: service)
         case .wifiBroadcast:
             return BroadcastTransport()
@@ -15,7 +15,7 @@ enum TransportProvider {
     }
 
     /// Creates an AlpineApiService for full API access (all endpoints).
-    static func createApiService(settings: SettingsStore, secureStorage: SecureStorage) -> AlpineApiService {
+    static func createApiService(settings: SettingsStore, secureStorage: SecureStorage, authManager: AuthManager? = nil) -> AlpineApiService {
         let tlsConfig = TlsConfig(
             enabled: settings.tlsEnabled,
             mode: settings.tlsMode,
@@ -23,7 +23,8 @@ enum TransportProvider {
         )
         let baseURL = buildBaseURL(host: settings.host, port: settings.port, tlsConfig: tlsConfig)
         let apiKey = secureStorage.read(key: "apiKey") ?? ""
-        let client = RestApiClient(baseURL: baseURL, apiKey: apiKey, tlsConfig: tlsConfig)
+        let sessionToken = authManager?.currentAccessToken()
+        let client = RestApiClient(baseURL: baseURL, apiKey: apiKey, sessionToken: sessionToken, tlsConfig: tlsConfig)
         return AlpineApiService(client: client)
     }
 

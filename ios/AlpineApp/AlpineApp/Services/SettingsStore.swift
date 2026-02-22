@@ -48,6 +48,18 @@ final class SettingsStore {
         didSet { Self.defaults.set(fileServerPort, forKey: Self.keyPrefix + "fileServerPort") }
     }
 
+    var authMethod: AuthMethod {
+        didSet { Self.defaults.set(authMethod.rawValue, forKey: Self.keyPrefix + "authMethod") }
+    }
+
+    var authRequired: Bool {
+        didSet { Self.defaults.set(authRequired, forKey: Self.keyPrefix + "authRequired") }
+    }
+
+    var autoLockTimeout: Int {
+        didSet { Self.defaults.set(autoLockTimeout, forKey: Self.keyPrefix + "autoLockTimeout") }
+    }
+
     init() {
         let defaults = Self.defaults
         let prefix = Self.keyPrefix
@@ -78,5 +90,20 @@ final class SettingsStore {
 
         let storedPort = defaults.integer(forKey: prefix + "fileServerPort")
         self.fileServerPort = storedPort != 0 ? storedPort : 8091
+
+        if let authMethodRaw = defaults.string(forKey: prefix + "authMethod"),
+           let method = AuthMethod(rawValue: authMethodRaw) {
+            self.authMethod = method
+        } else {
+            self.authMethod = .none
+        }
+
+        self.authRequired = defaults.bool(forKey: prefix + "authRequired")
+
+        if defaults.object(forKey: prefix + "autoLockTimeout") != nil {
+            self.autoLockTimeout = defaults.integer(forKey: prefix + "autoLockTimeout")
+        } else {
+            self.autoLockTimeout = -1
+        }
     }
 }

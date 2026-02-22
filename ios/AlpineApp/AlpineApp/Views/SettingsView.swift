@@ -21,6 +21,7 @@ struct SettingsView: View {
                 connectionSection
                 tlsSection
                 apiKeySection
+                securitySection
                 testConnectionSection
             } else {
                 wifiBroadcastSection
@@ -128,6 +129,42 @@ struct SettingsView: View {
             SecureField("API Key", text: $viewModel.apiKey)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
+        }
+    }
+
+    // MARK: - Security
+
+    private var securitySection: some View {
+        Section("Security") {
+            Toggle("Require Authentication", isOn: $viewModel.authRequired)
+
+            if viewModel.authRequired {
+                Picker("Auth Method", selection: $viewModel.authMethodRaw) {
+                    Text("None").tag(AuthMethod.none.rawValue)
+                    Text("TOTP").tag(AuthMethod.totp.rawValue)
+                    Text("YubiKey").tag(AuthMethod.yubiKey.rawValue)
+                    Text("Both").tag(AuthMethod.totpAndYubiKey.rawValue)
+                }
+
+                Picker("Auto-Lock", selection: $viewModel.autoLockTimeout) {
+                    Text("Immediately").tag(0)
+                    Text("1 minute").tag(60)
+                    Text("5 minutes").tag(300)
+                    Text("30 minutes").tag(1800)
+                    Text("Never").tag(-1)
+                }
+
+                NavigationLink("Set Up Authentication") {
+                    AuthEnrollmentView(
+                        secureStorage: viewModel.exposedSecureStorage,
+                        settingsStore: viewModel.exposedSettingsStore
+                    )
+                }
+
+                Button("Remove Authentication", role: .destructive) {
+                    viewModel.removeAuthentication()
+                }
+            }
         }
     }
 

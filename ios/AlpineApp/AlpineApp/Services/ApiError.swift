@@ -16,6 +16,10 @@ enum ApiError: Error, LocalizedError, Sendable {
     case networkError(underlying: Error)
     /// Invalid URL configuration
     case invalidURL(String)
+    /// Authentication is required but no credentials provided
+    case authenticationRequired
+    /// Session has expired and needs re-authentication
+    case sessionExpired
 
     var errorDescription: String? {
         switch self {
@@ -33,6 +37,10 @@ enum ApiError: Error, LocalizedError, Sendable {
             error.localizedDescription
         case .invalidURL(let url):
             "Invalid URL: \(url)"
+        case .authenticationRequired:
+            "Authentication required"
+        case .sessionExpired:
+            "Session expired, please re-authenticate"
         }
     }
 }

@@ -18,6 +18,16 @@ final class SettingsViewModel {
     var broadcastEnabled: Bool
     var indexedFileCount: Int { broadcastManager.indexedFileCount }
     var isBroadcastActive: Bool { broadcastManager.isActive }
+    var authRequired: Bool
+    var authMethodRaw: String {
+        didSet { settings.authMethod = AuthMethod(rawValue: authMethodRaw) ?? .none }
+    }
+    var autoLockTimeout: Int {
+        didSet { settings.autoLockTimeout = autoLockTimeout }
+    }
+
+    var exposedSecureStorage: SecureStorage { secureStorage }
+    var exposedSettingsStore: SettingsStore { settings }
 
     enum ConnectionStatus { case unknown, testing, connected, failed }
 
@@ -47,6 +57,9 @@ final class SettingsViewModel {
         apiKey = secureStorage.read(key: "apiKey") ?? ""
         sharedDirectory = settings.sharedDirectory
         broadcastEnabled = settings.broadcastEnabled
+        authRequired = settings.authRequired
+        authMethodRaw = settings.authMethod.rawValue
+        autoLockTimeout = settings.autoLockTimeout
     }
 
     func testConnection() {
@@ -100,6 +113,16 @@ final class SettingsViewModel {
         broadcastManager.reindex(sharedDirectory: sharedDirectory)
     }
 
+    func removeAuthentication() {
+        secureStorage.remove(key: "totp.secret")
+        secureStorage.remove(key: "totp.config")
+        secureStorage.remove(key: "yubikey.credentialId")
+        settings.authMethod = .none
+        settings.authRequired = false
+        authRequired = false
+        authMethodRaw = AuthMethod.none.rawValue
+    }
+
     func save() {
         settings.host = host
         settings.port = port
@@ -109,6 +132,9 @@ final class SettingsViewModel {
         settings.tlsCertFingerprint = tlsCertFingerprint
         settings.sharedDirectory = sharedDirectory
         settings.broadcastEnabled = broadcastEnabled
+        settings.authRequired = authRequired
+        settings.authMethod = AuthMethod(rawValue: authMethodRaw) ?? .none
+        settings.autoLockTimeout = autoLockTimeout
         _ = secureStorage.store(key: "apiKey", value: apiKey)
     }
 }

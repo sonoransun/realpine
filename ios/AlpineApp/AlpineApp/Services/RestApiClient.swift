@@ -5,14 +5,16 @@ import Foundation
 actor RestApiClient {
     let baseURL: URL
     private let apiKey: String
+    private var sessionToken: String?
     private let session: URLSession
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
-    /// Initialize with base URL (e.g. "http://host:port/api/v1"), optional API key and TLS config.
-    init(baseURL: URL, apiKey: String = "", tlsConfig: TlsConfig = TlsConfig()) {
+    /// Initialize with base URL (e.g. "http://host:port/api/v1"), optional API key, session token, and TLS config.
+    init(baseURL: URL, apiKey: String = "", sessionToken: String? = nil, tlsConfig: TlsConfig = TlsConfig()) {
         self.baseURL = baseURL
         self.apiKey = apiKey
+        self.sessionToken = sessionToken
 
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
@@ -21,6 +23,11 @@ actor RestApiClient {
 
         self.encoder = JSONEncoder()
         self.decoder = JSONDecoder()
+    }
+
+    /// Update the session token at runtime (e.g. after authentication or refresh).
+    func updateSessionToken(_ token: String?) {
+        self.sessionToken = token
     }
 
     // MARK: - HTTP Methods
@@ -117,7 +124,9 @@ actor RestApiClient {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        if !apiKey.isEmpty {
+        if let token = sessionToken, !token.isEmpty {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        } else if !apiKey.isEmpty {
             request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         }
 
@@ -161,6 +170,9 @@ actor RestApiClient {
         }
 
         guard (200...299).contains(httpResponse.statusCode) else {
+            if httpResponse.statusCode == 401 {
+                throw ApiError.sessionExpired
+            }
             let message = String(data: data, encoding: .utf8) ?? "Unknown error"
             throw ApiError.httpError(statusCode: httpResponse.statusCode, message: message)
         }

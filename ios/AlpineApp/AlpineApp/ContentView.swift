@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(SettingsStore.self) private var settings
     @Environment(SecureStorage.self) private var secureStorage
+    @Environment(AuthManager.self) private var authManager
 
     var body: some View {
         TabView {
@@ -35,7 +36,10 @@ struct ContentView: View {
 }
 
 #Preview {
+    let settings = SettingsStore()
+    let storage = SecureStorage()
     ContentView()
-        .environment(SettingsStore())
-        .environment(SecureStorage())
+        .environment(settings)
+        .environment(storage)
+        .environment(AuthManager(secureStorage: storage, settingsStore: settings))
 }
