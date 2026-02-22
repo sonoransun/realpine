@@ -14,7 +14,10 @@
       "Bash(find /Users/user/sonoranpub/realpine/android/AlpineApp -name \"proguard-rules.pro\" -o -name \"*.pro\" | xargs cat 2>/dev/null)",
       "Bash(wc:*)",
       "Bash(git add:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(echo XcodeGen not installed:*)",
+      "Bash(cd /Users/user/sonoranpub/realpine/ios/AlpineApp && xcodegen generate 2>&1)",
+      "Bash(echo === File counts ===:*)"
     ]
   }
 }
