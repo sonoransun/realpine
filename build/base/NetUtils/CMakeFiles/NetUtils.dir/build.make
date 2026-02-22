@@ -72,10 +72,24 @@ include base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/codegen:
 .PHONY : base/NetUtils/CMakeFiles/NetUtils.dir/codegen
 
+base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
+base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/BroadcastUdpConnection.cpp
+base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o -MF CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o.d -o CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/BroadcastUdpConnection.cpp
+
+base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/NetUtils/BroadcastUdpConnection.cpp > CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i
+
+base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/NetUtils/BroadcastUdpConnection.cpp -o CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s
+
 base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/CovertChannel.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o -MF CMakeFiles/NetUtils.dir/CovertChannel.cpp.o.d -o CMakeFiles/NetUtils.dir/CovertChannel.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/CovertChannel.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.i: cmake_force
@@ -89,7 +103,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/MulticastDiscovery.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o -MF CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o.d -o CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/MulticastDiscovery.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.i: cmake_force
@@ -100,10 +114,24 @@ base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/NetUtils/MulticastDiscovery.cpp -o CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s
 
+base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
+base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/MulticastUdpConnection.cpp
+base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o -MF CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o.d -o CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/MulticastUdpConnection.cpp
+
+base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/NetUtils/MulticastUdpConnection.cpp > CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i
+
+base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/NetUtils/MulticastUdpConnection.cpp -o CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s
+
 base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/NetUtils.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o -MF CMakeFiles/NetUtils.dir/NetUtils.cpp.o.d -o CMakeFiles/NetUtils.dir/NetUtils.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/NetUtils.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.i: cmake_force
@@ -114,10 +142,24 @@ base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NetUtils.dir/NetUtils.cpp.s"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/NetUtils/NetUtils.cpp -o CMakeFiles/NetUtils.dir/NetUtils.cpp.s
 
+base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
+base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/RawWifiConnection.cpp
+base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o -MF CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o.d -o CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/RawWifiConnection.cpp
+
+base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/NetUtils/RawWifiConnection.cpp > CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i
+
+base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s"
+	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/NetUtils/RawWifiConnection.cpp -o CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s
+
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/TcpAcceptor.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o -MF CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o.d -o CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/TcpAcceptor.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.i: cmake_force
@@ -131,7 +173,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/TcpAsyncConnector.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o -MF CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o.d -o CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/TcpAsyncConnector.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.i: cmake_force
@@ -145,7 +187,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/TcpConnector.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o -MF CMakeFiles/NetUtils.dir/TcpConnector.cpp.o.d -o CMakeFiles/NetUtils.dir/TcpConnector.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/TcpConnector.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.i: cmake_force
@@ -159,7 +201,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/TcpTransport.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o -MF CMakeFiles/NetUtils.dir/TcpTransport.cpp.o.d -o CMakeFiles/NetUtils.dir/TcpTransport.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/TcpTransport.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.i: cmake_force
@@ -173,7 +215,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/UdpConnection.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o -MF CMakeFiles/NetUtils.dir/UdpConnection.cpp.o.d -o CMakeFiles/NetUtils.dir/UdpConnection.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/UdpConnection.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.i: cmake_force
@@ -187,7 +229,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/WifiBeaconInjector.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o -MF CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o.d -o CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/WifiBeaconInjector.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.i: cmake_force
@@ -201,7 +243,7 @@ base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.s: cmake_force
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/flags.make
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o: /Users/user/sonoranpub/realpine/base/NetUtils/WifiDiscovery.cpp
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o: base/NetUtils/CMakeFiles/NetUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o -MF CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o.d -o CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o -c /Users/user/sonoranpub/realpine/base/NetUtils/WifiDiscovery.cpp
 
 base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.i: cmake_force
@@ -214,9 +256,12 @@ base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.s: cmake_force
 
 # Object files for target NetUtils
 NetUtils_OBJECTS = \
+"CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o" \
 "CMakeFiles/NetUtils.dir/CovertChannel.cpp.o" \
 "CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o" \
+"CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o" \
 "CMakeFiles/NetUtils.dir/NetUtils.cpp.o" \
+"CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o" \
 "CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o" \
 "CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o" \
 "CMakeFiles/NetUtils.dir/TcpConnector.cpp.o" \
@@ -228,9 +273,12 @@ NetUtils_OBJECTS = \
 # External object files for target NetUtils
 NetUtils_EXTERNAL_OBJECTS =
 
+lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o
+lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o
+lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o
@@ -240,7 +288,7 @@ lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/build.make
 lib/libNetUtils.a: base/NetUtils/CMakeFiles/NetUtils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX static library ../../lib/libNetUtils.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX static library ../../lib/libNetUtils.a"
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && $(CMAKE_COMMAND) -P CMakeFiles/NetUtils.dir/cmake_clean_target.cmake
 	cd /Users/user/sonoranpub/realpine/build/base/NetUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/NetUtils.dir/link.txt --verbose=$(VERBOSE)
 

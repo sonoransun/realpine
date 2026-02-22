@@ -7,11 +7,14 @@ add_library(AlpineTransportHeaders INTERFACE)
 target_include_directories(AlpineTransportHeaders INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(AlpineTransport
+    AlpineBroadcastUdpTransport.cpp
     AlpineDtcpConnAcceptor.cpp
     AlpineDtcpConnConnector.cpp
     AlpineDtcpConnMux.cpp
     AlpineDtcpConnTransport.cpp
     AlpineDtcpUdpTransport.cpp
+    AlpineMulticastUdpTransport.cpp
+    AlpineRawWifiUdpTransport.cpp
 )
 add_library(Alpine::AlpineTransport ALIAS AlpineTransport)
 target_include_directories(AlpineTransport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

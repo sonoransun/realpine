@@ -647,6 +647,9 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/stat.h \
   /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.h \
   /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.h \
   /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStack.h \
   /Users/user/sonoranpub/realpine/transport/TransBase/DataBuffer.h \
   /Users/user/sonoranpub/realpine/base/AppUtils/Log.h \

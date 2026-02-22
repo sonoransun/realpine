@@ -1,26 +1,4 @@
-///////
-///
-///  Copyright (C) 2026  sonoransun
-///
-///  Permission is hereby granted, free of charge, to any person obtaining a copy
-///  of this software and associated documentation files (the "Software"), to deal
-///  in the Software without restriction, including without limitation the rights
-///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-///  copies of the Software, and to permit persons to whom the Software is
-///  furnished to do so, subject to the following conditions:
-///
-///  The above copyright notice and this permission notice shall be included in all
-///  copies or substantial portions of the Software.
-///
-///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-///  SOFTWARE.
-///
-///////
+/// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
 #include <AlpineStack.h>
@@ -34,6 +12,9 @@
 #include <AlpineServiceThread.h>
 #include <AlpineDtcpUdpTransport.h>
 #include <AlpineDtcpConnTransport.h>
+#include <AlpineMulticastUdpTransport.h>
+#include <AlpineBroadcastUdpTransport.h>
+#include <AlpineRawWifiUdpTransport.h>
 #include <DtcpStack.h>
 #include <DataBuffer.h>
 #include <Log.h>
@@ -48,6 +29,9 @@ bool                              AlpineStack::initialized_s = false;
 AlpineServiceThread *             AlpineStack::serviceThread_s = nullptr;
 AlpineStackConfig *               AlpineStack::configuration_s = nullptr;
 AlpineDtcpUdpTransport *          AlpineStack::baseUdpTransport_s = nullptr;
+DtcpBaseUdpTransport *            AlpineStack::multicastTransport_s = nullptr;
+DtcpBaseUdpTransport *            AlpineStack::broadcastTransport_s = nullptr;
+DtcpBaseUdpTransport *            AlpineStack::rawWifiTransport_s = nullptr;
 ReadWriteSem                      AlpineStack::dataLock_s;
 
 static const int   eventIterationDelay = 1; // one second delay between interations
@@ -166,6 +150,78 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
         cleanUp ();
         return false;
     }
+
+    // Optionally create and activate wireless transports
+    //
+    if (configuration.multicastEnabled()) {
+        string group;
+        ushort mport;
+        configuration.getMulticastEndpoint (group, mport);
+
+        multicastTransport_s = new AlpineMulticastUdpTransport (localIp, localPort,
+                                                                 group, mport);
+        status = multicastTransport_s->initialize ();
+
+        if (status) {
+            status = multicastTransport_s->activate ();
+        }
+
+        if (status) {
+            Log::Info ("Multicast transport activated on "s + group +
+                       ":" + std::to_string (mport));
+        }
+        else {
+            Log::Error ("Failed to activate multicast transport.");
+            delete multicastTransport_s;
+            multicastTransport_s = nullptr;
+        }
+    }
+
+    if (configuration.broadcastEnabled()) {
+        ushort bport;
+        configuration.getBroadcastEndpoint (bport);
+
+        broadcastTransport_s = new AlpineBroadcastUdpTransport (localIp, htons(bport));
+
+        status = broadcastTransport_s->initialize ();
+
+        if (status) {
+            status = broadcastTransport_s->activate ();
+        }
+
+        if (status) {
+            Log::Info ("Broadcast transport activated on port "s +
+                       std::to_string (bport));
+        }
+        else {
+            Log::Error ("Failed to activate broadcast transport.");
+            delete broadcastTransport_s;
+            broadcastTransport_s = nullptr;
+        }
+    }
+
+    if (configuration.rawWifiEnabled()) {
+        string ifName;
+        configuration.getRawWifiInterface (ifName);
+
+        rawWifiTransport_s = new AlpineRawWifiUdpTransport (localIp, localPort, ifName);
+
+        status = rawWifiTransport_s->initialize ();
+
+        if (status) {
+            status = rawWifiTransport_s->activate ();
+        }
+
+        if (status) {
+            Log::Info ("Raw 802.11 transport activated on interface "s + ifName);
+        }
+        else {
+            Log::Error ("Failed to activate raw 802.11 transport.");
+            delete rawWifiTransport_s;
+            rawWifiTransport_s = nullptr;
+        }
+    }
+
     return true;
 }
 
@@ -214,6 +270,24 @@ AlpineStack::cleanUp ()
     if (configuration_s) {
         delete configuration_s;
         configuration_s = nullptr;
+    }
+
+    if (multicastTransport_s) {
+        multicastTransport_s->shutdown ();
+        delete multicastTransport_s;
+        multicastTransport_s = nullptr;
+    }
+
+    if (broadcastTransport_s) {
+        broadcastTransport_s->shutdown ();
+        delete broadcastTransport_s;
+        broadcastTransport_s = nullptr;
+    }
+
+    if (rawWifiTransport_s) {
+        rawWifiTransport_s->shutdown ();
+        delete rawWifiTransport_s;
+        rawWifiTransport_s = nullptr;
     }
 
     if (baseUdpTransport_s) {

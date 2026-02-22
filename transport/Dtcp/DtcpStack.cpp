@@ -1,26 +1,4 @@
-///////
-///
-///  Copyright (C) 2026  sonoransun
-///
-///  Permission is hereby granted, free of charge, to any person obtaining a copy
-///  of this software and associated documentation files (the "Software"), to deal
-///  in the Software without restriction, including without limitation the rights
-///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-///  copies of the Software, and to permit persons to whom the Software is
-///  furnished to do so, subject to the following conditions:
-///
-///  The above copyright notice and this permission notice shall be included in all
-///  copies or substantial portions of the Software.
-///
-///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-///  SOFTWARE.
-///
-///////
+/// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
 #include <DtcpStack.h>
@@ -39,6 +17,9 @@ DtcpBaseUdpTransport *                  DtcpStack::udpTransport_s = nullptr;
 DtcpBaseConnMux *                       DtcpStack::connMux_s = nullptr;
 ulong                                   DtcpStack::currTransportId_s = 0;
 ReadWriteSem                            DtcpStack::dataLock_s;
+
+std::vector<DtcpBaseUdpTransport *>     DtcpStack::additionalTransports_s;
+std::vector<DtcpBaseConnMux *>          DtcpStack::additionalMuxes_s;
 
 std::unique_ptr<DtcpStack::t_IpAddressSet>        DtcpStack::ipAddressFilter_s;
 std::unique_ptr<DtcpStack::t_SubnetAddressIndex>  DtcpStack::subnetFilter_s;
@@ -392,7 +373,31 @@ DtcpStack::registerUdpTransport (DtcpBaseUdpTransport * udpTransport,
 
 
 
-bool  
+bool
+DtcpStack::registerAdditionalUdpTransport (DtcpBaseUdpTransport * transport,
+                                            DtcpBaseConnMux *      connMux)
+{
+#ifdef _VERBOSE
+    Log::Debug ("DtcpStack::registerAdditionalUdpTransport invoked.");
+#endif
+
+    WriteLock  lock(dataLock_s);
+
+    if (!udpTransport_s) {
+        Log::Error ("No primary transport registered in DtcpStack::registerAdditionalUdpTransport.");
+        return false;
+    }
+    additionalTransports_s.push_back (transport);
+    additionalMuxes_s.push_back (connMux);
+
+    Log::Info ("Additional UDP transport registered with DtcpStack.");
+
+    return true;
+}
+
+
+
+bool
 DtcpStack::registerConnTransport (DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE

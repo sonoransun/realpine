@@ -1,26 +1,4 @@
-///////
-///
-///  Copyright (C) 2026  sonoransun
-///
-///  Permission is hereby granted, free of charge, to any person obtaining a copy
-///  of this software and associated documentation files (the "Software"), to deal
-///  in the Software without restriction, including without limitation the rights
-///  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-///  copies of the Software, and to permit persons to whom the Software is
-///  furnished to do so, subject to the following conditions:
-///
-///  The above copyright notice and this permission notice shall be included in all
-///  copies or substantial portions of the Software.
-///
-///  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-///  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-///  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-///  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-///  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-///  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-///  SOFTWARE.
-///
-///////
+/// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
 #include <AlpineStackConfig.h>
@@ -39,6 +17,12 @@ AlpineStackConfig::AlpineStackConfig ()
     localIpAddress_        = 0;
     localPort_             = 0;
     maxConcurrentQueries_  = 0;
+
+    multicastEnabled_      = false;
+    multicastPort_         = 0;
+    broadcastEnabled_      = false;
+    broadcastPort_         = 0;
+    rawWifiEnabled_        = false;
 }
 
 
@@ -52,6 +36,14 @@ AlpineStackConfig::AlpineStackConfig (const AlpineStackConfig & copy)
     localIpAddress_        = copy.localIpAddress_;
     localPort_             = copy.localPort_;
     maxConcurrentQueries_  = copy.maxConcurrentQueries_;
+
+    multicastEnabled_      = copy.multicastEnabled_;
+    multicastGroup_        = copy.multicastGroup_;
+    multicastPort_         = copy.multicastPort_;
+    broadcastEnabled_      = copy.broadcastEnabled_;
+    broadcastPort_         = copy.broadcastPort_;
+    rawWifiEnabled_        = copy.rawWifiEnabled_;
+    rawWifiInterface_      = copy.rawWifiInterface_;
 }
 
 
@@ -60,7 +52,7 @@ AlpineStackConfig::AlpineStackConfig (const AlpineStackConfig & copy)
 
 
 
-AlpineStackConfig & 
+AlpineStackConfig &
 AlpineStackConfig::operator = (const AlpineStackConfig & copy)
 {
 #ifdef _VERBOSE
@@ -74,6 +66,14 @@ AlpineStackConfig::operator = (const AlpineStackConfig & copy)
     localIpAddress_        = copy.localIpAddress_;
     localPort_             = copy.localPort_;
     maxConcurrentQueries_  = copy.maxConcurrentQueries_;
+
+    multicastEnabled_      = copy.multicastEnabled_;
+    multicastGroup_        = copy.multicastGroup_;
+    multicastPort_         = copy.multicastPort_;
+    broadcastEnabled_      = copy.broadcastEnabled_;
+    broadcastPort_         = copy.broadcastPort_;
+    rawWifiEnabled_        = copy.rawWifiEnabled_;
+    rawWifiInterface_      = copy.rawWifiInterface_;
 
     return *this;
 }
@@ -213,7 +213,7 @@ AlpineStackConfig::setMaxConcurrentQueries (ulong  max)
 
 
 
-bool  
+bool
 AlpineStackConfig::getMaxConcurrentQueries (ulong &  max)
 {
 #ifdef _VERBOSE
@@ -229,6 +229,134 @@ AlpineStackConfig::getMaxConcurrentQueries (ulong &  max)
 
 
     return true;
+}
+
+
+
+bool
+AlpineStackConfig::setMulticastEndpoint (const string & group, ushort port)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineStackConfig::setMulticastEndpoint invoked.");
+#endif
+
+    if (group.empty() || port == 0) {
+        Log::Error ("Invalid multicast parameters in AlpineStackConfig::setMulticastEndpoint!");
+        return false;
+    }
+
+    multicastGroup_   = group;
+    multicastPort_    = port;
+    multicastEnabled_ = true;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::getMulticastEndpoint (string & group, ushort & port)
+{
+    if (!multicastEnabled_) {
+        return false;
+    }
+
+    group = multicastGroup_;
+    port  = multicastPort_;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::multicastEnabled ()
+{
+    return multicastEnabled_;
+}
+
+
+
+bool
+AlpineStackConfig::setBroadcastEndpoint (ushort port)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineStackConfig::setBroadcastEndpoint invoked.");
+#endif
+
+    if (port == 0) {
+        Log::Error ("Invalid broadcast port in AlpineStackConfig::setBroadcastEndpoint!");
+        return false;
+    }
+
+    broadcastPort_    = port;
+    broadcastEnabled_ = true;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::getBroadcastEndpoint (ushort & port)
+{
+    if (!broadcastEnabled_) {
+        return false;
+    }
+
+    port = broadcastPort_;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::broadcastEnabled ()
+{
+    return broadcastEnabled_;
+}
+
+
+
+bool
+AlpineStackConfig::setRawWifiInterface (const string & interfaceName)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineStackConfig::setRawWifiInterface invoked.");
+#endif
+
+    if (interfaceName.empty()) {
+        Log::Error ("Invalid interface name in AlpineStackConfig::setRawWifiInterface!");
+        return false;
+    }
+
+    rawWifiInterface_ = interfaceName;
+    rawWifiEnabled_   = true;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::getRawWifiInterface (string & interfaceName)
+{
+    if (!rawWifiEnabled_) {
+        return false;
+    }
+
+    interfaceName = rawWifiInterface_;
+
+    return true;
+}
+
+
+
+bool
+AlpineStackConfig::rawWifiEnabled ()
+{
+    return rawWifiEnabled_;
 }
 
 

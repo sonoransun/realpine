@@ -8,9 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/Users/user/sonoranpub/realpine/base/NetUtils/BroadcastUdpConnection.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/CovertChannel.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/MulticastDiscovery.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o.d"
+  "/Users/user/sonoranpub/realpine/base/NetUtils/MulticastUdpConnection.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/NetUtils.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o.d"
+  "/Users/user/sonoranpub/realpine/base/NetUtils/RawWifiConnection.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/TcpAcceptor.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/TcpAsyncConnector.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o.d"
   "/Users/user/sonoranpub/realpine/base/NetUtils/TcpConnector.cpp" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o" "gcc" "base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o.d"

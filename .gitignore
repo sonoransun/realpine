@@ -1,0 +1,73 @@
+# CMake build directories
+build/
+_build/
+build_dir/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Compiled objects
+*.o
+*.d
+*.obj
+
+# Legacy Makefile object directories
+.obj*/
+
+# Libraries
+*.a
+*.so
+*.so.*
+*.dylib
+
+# Per-module lib/ directories (legacy Makefile output)
+# Top-level lib/ is also build output
+lib/
+*/lib/*.a
+*/lib/*.so
+*/*/lib/*.a
+*/*/lib/*.so
+
+# Per-module bin/ directories (legacy Makefile output)
+bin/
+*/bin/
+*/*/bin/
+
+# Executables (no extension, heuristic — CMake puts them in build/bin/)
+# Not globally ignored since some scripts lack extensions; covered by bin/ rules above
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Log files
+*.log
+
+# macOS
+.DS_Store
+._*
+
+# IDE / editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.xcodeproj/
+*.xcworkspace/
+compile_commands.json
+
+# Profiling
+*.gcda
+*.gcno
+*.gcov
+gmon.out
+
+# Core dumps
+core
+core.*
+
+# Claude Code
+.claude/

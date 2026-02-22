@@ -18344,8 +18344,11 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o: /Users/user/so
   /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineServiceThread.h \
   /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStack.h \
   /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStackConfig.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.h \
   /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.h \
   /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.h \
+  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.h \
   /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.h \
   /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.h \
   /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.h \
@@ -19000,7 +19003,11 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o: /Users/u
 
 /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.h:
 
+/Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.h:
+
 /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.h:
+
+/Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/thread:
 
@@ -20315,6 +20322,8 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o: /Users/u
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/wctype.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__bit/popcount.h:
+
+/Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.h:
 
 /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__type_traits/is_final.h:
 

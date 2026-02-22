@@ -130,6 +130,30 @@ AlpineTransport/fast:
 	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/build
 .PHONY : AlpineTransport/fast
 
+AlpineBroadcastUdpTransport.o: AlpineBroadcastUdpTransport.cpp.o
+.PHONY : AlpineBroadcastUdpTransport.o
+
+# target to build an object file
+AlpineBroadcastUdpTransport.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o
+.PHONY : AlpineBroadcastUdpTransport.cpp.o
+
+AlpineBroadcastUdpTransport.i: AlpineBroadcastUdpTransport.cpp.i
+.PHONY : AlpineBroadcastUdpTransport.i
+
+# target to preprocess a source file
+AlpineBroadcastUdpTransport.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i
+.PHONY : AlpineBroadcastUdpTransport.cpp.i
+
+AlpineBroadcastUdpTransport.s: AlpineBroadcastUdpTransport.cpp.s
+.PHONY : AlpineBroadcastUdpTransport.s
+
+# target to generate assembly for a file
+AlpineBroadcastUdpTransport.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s
+.PHONY : AlpineBroadcastUdpTransport.cpp.s
+
 AlpineDtcpConnAcceptor.o: AlpineDtcpConnAcceptor.cpp.o
 .PHONY : AlpineDtcpConnAcceptor.o
 
@@ -250,6 +274,54 @@ AlpineDtcpUdpTransport.cpp.s:
 	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s
 .PHONY : AlpineDtcpUdpTransport.cpp.s
 
+AlpineMulticastUdpTransport.o: AlpineMulticastUdpTransport.cpp.o
+.PHONY : AlpineMulticastUdpTransport.o
+
+# target to build an object file
+AlpineMulticastUdpTransport.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o
+.PHONY : AlpineMulticastUdpTransport.cpp.o
+
+AlpineMulticastUdpTransport.i: AlpineMulticastUdpTransport.cpp.i
+.PHONY : AlpineMulticastUdpTransport.i
+
+# target to preprocess a source file
+AlpineMulticastUdpTransport.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i
+.PHONY : AlpineMulticastUdpTransport.cpp.i
+
+AlpineMulticastUdpTransport.s: AlpineMulticastUdpTransport.cpp.s
+.PHONY : AlpineMulticastUdpTransport.s
+
+# target to generate assembly for a file
+AlpineMulticastUdpTransport.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s
+.PHONY : AlpineMulticastUdpTransport.cpp.s
+
+AlpineRawWifiUdpTransport.o: AlpineRawWifiUdpTransport.cpp.o
+.PHONY : AlpineRawWifiUdpTransport.o
+
+# target to build an object file
+AlpineRawWifiUdpTransport.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o
+.PHONY : AlpineRawWifiUdpTransport.cpp.o
+
+AlpineRawWifiUdpTransport.i: AlpineRawWifiUdpTransport.cpp.i
+.PHONY : AlpineRawWifiUdpTransport.i
+
+# target to preprocess a source file
+AlpineRawWifiUdpTransport.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i
+.PHONY : AlpineRawWifiUdpTransport.cpp.i
+
+AlpineRawWifiUdpTransport.s: AlpineRawWifiUdpTransport.cpp.s
+.PHONY : AlpineRawWifiUdpTransport.s
+
+# target to generate assembly for a file
+AlpineRawWifiUdpTransport.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s
+.PHONY : AlpineRawWifiUdpTransport.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -259,6 +331,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... AlpineTransport"
+	@echo "... AlpineBroadcastUdpTransport.o"
+	@echo "... AlpineBroadcastUdpTransport.i"
+	@echo "... AlpineBroadcastUdpTransport.s"
 	@echo "... AlpineDtcpConnAcceptor.o"
 	@echo "... AlpineDtcpConnAcceptor.i"
 	@echo "... AlpineDtcpConnAcceptor.s"
@@ -274,6 +349,12 @@ help:
 	@echo "... AlpineDtcpUdpTransport.o"
 	@echo "... AlpineDtcpUdpTransport.i"
 	@echo "... AlpineDtcpUdpTransport.s"
+	@echo "... AlpineMulticastUdpTransport.o"
+	@echo "... AlpineMulticastUdpTransport.i"
+	@echo "... AlpineMulticastUdpTransport.s"
+	@echo "... AlpineRawWifiUdpTransport.o"
+	@echo "... AlpineRawWifiUdpTransport.i"
+	@echo "... AlpineRawWifiUdpTransport.s"
 .PHONY : help
 
 

@@ -1,6 +1,8 @@
 file(REMOVE_RECURSE
   "../../lib/libAlpineTransport.a"
   "../../lib/libAlpineTransport.pdb"
+  "CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o"
+  "CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o.d"
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o"
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o.d"
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o"
@@ -11,6 +13,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o.d"
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o"
   "CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o.d"
+  "CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o"
+  "CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o.d"
+  "CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o"
+  "CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -130,6 +130,30 @@ NetUtils/fast:
 	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/build
 .PHONY : NetUtils/fast
 
+BroadcastUdpConnection.o: BroadcastUdpConnection.cpp.o
+.PHONY : BroadcastUdpConnection.o
+
+# target to build an object file
+BroadcastUdpConnection.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o
+.PHONY : BroadcastUdpConnection.cpp.o
+
+BroadcastUdpConnection.i: BroadcastUdpConnection.cpp.i
+.PHONY : BroadcastUdpConnection.i
+
+# target to preprocess a source file
+BroadcastUdpConnection.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i
+.PHONY : BroadcastUdpConnection.cpp.i
+
+BroadcastUdpConnection.s: BroadcastUdpConnection.cpp.s
+.PHONY : BroadcastUdpConnection.s
+
+# target to generate assembly for a file
+BroadcastUdpConnection.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s
+.PHONY : BroadcastUdpConnection.cpp.s
+
 CovertChannel.o: CovertChannel.cpp.o
 .PHONY : CovertChannel.o
 
@@ -178,6 +202,30 @@ MulticastDiscovery.cpp.s:
 	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s
 .PHONY : MulticastDiscovery.cpp.s
 
+MulticastUdpConnection.o: MulticastUdpConnection.cpp.o
+.PHONY : MulticastUdpConnection.o
+
+# target to build an object file
+MulticastUdpConnection.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o
+.PHONY : MulticastUdpConnection.cpp.o
+
+MulticastUdpConnection.i: MulticastUdpConnection.cpp.i
+.PHONY : MulticastUdpConnection.i
+
+# target to preprocess a source file
+MulticastUdpConnection.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i
+.PHONY : MulticastUdpConnection.cpp.i
+
+MulticastUdpConnection.s: MulticastUdpConnection.cpp.s
+.PHONY : MulticastUdpConnection.s
+
+# target to generate assembly for a file
+MulticastUdpConnection.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s
+.PHONY : MulticastUdpConnection.cpp.s
+
 NetUtils.o: NetUtils.cpp.o
 .PHONY : NetUtils.o
 
@@ -201,6 +249,30 @@ NetUtils.s: NetUtils.cpp.s
 NetUtils.cpp.s:
 	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.s
 .PHONY : NetUtils.cpp.s
+
+RawWifiConnection.o: RawWifiConnection.cpp.o
+.PHONY : RawWifiConnection.o
+
+# target to build an object file
+RawWifiConnection.cpp.o:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o
+.PHONY : RawWifiConnection.cpp.o
+
+RawWifiConnection.i: RawWifiConnection.cpp.i
+.PHONY : RawWifiConnection.i
+
+# target to preprocess a source file
+RawWifiConnection.cpp.i:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i
+.PHONY : RawWifiConnection.cpp.i
+
+RawWifiConnection.s: RawWifiConnection.cpp.s
+.PHONY : RawWifiConnection.s
+
+# target to generate assembly for a file
+RawWifiConnection.cpp.s:
+	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s
+.PHONY : RawWifiConnection.cpp.s
 
 TcpAcceptor.o: TcpAcceptor.cpp.o
 .PHONY : TcpAcceptor.o
@@ -379,15 +451,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... NetUtils"
+	@echo "... BroadcastUdpConnection.o"
+	@echo "... BroadcastUdpConnection.i"
+	@echo "... BroadcastUdpConnection.s"
 	@echo "... CovertChannel.o"
 	@echo "... CovertChannel.i"
 	@echo "... CovertChannel.s"
 	@echo "... MulticastDiscovery.o"
 	@echo "... MulticastDiscovery.i"
 	@echo "... MulticastDiscovery.s"
+	@echo "... MulticastUdpConnection.o"
+	@echo "... MulticastUdpConnection.i"
+	@echo "... MulticastUdpConnection.s"
 	@echo "... NetUtils.o"
 	@echo "... NetUtils.i"
 	@echo "... NetUtils.s"
+	@echo "... RawWifiConnection.o"
+	@echo "... RawWifiConnection.i"
+	@echo "... RawWifiConnection.s"
 	@echo "... TcpAcceptor.o"
 	@echo "... TcpAcceptor.i"
 	@echo "... TcpAcceptor.s"

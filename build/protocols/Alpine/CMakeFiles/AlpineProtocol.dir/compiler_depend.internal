@@ -18374,8 +18374,11 @@ protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o
  /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineServiceThread.h
  /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStack.h
  /Users/user/sonoranpub/realpine/protocols/Alpine/AlpineStackConfig.h
+ /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.h
  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.h
  /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.h
+ /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.h
+ /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.h
  /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.h
  /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.h
  /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.h

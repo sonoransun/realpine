@@ -350,6 +350,214 @@ update_mappings/fast:
 	$(MAKE) $(MAKESILENT) -f AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build.make AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build
 .PHONY : update_mappings/fast
 
+#=============================================================================
+# Target rules for targets named threadTest
+
+# Build rule for target.
+threadTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 threadTest
+.PHONY : threadTest
+
+# fast build rule for target.
+threadTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/auto_thread_test/CMakeFiles/threadTest.dir/build.make test/auto_thread_test/CMakeFiles/threadTest.dir/build
+.PHONY : threadTest/fast
+
+#=============================================================================
+# Target rules for targets named sysThreadTest
+
+# Build rule for target.
+sysThreadTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sysThreadTest
+.PHONY : sysThreadTest
+
+# fast build rule for target.
+sysThreadTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/sys_thread_test/CMakeFiles/sysThreadTest.dir/build.make test/sys_thread_test/CMakeFiles/sysThreadTest.dir/build
+.PHONY : sysThreadTest/fast
+
+#=============================================================================
+# Target rules for targets named mapTest
+
+# Build rule for target.
+mapTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mapTest
+.PHONY : mapTest
+
+# fast build rule for target.
+mapTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/map_test/CMakeFiles/mapTest.dir/build.make test/map_test/CMakeFiles/mapTest.dir/build
+.PHONY : mapTest/fast
+
+#=============================================================================
+# Target rules for targets named spawnProcess
+
+# Build rule for target.
+spawnProcess: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 spawnProcess
+.PHONY : spawnProcess
+
+# fast build rule for target.
+spawnProcess/fast:
+	$(MAKE) $(MAKESILENT) -f test/spawn_process/CMakeFiles/spawnProcess.dir/build.make test/spawn_process/CMakeFiles/spawnProcess.dir/build
+.PHONY : spawnProcess/fast
+
+#=============================================================================
+# Target rules for targets named tcpServer
+
+# Build rule for target.
+tcpServer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tcpServer
+.PHONY : tcpServer
+
+# fast build rule for target.
+tcpServer/fast:
+	$(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/build
+.PHONY : tcpServer/fast
+
+#=============================================================================
+# Target rules for targets named tcpClient
+
+# Build rule for target.
+tcpClient: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tcpClient
+.PHONY : tcpClient
+
+# fast build rule for target.
+tcpClient/fast:
+	$(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/build
+.PHONY : tcpClient/fast
+
+#=============================================================================
+# Target rules for targets named udpSendTest
+
+# Build rule for target.
+udpSendTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 udpSendTest
+.PHONY : udpSendTest
+
+# fast build rule for target.
+udpSendTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/udp_send_test/CMakeFiles/udpSendTest.dir/build.make test/udp_send_test/CMakeFiles/udpSendTest.dir/build
+.PHONY : udpSendTest/fast
+
+#=============================================================================
+# Target rules for targets named udpSockServer
+
+# Build rule for target.
+udpSockServer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 udpSockServer
+.PHONY : udpSockServer
+
+# fast build rule for target.
+udpSockServer/fast:
+	$(MAKE) $(MAKESILENT) -f test/udp_socket_conn/CMakeFiles/udpSockServer.dir/build.make test/udp_socket_conn/CMakeFiles/udpSockServer.dir/build
+.PHONY : udpSockServer/fast
+
+#=============================================================================
+# Target rules for targets named udpSockClient
+
+# Build rule for target.
+udpSockClient: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 udpSockClient
+.PHONY : udpSockClient
+
+# fast build rule for target.
+udpSockClient/fast:
+	$(MAKE) $(MAKESILENT) -f test/udp_socket_conn/CMakeFiles/udpSockClient.dir/build.make test/udp_socket_conn/CMakeFiles/udpSockClient.dir/build
+.PHONY : udpSockClient/fast
+
+#=============================================================================
+# Target rules for targets named dtcpStackTestServer
+
+# Build rule for target.
+dtcpStackTestServer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dtcpStackTestServer
+.PHONY : dtcpStackTestServer
+
+# fast build rule for target.
+dtcpStackTestServer/fast:
+	$(MAKE) $(MAKESILENT) -f test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/build.make test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/build
+.PHONY : dtcpStackTestServer/fast
+
+#=============================================================================
+# Target rules for targets named dtcpStackTestClient
+
+# Build rule for target.
+dtcpStackTestClient: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dtcpStackTestClient
+.PHONY : dtcpStackTestClient
+
+# fast build rule for target.
+dtcpStackTestClient/fast:
+	$(MAKE) $(MAKESILENT) -f test/dtcp_stack/CMakeFiles/dtcpStackTestClient.dir/build.make test/dtcp_stack/CMakeFiles/dtcpStackTestClient.dir/build
+.PHONY : dtcpStackTestClient/fast
+
+#=============================================================================
+# Target rules for targets named DynLib
+
+# Build rule for target.
+DynLib: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 DynLib
+.PHONY : DynLib
+
+# fast build rule for target.
+DynLib/fast:
+	$(MAKE) $(MAKESILENT) -f test/dl_test/DynLib/CMakeFiles/DynLib.dir/build.make test/dl_test/DynLib/CMakeFiles/DynLib.dir/build
+.PHONY : DynLib/fast
+
+#=============================================================================
+# Target rules for targets named dynamicLoaderTest
+
+# Build rule for target.
+dynamicLoaderTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 dynamicLoaderTest
+.PHONY : dynamicLoaderTest
+
+# fast build rule for target.
+dynamicLoaderTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/build.make test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/build
+.PHONY : dynamicLoaderTest/fast
+
+#=============================================================================
+# Target rules for targets named wifiRawConnTest
+
+# Build rule for target.
+wifiRawConnTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wifiRawConnTest
+.PHONY : wifiRawConnTest
+
+# fast build rule for target.
+wifiRawConnTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/wifi_hwsim/CMakeFiles/wifiRawConnTest.dir/build.make test/wifi_hwsim/CMakeFiles/wifiRawConnTest.dir/build
+.PHONY : wifiRawConnTest/fast
+
+#=============================================================================
+# Target rules for targets named wifiBroadcastConnTest
+
+# Build rule for target.
+wifiBroadcastConnTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wifiBroadcastConnTest
+.PHONY : wifiBroadcastConnTest
+
+# fast build rule for target.
+wifiBroadcastConnTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/wifi_hwsim/CMakeFiles/wifiBroadcastConnTest.dir/build.make test/wifi_hwsim/CMakeFiles/wifiBroadcastConnTest.dir/build
+.PHONY : wifiBroadcastConnTest/fast
+
+#=============================================================================
+# Target rules for targets named wifiBeaconDiscoveryTest
+
+# Build rule for target.
+wifiBeaconDiscoveryTest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 wifiBeaconDiscoveryTest
+.PHONY : wifiBeaconDiscoveryTest
+
+# fast build rule for target.
+wifiBeaconDiscoveryTest/fast:
+	$(MAKE) $(MAKESILENT) -f test/wifi_hwsim/CMakeFiles/wifiBeaconDiscoveryTest.dir/build.make test/wifi_hwsim/CMakeFiles/wifiBeaconDiscoveryTest.dir/build
+.PHONY : wifiBeaconDiscoveryTest/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -371,11 +579,27 @@ help:
 	@echo "... ConfigUtils"
 	@echo "... Dtcp"
 	@echo "... DtcpStackInterface"
+	@echo "... DynLib"
 	@echo "... NetUtils"
 	@echo "... SysUtils"
 	@echo "... ThreadUtils"
 	@echo "... TransBase"
+	@echo "... dtcpStackTestClient"
+	@echo "... dtcpStackTestServer"
+	@echo "... dynamicLoaderTest"
 	@echo "... glfw"
+	@echo "... mapTest"
+	@echo "... spawnProcess"
+	@echo "... sysThreadTest"
+	@echo "... tcpClient"
+	@echo "... tcpServer"
+	@echo "... threadTest"
+	@echo "... udpSendTest"
+	@echo "... udpSockClient"
+	@echo "... udpSockServer"
+	@echo "... wifiBeaconDiscoveryTest"
+	@echo "... wifiBroadcastConnTest"
+	@echo "... wifiRawConnTest"
 .PHONY : help
 
 

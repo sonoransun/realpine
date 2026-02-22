@@ -3,7 +3,14 @@
     "allow": [
       "Bash(cd /Users/user/sonoranpub/realpine/AlpineGui/vendor && git clone --depth 1 --branch v1.91.8 https://github.com/ocornut/imgui.git imgui 2>&1)",
       "Bash(cd /Users/user/sonoranpub/realpine/AlpineGui/vendor && git clone --depth 1 --branch 3.4 https://github.com/glfw/glfw.git glfw 2>&1)",
-      "Bash(tail:*)"
+      "Bash(tail:*)",
+      "Bash(cmake:*)",
+      "Bash(chmod +x:*)",
+      "Bash(ls:*)",
+      "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiRawConnTest mon0:*)",
+      "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiBeaconDiscoveryTest mon0:*)",
+      "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiBroadcastConnTest:*)",
+      "Bash(python3:*)"
     ]
   }
 }

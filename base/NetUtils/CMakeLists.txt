@@ -1,7 +1,10 @@
 add_library(NetUtils
+    BroadcastUdpConnection.cpp
     CovertChannel.cpp
     MulticastDiscovery.cpp
+    MulticastUdpConnection.cpp
     NetUtils.cpp
+    RawWifiConnection.cpp
     TcpAcceptor.cpp
     TcpAsyncConnector.cpp
     TcpConnector.cpp
