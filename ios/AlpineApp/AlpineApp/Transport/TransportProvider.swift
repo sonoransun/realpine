@@ -1,36 +1,39 @@
 import Foundation
 
-/// Factory that creates the appropriate QueryTransport implementation
-/// based on the current transport mode in settings.
+/// Factory that creates transport and API service instances based on configuration.
 enum TransportProvider {
-    /// Creates a QueryTransport matching the user's configured transport mode.
-    ///
-    /// - Parameters:
-    ///   - settings: The application settings store containing connection configuration
-    ///   - secureStorage: Secure storage for reading API keys and credentials
-    /// - Returns: A configured QueryTransport ready for use
+
+    /// Creates a QueryTransport for query operations.
     static func createTransport(settings: SettingsStore, secureStorage: SecureStorage) -> QueryTransport {
         switch settings.transportMode {
         case .restBridge:
-            let tlsConfig = TlsConfig(
-                enabled: settings.tlsEnabled,
-                mode: settings.tlsMode,
-                certFingerprint: settings.tlsCertFingerprint
-            )
-
-            guard let url = tlsConfig.buildURL(host: settings.host, port: settings.port) else {
-                // Fallback URL when TLS config cannot build a valid URL
-                let fallbackURL = URL(string: "http://\(settings.host):\(settings.port)/rpc")!
-                let client = JsonRpcClient(baseURL: fallbackURL)
-                return JsonRpcTransport(rpcService: AlpineRpcService(client: client))
-            }
-
-            let apiKey = secureStorage.read(key: "apiKey") ?? ""
-            let client = JsonRpcClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
-            return JsonRpcTransport(rpcService: AlpineRpcService(client: client))
-
+            let service = createApiService(settings: settings, secureStorage: secureStorage)
+            return RestApiTransport(apiService: service)
         case .wifiBroadcast:
             return BroadcastTransport()
         }
+    }
+
+    /// Creates an AlpineApiService for full API access (all endpoints).
+    static func createApiService(settings: SettingsStore, secureStorage: SecureStorage) -> AlpineApiService {
+        let tlsConfig = TlsConfig(
+            enabled: settings.tlsEnabled,
+            mode: settings.tlsMode,
+            certFingerprint: settings.tlsCertFingerprint
+        )
+        let baseURL = buildBaseURL(host: settings.host, port: settings.port, tlsConfig: tlsConfig)
+        let apiKey = secureStorage.read(key: "apiKey") ?? ""
+        let client = RestApiClient(baseURL: baseURL, apiKey: apiKey, tlsConfig: tlsConfig)
+        return AlpineApiService(client: client)
+    }
+
+    /// Builds the base URL with /api/v1 path prefix.
+    private static func buildBaseURL(host: String, port: String, tlsConfig: TlsConfig) -> URL {
+        let scheme = tlsConfig.enabled ? "https" : "http"
+        if let url = URL(string: "\(scheme)://\(host):\(port)/api/v1") {
+            return url
+        }
+        // Fallback
+        return URL(string: "http://\(host):\(port)/api/v1")!
     }
 }

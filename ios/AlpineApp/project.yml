@@ -26,3 +26,14 @@ targets:
         NSLocalNetworkUsageDescription: "Alpine App discovers and communicates with Alpine servers on your local network."
         NSBonjourServices:
           - "_alpine._tcp"
+  AlpineAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - AlpineAppTests
+    dependencies:
+      - target: AlpineApp
+    settings:
+      base:
+        INFOPLIST_FILE: ""
+        GENERATE_INFOPLIST_FILE: "YES"

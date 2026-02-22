@@ -15,35 +15,22 @@ final class GroupsViewModel {
         self.secureStorage = secureStorage
     }
 
-    private func createRpcService() -> AlpineRpcService? {
-        let tlsConfig = TlsConfig(
-            enabled: settings.tlsEnabled,
-            mode: settings.tlsMode,
-            certFingerprint: settings.tlsCertFingerprint
-        )
-        guard let url = tlsConfig.buildURL(host: settings.host, port: settings.port) else {
-            return nil
-        }
-        let apiKey = secureStorage.read(key: "apiKey") ?? ""
-        let client = JsonRpcClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
-        return AlpineRpcService(client: client)
+    private func createApiService() -> AlpineApiService {
+        TransportProvider.createApiService(settings: settings, secureStorage: secureStorage)
     }
 
     func loadGroups() async {
-        guard let rpc = createRpcService() else {
-            message = "Invalid server configuration"
-            return
-        }
+        let api = createApiService()
         isLoading = true
         do {
-            let groupIds = try await rpc.listGroups()
+            let groupIds = try await api.listGroups()
             var infos: [GroupInfo] = []
             for id in groupIds {
-                let info = try await rpc.getGroupInfo(groupId: id)
+                let info = try await api.getGroupInfo(groupId: id)
                 infos.append(info)
             }
             groups = infos
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
@@ -51,24 +38,24 @@ final class GroupsViewModel {
     }
 
     func createGroup(name: String, description: String) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            _ = try await rpc.createGroup(name: name, description: description)
+            _ = try await api.createGroup(name: name, description: description)
             message = "Group created"
             await loadGroups()
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
     }
 
     func deleteGroup(groupId: Int64) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            _ = try await rpc.deleteGroup(groupId: groupId)
+            _ = try await api.deleteGroup(groupId: groupId)
             message = "Group deleted"
             await loadGroups()
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }

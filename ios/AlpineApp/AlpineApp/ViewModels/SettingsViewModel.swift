@@ -60,17 +60,18 @@ final class SettingsViewModel {
                     mode: tlsMode,
                     certFingerprint: tlsCertFingerprint
                 )
-                guard let url = tlsConfig.buildURL(host: host, port: port) else {
+                let scheme = tlsConfig.enabled ? "https" : "http"
+                guard let url = URL(string: "\(scheme)://\(host):\(port)/api/v1") else {
                     connectionStatus = .failed
                     statusMessage = "Invalid URL"
                     return
                 }
-                let client = JsonRpcClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
-                let rpc = AlpineRpcService(client: client)
-                let status = try await rpc.getStatus()
+                let client = RestApiClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
+                let api = AlpineApiService(client: client)
+                let status = try await api.getStatus()
                 connectionStatus = .connected
                 statusMessage = "Connected - v\(status.version)"
-                rpc.shutdown()
+                api.shutdown()
             } catch {
                 connectionStatus = .failed
                 statusMessage = ErrorMessages.userFriendly(from: error)

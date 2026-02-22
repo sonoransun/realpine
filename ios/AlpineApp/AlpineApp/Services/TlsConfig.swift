@@ -13,6 +13,6 @@ struct TlsConfig: Sendable {
 
     func buildURL(host: String, port: String) -> URL? {
         let scheme = enabled ? "https" : "http"
-        return URL(string: "\(scheme)://\(host):\(port)/rpc")
+        return URL(string: "\(scheme)://\(host):\(port)/api/v1")
     }
 }

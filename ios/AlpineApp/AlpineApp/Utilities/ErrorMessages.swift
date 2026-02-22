@@ -1,9 +1,10 @@
 import Foundation
 
+/// Maps errors to user-friendly display strings.
 enum ErrorMessages {
     static func userFriendly(from error: Error) -> String {
-        if let rpcError = error as? JsonRpcError {
-            return "Server error (\(rpcError.code)): \(rpcError.message)"
+        if let apiError = error as? ApiError {
+            return apiError.localizedDescription ?? "Unknown API error"
         }
         if let urlError = error as? URLError {
             switch urlError.code {

@@ -15,35 +15,22 @@ final class PeersViewModel {
         self.secureStorage = secureStorage
     }
 
-    private func createRpcService() -> AlpineRpcService? {
-        let tlsConfig = TlsConfig(
-            enabled: settings.tlsEnabled,
-            mode: settings.tlsMode,
-            certFingerprint: settings.tlsCertFingerprint
-        )
-        guard let url = tlsConfig.buildURL(host: settings.host, port: settings.port) else {
-            return nil
-        }
-        let apiKey = secureStorage.read(key: "apiKey") ?? ""
-        let client = JsonRpcClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
-        return AlpineRpcService(client: client)
+    private func createApiService() -> AlpineApiService {
+        TransportProvider.createApiService(settings: settings, secureStorage: secureStorage)
     }
 
     func loadPeers() async {
-        guard let rpc = createRpcService() else {
-            message = "Invalid server configuration"
-            return
-        }
+        let api = createApiService()
         isLoading = true
         do {
-            let peerIds = try await rpc.getAllPeers()
+            let peerIds = try await api.getAllPeers()
             var details: [PeerDetail] = []
             for id in peerIds {
-                let detail = try await rpc.getPeer(peerId: id)
+                let detail = try await api.getPeer(peerId: id)
                 details.append(detail)
             }
             peers = details
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
@@ -51,47 +38,47 @@ final class PeersViewModel {
     }
 
     func addPeer(ipAddress: String, port: Int64) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            _ = try await rpc.addPeer(ipAddress: ipAddress, port: port)
+            _ = try await api.addPeer(ipAddress: ipAddress, port: port)
             message = "Peer added successfully"
             await loadPeers()
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
     }
 
     func pingPeer(peerId: Int64) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            let success = try await rpc.pingPeer(peerId: peerId)
+            let success = try await api.pingPeer(peerId: peerId)
             message = success ? "Ping successful" : "Ping failed"
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
     }
 
     func activatePeer(peerId: Int64) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            _ = try await rpc.activatePeer(peerId: peerId)
+            _ = try await api.activatePeer(peerId: peerId)
             message = "Peer activated"
             await loadPeers()
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }
     }
 
     func deactivatePeer(peerId: Int64) async {
-        guard let rpc = createRpcService() else { return }
+        let api = createApiService()
         do {
-            _ = try await rpc.deactivatePeer(peerId: peerId)
+            _ = try await api.deactivatePeer(peerId: peerId)
             message = "Peer deactivated"
             await loadPeers()
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             message = ErrorMessages.userFriendly(from: error)
         }

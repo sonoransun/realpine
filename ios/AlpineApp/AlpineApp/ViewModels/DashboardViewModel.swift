@@ -23,32 +23,20 @@ final class DashboardViewModel {
         isLoading = true
         error = nil
         do {
-            let tlsConfig = TlsConfig(
-                enabled: settings.tlsEnabled,
-                mode: settings.tlsMode,
-                certFingerprint: settings.tlsCertFingerprint
-            )
-            guard let url = tlsConfig.buildURL(host: settings.host, port: settings.port) else {
-                error = "Invalid server URL"
-                isLoading = false
-                return
-            }
-            let apiKey = secureStorage.read(key: "apiKey") ?? ""
-            let client = JsonRpcClient(baseURL: url, apiKey: apiKey, tlsConfig: tlsConfig)
-            let rpc = AlpineRpcService(client: client)
+            let api = TransportProvider.createApiService(settings: settings, secureStorage: secureStorage)
 
-            serverStatus = try await rpc.getStatus()
+            serverStatus = try await api.getStatus()
             isConnected = true
 
-            let peerIds = try await rpc.getAllPeers()
+            let peerIds = try await api.getAllPeers()
             peerCount = peerIds.count
 
-            let groupIds = try await rpc.listGroups()
+            let groupIds = try await api.listGroups()
             groupCount = groupIds.count
 
-            defaultGroup = try? await rpc.getDefaultGroupInfo()
+            defaultGroup = try? await api.getDefaultGroupInfo()
 
-            rpc.shutdown()
+            api.shutdown()
         } catch {
             self.error = ErrorMessages.userFriendly(from: error)
             isConnected = false
