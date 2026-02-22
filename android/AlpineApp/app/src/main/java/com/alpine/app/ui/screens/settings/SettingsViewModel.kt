@@ -12,7 +12,9 @@ import androidx.lifecycle.viewModelScope
 import com.alpine.app.AlpineApp
 import com.alpine.app.data.discovery.BridgeBeacon
 import com.alpine.app.data.discovery.WifiDiscoveryManager
-import com.alpine.app.data.repository.AlpineRepository
+import com.alpine.app.data.rpc.AlpineRpcService
+import com.alpine.app.data.rpc.TlsConfig
+import com.alpine.app.data.rpc.TlsMode
 import com.alpine.app.data.transport.TransportMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +35,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val portKey = stringPreferencesKey("port")
     private val transportModeKey = stringPreferencesKey("transport_mode")
     private val sharedDirectoryKey = stringPreferencesKey("shared_directory")
+    private val tlsEnabledKey = stringPreferencesKey("tls_enabled")
+    private val tlsModeKey = stringPreferencesKey("tls_mode")
+    private val tlsCertFingerprintKey = stringPreferencesKey("tls_cert_fingerprint")
 
     private val _host = MutableStateFlow("10.0.2.2")
     val host: StateFlow<String> = _host.asStateFlow()
@@ -64,6 +69,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val isBroadcastActive: StateFlow<Boolean> = broadcastServiceManager.isActive
     val indexedFileCount: StateFlow<Int> = broadcastServiceManager.indexedFileCount
 
+    // TLS settings
+    private val _tlsEnabled = MutableStateFlow(false)
+    val tlsEnabled: StateFlow<Boolean> = _tlsEnabled.asStateFlow()
+
+    private val _tlsMode = MutableStateFlow(TlsMode.SYSTEM_CA)
+    val tlsMode: StateFlow<TlsMode> = _tlsMode.asStateFlow()
+
+    private val _tlsCertFingerprint = MutableStateFlow("")
+    val tlsCertFingerprint: StateFlow<String> = _tlsCertFingerprint.asStateFlow()
+
     init {
         viewModelScope.launch {
             val prefs = dataStore.data.first()
@@ -75,6 +90,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 } catch (_: Exception) {}
             }
             prefs[sharedDirectoryKey]?.let { _sharedDirectory.value = it }
+            _tlsEnabled.value = prefs[tlsEnabledKey] == "true"
+            prefs[tlsModeKey]?.let { modeName ->
+                try {
+                    _tlsMode.value = TlsMode.valueOf(modeName)
+                } catch (_: Exception) {}
+            }
+            prefs[tlsCertFingerprintKey]?.let { _tlsCertFingerprint.value = it }
         }
     }
 
@@ -94,6 +116,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _sharedDirectory.value = path
     }
 
+    fun updateTlsEnabled(enabled: Boolean) {
+        _tlsEnabled.value = enabled
+    }
+
+    fun updateTlsMode(mode: TlsMode) {
+        _tlsMode.value = mode
+    }
+
+    fun updateTlsCertFingerprint(fingerprint: String) {
+        _tlsCertFingerprint.value = fingerprint
+    }
+
     fun startDiscovery() {
         discoveryManager.start(viewModelScope)
     }
@@ -111,13 +145,21 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             _connectionStatus.value = ConnectionStatus.Testing
             _statusMessage.value = ""
-            val baseUrl = "http://${_host.value}:${_port.value}/"
-            val repository = AlpineRepository(baseUrl)
-            val result = repository.testConnection()
-            result.onSuccess { status ->
+
+            try {
+                val tlsConfig = TlsConfig(
+                    enabled = _tlsEnabled.value,
+                    mode = _tlsMode.value,
+                    certFingerprint = _tlsCertFingerprint.value,
+                    hostname = _host.value
+                )
+                val baseUrl = tlsConfig.buildUrl(_host.value, _port.value)
+                val rpc = AlpineRpcService(baseUrl, tlsConfig, _host.value)
+                val status = rpc.getStatus()
                 _connectionStatus.value = ConnectionStatus.Connected
-                _statusMessage.value = "Connected - ${status.version}"
-            }.onFailure { e ->
+                _statusMessage.value = "Connected via JSON-RPC - ${status.version}"
+                rpc.shutdown()
+            } catch (e: Exception) {
                 _connectionStatus.value = ConnectionStatus.Failed
                 _statusMessage.value = e.message ?: "Connection failed"
             }
@@ -144,6 +186,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 prefs[portKey] = _port.value
                 prefs[transportModeKey] = _transportMode.value.name
                 prefs[sharedDirectoryKey] = _sharedDirectory.value
+                prefs[tlsEnabledKey] = if (_tlsEnabled.value) "true" else "false"
+                prefs[tlsModeKey] = _tlsMode.value.name
+                prefs[tlsCertFingerprintKey] = _tlsCertFingerprint.value
             }
             if (_transportMode.value == TransportMode.WIFI_BROADCAST) {
                 broadcastServiceManager.updateSharedDirectory(_sharedDirectory.value)

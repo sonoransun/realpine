@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -18,7 +19,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.alpine.app.data.rpc.TlsMode
 import com.alpine.app.data.transport.TransportMode
 import com.alpine.app.ui.components.ConnectionIndicator
 import com.alpine.app.ui.components.DiscoveredBridgeCard
@@ -52,6 +56,9 @@ fun SettingsScreen(
     val sharedDirectory by viewModel.sharedDirectory.collectAsState()
     val isBroadcastActive by viewModel.isBroadcastActive.collectAsState()
     val indexedFileCount by viewModel.indexedFileCount.collectAsState()
+    val tlsEnabled by viewModel.tlsEnabled.collectAsState()
+    val tlsMode by viewModel.tlsMode.collectAsState()
+    val tlsCertFingerprint by viewModel.tlsCertFingerprint.collectAsState()
 
     DisposableEffect(Unit) {
         viewModel.startDiscovery()
@@ -175,6 +182,21 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    HorizontalDivider()
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TlsSettingsSection(
+                        tlsEnabled = tlsEnabled,
+                        onTlsEnabledChanged = { viewModel.updateTlsEnabled(it) },
+                        tlsMode = tlsMode,
+                        onTlsModeChanged = { viewModel.updateTlsMode(it) },
+                        certFingerprint = tlsCertFingerprint,
+                        onCertFingerprintChanged = { viewModel.updateTlsCertFingerprint(it) }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -231,11 +253,113 @@ fun SettingsScreen(
             Button(
                 onClick = {
                     viewModel.saveAndContinue()
-                    navController.navigate("search")
+                    navController.navigate("dashboard") {
+                        popUpTo("settings") { inclusive = true }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Continue to Search")
+                Text("Save & Continue")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TlsSettingsSection(
+    tlsEnabled: Boolean,
+    onTlsEnabledChanged: (Boolean) -> Unit,
+    tlsMode: TlsMode,
+    onTlsModeChanged: (TlsMode) -> Unit,
+    certFingerprint: String,
+    onCertFingerprintChanged: (String) -> Unit
+) {
+    Column {
+        Text(
+            text = "TLS / Security",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = "Enable TLS", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "Use HTTPS for server connections",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = tlsEnabled,
+                onCheckedChange = onTlsEnabledChanged
+            )
+        }
+
+        if (tlsEnabled) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Certificate Verification",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val modes = listOf(
+                TlsMode.SYSTEM_CA to ("System CA" to "Verify using device trusted certificates"),
+                TlsMode.PINNED to ("Certificate Pinning" to "Pin to a specific certificate fingerprint"),
+                TlsMode.TRUST_ALL to ("Trust All (Dev)" to "Accept any certificate — insecure")
+            )
+
+            modes.forEach { (mode, labelDesc) ->
+                val (label, description) = labelDesc
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = mode == tlsMode,
+                            onClick = { onTlsModeChanged(mode) }
+                        )
+                        .padding(vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = mode == tlsMode,
+                        onClick = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column {
+                        Text(text = label, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (mode == TlsMode.TRUST_ALL)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (tlsMode == TlsMode.PINNED) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = certFingerprint,
+                    onValueChange = onCertFingerprintChanged,
+                    label = { Text("SHA-256 Fingerprint") },
+                    placeholder = { Text("sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

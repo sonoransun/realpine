@@ -5,6 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.alpine.app.AlpineApp
+import com.alpine.app.data.rpc.AlpineRpcService
+import com.alpine.app.data.rpc.TlsConfig
+import com.alpine.app.data.rpc.TlsMode
 import kotlinx.coroutines.flow.first
 
 object TransportProvider {
@@ -12,6 +15,9 @@ object TransportProvider {
     private val transportModeKey = stringPreferencesKey("transport_mode")
     private val hostKey = stringPreferencesKey("host")
     private val portKey = stringPreferencesKey("port")
+    private val tlsEnabledKey = stringPreferencesKey("tls_enabled")
+    private val tlsModeKey = stringPreferencesKey("tls_mode")
+    private val tlsCertFingerprintKey = stringPreferencesKey("tls_cert_fingerprint")
 
     suspend fun createTransport(
         application: Application,
@@ -24,7 +30,10 @@ object TransportProvider {
             TransportMode.REST_BRIDGE -> {
                 val host = prefs[hostKey] ?: "10.0.2.2"
                 val port = prefs[portKey] ?: "8080"
-                RestBridgeTransport("http://$host:$port/")
+                val tlsConfig = buildTlsConfig(prefs, host)
+                val baseUrl = tlsConfig.buildUrl(host, port)
+                val rpcService = AlpineRpcService(baseUrl, tlsConfig, host)
+                JsonRpcTransport(rpcService)
             }
             TransportMode.WIFI_BROADCAST -> (application as AlpineApp).broadcastTransport
         }
@@ -36,5 +45,17 @@ object TransportProvider {
                 try { TransportMode.valueOf(it) } catch (_: Exception) { null }
             }
             ?: TransportMode.REST_BRIDGE
+    }
+
+    fun buildTlsConfig(prefs: Preferences, host: String): TlsConfig {
+        val tlsEnabled = prefs[tlsEnabledKey] == "true"
+        val tlsModeStr = prefs[tlsModeKey] ?: "SYSTEM_CA"
+        val certFp = prefs[tlsCertFingerprintKey] ?: ""
+        return TlsConfig(
+            enabled = tlsEnabled,
+            mode = try { TlsMode.valueOf(tlsModeStr) } catch (_: Exception) { TlsMode.SYSTEM_CA },
+            certFingerprint = certFp,
+            hostname = host
+        )
     }
 }
