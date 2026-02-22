@@ -1,12 +1,18 @@
 package com.alpine.app.data.broadcast
 
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.encodeToJsonElement
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -21,7 +27,7 @@ class BroadcastResponder(
     private var listenSocket: DatagramSocket? = null
     private val responseSocket = DatagramSocket()
     private var listenJob: Job? = null
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val responderId = UUID.randomUUID().toString().take(8)
     private val queryTimestamps = ConcurrentHashMap<String, MutableList<Long>>()
 
@@ -57,11 +63,11 @@ class BroadcastResponder(
 
     private fun handleQuery(message: String) {
         try {
-            val json = gson.fromJson(message, JsonObject::class.java)
-            if (json.get("type")?.asString != "alpine_query") return
+            val jsonObj = json.parseToJsonElement(message).jsonObject
+            if (jsonObj["type"]?.jsonPrimitive?.content != "alpine_query") return
 
-            val queryString = json.get("queryString")?.asString ?: return
-            val senderAddress = json.get("senderAddress")?.asString ?: return
+            val queryString = jsonObj["queryString"]?.jsonPrimitive?.content ?: return
+            val senderAddress = jsonObj["senderAddress"]?.jsonPrimitive?.content ?: return
 
             // Rate limit per sender
             val now = System.currentTimeMillis()
@@ -71,22 +77,22 @@ class BroadcastResponder(
                 if (timestamps.size >= MAX_QUERIES_PER_WINDOW) return
                 timestamps.add(now)
             }
-            val senderPort = json.get("senderPort")?.asInt ?: return
-            val queryId = json.get("queryId")?.asLong ?: return
+            val senderPort = jsonObj["senderPort"]?.jsonPrimitive?.int ?: return
+            val queryId = jsonObj["queryId"]?.jsonPrimitive?.long ?: return
 
             val localAddress = NetworkUtils.getLocalIpAddress() ?: return
             if (senderAddress == localAddress) return
 
-            val peerDescMax = json.get("peerDescMax")?.asInt ?: 50
+            val peerDescMax = jsonObj["peerDescMax"]?.jsonPrimitive?.int ?: 50
             val results = contentProvider.search(queryString, localAddress, fileServerPort)
                 .take(peerDescMax)
             if (results.isEmpty()) return
 
-            val response = JsonObject().apply {
-                addProperty("type", "alpine_response")
-                addProperty("queryId", queryId)
-                addProperty("responderId", responderId)
-                add("resources", gson.toJsonTree(results))
+            val response = buildJsonObject {
+                put("type", "alpine_response")
+                put("queryId", queryId)
+                put("responderId", responderId)
+                put("resources", json.encodeToJsonElement(results))
             }
 
             val bytes = response.toString().toByteArray()

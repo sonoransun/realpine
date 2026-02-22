@@ -1,5 +1,8 @@
 package com.alpine.app.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PeerDetail(
     val peerId: Long,
     val ipAddress: String,

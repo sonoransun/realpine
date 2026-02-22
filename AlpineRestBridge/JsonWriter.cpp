@@ -2,152 +2,131 @@
 
 
 #include <JsonWriter.h>
-#include <cstdio>
 
 
 JsonWriter::JsonWriter ()
-    : needsComma_(false)
+    : root_(nullptr)
 {
 }
-
-
-// Dtor defaulted in header
 
 
 string
 JsonWriter::result ()
 {
-    return buffer_;
+    return root_.dump();
 }
 
 
 void
 JsonWriter::beginObject ()
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    buffer_ += "{";
-    needsComma_ = false;
+    if (stack_.empty()) {
+        root_ = nlohmann::json::object();
+        stack_.push(&root_);
+    } else {
+        auto * parent = stack_.top();
+        if (parent->is_array()) {
+            parent->push_back(nlohmann::json::object());
+            stack_.push(&parent->back());
+        } else if (parent->is_object() && !currentKey_.empty()) {
+            (*parent)[currentKey_] = nlohmann::json::object();
+            stack_.push(&(*parent)[currentKey_]);
+            currentKey_.clear();
+        }
+    }
 }
 
 
 void
 JsonWriter::endObject ()
 {
-    buffer_ += "}";
-    needsComma_ = true;
+    if (!stack_.empty())
+        stack_.pop();
 }
 
 
 void
 JsonWriter::beginArray ()
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    buffer_ += "[";
-    needsComma_ = false;
+    if (stack_.empty()) {
+        root_ = nlohmann::json::array();
+        stack_.push(&root_);
+    } else {
+        auto * parent = stack_.top();
+        if (parent->is_array()) {
+            parent->push_back(nlohmann::json::array());
+            stack_.push(&parent->back());
+        } else if (parent->is_object() && !currentKey_.empty()) {
+            (*parent)[currentKey_] = nlohmann::json::array();
+            stack_.push(&(*parent)[currentKey_]);
+            currentKey_.clear();
+        }
+    }
 }
 
 
 void
 JsonWriter::endArray ()
 {
-    buffer_ += "]";
-    needsComma_ = true;
+    if (!stack_.empty())
+        stack_.pop();
 }
 
 
 void
 JsonWriter::key (const string & k)
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    buffer_ += "\"";
-    buffer_ += escape(k);
-    buffer_ += "\":";
-    needsComma_ = false;
+    currentKey_ = k;
 }
 
 
 void
 JsonWriter::value (const string & v)
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    buffer_ += "\"";
-    buffer_ += escape(v);
-    buffer_ += "\"";
-    needsComma_ = true;
+    if (stack_.empty())
+        return;
+    auto * current = stack_.top();
+    if (current->is_array()) {
+        current->push_back(v);
+    } else if (current->is_object() && !currentKey_.empty()) {
+        (*current)[currentKey_] = v;
+        currentKey_.clear();
+    }
 }
 
 
 void
 JsonWriter::value (ulong v)
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    char numBuf[32];
-    snprintf(numBuf, sizeof(numBuf), "%lu", v);
-    buffer_ += numBuf;
-    needsComma_ = true;
+    if (stack_.empty())
+        return;
+    auto * current = stack_.top();
+    if (current->is_array()) {
+        current->push_back(v);
+    } else if (current->is_object() && !currentKey_.empty()) {
+        (*current)[currentKey_] = v;
+        currentKey_.clear();
+    }
 }
 
 
 void
 JsonWriter::value (bool v)
 {
-    if (needsComma_)
-        buffer_ += ",";
-
-    buffer_ += (v ? "true" : "false");
-    needsComma_ = true;
+    if (stack_.empty())
+        return;
+    auto * current = stack_.top();
+    if (current->is_array()) {
+        current->push_back(v);
+    } else if (current->is_object() && !currentKey_.empty()) {
+        (*current)[currentKey_] = v;
+        currentKey_.clear();
+    }
 }
 
 
 void
 JsonWriter::separator ()
 {
-    buffer_ += ",";
-    needsComma_ = false;
-}
-
-
-string
-JsonWriter::escape (const string & s)
-{
-    string out;
-    out.reserve(s.length());
-
-    for (ulong i = 0; i < s.length(); ++i)
-    {
-        char c = s[i];
-
-        switch (c)
-        {
-            case '"':   out += "\\\"";  break;
-            case '\\':  out += "\\\\";  break;
-            case '\n':  out += "\\n";   break;
-            case '\r':  out += "\\r";   break;
-            case '\t':  out += "\\t";   break;
-            default:
-                if (c >= 0 && c < 0x20)
-                {
-                    char hex[8];
-                    snprintf(hex, sizeof(hex), "\\u%04x", (uint)(uchar)c);
-                    out += hex;
-                }
-                else
-                {
-                    out += c;
-                }
-                break;
-        }
-    }
-
-    return out;
+    // no-op: nlohmann handles separators automatically
 }

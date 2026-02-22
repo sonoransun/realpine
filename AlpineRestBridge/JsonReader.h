@@ -3,6 +3,7 @@
 
 #pragma once
 #include <Common.h>
+#include <nlohmann/json.hpp>
 
 
 class JsonReader
@@ -11,7 +12,7 @@ class JsonReader
 
     static constexpr ulong MAX_STRING_LENGTH = 4096;
 
-    JsonReader (const string & json);
+    explicit JsonReader (const string & json);
     ~JsonReader () = default;
 
     bool  getString (const string & key, string & value);
@@ -23,10 +24,7 @@ class JsonReader
 
   private:
 
-    bool  findKey (const string & key, ulong & valuePos);
-
-    static void  skipWhitespace (const string & s, ulong & pos);
-
-    string  json_;
+    nlohmann::json  doc_;
+    bool  valid_;
 
 };

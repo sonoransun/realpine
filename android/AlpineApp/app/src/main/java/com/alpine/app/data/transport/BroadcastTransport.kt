@@ -7,14 +7,20 @@ import com.alpine.app.data.model.QueryResponse
 import com.alpine.app.data.model.QueryResultsResponse
 import com.alpine.app.data.model.QueryStatusResponse
 import com.alpine.app.data.model.ResourceDesc
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
+import kotlinx.serialization.json.put
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -25,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 class BroadcastTransport : QueryTransport {
 
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
     private val senderId = UUID.randomUUID().toString().take(8)
     private val queryIdCounter = AtomicLong(System.currentTimeMillis())
     private val queries = ConcurrentHashMap<Long, QueryState>()
@@ -71,16 +77,23 @@ class BroadcastTransport : QueryTransport {
 
     private fun handleResponse(message: String) {
         try {
-            val json = gson.fromJson(message, JsonObject::class.java)
-            if (json.get("type")?.asString != "alpine_response") return
-            val queryId = json.get("queryId")?.asLong ?: return
+            val jsonObj = json.parseToJsonElement(message).jsonObject
+            if (jsonObj["type"]?.jsonPrimitive?.content != "alpine_response") return
+            val queryId = jsonObj["queryId"]?.jsonPrimitive?.long ?: return
             val state = queries[queryId] ?: return
             if (!state.inProgress.get()) return
 
-            val responderId = json.get("responderId")?.asString ?: return
-            val resources = gson.fromJson(
-                json.getAsJsonArray("resources"), Array<ResourceDesc>::class.java
-            )?.toList() ?: return
+            val responderId = jsonObj["responderId"]?.jsonPrimitive?.content ?: return
+            val resources = jsonObj["resources"]?.jsonArray?.map { resEl ->
+                val res = resEl.jsonObject
+                val locators = res["locators"]?.jsonArray?.map { it.jsonPrimitive.content } ?: emptyList()
+                ResourceDesc(
+                    resourceId = res["resourceId"]?.jsonPrimitive?.long ?: 0,
+                    size = res["size"]?.jsonPrimitive?.long ?: 0,
+                    description = res["description"]?.jsonPrimitive?.content ?: "",
+                    locators = locators
+                )
+            } ?: return
 
             val peerId = responderId.hashCode().toLong() and 0x7FFFFFFFL
             state.results[responderId] = PeerResources(peerId, resources)
@@ -91,8 +104,8 @@ class BroadcastTransport : QueryTransport {
         } catch (_: Exception) {}
     }
 
-    private suspend fun sendBroadcast(json: JsonObject) {
-        val bytes = json.toString().toByteArray()
+    private suspend fun sendBroadcast(jsonObj: JsonObject) {
+        val bytes = jsonObj.toString().toByteArray()
         withContext(Dispatchers.IO) {
             socket.send(DatagramPacket(
                 bytes, bytes.size,
@@ -106,17 +119,17 @@ class BroadcastTransport : QueryTransport {
             val queryId = queryIdCounter.incrementAndGet()
             queries[queryId] = QueryState(request)
 
-            sendBroadcast(JsonObject().apply {
-                addProperty("type", "alpine_query")
-                addProperty("queryId", queryId)
-                addProperty("senderId", senderId)
-                addProperty("senderAddress", NetworkUtils.getLocalIpAddress() ?: "0.0.0.0")
-                addProperty("senderPort", socket.localPort)
-                addProperty("queryString", request.queryString)
-                addProperty("groupName", request.groupName)
-                addProperty("autoHaltLimit", request.autoHaltLimit)
-                addProperty("peerDescMax", request.peerDescMax)
-                addProperty("timestamp", System.currentTimeMillis())
+            sendBroadcast(buildJsonObject {
+                put("type", "alpine_query")
+                put("queryId", queryId)
+                put("senderId", senderId)
+                put("senderAddress", NetworkUtils.getLocalIpAddress() ?: "0.0.0.0")
+                put("senderPort", socket.localPort)
+                put("queryString", request.queryString)
+                put("groupName", request.groupName)
+                put("autoHaltLimit", request.autoHaltLimit)
+                put("peerDescMax", request.peerDescMax)
+                put("timestamp", System.currentTimeMillis())
             })
 
             Result.success(QueryResponse(queryId))
@@ -146,10 +159,10 @@ class BroadcastTransport : QueryTransport {
     override suspend fun cancelQuery(queryId: Long): Result<Unit> {
         queries[queryId]?.inProgress?.set(false)
         try {
-            sendBroadcast(JsonObject().apply {
-                addProperty("type", "alpine_cancel")
-                addProperty("queryId", queryId)
-                addProperty("senderId", senderId)
+            sendBroadcast(buildJsonObject {
+                put("type", "alpine_cancel")
+                put("queryId", queryId)
+                put("senderId", senderId)
             })
         } catch (_: Exception) {}
         return Result.success(Unit)

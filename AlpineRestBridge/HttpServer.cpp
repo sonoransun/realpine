@@ -2,16 +2,15 @@
 
 
 #include <HttpServer.h>
+#include <HttpRequest.h>
+#include <HttpResponse.h>
 #include <Log.h>
-#include <cstdio>
-#include <thread>
-#include <sys/socket.h>
-#include <sys/time.h>
+
+static constexpr ulong MAX_BODY_SIZE = 65536;
 
 
 HttpServer::HttpServer (HttpRouter & router)
-    : router_(router),
-      running_(false)
+    : router_(router)
 {
 }
 
@@ -26,131 +25,141 @@ bool
 HttpServer::start (ulong   ipAddress,
                    ushort  port)
 {
-    if (!acceptor_.create(ipAddress, port))
-    {
-        Log::Error("HttpServer: Failed to create acceptor");
+    try {
+        asio::ip::address addr;
+        if (ipAddress == 0) {
+            addr = asio::ip::address_v4::any();
+        } else {
+            addr = asio::ip::make_address_v4(static_cast<uint32_t>(ipAddress));
+        }
+
+        auto endpoint = asio::ip::tcp::endpoint(addr, port);
+        acceptor_ = std::make_unique<asio::ip::tcp::acceptor>(ioContext_);
+        acceptor_->open(endpoint.protocol());
+        acceptor_->set_option(asio::ip::tcp::acceptor::reuse_address(true));
+        acceptor_->bind(endpoint);
+        acceptor_->listen(asio::socket_base::max_listen_connections);
+
+        running_ = true;
+        doAccept();
+
+        for (int i = 0; i < THREAD_POOL_SIZE; ++i) {
+            workers_.emplace_back([this]() {
+                ioContext_.run();
+            });
+        }
+
+        Log::Info("HttpServer started on port " + std::to_string(port));
+        return true;
+    } catch (const std::exception & e) {
+        Log::Error("HttpServer::start failed: "s + e.what());
         return false;
     }
-
-    Log::Info("HttpServer: Listening on port "s + std::to_string((uint)port));
-
-    running_ = true;
-
-    while (running_)
-    {
-        std::unique_ptr<TcpTransport> transport;
-
-        if (!acceptor_.accept(transport))
-        {
-            Log::Error("HttpServer: Accept failed");
-            continue;
-        }
-
-        if (activeConnections_.load() >= MAX_CONNECTIONS)
-        {
-            HttpResponse resp(503, "Service Unavailable");
-            resp.setJsonBody("{\"error\":\"Too many connections\"}");
-            string responseStr = resp.build();
-            transport->send((const byte*)responseStr.c_str(), responseStr.length());
-            continue;
-        }
-
-        TcpTransport* rawTransport = transport.release();
-        activeConnections_.fetch_add(1);
-        std::thread([this, rawTransport]() {
-            handleConnection(rawTransport);
-            delete rawTransport;
-            activeConnections_.fetch_sub(1);
-        }).detach();
-    }
-
-    return true;
 }
 
 
 void
 HttpServer::stop ()
 {
+    if (!running_)
+        return;
     running_ = false;
-    acceptor_.close();
+
+    if (acceptor_) {
+        asio::error_code ec;
+        acceptor_->close(ec);
+    }
+    ioContext_.stop();
+
+    for (auto & w : workers_) {
+        if (w.joinable())
+            w.join();
+    }
+    workers_.clear();
+    Log::Info("HttpServer stopped");
 }
 
 
 void
-HttpServer::handleConnection (TcpTransport * transport)
+HttpServer::doAccept ()
 {
-    // Set socket receive timeout
-    struct timeval tv;
-    tv.tv_sec = 30;
-    tv.tv_usec = 0;
-    setsockopt(transport->getFd(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-
-    static constexpr ulong MAX_BODY_SIZE = 65536;
-    byte buffer[8192];
-    ulong totalRead = 0;
-    string rawData;
-
-    // First read to get headers
-    ulong bytesRead = 0;
-    if (!transport->receive(buffer, sizeof(buffer), bytesRead))
+    if (!running_)
         return;
-    rawData.append((const char*)buffer, bytesRead);
-    totalRead = bytesRead;
-
-    // Check for Content-Length and read more if needed
-    ulong headerEnd = rawData.find("\r\n\r\n");
-    if (headerEnd != string::npos) {
-        // Extract Content-Length from raw headers
-        ulong clPos = rawData.find("content-length:");
-        if (clPos == string::npos)
-            clPos = rawData.find("Content-Length:");
-
-        ulong contentLength = 0;
-        if (clPos != string::npos) {
-            ulong valStart = clPos + 15; // length of "content-length:"
-            while (valStart < rawData.length() && rawData[valStart] == ' ')
-                ++valStart;
-            string clStr;
-            while (valStart < rawData.length() && rawData[valStart] >= '0' && rawData[valStart] <= '9') {
-                clStr += rawData[valStart];
-                ++valStart;
+    acceptor_->async_accept([this](asio::error_code ec, asio::ip::tcp::socket socket) {
+        if (!ec && running_) {
+            if (activeConnections_ < MAX_CONNECTIONS) {
+                ++activeConnections_;
+                asio::post(ioContext_, [this, sock = std::move(socket)]() mutable {
+                    handleConnection(std::move(sock));
+                });
+            } else {
+                Log::Error("HttpServer: max connections reached, rejecting");
+                asio::error_code closeEc;
+                socket.close(closeEc);
             }
-            if (!clStr.empty())
-                contentLength = strtoul(clStr.c_str(), nullptr, 10);
         }
+        doAccept();
+    });
+}
 
-        if (contentLength > MAX_BODY_SIZE) {
-            HttpResponse resp(413, "Payload Too Large");
-            resp.setJsonBody("{\"error\":\"Request body too large\"}");
-            string responseStr = resp.build();
-            transport->send((const byte*)responseStr.c_str(), responseStr.length());
+
+void
+HttpServer::handleConnection (asio::ip::tcp::socket socket)
+{
+    try {
+        socket.set_option(asio::socket_base::receive_buffer_size(65536));
+
+        std::vector<byte> buffer(65536);
+        asio::error_code ec;
+        ulong totalRead = 0;
+
+        // Read headers first
+        auto bytesRead = socket.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
+        if (ec || bytesRead == 0) {
+            --activeConnections_;
+            return;
+        }
+        totalRead = bytesRead;
+
+        // Parse the request
+        HttpRequest request;
+        if (!HttpRequest::parse(buffer.data(), totalRead, request)) {
+            auto resp = HttpResponse::badRequest("Malformed HTTP request");
+            auto respStr = resp.build();
+            asio::write(socket, asio::buffer(respStr), ec);
+            --activeConnections_;
             return;
         }
 
-        ulong bodyStart = headerEnd + 4;
-        ulong expectedTotal = bodyStart + contentLength;
+        // Check for Content-Length and read body if needed
+        auto clIt = request.headers.find("content-length");
+        if (clIt != request.headers.end()) {
+            ulong contentLength = std::stoul(clIt->second);
+            if (contentLength > MAX_BODY_SIZE) {
+                auto resp = HttpResponse(413, "Payload Too Large");
+                resp.setBody("Request body too large");
+                auto respStr = resp.build();
+                asio::write(socket, asio::buffer(respStr), ec);
+                --activeConnections_;
+                return;
+            }
 
-        while (totalRead < expectedTotal && totalRead < MAX_BODY_SIZE + 8192) {
-            bytesRead = 0;
-            if (!transport->receive(buffer, sizeof(buffer), bytesRead))
-                break;
-            rawData.append((const char*)buffer, bytesRead);
-            totalRead += bytesRead;
+            while (request.body.length() < contentLength) {
+                bytesRead = socket.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
+                if (ec || bytesRead == 0)
+                    break;
+                request.body.append(reinterpret_cast<const char *>(buffer.data()), bytesRead);
+            }
         }
+
+        // Dispatch
+        auto response = router_.dispatch(request);
+        auto responseStr = response.build();
+        asio::write(socket, asio::buffer(responseStr), ec);
+
+    } catch (const std::exception & e) {
+        Log::Error("HttpServer::handleConnection exception: "s + e.what());
     }
 
-    HttpRequest request;
-    if (!HttpRequest::parse((const byte*)rawData.c_str(), rawData.length(), request))
-    {
-        HttpResponse resp = HttpResponse::badRequest("Malformed request");
-        string responseStr = resp.build();
-        transport->send((const byte*)responseStr.c_str(), responseStr.length());
-        return;
-    }
-
-    Log::Debug("HttpServer: "s + request.method + " " + request.path);
-
-    HttpResponse response = router_.dispatch(request);
-    string responseStr = response.build();
-    transport->send((const byte *)responseStr.c_str(), responseStr.length());
+    --activeConnections_;
 }

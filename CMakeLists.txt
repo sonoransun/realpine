@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.28)
 project(Alpine VERSION 0.0.19 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Output directories
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -34,7 +36,7 @@ if(WIN32)
         _VERBOSE
     )
 else()
-    target_compile_options(AlpineFlags INTERFACE -Wall -fPIC)
+    target_compile_options(AlpineFlags INTERFACE -Wall)
     target_compile_definitions(AlpineFlags INTERFACE
         _GNU_SOURCE
         _POSIX_THREADS
@@ -59,6 +61,33 @@ endif()
 
 find_package(Threads REQUIRED)
 target_link_libraries(AlpineFlags INTERFACE Threads::Threads)
+
+include(FetchContent)
+FetchContent_Declare(json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+    URL_HASH SHA256=d6c65aca6b1ed68e7a182f4757f0f1b291571afd5b8e5d8e6e4ab981df360ab9
+)
+FetchContent_MakeAvailable(json)
+
+FetchContent_Declare(spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.14.1
+    GIT_SHALLOW TRUE
+)
+set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(spdlog)
+
+FetchContent_Declare(asio
+    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
+    GIT_TAG asio-1-30-2
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(asio)
+
+add_library(asio_standalone INTERFACE)
+add_library(Asio::Asio ALIAS asio_standalone)
+target_include_directories(asio_standalone INTERFACE ${asio_SOURCE_DIR}/asio/include)
+target_compile_definitions(asio_standalone INTERFACE ASIO_STANDALONE ASIO_NO_DEPRECATED)
 
 if(WIN32)
     target_link_libraries(AlpineFlags INTERFACE ws2_32 iphlpapi)

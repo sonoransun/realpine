@@ -5,10 +5,12 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
-object SecureStorage {
-    private const val PREFS_NAME = "alpine_secure_prefs"
+class SecureStorage(private val context: Context) {
+    private companion object {
+        const val PREFS_NAME = "alpine_secure_prefs"
+    }
 
-    private fun getPrefs(context: Context): SharedPreferences {
+    private fun getPrefs(): SharedPreferences {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -21,15 +23,15 @@ object SecureStorage {
         )
     }
 
-    fun store(context: Context, key: String, value: String) {
-        getPrefs(context).edit().putString(key, value).apply()
+    fun store(key: String, value: String) {
+        getPrefs().edit().putString(key, value).apply()
     }
 
-    fun read(context: Context, key: String): String? {
-        return getPrefs(context).getString(key, null)
+    fun read(key: String): String? {
+        return getPrefs().getString(key, null)
     }
 
-    fun remove(context: Context, key: String) {
-        getPrefs(context).edit().remove(key).apply()
+    fun remove(key: String) {
+        getPrefs().edit().remove(key).apply()
     }
 }

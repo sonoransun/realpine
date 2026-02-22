@@ -1,16 +1,23 @@
 package com.alpine.app.data.api
 
 import com.alpine.app.BuildConfig
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
 object AlpineApiClient {
 
     private var retrofit: Retrofit? = null
     private var baseUrl: String = ""
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     fun getService(baseUrl: String): AlpineApiService {
         if (retrofit == null || this.baseUrl != baseUrl) {
@@ -30,10 +37,11 @@ object AlpineApiClient {
                 .addInterceptor(loggingInterceptor)
                 .build()
 
+            val contentType = "application/json".toMediaType()
             retrofit = Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(json.asConverterFactory(contentType))
                 .build()
         }
         return retrofit!!.create(AlpineApiService::class.java)

@@ -10,7 +10,11 @@
       "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiRawConnTest mon0:*)",
       "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiBeaconDiscoveryTest mon0:*)",
       "Bash(/Users/user/sonoranpub/realpine/build/bin/wifiBroadcastConnTest:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find /Users/user/sonoranpub/realpine/android/AlpineApp -name \"proguard-rules.pro\" -o -name \"*.pro\" | xargs cat 2>/dev/null)",
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "WebSearch"
     ]
   }
 }

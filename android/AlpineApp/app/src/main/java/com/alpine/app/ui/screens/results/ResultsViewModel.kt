@@ -1,29 +1,34 @@
 package com.alpine.app.ui.screens.results
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alpine.app.data.model.PeerResources
 import com.alpine.app.data.model.QueryStatusResponse
 import com.alpine.app.data.transport.QueryTransport
 import com.alpine.app.data.transport.TransportProvider
 import com.alpine.app.data.util.sanitizeError
-import com.alpine.app.ui.screens.settings.dataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ResultsViewModel(
-    application: Application,
+@HiltViewModel
+class ResultsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    private val dataStore: DataStore<Preferences>,
     savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     private val queryId: Long = savedStateHandle["queryId"] ?: 0L
-    private val dataStore = application.dataStore
 
     private val _queryStatus = MutableStateFlow<QueryStatusResponse?>(null)
     val queryStatus: StateFlow<QueryStatusResponse?> = _queryStatus.asStateFlow()
@@ -42,7 +47,7 @@ class ResultsViewModel(
 
     init {
         viewModelScope.launch {
-            transport = TransportProvider.createTransport(getApplication(), dataStore)
+            transport = TransportProvider.createTransport(appContext, dataStore)
             startPolling()
         }
     }

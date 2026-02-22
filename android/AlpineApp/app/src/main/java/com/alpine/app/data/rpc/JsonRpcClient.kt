@@ -1,11 +1,15 @@
 package com.alpine.app.data.rpc
 
-import com.google.gson.Gson
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.intOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -21,7 +25,7 @@ class JsonRpcClient(
     host: String = "",
     private val apiKey: String = ""
 ) {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
     private val requestId = AtomicLong(1)
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
@@ -47,14 +51,14 @@ class JsonRpcClient(
         builder.build()
     }
 
-    suspend fun call(method: String, params: JsonObject = JsonObject()): JsonElement {
+    suspend fun call(method: String, params: JsonObject = buildJsonObject {}): JsonElement {
         return withContext(Dispatchers.IO) {
             val id = requestId.getAndIncrement()
-            val request = JsonObject().apply {
-                addProperty("jsonrpc", "2.0")
-                addProperty("method", method)
-                add("params", params)
-                addProperty("id", id)
+            val request = buildJsonObject {
+                put("jsonrpc", "2.0")
+                put("method", method)
+                put("params", params)
+                put("id", id)
             }
 
             val body = request.toString().toRequestBody(jsonMediaType)
@@ -74,21 +78,21 @@ class JsonRpcClient(
                 )
             }
 
-            val json = try {
-                JsonParser.parseString(responseBody).asJsonObject
+            val jsonObj = try {
+                json.parseToJsonElement(responseBody).jsonObject
             } catch (e: Exception) {
                 throw JsonRpcException(-32603, "Invalid JSON response: ${e.message}")
             }
 
-            if (json.has("error")) {
-                val error = json.getAsJsonObject("error")
+            if ("error" in jsonObj) {
+                val error = jsonObj["error"]!!.jsonObject
                 throw JsonRpcException(
-                    error.get("code")?.asInt ?: -1,
-                    error.get("message")?.asString ?: "Unknown RPC error"
+                    error["code"]?.jsonPrimitive?.intOrNull ?: -1,
+                    error["message"]?.jsonPrimitive?.content ?: "Unknown RPC error"
                 )
             }
 
-            json.get("result") ?: throw JsonRpcException(-32603, "No result in response")
+            jsonObj["result"] ?: throw JsonRpcException(-32603, "No result in response")
         }
     }
 

@@ -42,7 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.alpine.app.data.model.GroupInfo
 
@@ -50,7 +50,7 @@ import com.alpine.app.data.model.GroupInfo
 @Composable
 fun GroupsScreen(
     navController: NavController,
-    viewModel: GroupsViewModel = viewModel()
+    viewModel: GroupsViewModel = hiltViewModel()
 ) {
     val groups by viewModel.groups.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

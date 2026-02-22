@@ -33,7 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.alpine.app.BuildConfig
 import com.alpine.app.data.rpc.TlsMode
@@ -45,7 +45,7 @@ import com.alpine.app.ui.components.DiscoveredBridgeCard
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val host by viewModel.host.collectAsState()
     val port by viewModel.port.collectAsState()

@@ -37,7 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.alpine.app.ui.components.ConnectionIndicator
 
@@ -45,7 +45,7 @@ import com.alpine.app.ui.components.ConnectionIndicator
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val serverStatus by viewModel.serverStatus.collectAsState()
     val peerCount by viewModel.peerCount.collectAsState()

@@ -2,7 +2,6 @@ package com.alpine.app.data.discovery
 
 import android.content.Context
 import android.net.wifi.WifiManager
-import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,6 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.int
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.SocketTimeoutException
@@ -26,6 +29,7 @@ class WifiDiscoveryManager(private val context: Context) {
         private const val RECEIVE_BUFFER_SIZE = 1024
     }
 
+    private val json = Json { ignoreUnknownKeys = true }
     private val beacons = mutableMapOf<String, BridgeBeacon>()
 
     private val _discoveredBridges = MutableStateFlow<List<BridgeBeacon>>(emptyList())
@@ -57,8 +61,8 @@ class WifiDiscoveryManager(private val context: Context) {
                     try {
                         val packet = DatagramPacket(buffer, buffer.size)
                         socket?.receive(packet)
-                        val json = String(packet.data, 0, packet.length)
-                        parseBeacon(json, packet.address.hostAddress ?: "")?.let { beacon ->
+                        val jsonStr = String(packet.data, 0, packet.length)
+                        parseBeacon(jsonStr, packet.address.hostAddress ?: "")?.let { beacon ->
                             val key = "${beacon.hostAddress}:${beacon.restPort}"
                             synchronized(beacons) {
                                 beacons[key] = beacon
@@ -107,17 +111,17 @@ class WifiDiscoveryManager(private val context: Context) {
         }
     }
 
-    private fun parseBeacon(json: String, sourceAddress: String): BridgeBeacon? {
+    private fun parseBeacon(jsonStr: String, sourceAddress: String): BridgeBeacon? {
         return try {
-            val obj = JsonParser.parseString(json).asJsonObject
-            val service = obj.get("service")?.asString ?: return null
+            val obj = json.parseToJsonElement(jsonStr).jsonObject
+            val service = obj["service"]?.jsonPrimitive?.content ?: return null
             if (service != "alpine-bridge") return null
 
             BridgeBeacon(
                 service = service,
-                protocolVersion = obj.get("version")?.asString ?: "0",
-                restPort = obj.get("restPort")?.asInt ?: return null,
-                bridgeVersion = obj.get("bridgeVersion")?.asString ?: "unknown",
+                protocolVersion = obj["version"]?.jsonPrimitive?.content ?: "0",
+                restPort = obj["restPort"]?.jsonPrimitive?.int ?: return null,
+                bridgeVersion = obj["bridgeVersion"]?.jsonPrimitive?.content ?: "unknown",
                 hostAddress = sourceAddress,
                 lastSeen = System.currentTimeMillis()
             )

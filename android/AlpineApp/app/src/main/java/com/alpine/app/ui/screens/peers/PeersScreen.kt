@@ -46,7 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.alpine.app.data.model.PeerDetail
 
@@ -54,7 +54,7 @@ import com.alpine.app.data.model.PeerDetail
 @Composable
 fun PeersScreen(
     navController: NavController,
-    viewModel: PeersViewModel = viewModel()
+    viewModel: PeersViewModel = hiltViewModel()
 ) {
     val peers by viewModel.peers.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()

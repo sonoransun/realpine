@@ -1,5 +1,8 @@
 package com.alpine.app.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class GroupInfo(
     val groupId: Long,
     val groupName: String,

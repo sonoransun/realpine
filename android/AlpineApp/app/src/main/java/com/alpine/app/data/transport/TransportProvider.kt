@@ -1,6 +1,6 @@
 package com.alpine.app.data.transport
 
-import android.app.Application
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -21,7 +21,7 @@ object TransportProvider {
     private val tlsCertFingerprintKey = stringPreferencesKey("tls_cert_fingerprint")
 
     suspend fun createTransport(
-        application: Application,
+        context: Context,
         dataStore: DataStore<Preferences>
     ): QueryTransport {
         val prefs = dataStore.data.first()
@@ -31,14 +31,15 @@ object TransportProvider {
             TransportMode.REST_BRIDGE -> {
                 val host = prefs[hostKey] ?: "10.0.2.2"
                 val port = prefs[portKey] ?: "8080"
-                val certFp = SecureStorage.read(application, "tls_cert_fingerprint") ?: prefs[tlsCertFingerprintKey] ?: ""
+                val secureStorage = SecureStorage(context)
+                val certFp = secureStorage.read("tls_cert_fingerprint") ?: prefs[tlsCertFingerprintKey] ?: ""
                 val tlsConfig = buildTlsConfig(prefs, host, certFp)
                 val baseUrl = tlsConfig.buildUrl(host, port)
-                val apiKey = SecureStorage.read(application, "api_key") ?: ""
+                val apiKey = secureStorage.read("api_key") ?: ""
                 val rpcService = AlpineRpcService(baseUrl, tlsConfig, host, apiKey)
                 JsonRpcTransport(rpcService)
             }
-            TransportMode.WIFI_BROADCAST -> (application as AlpineApp).broadcastTransport
+            TransportMode.WIFI_BROADCAST -> (context.applicationContext as AlpineApp).broadcastTransport
         }
     }
 

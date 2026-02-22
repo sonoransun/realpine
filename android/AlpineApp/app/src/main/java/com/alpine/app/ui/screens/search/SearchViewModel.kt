@@ -1,14 +1,17 @@
 package com.alpine.app.ui.screens.search
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alpine.app.data.model.QueryRequest
 import com.alpine.app.data.transport.TransportMode
 import com.alpine.app.data.transport.TransportProvider
 import com.alpine.app.data.util.sanitizeError
 import com.alpine.app.data.validation.InputValidator
-import com.alpine.app.ui.screens.settings.dataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -17,10 +20,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val dataStore = application.dataStore
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    private val dataStore: DataStore<Preferences>
+) : ViewModel() {
 
     private val _queryString = MutableStateFlow("")
     val queryString: StateFlow<String> = _queryString.asStateFlow()
@@ -79,7 +85,7 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
             _error.value = null
 
             val transport = TransportProvider.createTransport(
-                getApplication(), dataStore
+                appContext, dataStore
             )
             val request = QueryRequest(
                 queryString = _queryString.value,

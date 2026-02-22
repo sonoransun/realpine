@@ -3,6 +3,9 @@
 
 #pragma once
 #include <Common.h>
+#include <nlohmann/json.hpp>
+#include <stack>
+#include <variant>
 
 
 class JsonWriter
@@ -26,14 +29,13 @@ class JsonWriter
     void  value (ulong v);
     void  value (bool v);
 
-    void  separator ();
+    void  separator ();  // no-op with nlohmann
 
 
   private:
 
-    static string  escape (const string & s);
-
-    string  buffer_;
-    bool    needsComma_;
+    nlohmann::json  root_;
+    std::stack<nlohmann::json *>  stack_;
+    string  currentKey_;
 
 };

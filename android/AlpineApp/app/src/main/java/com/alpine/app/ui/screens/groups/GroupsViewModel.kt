@@ -1,8 +1,9 @@
 package com.alpine.app.ui.screens.groups
 
-import android.app.Application
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alpine.app.data.model.GroupInfo
 import com.alpine.app.data.rpc.AlpineRpcService
@@ -10,16 +11,19 @@ import com.alpine.app.data.rpc.TlsConfig
 import com.alpine.app.data.rpc.TlsMode
 import com.alpine.app.data.storage.SecureStorage
 import com.alpine.app.data.util.sanitizeError
-import com.alpine.app.ui.screens.settings.dataStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class GroupsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val dataStore = application.dataStore
+@HiltViewModel
+class GroupsViewModel @Inject constructor(
+    private val dataStore: DataStore<Preferences>,
+    private val secureStorage: SecureStorage
+) : ViewModel() {
 
     private val _groups = MutableStateFlow<List<GroupInfo>>(emptyList())
     val groups: StateFlow<List<GroupInfo>> = _groups.asStateFlow()
@@ -86,7 +90,7 @@ class GroupsViewModel(application: Application) : AndroidViewModel(application) 
             val port = prefs[stringPreferencesKey("port")] ?: "8080"
             val tlsEnabled = prefs[stringPreferencesKey("tls_enabled")] == "true"
             val tlsModeStr = prefs[stringPreferencesKey("tls_mode")] ?: "SYSTEM_CA"
-            val certFp = SecureStorage.read(getApplication(), "tls_cert_fingerprint")
+            val certFp = secureStorage.read("tls_cert_fingerprint")
                 ?: prefs[stringPreferencesKey("tls_cert_fingerprint")] ?: ""
             val tlsConfig = TlsConfig(
                 enabled = tlsEnabled,
@@ -94,7 +98,7 @@ class GroupsViewModel(application: Application) : AndroidViewModel(application) 
                 certFingerprint = certFp,
                 hostname = host
             )
-            val apiKey = SecureStorage.read(getApplication(), "api_key") ?: ""
+            val apiKey = secureStorage.read("api_key") ?: ""
             rpcService = AlpineRpcService(tlsConfig.buildUrl(host, port), tlsConfig, host, apiKey)
         }
         return rpcService!!

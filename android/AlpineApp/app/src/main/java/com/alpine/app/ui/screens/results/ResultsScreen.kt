@@ -27,7 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.alpine.app.ui.components.QueryStatusBar
 import com.alpine.app.ui.components.ResourceCard
@@ -36,7 +36,7 @@ import com.alpine.app.ui.components.ResourceCard
 @Composable
 fun ResultsScreen(
     navController: NavController,
-    viewModel: ResultsViewModel = viewModel()
+    viewModel: ResultsViewModel = hiltViewModel()
 ) {
     val queryStatus by viewModel.queryStatus.collectAsState()
     val results by viewModel.results.collectAsState()

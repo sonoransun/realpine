@@ -34,4 +34,6 @@ target_link_libraries(AlpineRestBridge PRIVATE
     Alpine::NetUtils
     Alpine::ThreadUtils
     Alpine::ConfigUtils
+    nlohmann_json::nlohmann_json
+    Asio::Asio
 )

@@ -1,13 +1,14 @@
 package com.alpine.app.ui.screens.settings
 
 import android.app.Application
+import android.content.Context
 import android.os.Environment
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.alpine.app.AlpineApp
 import com.alpine.app.data.discovery.BridgeBeacon
@@ -19,21 +20,28 @@ import com.alpine.app.data.storage.SecureStorage
 import com.alpine.app.data.transport.TransportMode
 import com.alpine.app.data.util.sanitizeError
 import com.alpine.app.data.validation.InputValidator
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-val Application.dataStore: DataStore<Preferences> by preferencesDataStore(name = "alpine_settings")
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "alpine_settings")
 
 enum class ConnectionStatus {
     Idle, Testing, Connected, Failed
 }
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+    private val dataStore: DataStore<Preferences>,
+    private val secureStorage: SecureStorage
+) : ViewModel() {
 
-    private val dataStore = application.dataStore
     private val hostKey = stringPreferencesKey("host")
     private val portKey = stringPreferencesKey("port")
     private val transportModeKey = stringPreferencesKey("transport_mode")
@@ -55,7 +63,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _statusMessage = MutableStateFlow("")
     val statusMessage: StateFlow<String> = _statusMessage.asStateFlow()
 
-    private val discoveryManager = WifiDiscoveryManager(application)
+    private val discoveryManager = WifiDiscoveryManager(appContext)
 
     val discoveredBridges: StateFlow<List<BridgeBeacon>> = discoveryManager.discoveredBridges
     val isScanning: StateFlow<Boolean> = discoveryManager.isScanning
@@ -68,7 +76,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     )
     val sharedDirectory: StateFlow<String> = _sharedDirectory.asStateFlow()
 
-    private val broadcastServiceManager = (application as AlpineApp).broadcastServiceManager
+    private val broadcastServiceManager = (appContext as AlpineApp).broadcastServiceManager
 
     val isBroadcastActive: StateFlow<Boolean> = broadcastServiceManager.isActive
     val indexedFileCount: StateFlow<Int> = broadcastServiceManager.indexedFileCount
@@ -111,8 +119,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             prefs[apiKeyKey]?.let { _apiKey.value = it }
 
             // Override with secure storage values if available
-            SecureStorage.read(application, "tls_cert_fingerprint")?.let { _tlsCertFingerprint.value = it }
-            SecureStorage.read(application, "api_key")?.let { _apiKey.value = it }
+            secureStorage.read("tls_cert_fingerprint")?.let { _tlsCertFingerprint.value = it }
+            secureStorage.read("api_key")?.let { _apiKey.value = it }
         }
     }
 
@@ -235,8 +243,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 prefs[tlsModeKey] = _tlsMode.value.name
             }
             // Store secrets in encrypted storage
-            SecureStorage.store(getApplication(), "tls_cert_fingerprint", _tlsCertFingerprint.value)
-            SecureStorage.store(getApplication(), "api_key", _apiKey.value)
+            secureStorage.store("tls_cert_fingerprint", _tlsCertFingerprint.value)
+            secureStorage.store("api_key", _apiKey.value)
 
             if (_transportMode.value == TransportMode.WIFI_BROADCAST) {
                 broadcastServiceManager.updateSharedDirectory(_sharedDirectory.value)

@@ -24,6 +24,8 @@ target_link_libraries(AlpineServer PRIVATE
     Alpine::AppUtils
     Alpine::NetUtils
     Alpine::ConfigUtils
+    nlohmann_json::nlohmann_json
+    Asio::Asio
 )
 if(ALPINE_ENABLE_CORBA)
     target_link_libraries(AlpineServer PRIVATE
