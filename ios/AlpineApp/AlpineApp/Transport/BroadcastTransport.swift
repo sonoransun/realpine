@@ -60,7 +60,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
 
         // Build and send the broadcast query
         let localAddress = NetworkUtility.localIPAddress() ?? "0.0.0.0"
-        let queryMessage: [String: Any] = [
+        var queryMessage: [String: Any] = [
             "type": "alpine_query",
             "queryId": queryId,
             "senderId": senderId,
@@ -72,6 +72,52 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             "peerDescMax": request.peerDescMax,
             "timestamp": Int64(Date().timeIntervalSince1970 * 1000)
         ]
+
+        // Add enhanced search fields when present
+        if let searchMode = request.searchMode {
+            queryMessage["searchMode"] = searchMode.rawValue
+        }
+        if let metric = request.similarityMetric {
+            queryMessage["similarityMetric"] = metric.rawValue
+        }
+        if let threshold = request.similarityThreshold {
+            queryMessage["similarityThreshold"] = threshold
+        }
+        if let version = request.protocolVersion {
+            queryMessage["protocolVersion"] = version
+        }
+        if let filters = request.entityFilters {
+            queryMessage["entityFilters"] = filters.map { filter in
+                var dict: [String: Any] = ["text": filter.text, "minConfidence": filter.minConfidence]
+                if let entityType = filter.entityType {
+                    dict["entityType"] = entityType.rawValue
+                }
+                return dict
+            }
+        }
+        if let patterns = request.sparqlPatterns {
+            queryMessage["sparqlPatterns"] = patterns.map { pattern in
+                var dict: [String: Any] = [:]
+                if let s = pattern.subject { dict["subject"] = s }
+                if let p = pattern.predicate { dict["predicate"] = p }
+                if let o = pattern.object { dict["object"] = o }
+                return dict
+            }
+        }
+        if let cats = request.contentCategories {
+            queryMessage["contentCategories"] = cats.map(\.rawValue)
+        }
+        if let langs = request.languages {
+            queryMessage["languages"] = langs
+        }
+        if let weights = request.signalWeights {
+            queryMessage["signalWeights"] = [
+                "text": weights.text,
+                "entity": weights.entity,
+                "category": weights.category,
+                "language": weights.language
+            ] as [String: Any]
+        }
 
         try sendBroadcast(queryMessage)
 
@@ -218,12 +264,92 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
                     locators = []
                 }
 
-                resources.append(ResourceDesc(
+                // Parse enhanced fields
+                let score = resDict["score"] as? Float
+                let matchedKeywords = resDict["matchedKeywords"] as? [String]
+
+                var matchedEntities: [EntityAnnotation]?
+                if let entitiesArray = resDict["matchedEntities"] as? [[String: Any]] {
+                    matchedEntities = entitiesArray.compactMap { dict in
+                        guard let text = dict["text"] as? String,
+                              let typeRaw = dict["entityType"] as? String,
+                              let entityType = EntityType(rawValue: typeRaw) else { return nil }
+                        let confidence = dict["confidence"] as? Double ?? 0.0
+                        let sourceRaw = dict["source"] as? String ?? "filename"
+                        let source = EntitySource(rawValue: sourceRaw) ?? .filename
+                        return EntityAnnotation(text: text, entityType: entityType, confidence: confidence, source: source)
+                    }
+                }
+
+                var rdfTriples: [RDFTriple]?
+                if let triplesArray = resDict["rdfTriples"] as? [[String: Any]] {
+                    rdfTriples = triplesArray.compactMap { dict -> RDFTriple? in
+                        guard let predicate = dict["predicate"] as? String,
+                              let subjectStr = dict["subject"] as? String,
+                              let objectStr = dict["object"] as? String else { return nil }
+                        return RDFTriple(
+                            subject: .uri(subjectStr),
+                            predicate: predicate,
+                            object: .literal(objectStr, .string)
+                        )
+                    }
+                }
+
+                var desc = ResourceDesc(
                     resourceId: resourceId,
                     size: size,
                     locators: locators,
                     description: description
-                ))
+                )
+                desc.score = score
+                desc.matchedEntities = matchedEntities
+                desc.matchedKeywords = matchedKeywords
+                desc.rdfTriples = rdfTriples
+
+                // Parse v3 fields
+                if let catRaw = resDict["contentCategory"] as? String {
+                    desc.contentCategory = ContentCategory(rawValue: catRaw)
+                }
+                if let langDict = resDict["language"] as? [String: Any],
+                   let code = langDict["languageCode"] as? String {
+                    desc.language = LanguageInfo(
+                        languageCode: code,
+                        confidence: langDict["confidence"] as? Double ?? 0.0
+                    )
+                }
+                if let mediaDict = resDict["mediaMetadata"] as? [String: Any] {
+                    desc.mediaMetadata = MediaMetadata(
+                        width: mediaDict["width"] as? Int,
+                        height: mediaDict["height"] as? Int,
+                        durationSeconds: mediaDict["durationSeconds"] as? Double,
+                        colorSpace: mediaDict["colorSpace"] as? String,
+                        hasAlpha: mediaDict["hasAlpha"] as? Bool,
+                        codec: mediaDict["codec"] as? String,
+                        bitRate: mediaDict["bitRate"] as? Int,
+                        sampleRate: mediaDict["sampleRate"] as? Int
+                    )
+                }
+                if let refinementsArray = resDict["refinements"] as? [[String: Any]] {
+                    desc.refinements = refinementsArray.compactMap { refDict in
+                        guard let idStr = refDict["id"] as? String,
+                              let id = UUID(uuidString: idStr),
+                              let label = refDict["label"] as? String,
+                              let typeRaw = refDict["refinementType"] as? String,
+                              let refinementType = RefinementType(rawValue: typeRaw) else { return nil }
+                        let paramsDict = refDict["parameters"] as? [String: Any] ?? [:]
+                        let params = RefinementParameters(
+                            contentCategory: (paramsDict["contentCategory"] as? String).flatMap { ContentCategory(rawValue: $0) },
+                            languageCode: paramsDict["languageCode"] as? String,
+                            entityType: (paramsDict["entityType"] as? String).flatMap { EntityType(rawValue: $0) },
+                            entityText: paramsDict["entityText"] as? String,
+                            keyword: paramsDict["keyword"] as? String,
+                            threshold: paramsDict["threshold"] as? Float
+                        )
+                        return QueryRefinement(id: id, label: label, refinementType: refinementType, parameters: params)
+                    }
+                }
+
+                resources.append(desc)
             }
         }
 

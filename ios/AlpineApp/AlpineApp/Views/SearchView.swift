@@ -24,7 +24,17 @@ struct SearchView: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .padding(.horizontal)
 
-            searchField
+            modePicker
+
+            if viewModel.searchMode != .sparql {
+                searchField
+            }
+
+            sparqlEditor
+            entityFilterChips
+            similaritySlider
+            multiModalOptions
+            queryPreview
 
             advancedOptions
 
@@ -54,6 +64,20 @@ struct SearchView: View {
         }
     }
 
+    // MARK: - Search Mode Picker
+
+    private var modePicker: some View {
+        Picker("Search Mode", selection: $viewModel.searchMode) {
+            Text("Keyword").tag(SearchMode.keyword)
+            Text("Semantic").tag(SearchMode.semantic)
+            Text("Entity").tag(SearchMode.entity)
+            Text("SPARQL").tag(SearchMode.sparql)
+            Text("Multi-Modal").tag(SearchMode.multiModal)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal)
+    }
+
     // MARK: - Search Field
 
     private var searchField: some View {
@@ -72,6 +96,204 @@ struct SearchView: View {
         .background(AlpineTheme.secondaryBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
+    }
+
+    // MARK: - SPARQL Editor
+
+    @ViewBuilder
+    private var sparqlEditor: some View {
+        if viewModel.searchMode == .sparql {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Triple Patterns")
+                    .font(AlpineTheme.Typography.caption)
+                    .foregroundStyle(.secondary)
+                TextEditor(text: $viewModel.sparqlQuery)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(minHeight: 80, maxHeight: 160)
+                    .scrollContentBackground(.hidden)
+                    .padding(8)
+                    .background(AlpineTheme.secondaryBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                Text("Example: ?file alpine:hasKeyword report")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Entity Filter Chips
+
+    @ViewBuilder
+    private var entityFilterChips: some View {
+        if viewModel.searchMode == .entity {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Filter by Entity Type")
+                    .font(AlpineTheme.Typography.caption)
+                    .foregroundStyle(.secondary)
+                FlowLayout(spacing: 8) {
+                    ForEach(EntityType.allCases, id: \.self) { type in
+                        let isSelected = viewModel.entityFilters.contains(type)
+                        Button {
+                            if isSelected {
+                                viewModel.entityFilters.remove(type)
+                            } else {
+                                viewModel.entityFilters.insert(type)
+                            }
+                        } label: {
+                            Text(entityTypeLabel(type))
+                                .font(AlpineTheme.Typography.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? entityTypeColor(type) : Color.gray.opacity(0.2))
+                                .foregroundStyle(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Similarity Slider
+
+    @ViewBuilder
+    private var similaritySlider: some View {
+        if viewModel.searchMode == .semantic {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("Similarity Threshold")
+                        .font(AlpineTheme.Typography.caption)
+                    Spacer()
+                    Text("\(Int(viewModel.similarityThreshold * 100))%")
+                        .font(AlpineTheme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Slider(value: $viewModel.similarityThreshold, in: 0.1...1.0, step: 0.05)
+                    .tint(AlpineTheme.alpineGreen)
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Multi-Modal Options
+
+    @ViewBuilder
+    private var multiModalOptions: some View {
+        if viewModel.searchMode == .multiModal {
+            VStack(alignment: .leading, spacing: 12) {
+                // Similarity threshold (reuse the slider)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Similarity Threshold")
+                            .font(AlpineTheme.Typography.caption)
+                        Spacer()
+                        Text("\(Int(viewModel.similarityThreshold * 100))%")
+                            .font(AlpineTheme.Typography.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Slider(value: $viewModel.similarityThreshold, in: 0.1...1.0, step: 0.05)
+                        .tint(AlpineTheme.alpineGreen)
+                }
+
+                // Content category chips
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Content Categories")
+                        .font(AlpineTheme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                    FlowLayout(spacing: 8) {
+                        ForEach(ContentCategory.allCases, id: \.self) { category in
+                            let isSelected = viewModel.contentCategoryFilters.contains(category)
+                            Button {
+                                if isSelected {
+                                    viewModel.contentCategoryFilters.remove(category)
+                                } else {
+                                    viewModel.contentCategoryFilters.insert(category)
+                                }
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: categoryIcon(category))
+                                        .font(.caption2)
+                                    Text(category.rawValue.capitalized)
+                                }
+                                .font(AlpineTheme.Typography.caption)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? categoryColor(category) : Color.gray.opacity(0.2))
+                                .foregroundStyle(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                            }
+                        }
+                    }
+                }
+
+                // Language chips
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Language Filter")
+                        .font(AlpineTheme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                    FlowLayout(spacing: 8) {
+                        ForEach(["en", "es", "fr", "de", "ja", "zh"], id: \.self) { code in
+                            let isSelected = viewModel.languageFilters.contains(code)
+                            let displayName = Locale.current.localizedString(forLanguageCode: code) ?? code
+                            Button {
+                                if isSelected {
+                                    viewModel.languageFilters.remove(code)
+                                } else {
+                                    viewModel.languageFilters.insert(code)
+                                }
+                            } label: {
+                                Text(displayName)
+                                    .font(AlpineTheme.Typography.caption)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(isSelected ? AlpineTheme.alpineBlue : Color.gray.opacity(0.2))
+                                    .foregroundStyle(isSelected ? .white : .primary)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
+                }
+
+                // Signal weights
+                DisclosureGroup("Signal Weights") {
+                    VStack(spacing: 8) {
+                        weightSlider(label: "Text", value: $viewModel.signalWeights.text)
+                        weightSlider(label: "Entity", value: $viewModel.signalWeights.entity)
+                        weightSlider(label: "Category", value: $viewModel.signalWeights.category)
+                        weightSlider(label: "Language", value: $viewModel.signalWeights.language)
+                    }
+                    .padding(.top, 4)
+                }
+                .font(AlpineTheme.Typography.caption)
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private func weightSlider(label: String, value: Binding<Double>) -> some View {
+        HStack {
+            Text(label)
+                .font(AlpineTheme.Typography.caption)
+                .frame(width: 70, alignment: .leading)
+            Slider(value: value, in: 0.0...2.0, step: 0.1)
+                .tint(AlpineTheme.alpineBlue)
+            Text(String(format: "%.1f", value.wrappedValue))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .frame(width: 30)
+        }
+    }
+
+    // MARK: - Query Preview
+
+    private var queryPreview: some View {
+        Text(viewModel.queryPreview)
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
     }
 
     // MARK: - Advanced Options
@@ -112,6 +334,16 @@ struct SearchView: View {
 
     // MARK: - Search Button
 
+    private var isSearchDisabled: Bool {
+        if viewModel.isLoading { return true }
+        switch viewModel.searchMode {
+        case .sparql:
+            return viewModel.sparqlQuery.trimmingCharacters(in: .whitespaces).isEmpty
+        default:
+            return viewModel.queryString.trimmingCharacters(in: .whitespaces).isEmpty
+        }
+    }
+
     private var searchButton: some View {
         Button {
             performSearch()
@@ -127,15 +359,11 @@ struct SearchView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .background(
-                viewModel.queryString.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isLoading
-                    ? Color.gray
-                    : AlpineTheme.alpineGreen
-            )
+            .background(isSearchDisabled ? Color.gray : AlpineTheme.alpineGreen)
             .foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .disabled(viewModel.queryString.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isLoading)
+        .disabled(isSearchDisabled)
         .padding(.horizontal)
     }
 
@@ -147,6 +375,56 @@ struct SearchView: View {
                 activeQueryId = queryId
                 navigateToResults = true
             }
+        }
+    }
+
+    // MARK: - Entity Helpers
+
+    private func entityTypeLabel(_ type: EntityType) -> String {
+        switch type {
+        case .personalName: return "Person"
+        case .placeName: return "Place"
+        case .organizationName: return "Organization"
+        case .date: return "Date"
+        case .fileType: return "File Type"
+        }
+    }
+
+    private func entityTypeColor(_ type: EntityType) -> Color {
+        switch type {
+        case .personalName: return .blue
+        case .placeName: return .green
+        case .organizationName: return .purple
+        case .date: return .orange
+        case .fileType: return .teal
+        }
+    }
+
+    // MARK: - Category Helpers
+
+    private func categoryIcon(_ category: ContentCategory) -> String {
+        switch category {
+        case .document: return "doc.text"
+        case .image: return "photo"
+        case .audio: return "waveform"
+        case .video: return "film"
+        case .archive: return "archivebox"
+        case .code: return "chevron.left.forwardslash.chevron.right"
+        case .data: return "tablecells"
+        case .other: return "questionmark.folder"
+        }
+    }
+
+    private func categoryColor(_ category: ContentCategory) -> Color {
+        switch category {
+        case .document: return .blue
+        case .image: return .green
+        case .audio: return .purple
+        case .video: return .red
+        case .archive: return .orange
+        case .code: return .teal
+        case .data: return .indigo
+        case .other: return .gray
         }
     }
 }

@@ -16,12 +16,22 @@ struct ResultsView: View {
             QueryStatusBar(status: viewModel.queryStatus)
                 .padding()
 
+            sortPicker
+
+            if !viewModel.refinements.isEmpty {
+                RefinementBar(refinements: viewModel.refinements) { refinement in
+                    // TODO: Navigate back with refinement applied
+                }
+            }
+
             if viewModel.isLoading && viewModel.results.isEmpty {
                 loadingView
             } else if let error = viewModel.error {
                 errorView(error)
             } else if viewModel.results.isEmpty {
                 emptyView
+            } else if viewModel.hasScores {
+                flatResultsList
             } else {
                 resultsList
             }
@@ -88,6 +98,32 @@ struct ResultsView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    // MARK: - Sort Picker
+
+    @ViewBuilder
+    private var sortPicker: some View {
+        if viewModel.hasScores {
+            Picker("Sort", selection: $viewModel.sortOrder) {
+                Text("Relevance").tag(ResultSortOrder.relevance)
+                Text("Name").tag(ResultSortOrder.name)
+                Text("Size").tag(ResultSortOrder.size)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+        }
+    }
+
+    // MARK: - Flat Results List
+
+    private var flatResultsList: some View {
+        List {
+            ForEach(viewModel.flattenedResults) { resource in
+                ResourceCard(resource: resource)
+            }
+        }
+        .listStyle(.insetGrouped)
     }
 
     // MARK: - Results List

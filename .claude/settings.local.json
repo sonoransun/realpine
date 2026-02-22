@@ -20,7 +20,10 @@
       "Bash(echo === File counts ===:*)",
       "Bash(head:*)",
       "Bash(xcodegen generate:*)",
-      "Bash(echo === Final counts ===:*)"
+      "Bash(echo === Final counts ===:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(swift:*)",
+      "Bash(swiftc:*)"
     ]
   }
 }

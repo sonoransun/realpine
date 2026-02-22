@@ -116,20 +116,81 @@ final class BroadcastResponder {
             return
         }
 
-        // Search local content
+        // Parse optional enhanced search fields
+        let searchModeRaw = json["searchMode"] as? String
+        let searchMode = searchModeRaw.flatMap { SearchMode(rawValue: $0) }
+        let metricRaw = json["similarityMetric"] as? String
+        let similarityMetric = metricRaw.flatMap { SimilarityMetric(rawValue: $0) } ?? .cosine
+        let similarityThreshold = json["similarityThreshold"] as? Float ?? 0.3
+        let protocolVersion = json["protocolVersion"] as? Int ?? 1
+
+        var entityFilters: [EntityFilter]?
+        if let filtersJson = json["entityFilters"] as? [[String: Any]] {
+            entityFilters = filtersJson.compactMap { dict in
+                guard let text = dict["text"] as? String else { return nil }
+                let typeRaw = dict["entityType"] as? String
+                let entityType = typeRaw.flatMap { EntityType(rawValue: $0) }
+                let minConfidence = dict["minConfidence"] as? Double ?? 0.0
+                return EntityFilter(text: text, entityType: entityType, minConfidence: minConfidence)
+            }
+        }
+
+        var sparqlPatterns: [CodableTriplePattern]?
+        if let patternsJson = json["sparqlPatterns"] as? [[String: Any]] {
+            sparqlPatterns = patternsJson.map { dict in
+                CodableTriplePattern(
+                    subject: dict["subject"] as? String,
+                    predicate: dict["predicate"] as? String,
+                    object: dict["object"] as? String
+                )
+            }
+        }
+
+        // Parse v3 fields
+        let contentCategoriesRaw = json["contentCategories"] as? [String]
+        let contentCategories = contentCategoriesRaw?.compactMap { ContentCategory(rawValue: $0) }
+        let languages = json["languages"] as? [String]
+        var signalWeights: SignalWeights?
+        if let weightsDict = json["signalWeights"] as? [String: Any] {
+            signalWeights = SignalWeights(
+                text: weightsDict["text"] as? Double ?? 1.0,
+                entity: weightsDict["entity"] as? Double ?? 1.0,
+                category: weightsDict["category"] as? Double ?? 0.8,
+                language: weightsDict["language"] as? Double ?? 0.5
+            )
+        }
+
+        // Search local content using enhanced or basic search
         let localAddress = NetworkUtility.localIPAddress() ?? "0.0.0.0"
-        let results = localContentProvider.search(
-            queryString: queryString,
-            localAddress: localAddress,
-            fileServerPort: fileServerPort
-        )
+        let results: [ResourceDesc]
+        if let searchMode {
+            results = localContentProvider.enhancedSearch(
+                queryString: queryString,
+                localAddress: localAddress,
+                fileServerPort: fileServerPort,
+                searchMode: searchMode,
+                similarityMetric: similarityMetric,
+                similarityThreshold: similarityThreshold,
+                entityFilters: entityFilters,
+                sparqlPatterns: sparqlPatterns,
+                contentCategories: contentCategories,
+                languages: languages,
+                signalWeights: signalWeights
+            )
+        } else {
+            results = localContentProvider.search(
+                queryString: queryString,
+                localAddress: localAddress,
+                fileServerPort: fileServerPort
+            )
+        }
 
         // Only send a response if we have matching results
         guard !results.isEmpty else { return }
 
         // Send the response back to the sender
         if let endpoint {
-            sendResponse(queryId: queryId, resources: results, to: endpoint)
+            sendResponse(queryId: queryId, resources: results, to: endpoint, protocolVersion: protocolVersion)
         } else if let senderAddress = json["senderAddress"] as? String,
                   let senderPort = json["senderPort"] as? Int {
             // Fall back to the address/port specified in the query message
@@ -137,7 +198,7 @@ final class BroadcastResponder {
                 host: NWEndpoint.Host(senderAddress),
                 port: NWEndpoint.Port(integerLiteral: UInt16(senderPort))
             )
-            sendResponse(queryId: queryId, resources: results, to: target)
+            sendResponse(queryId: queryId, resources: results, to: target, protocolVersion: protocolVersion)
         }
     }
 
@@ -166,15 +227,104 @@ final class BroadcastResponder {
 
     // MARK: - Response Sending
 
-    private func sendResponse(queryId: Int64, resources: [ResourceDesc], to endpoint: NWEndpoint) {
+    private func sendResponse(queryId: Int64, resources: [ResourceDesc], to endpoint: NWEndpoint, protocolVersion: Int = 1) {
         // Build the resource array for JSON serialization
-        let resourceDicts: [[String: Any]] = resources.map { resource in
-            [
+        var resourceDicts: [[String: Any]] = resources.map { resource in
+            var dict: [String: Any] = [
                 "resourceId": resource.resourceId,
                 "size": resource.size,
                 "description": resource.description,
                 "locators": resource.locators
             ]
+
+            // Include enhanced fields for protocol version >= 2
+            if protocolVersion >= 2 {
+                if let score = resource.score {
+                    dict["score"] = score
+                }
+                if let matchedKeywords = resource.matchedKeywords {
+                    dict["matchedKeywords"] = matchedKeywords
+                }
+                if let matchedEntities = resource.matchedEntities {
+                    dict["matchedEntities"] = matchedEntities.map { entity in
+                        [
+                            "text": entity.text,
+                            "entityType": entity.entityType.rawValue,
+                            "confidence": entity.confidence,
+                            "source": entity.source.rawValue
+                        ] as [String: Any]
+                    }
+                }
+                if let rdfTriples = resource.rdfTriples {
+                    dict["rdfTriples"] = rdfTriples.map { triple in
+                        var tripleDict: [String: Any] = ["predicate": triple.predicate]
+                        switch triple.subject {
+                        case .uri(let uri):
+                            tripleDict["subject"] = uri
+                        case .literal(let value, _):
+                            tripleDict["subject"] = value
+                        case .blank(let id):
+                            tripleDict["subject"] = "_:\(id)"
+                        }
+                        switch triple.object {
+                        case .uri(let uri):
+                            tripleDict["object"] = uri
+                        case .literal(let value, _):
+                            tripleDict["object"] = value
+                        case .blank(let id):
+                            tripleDict["object"] = "_:\(id)"
+                        }
+                        return tripleDict
+                    }
+                }
+            }
+
+            // Include v3 fields for protocol version >= 3
+            if protocolVersion >= 3 {
+                if let contentCategory = resource.contentCategory {
+                    dict["contentCategory"] = contentCategory.rawValue
+                }
+                if let language = resource.language {
+                    dict["language"] = [
+                        "languageCode": language.languageCode,
+                        "confidence": language.confidence
+                    ] as [String: Any]
+                }
+                if let media = resource.mediaMetadata {
+                    var mediaDict: [String: Any] = [:]
+                    if let w = media.width { mediaDict["width"] = w }
+                    if let h = media.height { mediaDict["height"] = h }
+                    if let dur = media.durationSeconds { mediaDict["durationSeconds"] = dur }
+                    if let cs = media.colorSpace { mediaDict["colorSpace"] = cs }
+                    if let alpha = media.hasAlpha { mediaDict["hasAlpha"] = alpha }
+                    if let codec = media.codec { mediaDict["codec"] = codec }
+                    if let br = media.bitRate { mediaDict["bitRate"] = br }
+                    if let sr = media.sampleRate { mediaDict["sampleRate"] = sr }
+                    if !mediaDict.isEmpty {
+                        dict["mediaMetadata"] = mediaDict
+                    }
+                }
+                if let refinements = resource.refinements {
+                    dict["refinements"] = refinements.map { ref in
+                        var refDict: [String: Any] = [
+                            "id": ref.id.uuidString,
+                            "label": ref.label,
+                            "refinementType": ref.refinementType.rawValue
+                        ]
+                        var params: [String: Any] = [:]
+                        if let cat = ref.parameters.contentCategory { params["contentCategory"] = cat.rawValue }
+                        if let lang = ref.parameters.languageCode { params["languageCode"] = lang }
+                        if let et = ref.parameters.entityType { params["entityType"] = et.rawValue }
+                        if let txt = ref.parameters.entityText { params["entityText"] = txt }
+                        if let kw = ref.parameters.keyword { params["keyword"] = kw }
+                        if let t = ref.parameters.threshold { params["threshold"] = t }
+                        refDict["parameters"] = params
+                        return refDict
+                    }
+                }
+            }
+
+            return dict
         }
 
         let responseMessage: [String: Any] = [
@@ -184,9 +334,48 @@ final class BroadcastResponder {
             "resources": resourceDicts
         ]
 
-        guard let data = try? JSONSerialization.data(withJSONObject: responseMessage) else {
+        guard var data = try? JSONSerialization.data(withJSONObject: responseMessage) else {
             print("[BroadcastResponder] Failed to serialize response")
             return
+        }
+
+        // UDP size guard: truncate resources if serialized data exceeds 60KB
+        let maxUDPSize = 60000
+        if data.count > maxUDPSize {
+            // Binary search for the maximum number of resources that fits
+            var low = 0
+            var high = resourceDicts.count
+            var bestCount = 0
+
+            while low <= high {
+                let mid = (low + high) / 2
+                let truncatedMessage: [String: Any] = [
+                    "type": "alpine_response",
+                    "queryId": queryId,
+                    "responderId": responderId,
+                    "resources": Array(resourceDicts.prefix(mid))
+                ]
+                if let testData = try? JSONSerialization.data(withJSONObject: truncatedMessage),
+                   testData.count <= maxUDPSize {
+                    bestCount = mid
+                    low = mid + 1
+                } else {
+                    high = mid - 1
+                }
+            }
+
+            resourceDicts = Array(resourceDicts.prefix(bestCount))
+            let truncatedMessage: [String: Any] = [
+                "type": "alpine_response",
+                "queryId": queryId,
+                "responderId": responderId,
+                "resources": resourceDicts
+            ]
+            guard let truncatedData = try? JSONSerialization.data(withJSONObject: truncatedMessage) else {
+                print("[BroadcastResponder] Failed to serialize truncated response")
+                return
+            }
+            data = truncatedData
         }
 
         let params = NWParameters.udp

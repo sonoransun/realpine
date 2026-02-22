@@ -7,6 +7,29 @@ final class ResultsViewModel {
     var results: [PeerResources] = []
     var isLoading = true
     var error: String?
+    var sortOrder: ResultSortOrder = .relevance
+
+    var flattenedResults: [ResourceDesc] {
+        let allResources = results.flatMap(\.resources)
+        switch sortOrder {
+        case .relevance:
+            return allResources.sorted { ($0.score ?? 0) > ($1.score ?? 0) }
+        case .name:
+            return allResources.sorted { $0.description.localizedCaseInsensitiveCompare($1.description) == .orderedAscending }
+        case .size:
+            return allResources.sorted { $0.size > $1.size }
+        }
+    }
+
+    var hasScores: Bool {
+        results.contains { peer in
+            peer.resources.contains { $0.score != nil }
+        }
+    }
+
+    var refinements: [QueryRefinement] {
+        results.flatMap(\.resources).compactMap(\.refinements).flatMap { $0 }
+    }
 
     private let queryId: Int64
     private let transport: QueryTransport
