@@ -109,6 +109,7 @@ endif()
 add_subdirectory(AlpineServer)
 add_subdirectory(AlpineCmdIf)
 add_subdirectory(AlpineRestBridge)
+add_subdirectory(AlpineGui)
 
 # Tests
 if(ALPINE_BUILD_TESTS)

@@ -311,6 +311,45 @@ AlpineRestBridge/fast:
 	$(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build
 .PHONY : AlpineRestBridge/fast
 
+#=============================================================================
+# Target rules for targets named AlpineGui
+
+# Build rule for target.
+AlpineGui: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui
+.PHONY : AlpineGui
+
+# fast build rule for target.
+AlpineGui/fast:
+	$(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/build
+.PHONY : AlpineGui/fast
+
+#=============================================================================
+# Target rules for targets named glfw
+
+# Build rule for target.
+glfw: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 glfw
+.PHONY : glfw
+
+# fast build rule for target.
+glfw/fast:
+	$(MAKE) $(MAKESILENT) -f AlpineGui/vendor/glfw/src/CMakeFiles/glfw.dir/build.make AlpineGui/vendor/glfw/src/CMakeFiles/glfw.dir/build
+.PHONY : glfw/fast
+
+#=============================================================================
+# Target rules for targets named update_mappings
+
+# Build rule for target.
+update_mappings: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 update_mappings
+.PHONY : update_mappings
+
+# fast build rule for target.
+update_mappings/fast:
+	$(MAKE) $(MAKESILENT) -f AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build.make AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build
+.PHONY : update_mappings/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -319,7 +358,9 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... update_mappings"
 	@echo "... AlpineCmdIf"
+	@echo "... AlpineGui"
 	@echo "... AlpineProtocol"
 	@echo "... AlpineRestBridge"
 	@echo "... AlpineServer"
@@ -334,6 +375,7 @@ help:
 	@echo "... SysUtils"
 	@echo "... ThreadUtils"
 	@echo "... TransBase"
+	@echo "... glfw"
 .PHONY : help
 
 

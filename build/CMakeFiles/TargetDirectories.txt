@@ -45,3 +45,12 @@
 /Users/user/sonoranpub/realpine/build/AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir
 /Users/user/sonoranpub/realpine/build/AlpineRestBridge/CMakeFiles/edit_cache.dir
 /Users/user/sonoranpub/realpine/build/AlpineRestBridge/CMakeFiles/rebuild_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/CMakeFiles/AlpineGui.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/CMakeFiles/edit_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/CMakeFiles/rebuild_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/CMakeFiles/edit_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/CMakeFiles/rebuild_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/glfw.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/edit_cache.dir
+/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/rebuild_cache.dir
