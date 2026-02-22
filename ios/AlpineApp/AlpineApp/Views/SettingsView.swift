@@ -98,6 +98,8 @@ struct SettingsView: View {
     private var tlsSection: some View {
         Section("TLS") {
             Toggle("Enable TLS", isOn: $viewModel.tlsEnabled)
+                .accessibilityLabel("Enable TLS")
+                .accessibilityHint("Encrypts the connection to the bridge server")
             if viewModel.tlsEnabled {
                 Picker("TLS Mode", selection: $viewModel.tlsMode) {
                     ForEach(TlsMode.allCases, id: \.self) { mode in
@@ -137,13 +139,25 @@ struct SettingsView: View {
     private var securitySection: some View {
         Section("Security") {
             Toggle("Require Authentication", isOn: $viewModel.authRequired)
+                .accessibilityLabel("Require authentication")
+                .accessibilityHint("When enabled, the app requires authentication to unlock")
 
             if viewModel.authRequired {
                 Picker("Auth Method", selection: $viewModel.authMethodRaw) {
                     Text("None").tag(AuthMethod.none.rawValue)
                     Text("TOTP").tag(AuthMethod.totp.rawValue)
                     Text("YubiKey").tag(AuthMethod.yubiKey.rawValue)
+                    if viewModel.biometricAvailable {
+                        Text("Biometric").tag(AuthMethod.biometric.rawValue)
+                    }
                     Text("Both").tag(AuthMethod.totpAndYubiKey.rawValue)
+                }
+                .accessibilityLabel("Authentication method")
+
+                if !viewModel.biometricAvailable && viewModel.authMethodRaw == AuthMethod.biometric.rawValue {
+                    Text("Biometric authentication is not available on this device")
+                        .font(AlpineTheme.Typography.caption)
+                        .foregroundStyle(AlpineTheme.warning)
                 }
 
                 Picker("Auto-Lock", selection: $viewModel.autoLockTimeout) {
@@ -153,6 +167,7 @@ struct SettingsView: View {
                     Text("30 minutes").tag(1800)
                     Text("Never").tag(-1)
                 }
+                .accessibilityLabel("Auto-lock timeout")
 
                 NavigationLink("Set Up Authentication") {
                     AuthEnrollmentView(
@@ -160,10 +175,14 @@ struct SettingsView: View {
                         settingsStore: viewModel.exposedSettingsStore
                     )
                 }
+                .accessibilityLabel("Set up authentication")
+                .accessibilityHint("Navigate to configure authentication credentials")
 
                 Button("Remove Authentication", role: .destructive) {
                     viewModel.removeAuthentication()
                 }
+                .accessibilityLabel("Remove authentication")
+                .accessibilityHint("Clears all stored authentication credentials")
             }
         }
     }
@@ -192,6 +211,8 @@ struct SettingsView: View {
                     }
                 }
             }
+            .accessibilityLabel("Test connection")
+            .accessibilityHint("Tests connectivity to the configured bridge server")
             if !viewModel.statusMessage.isEmpty {
                 Text(viewModel.statusMessage)
                     .font(AlpineTheme.Typography.caption)
@@ -250,6 +271,8 @@ struct SettingsView: View {
             .tint(AlpineTheme.alpineGreen)
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
+            .accessibilityLabel("Save settings")
+            .accessibilityHint("Saves all configuration changes")
         }
     }
 }

@@ -26,6 +26,7 @@ struct AuthGateView<Content: View>: View {
 private struct AuthLockScreen: View {
     @Environment(AuthManager.self) private var authManager
     @State private var viewModel: AuthViewModel?
+    @State private var biometricError: String?
 
     var body: some View {
         NavigationStack {
@@ -35,6 +36,7 @@ private struct AuthLockScreen: View {
                 Image(systemName: "lock.shield.fill")
                     .font(.system(size: 64))
                     .foregroundStyle(AlpineTheme.alpineGreen)
+                    .accessibilityLabel("Locked")
 
                 Text("Alpine")
                     .font(.largeTitle.bold())
@@ -42,6 +44,7 @@ private struct AuthLockScreen: View {
                 Text("Authentication required")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .accessibilityLabel("Authentication is required to unlock the app")
 
                 if let viewModel {
                     VStack(spacing: 20) {
@@ -55,6 +58,8 @@ private struct AuthLockScreen: View {
                                     .font(.system(.title, design: .monospaced))
                                     .frame(maxWidth: 200)
                                     .textFieldStyle(.roundedBorder)
+                                    .accessibilityLabel("TOTP code entry")
+                                    .accessibilityHint("Enter your 6-digit authentication code")
                             }
                         }
 
@@ -67,13 +72,40 @@ private struct AuthLockScreen: View {
                             }
                             .buttonStyle(.bordered)
                             .disabled(viewModel.isYubiKeyScanning)
+                            .accessibilityLabel("Tap YubiKey to authenticate")
+                            .accessibilityHint("Starts scanning for a YubiKey device")
                         }
 
-                        if let error = viewModel.error {
+                        // Biometric authentication button
+                        if authManager.biometricAvailable {
+                            Button {
+                                Task {
+                                    biometricError = nil
+                                    do {
+                                        try await authManager.unlockWithBiometric()
+                                    } catch {
+                                        biometricError = error.localizedDescription
+                                    }
+                                }
+                            } label: {
+                                Label(
+                                    biometricLabel,
+                                    systemImage: biometricIcon
+                                )
+                                .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(AlpineTheme.alpineGreen)
+                            .accessibilityLabel(biometricLabel)
+                            .accessibilityHint("Unlock the app using biometric authentication")
+                        }
+
+                        if let error = viewModel.error ?? biometricError {
                             Text(error)
                                 .font(.caption)
                                 .foregroundStyle(.red)
                                 .multilineTextAlignment(.center)
+                                .accessibilityLabel("Error: \(error)")
                         }
 
                         Button {
@@ -90,6 +122,8 @@ private struct AuthLockScreen: View {
                         .buttonStyle(.borderedProminent)
                         .tint(AlpineTheme.alpineGreen)
                         .disabled(viewModel.isAuthenticating)
+                        .accessibilityLabel("Unlock")
+                        .accessibilityHint("Submit credentials to unlock the app")
                     }
                     .padding(.horizontal, 40)
                 }
@@ -102,6 +136,22 @@ private struct AuthLockScreen: View {
             if viewModel == nil {
                 viewModel = AuthViewModel(authManager: authManager)
             }
+        }
+    }
+
+    private var biometricLabel: String {
+        switch authManager.biometricService.biometricType {
+        case .faceID: "Face ID"
+        case .touchID: "Touch ID"
+        case .none: "Biometric"
+        }
+    }
+
+    private var biometricIcon: String {
+        switch authManager.biometricService.biometricType {
+        case .faceID: "faceid"
+        case .touchID: "touchid"
+        case .none: "lock.fill"
         }
     }
 }

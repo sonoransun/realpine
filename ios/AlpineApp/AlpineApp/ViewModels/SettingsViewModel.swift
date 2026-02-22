@@ -22,6 +22,7 @@ final class SettingsViewModel {
     var authMethodRaw: String {
         didSet { settings.authMethod = AuthMethod(rawValue: authMethodRaw) ?? .none }
     }
+    private(set) var biometricAvailable: Bool = false
     var autoLockTimeout: Int {
         didSet { settings.autoLockTimeout = autoLockTimeout }
     }
@@ -60,6 +61,9 @@ final class SettingsViewModel {
         authRequired = settings.authRequired
         authMethodRaw = settings.authMethod.rawValue
         autoLockTimeout = settings.autoLockTimeout
+
+        let biometricService = BiometricAuthService()
+        biometricAvailable = biometricService.isAvailable
     }
 
     func testConnection() {
@@ -121,6 +125,14 @@ final class SettingsViewModel {
         settings.authRequired = false
         authRequired = false
         authMethodRaw = AuthMethod.none.rawValue
+    }
+
+    /// Check if a given auth method should be available for selection.
+    func isAuthMethodAvailable(_ method: AuthMethod) -> Bool {
+        switch method {
+        case .biometric: biometricAvailable
+        default: true
+        }
     }
 
     func save() {

@@ -20,6 +20,12 @@ enum ApiError: Error, LocalizedError, Sendable {
     case authenticationRequired
     /// Session has expired and needs re-authentication
     case sessionExpired
+    /// No network connection available
+    case networkUnavailable
+    /// Request failed after multiple retries
+    case retryExhausted(lastError: String)
+    /// Request timed out
+    case timeout
 
     var errorDescription: String? {
         switch self {
@@ -41,6 +47,12 @@ enum ApiError: Error, LocalizedError, Sendable {
             "Authentication required"
         case .sessionExpired:
             "Session expired, please re-authenticate"
+        case .networkUnavailable:
+            "No network connection available"
+        case .retryExhausted(let lastError):
+            "Request failed after multiple retries: \(lastError)"
+        case .timeout:
+            "Request timed out"
         }
     }
 }

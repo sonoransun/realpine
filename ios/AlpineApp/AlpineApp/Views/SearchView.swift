@@ -5,6 +5,7 @@ struct SearchView: View {
     @State private var navigateToResults = false
     @State private var activeQueryId: Int64?
     @State private var showError = false
+    @Environment(SearchHistoryStore.self) private var searchHistory
 
     private let settings: SettingsStore
     private let secureStorage: SecureStorage
@@ -12,9 +13,11 @@ struct SearchView: View {
     init(settings: SettingsStore, secureStorage: SecureStorage) {
         self.settings = settings
         self.secureStorage = secureStorage
+        // SearchHistoryStore will be assigned from environment in onAppear
         _viewModel = State(wrappedValue: SearchViewModel(
             settings: settings,
-            secureStorage: secureStorage
+            secureStorage: secureStorage,
+            searchHistory: SearchHistoryStore()
         ))
     }
 
@@ -29,6 +32,8 @@ struct SearchView: View {
             if viewModel.searchMode != .sparql {
                 searchField
             }
+
+            recentSearchesSection
 
             sparqlEditor
             entityFilterChips
@@ -62,6 +67,9 @@ struct SearchView: View {
         .onChange(of: viewModel.error) { _, newValue in
             showError = newValue != nil
         }
+        .onAppear {
+            viewModel.searchHistory = searchHistory
+        }
     }
 
     // MARK: - Search Mode Picker
@@ -91,11 +99,71 @@ struct SearchView: View {
                 .onSubmit {
                     performSearch()
                 }
+                .accessibilityLabel("Search query")
+                .accessibilityHint("Enter your search terms")
         }
         .padding()
         .background(AlpineTheme.secondaryBackground)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
+    }
+
+    // MARK: - Recent Searches
+
+    @ViewBuilder
+    private var recentSearchesSection: some View {
+        let queryEmpty = viewModel.queryString.trimmingCharacters(in: .whitespaces).isEmpty
+        if queryEmpty && !searchHistory.entries.isEmpty && viewModel.searchMode != .sparql {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Recent Searches")
+                        .font(AlpineTheme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Clear History") {
+                        searchHistory.clear()
+                    }
+                    .font(.caption)
+                    .foregroundStyle(AlpineTheme.destructive)
+                    .accessibilityLabel("Clear search history")
+                    .accessibilityHint("Removes all recent search entries")
+                }
+
+                ForEach(searchHistory.entries.prefix(10)) { entry in
+                    Button {
+                        viewModel.queryString = entry.query
+                        if let mode = SearchMode(rawValue: entry.mode) {
+                            viewModel.searchMode = mode
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(entry.query)
+                                    .font(AlpineTheme.Typography.body)
+                                    .foregroundStyle(AlpineTheme.textPrimary)
+                                    .lineLimit(1)
+                                Text(entry.mode.capitalized)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if let count = entry.resultCount {
+                                Text("\(count)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .accessibilityLabel("Recent search: \(entry.query)")
+                    .accessibilityHint("Tap to search for \(entry.query) using \(entry.mode) mode")
+                }
+            }
+            .padding(.horizontal)
+        }
     }
 
     // MARK: - SPARQL Editor
@@ -365,6 +433,8 @@ struct SearchView: View {
         }
         .disabled(isSearchDisabled)
         .padding(.horizontal)
+        .accessibilityLabel(viewModel.isLoading ? "Searching" : "Search")
+        .accessibilityHint("Submits the search query")
     }
 
     // MARK: - Actions

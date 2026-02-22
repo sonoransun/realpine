@@ -1,5 +1,8 @@
 import Foundation
 import Network
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "LocalFileServer")
 
 /// A simple HTTP file server using the Network framework.
 /// Serves files from a root directory over TCP, allowing peers on the
@@ -21,7 +24,7 @@ final class LocalFileServer {
             let params = NWParameters.tcp
             listener = try NWListener(using: params, on: NWEndpoint.Port(integerLiteral: port))
         } catch {
-            print("[LocalFileServer] Failed to create listener: \(error)")
+            logger.error("Failed to create listener: \(error.localizedDescription)")
             return
         }
 
@@ -33,9 +36,9 @@ final class LocalFileServer {
         listener?.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                print("[LocalFileServer] Listening on port \(listenPort)")
+                logger.info("Listening on port \(listenPort)")
             case .failed(let error):
-                print("[LocalFileServer] Listener failed: \(error)")
+                logger.error("Listener failed: \(error.localizedDescription)")
             default:
                 break
             }
@@ -63,7 +66,7 @@ final class LocalFileServer {
             }
 
             if let error {
-                print("[LocalFileServer] Receive error: \(error)")
+                logger.error("Receive error: \(error.localizedDescription)")
                 connection.cancel()
                 return
             }

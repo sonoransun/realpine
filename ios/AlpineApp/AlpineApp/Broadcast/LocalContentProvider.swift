@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "LocalContentProvider")
 
 /// Indexes files in a shared directory and provides search capability
 /// using glob-like patterns. Used by BroadcastResponder to answer
@@ -22,6 +25,7 @@ final class LocalContentProvider {
     /// Recursively enumerates files in the given directory and builds an
     /// index of relative paths and file sizes, up to maxIndexedFiles.
     func indexDirectory(path: String) {
+        logger.info("Indexing directory: \(path)")
         rootDirectory = path
         indexedFiles = []
 
@@ -74,6 +78,8 @@ final class LocalContentProvider {
 
         // Build embeddings
         fileEmbeddings = embeddingBuilder.buildEmbeddings(for: fileMetadata)
+
+        logger.info("Indexed \(self.indexedFiles.count) files with \(self.fileMetadata.count) metadata entries")
     }
 
     /// Searches indexed files using a glob-like pattern and returns matching

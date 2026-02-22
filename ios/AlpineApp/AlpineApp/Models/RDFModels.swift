@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "RDFModels")
 
 // MARK: - RDF Core Types
 
@@ -60,28 +63,31 @@ struct TriplePattern: Sendable {
 
 /// Thread-safe in-memory RDF triple store with three-way indexing for fast pattern queries.
 final class FileKnowledgeGraph: @unchecked Sendable {
-    private var triples: [RDFTriple] = []
-    private var subjectIndex: [RDFNode: [Int]] = [:]
-    private var predicateIndex: [String: [Int]] = [:]
-    private var objectIndex: [RDFNode: [Int]] = [:]
-    private let lock = NSLock()
+    private struct StoreState {
+        var triples: [RDFTriple] = []
+        var subjectIndex: [RDFNode: [Int]] = [:]
+        var predicateIndex: [String: [Int]] = [:]
+        var objectIndex: [RDFNode: [Int]] = [:]
+    }
+
+    private let store = OSAllocatedUnfairLock(initialState: StoreState())
 
     // MARK: - Mutation
 
     func add(_ triple: RDFTriple) {
-        lock.lock()
-        defer { lock.unlock() }
+        store.withLock { state in
+            let idx = state.triples.count
+            state.triples.append(triple)
 
-        let idx = triples.count
-        triples.append(triple)
-
-        subjectIndex[triple.subject, default: []].append(idx)
-        predicateIndex[triple.predicate, default: []].append(idx)
-        objectIndex[triple.object, default: []].append(idx)
+            state.subjectIndex[triple.subject, default: []].append(idx)
+            state.predicateIndex[triple.predicate, default: []].append(idx)
+            state.objectIndex[triple.object, default: []].append(idx)
+        }
     }
 
     /// Generate and store RDF triples that describe a file's metadata.
     func addFileMetadata(_ metadata: FileMetadata) {
+        logger.debug("Adding metadata for file: \(metadata.relativePath)")
         let subject = RDFNode.uri("file:\(metadata.id)")
 
         // hasName
@@ -193,28 +199,32 @@ final class FileKnowledgeGraph: @unchecked Sendable {
 
     /// Query triples matching a pattern, using the most selective index first.
     func query(pattern: TriplePattern) -> [RDFTriple] {
-        lock.lock()
-        defer { lock.unlock() }
+        store.withLock { state in
+            Self.queryState(state, pattern: pattern)
+        }
+    }
 
+    /// Internal query on state without locking (caller must hold the lock).
+    private static func queryState(_ state: StoreState, pattern: TriplePattern) -> [RDFTriple] {
         // Determine which index yields the smallest candidate set
         var candidateIndices: [Int]?
 
         if let s = pattern.subject {
-            let indices = subjectIndex[s] ?? []
+            let indices = state.subjectIndex[s] ?? []
             if candidateIndices == nil || indices.count < candidateIndices!.count {
                 candidateIndices = indices
             }
         }
 
         if let p = pattern.predicate {
-            let indices = predicateIndex[p] ?? []
+            let indices = state.predicateIndex[p] ?? []
             if candidateIndices == nil || indices.count < candidateIndices!.count {
                 candidateIndices = indices
             }
         }
 
         if let o = pattern.object {
-            let indices = objectIndex[o] ?? []
+            let indices = state.objectIndex[o] ?? []
             if candidateIndices == nil || indices.count < candidateIndices!.count {
                 candidateIndices = indices
             }
@@ -222,14 +232,14 @@ final class FileKnowledgeGraph: @unchecked Sendable {
 
         // If no constraints, return all triples
         guard let indices = candidateIndices else {
-            return triples
+            return state.triples
         }
 
         // Filter candidates through the full pattern
         var results: [RDFTriple] = []
         results.reserveCapacity(indices.count)
         for idx in indices {
-            let triple = triples[idx]
+            let triple = state.triples[idx]
             if pattern.matches(triple) {
                 results.append(triple)
             }
@@ -240,77 +250,36 @@ final class FileKnowledgeGraph: @unchecked Sendable {
     /// Basic Graph Pattern: evaluate multiple patterns and return the set of subject
     /// nodes that satisfy all of them.
     func queryBGP(patterns: [TriplePattern]) -> Set<RDFNode> {
-        lock.lock()
-        defer { lock.unlock() }
+        store.withLock { state in
+            guard let first = patterns.first else { return [] }
 
-        guard let first = patterns.first else { return [] }
+            // Evaluate the first pattern to get initial candidate subjects
+            var candidates: Set<RDFNode> = Set(
+                Self.queryState(state, pattern: first).map { $0.subject }
+            )
 
-        // Evaluate the first pattern to get initial candidate subjects
-        var candidates: Set<RDFNode> = Set(
-            queryUnlocked(pattern: first).map { $0.subject }
-        )
+            // For each subsequent pattern, intersect with matching subjects
+            for i in 1..<patterns.count {
+                guard !candidates.isEmpty else { break }
 
-        // For each subsequent pattern, intersect with matching subjects
-        for i in 1..<patterns.count {
-            guard !candidates.isEmpty else { break }
-
-            let matches = queryUnlocked(pattern: patterns[i])
-            let matchingSubjects = Set(matches.map { $0.subject })
-            candidates = candidates.intersection(matchingSubjects)
-        }
-
-        return candidates
-    }
-
-    /// Internal query without locking (caller must hold the lock).
-    private func queryUnlocked(pattern: TriplePattern) -> [RDFTriple] {
-        var candidateIndices: [Int]?
-
-        if let s = pattern.subject {
-            let indices = subjectIndex[s] ?? []
-            if candidateIndices == nil || indices.count < candidateIndices!.count {
-                candidateIndices = indices
+                let matches = Self.queryState(state, pattern: patterns[i])
+                let matchingSubjects = Set(matches.map { $0.subject })
+                candidates = candidates.intersection(matchingSubjects)
             }
-        }
 
-        if let p = pattern.predicate {
-            let indices = predicateIndex[p] ?? []
-            if candidateIndices == nil || indices.count < candidateIndices!.count {
-                candidateIndices = indices
-            }
+            return candidates
         }
-
-        if let o = pattern.object {
-            let indices = objectIndex[o] ?? []
-            if candidateIndices == nil || indices.count < candidateIndices!.count {
-                candidateIndices = indices
-            }
-        }
-
-        guard let indices = candidateIndices else {
-            return triples
-        }
-
-        var results: [RDFTriple] = []
-        results.reserveCapacity(indices.count)
-        for idx in indices {
-            let triple = triples[idx]
-            if pattern.matches(triple) {
-                results.append(triple)
-            }
-        }
-        return results
     }
 
     // MARK: - Clear
 
     func clear() {
-        lock.lock()
-        defer { lock.unlock() }
-
-        triples.removeAll()
-        subjectIndex.removeAll()
-        predicateIndex.removeAll()
-        objectIndex.removeAll()
+        store.withLock { state in
+            state.triples.removeAll()
+            state.subjectIndex.removeAll()
+            state.predicateIndex.removeAll()
+            state.objectIndex.removeAll()
+        }
+        logger.debug("Knowledge graph cleared")
     }
 }

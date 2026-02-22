@@ -1,5 +1,8 @@
 import Foundation
 import Network
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "BroadcastResponder")
 
 /// Listens on UDP port 8090 for incoming Alpine query broadcasts from peers
 /// on the local network. When a query is received, searches local content
@@ -35,7 +38,7 @@ final class BroadcastResponder {
 
             listener = try NWListener(using: params, on: NWEndpoint.Port(integerLiteral: port))
         } catch {
-            print("[BroadcastResponder] Failed to create listener: \(error)")
+            logger.error("Failed to create listener: \(error.localizedDescription)")
             return
         }
 
@@ -47,9 +50,9 @@ final class BroadcastResponder {
         listener?.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                print("[BroadcastResponder] Listening for queries on port \(listenPort)")
+                logger.info("Listening for queries on port \(listenPort)")
             case .failed(let error):
-                print("[BroadcastResponder] Listener failed: \(error)")
+                logger.error("Listener failed: \(error.localizedDescription)")
             default:
                 break
             }
@@ -77,7 +80,7 @@ final class BroadcastResponder {
             defer { connection.cancel() }
 
             if let error {
-                print("[BroadcastResponder] Receive error: \(error)")
+                logger.error("Receive error: \(error.localizedDescription)")
                 return
             }
 
@@ -112,7 +115,7 @@ final class BroadcastResponder {
 
         // Apply rate limiting per sender
         if isRateLimited(senderId: senderId) {
-            print("[BroadcastResponder] Rate limited sender: \(senderId)")
+            logger.warning("Rate limited sender: \(senderId)")
             return
         }
 
@@ -335,7 +338,7 @@ final class BroadcastResponder {
         ]
 
         guard var data = try? JSONSerialization.data(withJSONObject: responseMessage) else {
-            print("[BroadcastResponder] Failed to serialize response")
+            logger.error("Failed to serialize response")
             return
         }
 
@@ -372,7 +375,7 @@ final class BroadcastResponder {
                 "resources": resourceDicts
             ]
             guard let truncatedData = try? JSONSerialization.data(withJSONObject: truncatedMessage) else {
-                print("[BroadcastResponder] Failed to serialize truncated response")
+                logger.error("Failed to serialize truncated response")
                 return
             }
             data = truncatedData
@@ -386,7 +389,7 @@ final class BroadcastResponder {
 
         connection.send(content: data, completion: .contentProcessed { error in
             if let error {
-                print("[BroadcastResponder] Send response error: \(error)")
+                logger.error("Send response error: \(error.localizedDescription)")
             }
             // Brief delay before cancelling to ensure delivery
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.3) {

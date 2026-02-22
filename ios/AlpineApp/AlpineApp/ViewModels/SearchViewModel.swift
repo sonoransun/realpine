@@ -20,10 +20,12 @@ final class SearchViewModel {
 
     private let settings: SettingsStore
     private let secureStorage: SecureStorage
+    var searchHistory: SearchHistoryStore
 
-    init(settings: SettingsStore, secureStorage: SecureStorage) {
+    init(settings: SettingsStore, secureStorage: SecureStorage, searchHistory: SearchHistoryStore) {
         self.settings = settings
         self.secureStorage = secureStorage
+        self.searchHistory = searchHistory
         self.transportMode = settings.transportMode
     }
 
@@ -58,6 +60,9 @@ final class SearchViewModel {
             error = "Please enter a search query"
             return nil
         }
+
+        // Record the search in history
+        searchHistory.add(query: sanitized, mode: searchMode.rawValue, resultCount: nil)
 
         isLoading = true
         error = nil

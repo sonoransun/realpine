@@ -5,6 +5,7 @@ enum AuthMethod: String, Codable, Sendable, CaseIterable {
     case none
     case totp
     case yubiKey
+    case biometric
     case totpAndYubiKey
 }
 

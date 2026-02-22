@@ -15,6 +15,8 @@ struct DashboardView: View {
         ))
     }
 
+    @State private var navigateToSettings = false
+
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -22,6 +24,15 @@ struct DashboardView: View {
                     loadingSection
                 } else if let error = viewModel.error {
                     errorSection(error)
+                } else if viewModel.serverStatus == nil {
+                    EmptyStateView(
+                        systemImage: "server.rack",
+                        title: "Not Connected",
+                        description: "Configure your bridge connection in Settings",
+                        actionLabel: "Open Settings"
+                    ) {
+                        navigateToSettings = true
+                    }
                 } else {
                     serverInfoSection
                     statsSection
@@ -35,6 +46,7 @@ struct DashboardView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 ConnectionIndicator(isConnected: viewModel.isConnected, showLabel: true)
+                    .accessibilityLabel(viewModel.isConnected ? "Connected to server" : "Not connected to server")
             }
             ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
@@ -42,7 +54,12 @@ struct DashboardView: View {
                 } label: {
                     Image(systemName: "gear")
                 }
+                .accessibilityLabel("Settings")
+                .accessibilityHint("Opens the settings screen")
             }
+        }
+        .navigationDestination(isPresented: $navigateToSettings) {
+            SettingsView(settings: settings, secureStorage: secureStorage)
         }
         .refreshable {
             await viewModel.refresh()
@@ -82,6 +99,8 @@ struct DashboardView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(AlpineTheme.alpineGreen)
+            .accessibilityLabel("Retry connection")
+            .accessibilityHint("Attempts to reconnect to the server")
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
@@ -124,7 +143,9 @@ struct DashboardView: View {
     private var statsSection: some View {
         HStack(spacing: 12) {
             statCard(title: "Peers", value: viewModel.peerCount, icon: "person.2.fill", color: AlpineTheme.alpineBlue)
+                .accessibilityLabel("\(viewModel.peerCount) peers connected")
             statCard(title: "Groups", value: viewModel.groupCount, icon: "folder.fill", color: AlpineTheme.alpineGreen)
+                .accessibilityLabel("\(viewModel.groupCount) groups available")
         }
     }
 

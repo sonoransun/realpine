@@ -1,16 +1,18 @@
 import Foundation
 import Network
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "BroadcastTransport")
 
 /// UDP broadcast-based transport for peer-to-peer Alpine queries on the local network.
 /// Sends query broadcasts on port 8090 and listens for responses from peers.
 /// Conforms to QueryTransport with @unchecked Sendable since internal state
-/// is protected by NSLock.
+/// is protected by OSAllocatedUnfairLock.
 final class BroadcastTransport: QueryTransport, @unchecked Sendable {
     private let broadcastPort: UInt16 = 8090
     private let queryTimeout: TimeInterval = 30.0
     private let senderId: String
-    private var activeQueries: [Int64: QueryState] = [:]
-    private let lock = NSLock()
+    private let state: OSAllocatedUnfairLock<[Int64: QueryState]>
     private var listener: NWListener?
     private let queue = DispatchQueue(label: "com.alpine.broadcast.transport", qos: .utility)
 
@@ -26,6 +28,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
 
     init() {
         senderId = String(UUID().uuidString.prefix(8)).lowercased()
+        state = OSAllocatedUnfairLock(initialState: [:])
         startListener()
     }
 
@@ -43,9 +46,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             timeoutTask: nil
         )
 
-        lock.lock()
-        activeQueries[queryId] = state
-        lock.unlock()
+        self.state.withLock { $0[queryId] = state }
 
         // Start timeout task
         let timeoutTask = Task { [weak self] in
@@ -54,9 +55,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             self?.markQueryComplete(queryId)
         }
 
-        lock.lock()
-        activeQueries[queryId]?.timeoutTask = timeoutTask
-        lock.unlock()
+        self.state.withLock { $0[queryId]?.timeoutTask = timeoutTask }
 
         // Build and send the broadcast query
         let localAddress = NetworkUtility.localIPAddress() ?? "0.0.0.0"
@@ -125,11 +124,9 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
     }
 
     func getQueryStatus(_ queryId: Int64) async throws -> QueryStatusResponse {
-        lock.lock()
-        let state = activeQueries[queryId]
-        lock.unlock()
+        let queryState = state.withLock { $0[queryId] }
 
-        guard let state else {
+        guard let queryState else {
             return QueryStatusResponse(
                 inProgress: false,
                 totalPeers: 0,
@@ -139,22 +136,20 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             )
         }
 
-        let peerCount = Int64(state.totalPeers.count)
+        let peerCount = Int64(queryState.totalPeers.count)
         return QueryStatusResponse(
-            inProgress: state.inProgress,
+            inProgress: queryState.inProgress,
             totalPeers: peerCount,
             peersQueried: peerCount,
             numPeerResponses: peerCount,
-            totalHits: state.totalHits
+            totalHits: queryState.totalHits
         )
     }
 
     func getQueryResults(_ queryId: Int64) async throws -> QueryResultsResponse {
-        lock.lock()
-        let state = activeQueries[queryId]
-        lock.unlock()
+        let queryState = state.withLock { $0[queryId] }
 
-        return QueryResultsResponse(peers: state?.results ?? [])
+        return QueryResultsResponse(peers: queryState?.results ?? [])
     }
 
     func cancelQuery(_ queryId: Int64) async throws {
@@ -171,9 +166,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
     }
 
     func shutdown() {
-        lock.lock()
-        let queryIds = Array(activeQueries.keys)
-        lock.unlock()
+        let queryIds = state.withLock { Array($0.keys) }
 
         for queryId in queryIds {
             markQueryComplete(queryId)
@@ -194,7 +187,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
 
             listener = try NWListener(using: params, on: NWEndpoint.Port(integerLiteral: broadcastPort))
         } catch {
-            print("[BroadcastTransport] Failed to create listener: \(error)")
+            logger.error("Failed to create listener: \(error.localizedDescription)")
             return
         }
 
@@ -206,9 +199,9 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
         listener?.stateUpdateHandler = { state in
             switch state {
             case .ready:
-                print("[BroadcastTransport] Listening for responses on port \(port)")
+                logger.info("Listening for responses on port \(port)")
             case .failed(let error):
-                print("[BroadcastTransport] Listener failed: \(error)")
+                logger.error("Listener failed: \(error.localizedDescription)")
             default:
                 break
             }
@@ -224,7 +217,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             defer { connection.cancel() }
 
             if let error {
-                print("[BroadcastTransport] Receive error: \(error)")
+                logger.error("Receive error: \(error.localizedDescription)")
                 return
             }
 
@@ -353,29 +346,28 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
             }
         }
 
-        lock.lock()
-        guard var state = activeQueries[queryId], state.inProgress else {
-            lock.unlock()
-            return
+        state.withLock { activeQueries in
+            guard var queryState = activeQueries[queryId], queryState.inProgress else {
+                return
+            }
+
+            // Track unique responder
+            queryState.totalPeers.insert(responderId)
+            let peerId = Int64(abs(responderId.hashValue) % Int.max)
+
+            // Add peer resources
+            let peerResources = PeerResources(peerId: peerId, resources: resources)
+            queryState.results.append(peerResources)
+            queryState.totalHits += Int64(resources.count)
+
+            // Check auto-halt limit
+            if queryState.totalHits >= queryState.autoHaltLimit {
+                queryState.inProgress = false
+                queryState.timeoutTask?.cancel()
+            }
+
+            activeQueries[queryId] = queryState
         }
-
-        // Track unique responder
-        state.totalPeers.insert(responderId)
-        let peerId = Int64(abs(responderId.hashValue) % Int.max)
-
-        // Add peer resources
-        let peerResources = PeerResources(peerId: peerId, resources: resources)
-        state.results.append(peerResources)
-        state.totalHits += Int64(resources.count)
-
-        // Check auto-halt limit
-        if state.totalHits >= state.autoHaltLimit {
-            state.inProgress = false
-            state.timeoutTask?.cancel()
-        }
-
-        activeQueries[queryId] = state
-        lock.unlock()
     }
 
     // MARK: - Broadcast Sending
@@ -404,7 +396,7 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
 
         connection.send(content: data, completion: .contentProcessed { error in
             if let error {
-                print("[BroadcastTransport] Send error: \(error)")
+                logger.error("Send error: \(error.localizedDescription)")
             }
             // Allow a brief moment for the send to complete, then cancel
             DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
@@ -416,10 +408,11 @@ final class BroadcastTransport: QueryTransport, @unchecked Sendable {
     // MARK: - Query Lifecycle
 
     private func markQueryComplete(_ queryId: Int64) {
-        lock.lock()
-        activeQueries[queryId]?.inProgress = false
-        activeQueries[queryId]?.timeoutTask?.cancel()
-        lock.unlock()
+        state.withLock { activeQueries in
+            activeQueries[queryId]?.inProgress = false
+            activeQueries[queryId]?.timeoutTask?.cancel()
+        }
+        logger.debug("Query \(queryId) marked complete")
     }
 }
 

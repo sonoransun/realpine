@@ -38,6 +38,8 @@ struct GroupsView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Create group")
+                .accessibilityHint("Opens a sheet to create a new group")
             }
         }
         .sheet(isPresented: $showCreateSheet) {
@@ -72,23 +74,14 @@ struct GroupsView: View {
     // MARK: - Empty
 
     private var emptyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "folder.badge.questionmark")
-                .font(.system(size: 36))
-                .foregroundStyle(.secondary)
-            Text("No groups found")
-                .font(AlpineTheme.Typography.headline)
-            Text("Create a group to organize peers")
-                .font(AlpineTheme.Typography.caption)
-                .foregroundStyle(.secondary)
-            Button("Create Group") {
-                showCreateSheet = true
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(AlpineTheme.alpineGreen)
-            .padding(.top, 8)
+        EmptyStateView(
+            systemImage: "folder",
+            title: "No Groups",
+            description: "Create a group to organize your peers",
+            actionLabel: "Create Group"
+        ) {
+            showCreateSheet = true
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Groups List
@@ -103,6 +96,7 @@ struct GroupsView: View {
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .accessibilityLabel("Delete group \(group.groupName)")
                     }
             }
         }

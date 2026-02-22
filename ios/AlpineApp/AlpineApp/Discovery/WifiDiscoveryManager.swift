@@ -1,6 +1,9 @@
 import Foundation
 import Network
 import Observation
+import os
+
+private let logger = Logger(subsystem: "com.sonoranpub.AlpineApp", category: "WifiDiscoveryManager")
 
 /// Listens on UDP port 8089 for Alpine REST Bridge beacon broadcasts.
 /// Maintains a list of discovered bridges, automatically removing stale
@@ -29,7 +32,7 @@ final class WifiDiscoveryManager {
 
             listener = try NWListener(using: params, on: NWEndpoint.Port(integerLiteral: beaconPort))
         } catch {
-            print("[WifiDiscoveryManager] Failed to create listener: \(error)")
+            logger.error("Failed to create listener: \(error.localizedDescription)")
             return
         }
 
@@ -40,9 +43,9 @@ final class WifiDiscoveryManager {
         listener?.stateUpdateHandler = { [weak self] state in
             switch state {
             case .ready:
-                print("[WifiDiscoveryManager] Listening for beacons on port \(self?.beaconPort ?? 0)")
+                logger.info("Listening for beacons on port \(self?.beaconPort ?? 0)")
             case .failed(let error):
-                print("[WifiDiscoveryManager] Listener failed: \(error)")
+                logger.error("Listener failed: \(error.localizedDescription)")
                 self?.stop()
             default:
                 break
@@ -83,7 +86,7 @@ final class WifiDiscoveryManager {
             defer { connection.cancel() }
 
             if let error {
-                print("[WifiDiscoveryManager] Receive error: \(error)")
+                logger.error("Receive error: \(error.localizedDescription)")
                 return
             }
 

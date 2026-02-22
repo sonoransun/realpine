@@ -7,6 +7,7 @@ final class AuthManager {
     private(set) var authState: AuthState = .locked
     private let sessionManager = SessionManager()
     private let yubiKeyService = YubiKeyService()
+    let biometricService = BiometricAuthService()
     private let secureStorage: SecureStorage
     private let settingsStore: SettingsStore
     private var backgroundTime: Date?
@@ -22,9 +23,13 @@ final class AuthManager {
         settingsStore.authMethod
     }
 
+    var biometricAvailable: Bool { biometricService.isAvailable }
+
     init(secureStorage: SecureStorage, settingsStore: SettingsStore) {
         self.secureStorage = secureStorage
         self.settingsStore = settingsStore
+
+        biometricService.checkAvailability()
 
         // If auth not required, auto-authenticate
         if !settingsStore.authRequired {
@@ -37,11 +42,54 @@ final class AuthManager {
         }
     }
 
+    /// Attempt to unlock the app using biometric authentication (Face ID / Touch ID).
+    func unlockWithBiometric() async throws {
+        authState = .authenticating
+
+        let success = try await biometricService.authenticate(reason: "Unlock Alpine")
+        guard success else {
+            authState = .locked
+            throw AuthError.biometricFailed
+        }
+
+        // Attempt server session auth if configured
+        do {
+            let request = AuthRequest(
+                method: AuthMethod.biometric.rawValue,
+                totpCode: nil,
+                yubiKeyOTP: nil,
+                challengeId: nil
+            )
+            let baseURL = buildBaseURL()
+            let session = try await sessionManager.authenticate(request: request, baseURL: baseURL)
+            _ = secureStorage.store(key: "session.accessToken", value: session.accessToken)
+            if let refresh = session.refreshToken {
+                _ = secureStorage.store(key: "session.refreshToken", value: refresh)
+            }
+            authState = .authenticated(session: session)
+        } catch {
+            // Server not available -- authenticate locally after successful biometric
+            let localSession = SessionToken(
+                accessToken: secureStorage.read(key: "apiKey") ?? "",
+                refreshToken: nil,
+                expiresAt: Date().addingTimeInterval(3600),
+                issuedAt: Date()
+            )
+            authState = .authenticated(session: localSession)
+        }
+    }
+
     /// Attempt to unlock the app with provided credentials.
     func unlock(totpCode: String? = nil, yubiKeyOTP: String? = nil) async throws {
         authState = .authenticating
 
         let method = settingsStore.authMethod
+
+        // Handle biometric method via dedicated flow
+        if method == .biometric {
+            try await unlockWithBiometric()
+            return
+        }
 
         // Validate TOTP locally if required
         if method == .totp || method == .totpAndYubiKey {
@@ -162,6 +210,7 @@ enum AuthError: Error, LocalizedError {
     case notEnrolled
     case yubiKeyFailed(Error)
     case sessionExpired
+    case biometricFailed
 
     var errorDescription: String? {
         switch self {
@@ -170,6 +219,7 @@ enum AuthError: Error, LocalizedError {
         case .notEnrolled: "Authentication not enrolled"
         case .yubiKeyFailed(let error): "YubiKey error: \(error.localizedDescription)"
         case .sessionExpired: "Session expired, please re-authenticate"
+        case .biometricFailed: "Biometric authentication failed"
         }
     }
 }

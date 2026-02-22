@@ -38,6 +38,8 @@ struct PeersView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Add peer")
+                .accessibilityHint("Opens a sheet to add a new peer")
             }
         }
         .sheet(isPresented: $showAddSheet) {
@@ -72,23 +74,14 @@ struct PeersView: View {
     // MARK: - Empty
 
     private var emptyView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "person.2.slash")
-                .font(.system(size: 36))
-                .foregroundStyle(.secondary)
-            Text("No peers found")
-                .font(AlpineTheme.Typography.headline)
-            Text("Add a peer to get started")
-                .font(AlpineTheme.Typography.caption)
-                .foregroundStyle(.secondary)
-            Button("Add Peer") {
-                showAddSheet = true
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(AlpineTheme.alpineGreen)
-            .padding(.top, 8)
+        EmptyStateView(
+            systemImage: "network",
+            title: "No Peers",
+            description: "Add peers to start sharing resources",
+            actionLabel: "Add Peer"
+        ) {
+            showAddSheet = true
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Peers List
@@ -163,6 +156,7 @@ struct PeersView: View {
             .background(isActive ? Color.green.opacity(0.15) : Color.gray.opacity(0.15))
             .foregroundStyle(isActive ? .green : .secondary)
             .clipShape(Capsule())
+            .accessibilityLabel("Peer status: \(isActive ? "Active" : "Inactive")")
     }
 
     private func formatBandwidth(_ bytes: Int64) -> String {
