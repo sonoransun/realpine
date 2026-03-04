@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/base/SysUtils//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/base/SysUtils//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 base/SysUtils/CMakeFiles/SysUtils.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/CMakeFiles/SysUtils.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/SysUtils/CMakeFiles/SysUtils.dir/rule
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ SysUtils: base/SysUtils/CMakeFiles/SysUtils.dir/rule
 
 # fast build rule for target.
 SysUtils/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/build
 .PHONY : SysUtils/fast
 
 DynamicLoader.o: DynamicLoader.cpp.o
@@ -135,7 +210,7 @@ DynamicLoader.o: DynamicLoader.cpp.o
 
 # target to build an object file
 DynamicLoader.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o
 .PHONY : DynamicLoader.cpp.o
 
 DynamicLoader.i: DynamicLoader.cpp.i
@@ -143,7 +218,7 @@ DynamicLoader.i: DynamicLoader.cpp.i
 
 # target to preprocess a source file
 DynamicLoader.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i
 .PHONY : DynamicLoader.cpp.i
 
 DynamicLoader.s: DynamicLoader.cpp.s
@@ -151,7 +226,7 @@ DynamicLoader.s: DynamicLoader.cpp.s
 
 # target to generate assembly for a file
 DynamicLoader.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s
 .PHONY : DynamicLoader.cpp.s
 
 FileUtils.o: FileUtils.cpp.o
@@ -159,7 +234,7 @@ FileUtils.o: FileUtils.cpp.o
 
 # target to build an object file
 FileUtils.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o
 .PHONY : FileUtils.cpp.o
 
 FileUtils.i: FileUtils.cpp.i
@@ -167,7 +242,7 @@ FileUtils.i: FileUtils.cpp.i
 
 # target to preprocess a source file
 FileUtils.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.i
 .PHONY : FileUtils.cpp.i
 
 FileUtils.s: FileUtils.cpp.s
@@ -175,7 +250,7 @@ FileUtils.s: FileUtils.cpp.s
 
 # target to generate assembly for a file
 FileUtils.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.s
 .PHONY : FileUtils.cpp.s
 
 SignalSet.o: SignalSet.cpp.o
@@ -183,7 +258,7 @@ SignalSet.o: SignalSet.cpp.o
 
 # target to build an object file
 SignalSet.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o
 .PHONY : SignalSet.cpp.o
 
 SignalSet.i: SignalSet.cpp.i
@@ -191,7 +266,7 @@ SignalSet.i: SignalSet.cpp.i
 
 # target to preprocess a source file
 SignalSet.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.i
 .PHONY : SignalSet.cpp.i
 
 SignalSet.s: SignalSet.cpp.s
@@ -199,7 +274,7 @@ SignalSet.s: SignalSet.cpp.s
 
 # target to generate assembly for a file
 SignalSet.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.s
 .PHONY : SignalSet.cpp.s
 
 SpawnProcess.o: SpawnProcess.cpp.o
@@ -207,7 +282,7 @@ SpawnProcess.o: SpawnProcess.cpp.o
 
 # target to build an object file
 SpawnProcess.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o
 .PHONY : SpawnProcess.cpp.o
 
 SpawnProcess.i: SpawnProcess.cpp.i
@@ -215,7 +290,7 @@ SpawnProcess.i: SpawnProcess.cpp.i
 
 # target to preprocess a source file
 SpawnProcess.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i
 .PHONY : SpawnProcess.cpp.i
 
 SpawnProcess.s: SpawnProcess.cpp.s
@@ -223,7 +298,7 @@ SpawnProcess.s: SpawnProcess.cpp.s
 
 # target to generate assembly for a file
 SpawnProcess.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s
 .PHONY : SpawnProcess.cpp.s
 
 UserUtils.o: UserUtils.cpp.o
@@ -231,7 +306,7 @@ UserUtils.o: UserUtils.cpp.o
 
 # target to build an object file
 UserUtils.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o
 .PHONY : UserUtils.cpp.o
 
 UserUtils.i: UserUtils.cpp.i
@@ -239,7 +314,7 @@ UserUtils.i: UserUtils.cpp.i
 
 # target to preprocess a source file
 UserUtils.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.i
 .PHONY : UserUtils.cpp.i
 
 UserUtils.s: UserUtils.cpp.s
@@ -247,7 +322,7 @@ UserUtils.s: UserUtils.cpp.s
 
 # target to generate assembly for a file
 UserUtils.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/SysUtils/CMakeFiles/SysUtils.dir/build.make base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.s
 .PHONY : UserUtils.cpp.s
 
 # Help Target
@@ -257,7 +332,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... SysUtils"
 	@echo "... DynamicLoader.o"
 	@echo "... DynamicLoader.i"
@@ -285,6 +367,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

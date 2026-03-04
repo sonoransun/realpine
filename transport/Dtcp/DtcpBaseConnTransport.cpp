@@ -12,6 +12,11 @@
 #include <StringUtils.h>
 #include <Platform.h>
 
+#ifdef ALPINE_TLS_ENABLED
+#include <DtlsWrapper.h>
+#include <TlsContext.h>
+#endif
+
 
 
 ulong            DtcpBaseConnTransport::currSequenceNum_s = 0;
@@ -48,7 +53,10 @@ DtcpBaseConnTransport::~DtcpBaseConnTransport ()
     Log::Debug ("DtcpBaseConnTransport destructor invoked.");
 #endif
 
-    // MRP_TEMP something should be cleanup up here.. not sure what. 
+#ifdef ALPINE_TLS_ENABLED
+    delete dtlsWrapper_;
+    dtlsWrapper_ = nullptr;
+#endif
 }
 
 
@@ -579,11 +587,56 @@ DtcpBaseConnTransport::setRecvSequenceNum (ulong recvSequenceNum)
 
 
 
-bool 
+#ifdef ALPINE_TLS_ENABLED
+bool
+DtcpBaseConnTransport::enableTls (TlsContext & tlsCtx)
+{
+#ifdef _VERBOSE
+    Log::Debug ("DtcpBaseConnTransport::enableTls invoked.");
+#endif
+
+    if (dtlsWrapper_) {
+        Log::Error("DtcpBaseConnTransport::enableTls: TLS already enabled");
+        return false;
+    }
+
+    dtlsWrapper_ = new DtlsWrapper();
+
+    // Use TLS (not DTLS) for connection-oriented transport
+    auto mode = DtlsWrapper::t_Mode::TlsClient;
+
+    bool status = dtlsWrapper_->initialize(tlsCtx, mode);
+
+    if (!status) {
+        Log::Error("DtcpBaseConnTransport::enableTls: wrapper initialization failed");
+        delete dtlsWrapper_;
+        dtlsWrapper_ = nullptr;
+        return false;
+    }
+
+    return true;
+}
+
+
+bool
+DtcpBaseConnTransport::isTlsEnabled () const
+{
+    return dtlsWrapper_ && dtlsWrapper_->isInitialized();
+}
+#endif
+
+
+bool
 DtcpBaseConnTransport::close ()
 {
 #ifdef _VERBOSE
     Log::Debug ("DtcpBaseConnTransport::close invoked.");
+#endif
+
+#ifdef ALPINE_TLS_ENABLED
+    if (dtlsWrapper_) {
+        dtlsWrapper_->shutdown();
+    }
 #endif
 
     // MRP_TEMP complete

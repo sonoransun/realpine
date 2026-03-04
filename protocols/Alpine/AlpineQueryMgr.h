@@ -8,6 +8,7 @@
 #include <ReadWriteSem.h>
 #include <OptHash.h>
 #include <vector>
+#include <memory>
 
 
 class AlpineQuery;
@@ -27,35 +28,35 @@ class AlpineQueryMgr
 
     // Public operations
     //
-    static bool  createQuery (AlpineQueryOptions &  options,
+    [[nodiscard]] static bool  createQuery (AlpineQueryOptions &  options,
                               ulong &               queryId);
 
-    static bool  getQueryStatus (ulong                queryId,
+    [[nodiscard]] static bool  getQueryStatus (ulong                queryId,
                                  AlpineQueryStatus &  status);
 
-    static bool  exists (ulong  queryId);
+    [[nodiscard]] static bool  exists (ulong  queryId);
 
-    static bool  isActive (ulong  queryId);
+    [[nodiscard]] static bool  isActive (ulong  queryId);
 
-    static bool  inProgress (ulong  queryId);
+    [[nodiscard]] static bool  inProgress (ulong  queryId);
 
-    static bool  pauseQuery (ulong  queryId);
+    [[nodiscard]] static bool  pauseQuery (ulong  queryId);
 
-    static bool  resumeQuery (ulong  queryId);
+    [[nodiscard]] static bool  resumeQuery (ulong  queryId);
 
-    static bool  cancelQuery (ulong  queryId);
+    [[nodiscard]] static bool  cancelQuery (ulong  queryId);
 
-    static bool  getAllActiveQueryIds (t_QueryIdList  queryIdList);
+    [[nodiscard]] static bool  getAllActiveQueryIds (t_QueryIdList  queryIdList);
 
-    static bool  getAllPastQueryIds (t_QueryIdList  queryIdList);
+    [[nodiscard]] static bool  getAllPastQueryIds (t_QueryIdList  queryIdList);
 
-    static bool  getQueryResults (ulong                  queryId,
+    [[nodiscard]] static bool  getQueryResults (ulong                  queryId,
                                   AlpineQueryResults *&  results);
 
-    static bool  getPeerActiveQueryList (ulong            peerId,
+    [[nodiscard]] static bool  getPeerActiveQueryList (ulong            peerId,
                                          t_QueryIdList &  queryIdList);
 
-    static bool  getPeerPastQueryList (ulong            peerId,
+    [[nodiscard]] static bool  getPeerPastQueryList (ulong            peerId,
                                        t_QueryIdList &  queryIdList);
 
 
@@ -71,39 +72,39 @@ class AlpineQueryMgr
 
 
     struct t_QueryState {
-        ulong                  queryId;
-        AlpineQuery *          query;  // only present while active
-        AlpineQueryResults *   results;
-        t_PendingReplyIndex *  pending;
+        ulong                                  queryId;
+        std::unique_ptr<AlpineQuery>           query;    // only present while active
+        std::unique_ptr<AlpineQueryResults>    results;
+        std::unique_ptr<t_PendingReplyIndex>   pending;
     };
 
     using t_QueryStateIndex = std::unordered_map< ulong,   // query ID
-                      t_QueryState *,
+                      std::unique_ptr<t_QueryState>,
                       OptHash<ulong>,
                       equal_to<ulong> >;
 
-    using t_QueryStateIndexPair = std::pair<ulong, t_QueryState *>;
+    using t_QueryStateIndexPair = std::pair<ulong, std::unique_ptr<t_QueryState>>;
 
 
     using t_PeerQueryIndex = std::unordered_map< ulong,   // peer ID
-                      t_QueryIdList *,
+                      std::unique_ptr<t_QueryIdList>,
                       OptHash<ulong>,
                       equal_to<ulong> >;
 
-    using t_PeerQueryIndexPair = std::pair<ulong, t_QueryIdList *>;
+    using t_PeerQueryIndexPair = std::pair<ulong, std::unique_ptr<t_QueryIdList>>;
 
 
 
   private:
 
-    static bool                        initialized_s;
-    static ulong                       maxConncurent_s;
-    static ulong                       currQueryId_s;
-    static t_QueryStateIndex *         activeQueryIndex_s;
-    static t_QueryStateIndex *         pastQueryIndex_s;
-    static t_PeerQueryIndex *          activePeerQueryIndex_s;
-    static t_PeerQueryIndex *          pastPeerQueryIndex_s;
-    static ReadWriteSem                dataLock_s;
+    static bool                                    initialized_s;
+    static ulong                                   maxConncurent_s;
+    static ulong                                   currQueryId_s;
+    static std::unique_ptr<t_QueryStateIndex>      activeQueryIndex_s;
+    static std::unique_ptr<t_QueryStateIndex>      pastQueryIndex_s;
+    static std::unique_ptr<t_PeerQueryIndex>       activePeerQueryIndex_s;
+    static std::unique_ptr<t_PeerQueryIndex>       pastPeerQueryIndex_s;
+    static ReadWriteSem                            dataLock_s;
 
 
 

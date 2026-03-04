@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/base/ConfigUtils//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/base/ConfigUtils//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ ConfigUtils: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/rule
 
 # fast build rule for target.
 ConfigUtils/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build
 .PHONY : ConfigUtils/fast
 
 ArgumentMap.o: ArgumentMap.cpp.o
@@ -135,7 +210,7 @@ ArgumentMap.o: ArgumentMap.cpp.o
 
 # target to build an object file
 ArgumentMap.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o
 .PHONY : ArgumentMap.cpp.o
 
 ArgumentMap.i: ArgumentMap.cpp.i
@@ -143,7 +218,7 @@ ArgumentMap.i: ArgumentMap.cpp.i
 
 # target to preprocess a source file
 ArgumentMap.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i
 .PHONY : ArgumentMap.cpp.i
 
 ArgumentMap.s: ArgumentMap.cpp.s
@@ -151,7 +226,7 @@ ArgumentMap.s: ArgumentMap.cpp.s
 
 # target to generate assembly for a file
 ArgumentMap.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s
 .PHONY : ArgumentMap.cpp.s
 
 ConfigData.o: ConfigData.cpp.o
@@ -159,7 +234,7 @@ ConfigData.o: ConfigData.cpp.o
 
 # target to build an object file
 ConfigData.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o
 .PHONY : ConfigData.cpp.o
 
 ConfigData.i: ConfigData.cpp.i
@@ -167,7 +242,7 @@ ConfigData.i: ConfigData.cpp.i
 
 # target to preprocess a source file
 ConfigData.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i
 .PHONY : ConfigData.cpp.i
 
 ConfigData.s: ConfigData.cpp.s
@@ -175,7 +250,7 @@ ConfigData.s: ConfigData.cpp.s
 
 # target to generate assembly for a file
 ConfigData.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s
 .PHONY : ConfigData.cpp.s
 
 ConfigFile.o: ConfigFile.cpp.o
@@ -183,7 +258,7 @@ ConfigFile.o: ConfigFile.cpp.o
 
 # target to build an object file
 ConfigFile.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o
 .PHONY : ConfigFile.cpp.o
 
 ConfigFile.i: ConfigFile.cpp.i
@@ -191,7 +266,7 @@ ConfigFile.i: ConfigFile.cpp.i
 
 # target to preprocess a source file
 ConfigFile.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i
 .PHONY : ConfigFile.cpp.i
 
 ConfigFile.s: ConfigFile.cpp.s
@@ -199,15 +274,39 @@ ConfigFile.s: ConfigFile.cpp.s
 
 # target to generate assembly for a file
 ConfigFile.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s
 .PHONY : ConfigFile.cpp.s
+
+ConfigSchema.o: ConfigSchema.cpp.o
+.PHONY : ConfigSchema.o
+
+# target to build an object file
+ConfigSchema.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o
+.PHONY : ConfigSchema.cpp.o
+
+ConfigSchema.i: ConfigSchema.cpp.i
+.PHONY : ConfigSchema.i
+
+# target to preprocess a source file
+ConfigSchema.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.i
+.PHONY : ConfigSchema.cpp.i
+
+ConfigSchema.s: ConfigSchema.cpp.s
+.PHONY : ConfigSchema.s
+
+# target to generate assembly for a file
+ConfigSchema.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.s
+.PHONY : ConfigSchema.cpp.s
 
 Configuration.o: Configuration.cpp.o
 .PHONY : Configuration.o
 
 # target to build an object file
 Configuration.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o
 .PHONY : Configuration.cpp.o
 
 Configuration.i: Configuration.cpp.i
@@ -215,7 +314,7 @@ Configuration.i: Configuration.cpp.i
 
 # target to preprocess a source file
 Configuration.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.i
 .PHONY : Configuration.cpp.i
 
 Configuration.s: Configuration.cpp.s
@@ -223,7 +322,7 @@ Configuration.s: Configuration.cpp.s
 
 # target to generate assembly for a file
 Configuration.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.s
 .PHONY : Configuration.cpp.s
 
 EnvironMap.o: EnvironMap.cpp.o
@@ -231,7 +330,7 @@ EnvironMap.o: EnvironMap.cpp.o
 
 # target to build an object file
 EnvironMap.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o
 .PHONY : EnvironMap.cpp.o
 
 EnvironMap.i: EnvironMap.cpp.i
@@ -239,7 +338,7 @@ EnvironMap.i: EnvironMap.cpp.i
 
 # target to preprocess a source file
 EnvironMap.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i
 .PHONY : EnvironMap.cpp.i
 
 EnvironMap.s: EnvironMap.cpp.s
@@ -247,7 +346,7 @@ EnvironMap.s: EnvironMap.cpp.s
 
 # target to generate assembly for a file
 EnvironMap.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s
 .PHONY : EnvironMap.cpp.s
 
 # Help Target
@@ -257,7 +356,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... ConfigUtils"
 	@echo "... ArgumentMap.o"
 	@echo "... ArgumentMap.i"
@@ -268,6 +374,9 @@ help:
 	@echo "... ConfigFile.o"
 	@echo "... ConfigFile.i"
 	@echo "... ConfigFile.s"
+	@echo "... ConfigSchema.o"
+	@echo "... ConfigSchema.i"
+	@echo "... ConfigSchema.s"
 	@echo "... Configuration.o"
 	@echo "... Configuration.i"
 	@echo "... Configuration.s"
@@ -285,6 +394,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

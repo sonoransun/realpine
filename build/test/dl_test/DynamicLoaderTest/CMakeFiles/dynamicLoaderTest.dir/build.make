@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/depend.make
@@ -73,18 +73,18 @@ test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/codegen:
 .PHONY : test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/codegen
 
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o: test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/flags.make
-test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o: /Users/user/sonoranpub/realpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp
+test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o: /Users/user/cdev/exrealpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o: test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o -MF CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o.d -o CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o -c /Users/user/sonoranpub/realpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o -MF CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o.d -o CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.o -c /Users/user/cdev/exrealpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp
 
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp > CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp > CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.i
 
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp -o CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/dl_test/DynamicLoaderTest/dynamicLoaderTest.cpp -o CMakeFiles/dynamicLoaderTest.dir/dynamicLoaderTest.cpp.s
 
 # Object files for target dynamicLoaderTest
 dynamicLoaderTest_OBJECTS = \
@@ -100,19 +100,20 @@ bin/dynamicLoaderTest: lib/libSysUtils.a
 bin/dynamicLoaderTest: lib/libThreadUtils.a
 bin/dynamicLoaderTest: lib/libSysUtils.a
 bin/dynamicLoaderTest: lib/libAppUtils.a
+bin/dynamicLoaderTest: lib/libspdlog.a
 bin/dynamicLoaderTest: test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../../../bin/dynamicLoaderTest"
-	cd /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dynamicLoaderTest.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../../../bin/dynamicLoaderTest"
+	cd /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dynamicLoaderTest.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/build: bin/dynamicLoaderTest
 .PHONY : test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/build
 
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest && $(CMAKE_COMMAND) -P CMakeFiles/dynamicLoaderTest.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest && $(CMAKE_COMMAND) -P CMakeFiles/dynamicLoaderTest.dir/cmake_clean.cmake
 .PHONY : test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/clean
 
 test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/test/dl_test/DynamicLoaderTest /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest /Users/user/sonoranpub/realpine/build/test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/DependInfo.cmake "--color=$(COLOR)" dynamicLoaderTest
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/test/dl_test/DynamicLoaderTest /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest /Users/user/cdev/exrealpine/build/test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/DependInfo.cmake "--color=$(COLOR)" dynamicLoaderTest
 .PHONY : test/dl_test/DynamicLoaderTest/CMakeFiles/dynamicLoaderTest.dir/depend
 

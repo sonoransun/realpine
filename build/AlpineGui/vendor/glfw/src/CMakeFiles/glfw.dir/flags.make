@@ -4,7 +4,7 @@
 # compile C with /usr/bin/cc
 C_DEFINES = -D_GLFW_COCOA
 
-C_INCLUDES = -I/Users/user/sonoranpub/realpine/AlpineGui/vendor/glfw/include -I/Users/user/sonoranpub/realpine/AlpineGui/vendor/glfw/src -I/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src
+C_INCLUDES = -I/Users/user/cdev/exrealpine/AlpineGui/vendor/glfw/include -I/Users/user/cdev/exrealpine/AlpineGui/vendor/glfw/src -I/Users/user/cdev/exrealpine/build/AlpineGui/vendor/glfw/src
 
 C_FLAGSarm64 = -O3 -DNDEBUG -std=c99 -arch arm64 -fPIC -Wall
 

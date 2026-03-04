@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include base/ConfigUtils/CMakeFiles/ConfigUtils.dir/depend.make
@@ -73,80 +73,95 @@ base/ConfigUtils/CMakeFiles/ConfigUtils.dir/codegen:
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/codegen
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
-base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o: /Users/user/sonoranpub/realpine/base/ConfigUtils/ArgumentMap.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/ArgumentMap.cpp
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o -MF CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o -c /Users/user/sonoranpub/realpine/base/ConfigUtils/ArgumentMap.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o -MF CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/ArgumentMap.cpp
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ConfigUtils/ArgumentMap.cpp > CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/ArgumentMap.cpp > CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.i
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ConfigUtils/ArgumentMap.cpp -o CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/ArgumentMap.cpp -o CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.s
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
-base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o: /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigData.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigData.cpp
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o -MF CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o -c /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigData.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o -MF CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigData.cpp
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigData.cpp > CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigData.cpp > CMakeFiles/ConfigUtils.dir/ConfigData.cpp.i
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigData.cpp -o CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigData.cpp -o CMakeFiles/ConfigUtils.dir/ConfigData.cpp.s
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
-base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o: /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigFile.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigFile.cpp
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o -MF CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o -c /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigFile.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o -MF CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigFile.cpp
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigFile.cpp > CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigFile.cpp > CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.i
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ConfigUtils/ConfigFile.cpp -o CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigFile.cpp -o CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.s
+
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigSchema.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o -MF CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o.d -o CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigSchema.cpp
+
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.i"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigSchema.cpp > CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.i
+
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.s"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/ConfigSchema.cpp -o CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.s
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
-base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o: /Users/user/sonoranpub/realpine/base/ConfigUtils/Configuration.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/Configuration.cpp
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o -MF CMakeFiles/ConfigUtils.dir/Configuration.cpp.o.d -o CMakeFiles/ConfigUtils.dir/Configuration.cpp.o -c /Users/user/sonoranpub/realpine/base/ConfigUtils/Configuration.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o -MF CMakeFiles/ConfigUtils.dir/Configuration.cpp.o.d -o CMakeFiles/ConfigUtils.dir/Configuration.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/Configuration.cpp
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/Configuration.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ConfigUtils/Configuration.cpp > CMakeFiles/ConfigUtils.dir/Configuration.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/Configuration.cpp > CMakeFiles/ConfigUtils.dir/Configuration.cpp.i
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/Configuration.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ConfigUtils/Configuration.cpp -o CMakeFiles/ConfigUtils.dir/Configuration.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/Configuration.cpp -o CMakeFiles/ConfigUtils.dir/Configuration.cpp.s
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/flags.make
-base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o: /Users/user/sonoranpub/realpine/base/ConfigUtils/EnvironMap.cpp
+base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o: /Users/user/cdev/exrealpine/base/ConfigUtils/EnvironMap.cpp
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o -MF CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o.d -o CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o -c /Users/user/sonoranpub/realpine/base/ConfigUtils/EnvironMap.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o -MF CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o.d -o CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o -c /Users/user/cdev/exrealpine/base/ConfigUtils/EnvironMap.cpp
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ConfigUtils/EnvironMap.cpp > CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ConfigUtils/EnvironMap.cpp > CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.i
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ConfigUtils/EnvironMap.cpp -o CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ConfigUtils/EnvironMap.cpp -o CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.s
 
 # Object files for target ConfigUtils
 ConfigUtils_OBJECTS = \
 "CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o" \
 "CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o" \
 "CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o" \
+"CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o" \
 "CMakeFiles/ConfigUtils.dir/Configuration.cpp.o" \
 "CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o"
 
@@ -156,23 +171,24 @@ ConfigUtils_EXTERNAL_OBJECTS =
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ArgumentMap.cpp.o
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o
+lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/Configuration.cpp.o
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build.make
 lib/libConfigUtils.a: base/ConfigUtils/CMakeFiles/ConfigUtils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library ../../lib/libConfigUtils.a"
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -P CMakeFiles/ConfigUtils.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ConfigUtils.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library ../../lib/libConfigUtils.a"
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -P CMakeFiles/ConfigUtils.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ConfigUtils.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build: lib/libConfigUtils.a
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/build
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -P CMakeFiles/ConfigUtils.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/base/ConfigUtils && $(CMAKE_COMMAND) -P CMakeFiles/ConfigUtils.dir/cmake_clean.cmake
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/clean
 
 base/ConfigUtils/CMakeFiles/ConfigUtils.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/base/ConfigUtils /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/base/ConfigUtils /Users/user/sonoranpub/realpine/build/base/ConfigUtils/CMakeFiles/ConfigUtils.dir/DependInfo.cmake "--color=$(COLOR)" ConfigUtils
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/base/ConfigUtils /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/base/ConfigUtils /Users/user/cdev/exrealpine/build/base/ConfigUtils/CMakeFiles/ConfigUtils.dir/DependInfo.cmake "--color=$(COLOR)" ConfigUtils
 .PHONY : base/ConfigUtils/CMakeFiles/ConfigUtils.dir/depend
 

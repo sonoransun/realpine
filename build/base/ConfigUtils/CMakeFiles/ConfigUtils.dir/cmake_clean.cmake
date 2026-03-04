@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/ConfigUtils.dir/ConfigData.cpp.o.d"
   "CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o"
   "CMakeFiles/ConfigUtils.dir/ConfigFile.cpp.o.d"
+  "CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o"
+  "CMakeFiles/ConfigUtils.dir/ConfigSchema.cpp.o.d"
   "CMakeFiles/ConfigUtils.dir/Configuration.cpp.o"
   "CMakeFiles/ConfigUtils.dir/Configuration.cpp.o.d"
   "CMakeFiles/ConfigUtils.dir/EnvironMap.cpp.o"

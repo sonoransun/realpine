@@ -1,0 +1,12 @@
+apiVersion: v2
+name: alpine
+description: Alpine — Decentralized P2P resource discovery platform
+type: application
+version: 0.1.0
+appVersion: "0.0.19"
+maintainers:
+  - name: sonoransun
+keywords:
+  - p2p
+  - distributed
+  - resource-discovery

@@ -1,0 +1,33 @@
+{
+  "name": "alpine",
+  "version": "0.0.19",
+  "description": "Decentralized peer-to-peer resource discovery and distributed querying platform",
+  "license": "LGPL-2.1-or-later",
+  "supports": "!uwp",
+  "dependencies": [
+    "nlohmann-json",
+    "spdlog",
+    "asio"
+  ],
+  "features": {
+    "tls": {
+      "description": "Enable TLS/DTLS encryption",
+      "dependencies": [
+        "openssl",
+        "jwt-cpp"
+      ]
+    },
+    "tests": {
+      "description": "Build test programs",
+      "dependencies": [
+        "catch2"
+      ]
+    },
+    "benchmarks": {
+      "description": "Build benchmark programs",
+      "dependencies": [
+        "benchmark"
+      ]
+    }
+  }
+}

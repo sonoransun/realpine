@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include transport/Dtcp/CMakeFiles/Dtcp.dir/depend.make
@@ -73,326 +73,354 @@ transport/Dtcp/CMakeFiles/Dtcp.dir/codegen:
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/codegen
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnAcceptor.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnConnector.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnConnector.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnConnector.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnConnector.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnConnector.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnConnector.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnConnector.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnConnector.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnMux.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnMux.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnMux.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnMux.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnMux.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnMux.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnMux.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnMux.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnTransport.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnTransport.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnTransport.cpp > CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseConnTransport.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseConnTransport.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseUdpTransport.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseUdpTransport.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.cpp > CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseUdpTransport.cpp > CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBaseUdpTransport.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBaseUdpTransport.cpp -o CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcast.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcast.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcast.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcast.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcast.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcast.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcast.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcast.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastMgr.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastMgr.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastMgr.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastMgr.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastMgr.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastMgr.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastMgr.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastMgr.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastSet.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastSet.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastSet.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastSet.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastSet.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastSet.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastSet.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastSet.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastStates.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastStates.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastStates.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastStates.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastStates.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastStates.cpp > CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpBroadcastStates.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpBroadcastStates.cpp -o CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnectionMap.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnectionMap.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnectionMap.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnectionMap.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnectionMap.cpp > CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnectionMap.cpp > CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnectionMap.cpp -o CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnectionMap.cpp -o CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnPacket.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnPacket.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnPacket.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnPacket.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnPacket.cpp > CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnPacket.cpp > CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpConnPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpConnPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpDataPacket.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpDataPacket.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpDataPacket.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpDataPacket.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpDataPacket.cpp > CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpDataPacket.cpp > CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpDataPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpDataPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpFilter.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpFilter.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpFilter.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpFilter.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpFilter.cpp > CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpFilter.cpp > CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpFilter.cpp -o CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpFilter.cpp -o CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpIORecord.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpIORecord.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpIORecord.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpIORecord.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpIORecord.cpp > CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpIORecord.cpp > CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpIORecord.cpp -o CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpIORecord.cpp -o CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpMonitorThread.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpMonitorThread.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpMonitorThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpMonitorThread.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpMonitorThread.cpp > CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpMonitorThread.cpp > CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpMonitorThread.cpp -o CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpMonitorThread.cpp -o CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpNetId.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpNetId.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.cpp > CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpNetId.cpp > CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpNetId.cpp -o CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpNetId.cpp -o CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPacket.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPacket.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPacket.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPacket.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPacket.cpp > CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPacket.cpp > CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPacket.cpp -o CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPendingAckMap.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPendingAckMap.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPendingAckMap.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPendingAckMap.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPendingAckMap.cpp > CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPendingAckMap.cpp > CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpPendingAckMap.cpp -o CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpPendingAckMap.cpp -o CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSendQueue.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSendQueue.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSendQueue.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSendQueue.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSendQueue.cpp > CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSendQueue.cpp > CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSendQueue.cpp -o CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSendQueue.cpp -o CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSocketThread.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSocketThread.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSocketThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSocketThread.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSocketThread.cpp > CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSocketThread.cpp > CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpSocketThread.cpp -o CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpSocketThread.cpp -o CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStack.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStack.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpStack.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpStack.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStack.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpStack.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpStack.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStack.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpStack.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStack.cpp > CMakeFiles/Dtcp.dir/DtcpStack.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStack.cpp > CMakeFiles/Dtcp.dir/DtcpStack.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpStack.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStack.cpp -o CMakeFiles/Dtcp.dir/DtcpStack.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStack.cpp -o CMakeFiles/Dtcp.dir/DtcpStack.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStackThread.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStackThread.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStackThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStackThread.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStackThread.cpp > CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStackThread.cpp > CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpStackThread.cpp -o CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpStackThread.cpp -o CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
-transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o: /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpThreadTable.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtcpThreadTable.cpp
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o -c /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpThreadTable.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o -MF CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o.d -o CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtcpThreadTable.cpp
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpThreadTable.cpp > CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtcpThreadTable.cpp > CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Dtcp/DtcpThreadTable.cpp -o CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtcpThreadTable.cpp -o CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/DtlsWrapper.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o -MF CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o.d -o CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/DtlsWrapper.cpp
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.i"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/DtlsWrapper.cpp > CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.i
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.s"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/DtlsWrapper.cpp -o CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.s
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/flags.make
+transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o: /Users/user/cdev/exrealpine/transport/Dtcp/PeerTlsVerifier.cpp
+transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o: transport/Dtcp/CMakeFiles/Dtcp.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o -MF CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o.d -o CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o -c /Users/user/cdev/exrealpine/transport/Dtcp/PeerTlsVerifier.cpp
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.i"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Dtcp/PeerTlsVerifier.cpp > CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.i
+
+transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.s"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Dtcp/PeerTlsVerifier.cpp -o CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.s
 
 # Object files for target Dtcp
 Dtcp_OBJECTS = \
@@ -418,7 +446,9 @@ Dtcp_OBJECTS = \
 "CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o" \
 "CMakeFiles/Dtcp.dir/DtcpStack.cpp.o" \
 "CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o" \
-"CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o"
+"CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o" \
+"CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o" \
+"CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o"
 
 # External object files for target Dtcp
 Dtcp_EXTERNAL_OBJECTS =
@@ -446,21 +476,23 @@ lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o
 lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o
 lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o
 lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o
+lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o
+lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o
 lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/build.make
 lib/libDtcp.a: transport/Dtcp/CMakeFiles/Dtcp.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Linking CXX static library ../../lib/libDtcp.a"
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && $(CMAKE_COMMAND) -P CMakeFiles/Dtcp.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Dtcp.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Linking CXX static library ../../lib/libDtcp.a"
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && $(CMAKE_COMMAND) -P CMakeFiles/Dtcp.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Dtcp.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 transport/Dtcp/CMakeFiles/Dtcp.dir/build: lib/libDtcp.a
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/build
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/transport/Dtcp && $(CMAKE_COMMAND) -P CMakeFiles/Dtcp.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/Dtcp && $(CMAKE_COMMAND) -P CMakeFiles/Dtcp.dir/cmake_clean.cmake
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/clean
 
 transport/Dtcp/CMakeFiles/Dtcp.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/transport/Dtcp /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/transport/Dtcp /Users/user/sonoranpub/realpine/build/transport/Dtcp/CMakeFiles/Dtcp.dir/DependInfo.cmake "--color=$(COLOR)" Dtcp
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/transport/Dtcp /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/transport/Dtcp /Users/user/cdev/exrealpine/build/transport/Dtcp/CMakeFiles/Dtcp.dir/DependInfo.cmake "--color=$(COLOR)" Dtcp
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/depend
 

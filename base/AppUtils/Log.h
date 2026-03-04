@@ -4,11 +4,16 @@
 #pragma once
 #include <string>
 #include <string_view>
+#include <initializer_list>
+#include <utility>
 
 
 class Log
 {
   public:
+
+    using t_KvPair  = std::pair<std::string_view, std::string_view>;
+    using t_KvPairs = std::initializer_list<t_KvPair>;
 
     enum class t_LogLevel { Silent, Error, Info, Debug };
 
@@ -26,9 +31,29 @@ class Log
 
     static void Debug (std::string_view logMsg);
 
+    static void Error (std::string_view logMsg, t_KvPairs kvPairs);
+
+    static void Info (std::string_view logMsg, t_KvPairs kvPairs);
+
+    static void Debug (std::string_view logMsg, t_KvPairs kvPairs);
+
+    static void setCorrelationId (const std::string & id);
+
+    static void clearCorrelationId ();
+
+    static void setJsonFormat (bool enable);
+
 
   private:
 
-    static t_LogLevel logLevel_s;
+    static t_LogLevel    logLevel_s;
+    static bool          jsonFormat_s;
+
+    static thread_local std::string  correlationId_s;
+
+    static std::string  formatStructured (std::string_view  logMsg,
+                                          t_KvPairs         kvPairs);
+
+    static std::string  formatWithCorrelation (std::string_view logMsg);
 
 };

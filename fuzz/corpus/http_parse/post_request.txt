@@ -1,0 +1,7 @@
+POST /query/start HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
+Content-Length: 42
+Authorization: Bearer test-key-12345
+
+{"queryString":"test","groupName":"default"}

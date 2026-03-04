@@ -4,10 +4,13 @@
 #include "Log.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <sstream>
 
 
-Log::t_LogLevel Log::logLevel_s = t_LogLevel::Debug;
+Log::t_LogLevel          Log::logLevel_s    = t_LogLevel::Debug;
+bool                     Log::jsonFormat_s  = false;
+thread_local std::string Log::correlationId_s;
 
 
 bool
@@ -71,7 +74,7 @@ Log::Error (std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Error)
         return;
-    spdlog::error("{}", logMsg);
+    spdlog::error("{}", formatWithCorrelation(logMsg));
 }
 
 
@@ -80,7 +83,7 @@ Log::Info (std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Info)
         return;
-    spdlog::info("{}", logMsg);
+    spdlog::info("{}", formatWithCorrelation(logMsg));
 }
 
 
@@ -89,5 +92,101 @@ Log::Debug (std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Debug)
         return;
-    spdlog::debug("{}", logMsg);
+    spdlog::debug("{}", formatWithCorrelation(logMsg));
+}
+
+
+void
+Log::Error (std::string_view logMsg, t_KvPairs kvPairs)
+{
+    if (logLevel_s < t_LogLevel::Error)
+        return;
+    spdlog::error("{}", formatStructured(logMsg, kvPairs));
+}
+
+
+void
+Log::Info (std::string_view logMsg, t_KvPairs kvPairs)
+{
+    if (logLevel_s < t_LogLevel::Info)
+        return;
+    spdlog::info("{}", formatStructured(logMsg, kvPairs));
+}
+
+
+void
+Log::Debug (std::string_view logMsg, t_KvPairs kvPairs)
+{
+    if (logLevel_s < t_LogLevel::Debug)
+        return;
+    spdlog::debug("{}", formatStructured(logMsg, kvPairs));
+}
+
+
+void
+Log::setCorrelationId (const std::string & id)
+{
+    correlationId_s = id;
+}
+
+
+void
+Log::clearCorrelationId ()
+{
+    correlationId_s.clear();
+}
+
+
+void
+Log::setJsonFormat (bool enable)
+{
+    jsonFormat_s = enable;
+}
+
+
+std::string
+Log::formatStructured (std::string_view  logMsg,
+                       t_KvPairs         kvPairs)
+{
+    if (jsonFormat_s) {
+        std::ostringstream oss;
+        oss << "{\"msg\":\"" << logMsg << "\"";
+        if (!correlationId_s.empty())
+            oss << ",\"correlation_id\":\"" << correlationId_s << "\"";
+        for (const auto & [k, v] : kvPairs)
+            oss << ",\"" << k << "\":\"" << v << "\"";
+        oss << "}";
+        return oss.str();
+    }
+
+    std::string result;
+    if (!correlationId_s.empty())
+        result += "[" + correlationId_s + "] ";
+    result += logMsg;
+    for (const auto & [k, v] : kvPairs) {
+        result += " ";
+        result += k;
+        result += "=";
+        result += v;
+    }
+    return result;
+}
+
+
+std::string
+Log::formatWithCorrelation (std::string_view logMsg)
+{
+    if (jsonFormat_s) {
+        std::ostringstream oss;
+        oss << "{\"msg\":\"" << logMsg << "\"";
+        if (!correlationId_s.empty())
+            oss << ",\"correlation_id\":\"" << correlationId_s << "\"";
+        oss << "}";
+        return oss.str();
+    }
+
+    if (correlationId_s.empty())
+        return std::string(logMsg);
+
+    return "[" + correlationId_s + "] " + std::string(logMsg);
 }

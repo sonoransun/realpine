@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/depend.make
@@ -73,18 +73,18 @@ interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/codegen:
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/codegen
 
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/flags.make
-interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o: /Users/user/sonoranpub/realpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp
+interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o: /Users/user/cdev/exrealpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o -MF CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o.d -o CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o -c /Users/user/sonoranpub/realpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o -MF CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o.d -o CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o -c /Users/user/cdev/exrealpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp
 
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp > CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp > CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.i
 
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp -o CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/interfaces/DtcpStackInterface/DtcpStackInterface.cpp -o CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.s
 
 # Object files for target DtcpStackInterface
 DtcpStackInterface_OBJECTS = \
@@ -96,19 +96,19 @@ DtcpStackInterface_EXTERNAL_OBJECTS =
 lib/libDtcpStackInterface.a: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o
 lib/libDtcpStackInterface.a: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build.make
 lib/libDtcpStackInterface.a: interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library ../../lib/libDtcpStackInterface.a"
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -P CMakeFiles/DtcpStackInterface.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/DtcpStackInterface.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library ../../lib/libDtcpStackInterface.a"
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -P CMakeFiles/DtcpStackInterface.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/DtcpStackInterface.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build: lib/libDtcpStackInterface.a
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/build
 
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -P CMakeFiles/DtcpStackInterface.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface && $(CMAKE_COMMAND) -P CMakeFiles/DtcpStackInterface.dir/cmake_clean.cmake
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/clean
 
 interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/interfaces/DtcpStackInterface /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface /Users/user/sonoranpub/realpine/build/interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DependInfo.cmake "--color=$(COLOR)" DtcpStackInterface
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/interfaces/DtcpStackInterface /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface /Users/user/cdev/exrealpine/build/interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/DependInfo.cmake "--color=$(COLOR)" DtcpStackInterface
 .PHONY : interfaces/DtcpStackInterface/CMakeFiles/DtcpStackInterface.dir/depend
 

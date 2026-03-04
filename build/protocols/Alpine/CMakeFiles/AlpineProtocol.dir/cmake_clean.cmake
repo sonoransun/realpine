@@ -63,6 +63,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o.d"
   "CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o"
   "CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o.d"
+  "CMakeFiles/AlpineProtocol.dir/QueryCache.cpp.o"
+  "CMakeFiles/AlpineProtocol.dir/QueryCache.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

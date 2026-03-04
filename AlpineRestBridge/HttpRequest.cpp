@@ -61,7 +61,7 @@ HttpRequest::parse (const byte *  data,
         string headerLine = raw.substr(pos, headerEnd - pos);
 
         ulong colonPos = headerLine.find(':');
-        if (colonPos != string::npos)
+        if (headerLine.contains(':'))
         {
             string name = headerLine.substr(0, colonPos);
             string val  = headerLine.substr(colonPos + 1);

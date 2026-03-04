@@ -47,6 +47,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o.d"
   "CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o"
   "CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o.d"
+  "CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o"
+  "CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o.d"
+  "CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o"
+  "CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o.d"
 )
 
 # Per-language clean rules from dependency scanning.

@@ -3,6 +3,7 @@
 
 #pragma once
 #include <Common.h>
+#include <memory>
 
 
 class DataBlock
@@ -11,11 +12,17 @@ class DataBlock
 
     DataBlock (uint  length);
 
-    ~DataBlock ();
+    ~DataBlock () noexcept = default;
+
+    DataBlock (DataBlock && other) noexcept;
+    DataBlock & operator= (DataBlock && other) noexcept;
+
+    DataBlock (const DataBlock &) = delete;
+    DataBlock & operator= (const DataBlock &) = delete;
 
 
-    byte *  buffer_;
-    uint    length_;
+    std::unique_ptr<byte[]>  buffer_;
+    uint                     length_;
 };
 
 

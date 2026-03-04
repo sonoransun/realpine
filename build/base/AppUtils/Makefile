@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/base/AppUtils//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/base/AppUtils//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 base/AppUtils/CMakeFiles/AppUtils.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/CMakeFiles/AppUtils.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/AppUtils/CMakeFiles/AppUtils.dir/rule
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ AppUtils: base/AppUtils/CMakeFiles/AppUtils.dir/rule
 
 # fast build rule for target.
 AppUtils/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/build
 .PHONY : AppUtils/fast
 
 AgedQueue.o: AgedQueue.cpp.o
@@ -135,7 +210,7 @@ AgedQueue.o: AgedQueue.cpp.o
 
 # target to build an object file
 AgedQueue.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o
 .PHONY : AgedQueue.cpp.o
 
 AgedQueue.i: AgedQueue.cpp.i
@@ -143,7 +218,7 @@ AgedQueue.i: AgedQueue.cpp.i
 
 # target to preprocess a source file
 AgedQueue.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.i
 .PHONY : AgedQueue.cpp.i
 
 AgedQueue.s: AgedQueue.cpp.s
@@ -151,15 +226,39 @@ AgedQueue.s: AgedQueue.cpp.s
 
 # target to generate assembly for a file
 AgedQueue.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.s
 .PHONY : AgedQueue.cpp.s
+
+EventBus.o: EventBus.cpp.o
+.PHONY : EventBus.o
+
+# target to build an object file
+EventBus.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o
+.PHONY : EventBus.cpp.o
+
+EventBus.i: EventBus.cpp.i
+.PHONY : EventBus.i
+
+# target to preprocess a source file
+EventBus.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.i
+.PHONY : EventBus.cpp.i
+
+EventBus.s: EventBus.cpp.s
+.PHONY : EventBus.s
+
+# target to generate assembly for a file
+EventBus.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.s
+.PHONY : EventBus.cpp.s
 
 Log.o: Log.cpp.o
 .PHONY : Log.o
 
 # target to build an object file
 Log.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o
 .PHONY : Log.cpp.o
 
 Log.i: Log.cpp.i
@@ -167,7 +266,7 @@ Log.i: Log.cpp.i
 
 # target to preprocess a source file
 Log.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.i
 .PHONY : Log.cpp.i
 
 Log.s: Log.cpp.s
@@ -175,7 +274,7 @@ Log.s: Log.cpp.s
 
 # target to generate assembly for a file
 Log.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.s
 .PHONY : Log.cpp.s
 
 OptHash.o: OptHash.cpp.o
@@ -183,7 +282,7 @@ OptHash.o: OptHash.cpp.o
 
 # target to build an object file
 OptHash.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o
 .PHONY : OptHash.cpp.o
 
 OptHash.i: OptHash.cpp.i
@@ -191,7 +290,7 @@ OptHash.i: OptHash.cpp.i
 
 # target to preprocess a source file
 OptHash.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.i
 .PHONY : OptHash.cpp.i
 
 OptHash.s: OptHash.cpp.s
@@ -199,7 +298,7 @@ OptHash.s: OptHash.cpp.s
 
 # target to generate assembly for a file
 OptHash.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.s
 .PHONY : OptHash.cpp.s
 
 PollSet.o: PollSet.cpp.o
@@ -207,7 +306,7 @@ PollSet.o: PollSet.cpp.o
 
 # target to build an object file
 PollSet.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o
 .PHONY : PollSet.cpp.o
 
 PollSet.i: PollSet.cpp.i
@@ -215,7 +314,7 @@ PollSet.i: PollSet.cpp.i
 
 # target to preprocess a source file
 PollSet.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.i
 .PHONY : PollSet.cpp.i
 
 PollSet.s: PollSet.cpp.s
@@ -223,7 +322,7 @@ PollSet.s: PollSet.cpp.s
 
 # target to generate assembly for a file
 PollSet.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.s
 .PHONY : PollSet.cpp.s
 
 StringUtils.o: StringUtils.cpp.o
@@ -231,7 +330,7 @@ StringUtils.o: StringUtils.cpp.o
 
 # target to build an object file
 StringUtils.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o
 .PHONY : StringUtils.cpp.o
 
 StringUtils.i: StringUtils.cpp.i
@@ -239,7 +338,7 @@ StringUtils.i: StringUtils.cpp.i
 
 # target to preprocess a source file
 StringUtils.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.i
 .PHONY : StringUtils.cpp.i
 
 StringUtils.s: StringUtils.cpp.s
@@ -247,7 +346,7 @@ StringUtils.s: StringUtils.cpp.s
 
 # target to generate assembly for a file
 StringUtils.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/AppUtils/CMakeFiles/AppUtils.dir/build.make base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.s
 .PHONY : StringUtils.cpp.s
 
 # Help Target
@@ -257,11 +356,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... AppUtils"
 	@echo "... AgedQueue.o"
 	@echo "... AgedQueue.i"
 	@echo "... AgedQueue.s"
+	@echo "... EventBus.o"
+	@echo "... EventBus.i"
+	@echo "... EventBus.s"
 	@echo "... Log.o"
 	@echo "... Log.i"
 	@echo "... Log.s"
@@ -285,6 +394,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

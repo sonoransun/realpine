@@ -15,6 +15,7 @@ QueryHandler::registerRoutes (HttpRouter & router)
     router.addRoute("POST",   "/query",              startQuery);
     router.addRoute("GET",    "/query/:id",          getQuery);
     router.addRoute("GET",    "/query/:id/results",  getQueryResults);
+    router.addRoute("GET",    "/query/:id/stream",   streamQueryResults);
     router.addRoute("DELETE", "/query/:id",          cancelQuery);
 }
 
@@ -48,10 +49,11 @@ QueryHandler::startQuery (const HttpRequest & request,
     options.autoDownload = false;
     options.optionId = 0;
 
-    ulong queryId = 0;
-
-    if (!AlpineStackInterface::startQuery(options, queryString, queryId))
+    auto result = AlpineStackInterface::startQuery2(options, queryString);
+    if (!result)
         return HttpResponse::serverError("Failed to start query");
+
+    ulong queryId = *result;
 
     JsonWriter writer;
     writer.beginObject();
@@ -59,7 +61,9 @@ QueryHandler::startQuery (const HttpRequest & request,
     writer.value(queryId);
     writer.endObject();
 
-    return HttpResponse::ok(writer.result());
+    auto response = HttpResponse::accepted(writer.result());
+    response.setHeader("Location", "/query/"s + std::to_string(queryId));
+    return response;
 }
 
 
@@ -182,4 +186,130 @@ QueryHandler::cancelQuery (const HttpRequest & request,
     writer.endObject();
 
     return HttpResponse::ok(writer.result());
+}
+
+
+
+HttpResponse
+QueryHandler::streamQueryResults (const HttpRequest & request,
+                                   const std::unordered_map<string, string> & params)
+{
+    auto it = params.find("id");
+    if (it == params.end()) {
+        return HttpResponse::badRequest("Missing query id");
+    }
+
+    ulong queryId = strtoul(it->second.c_str(), nullptr, 10);
+
+    // Check that the query exists
+    if (!AlpineStackInterface::queryInProgress(queryId)) {
+        // If not in progress, return the final results as a single SSE event
+        auto resultsResult = AlpineStackInterface::getQueryResults2(queryId);
+        if (!resultsResult) {
+            return HttpResponse::notFound();
+        }
+        auto & results = *resultsResult;
+
+        JsonWriter writer;
+        writer.beginObject();
+        writer.key("event");
+        writer.value("complete"s);
+        writer.key("queryId");
+        writer.value(queryId);
+        writer.key("peers");
+        writer.beginArray();
+
+        for (const auto& [peerId, peerRes] : results) {
+            writer.beginObject();
+            writer.key("peerId");
+            writer.value(peerId);
+            writer.key("resources");
+            writer.beginArray();
+            for (const auto& res : peerRes.resourceDescList) {
+                writer.beginObject();
+                writer.key("resourceId");
+                writer.value(res.resourceId);
+                writer.key("size");
+                writer.value(res.size);
+                writer.key("description");
+                writer.value(res.description);
+                writer.endObject();
+            }
+            writer.endArray();
+            writer.endObject();
+        }
+
+        writer.endArray();
+        writer.endObject();
+
+        HttpResponse response(200, "OK");
+        response.setHeader("Content-Type", "text/event-stream");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
+        response.setBody("event: complete\ndata: "s + writer.result() + "\n\n"s);
+        return response;
+    }
+
+    // Query is still in progress — return current status and partial results as SSE snapshot.
+    // Full real-time streaming would require keeping the connection open;
+    // for that, clients should use WebSocket (connect to ws:// and subscribe to query events).
+    //
+    auto statusResult = AlpineStackInterface::getQueryStatus2(queryId);
+    AlpineStackInterface::t_QueryStatus status{};
+    if (statusResult) {
+        status = *statusResult;
+    }
+
+    auto resultsResult2 = AlpineStackInterface::getQueryResults2(queryId);
+    AlpineStackInterface::t_PeerResourcesIndex results;
+    if (resultsResult2) {
+        results = std::move(*resultsResult2);
+    }
+
+    JsonWriter statusWriter;
+    statusWriter.beginObject();
+    statusWriter.key("event");
+    statusWriter.value("progress"s);
+    statusWriter.key("queryId");
+    statusWriter.value(queryId);
+    statusWriter.key("totalPeers");
+    statusWriter.value(status.totalPeers);
+    statusWriter.key("peersQueried");
+    statusWriter.value(status.peersQueried);
+    statusWriter.key("totalHits");
+    statusWriter.value(status.totalHits);
+    statusWriter.endObject();
+
+    JsonWriter dataWriter;
+    dataWriter.beginObject();
+    dataWriter.key("event");
+    dataWriter.value("partial"s);
+    dataWriter.key("queryId");
+    dataWriter.value(queryId);
+    dataWriter.key("peerCount");
+    dataWriter.value(static_cast<ulong>(results.size()));
+    dataWriter.key("peers");
+    dataWriter.beginArray();
+
+    for (const auto& [peerId, peerRes] : results) {
+        dataWriter.beginObject();
+        dataWriter.key("peerId");
+        dataWriter.value(peerId);
+        dataWriter.key("resourceCount");
+        dataWriter.value(static_cast<ulong>(peerRes.resourceDescList.size()));
+        dataWriter.endObject();
+    }
+
+    dataWriter.endArray();
+    dataWriter.endObject();
+
+    HttpResponse response(200, "OK");
+    response.setHeader("Content-Type", "text/event-stream");
+    response.setHeader("Cache-Control", "no-cache");
+    response.setHeader("Connection", "keep-alive");
+    response.setBody(
+        "event: progress\ndata: "s + statusWriter.result() + "\n\n"s +
+        "event: partial\ndata: "s + dataWriter.result() + "\n\n"s
+    );
+    return response;
 }

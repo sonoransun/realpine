@@ -1,0 +1,37 @@
+replicaCount: 3
+
+image:
+  repository: alpine
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  restPort: 8080
+  beaconPort: 8089
+  broadcastPort: 8090
+  protocolPort: 9000
+
+config:
+  logLevel: Info
+  beaconEnabled: true
+  broadcastEnabled: true
+  torEnabled: false
+  dlnaEnabled: false
+  wifiMulticastGroup: "239.255.0.1"
+  wifiMulticastPort: 8091
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+networkPolicy:
+  enabled: true

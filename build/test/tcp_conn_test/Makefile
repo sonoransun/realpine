@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/test/tcp_conn_test//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/test/tcp_conn_test//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 test/tcp_conn_test/CMakeFiles/tcpServer.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/CMakeFiles/tcpServer.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/CMakeFiles/tcpServer.dir/rule
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpServer.dir/rule
 
 # Convenience name for target.
@@ -127,12 +202,12 @@ tcpServer: test/tcp_conn_test/CMakeFiles/tcpServer.dir/rule
 
 # fast build rule for target.
 tcpServer/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/build
 .PHONY : tcpServer/fast
 
 # Convenience name for target.
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/CMakeFiles/tcpClient.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/tcp_conn_test/CMakeFiles/tcpClient.dir/rule
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpClient.dir/rule
 
 # Convenience name for target.
@@ -141,7 +216,7 @@ tcpClient: test/tcp_conn_test/CMakeFiles/tcpClient.dir/rule
 
 # fast build rule for target.
 tcpClient/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/build
 .PHONY : tcpClient/fast
 
 TcpClientConfig.o: TcpClientConfig.cpp.o
@@ -149,7 +224,7 @@ TcpClientConfig.o: TcpClientConfig.cpp.o
 
 # target to build an object file
 TcpClientConfig.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o
 .PHONY : TcpClientConfig.cpp.o
 
 TcpClientConfig.i: TcpClientConfig.cpp.i
@@ -157,7 +232,7 @@ TcpClientConfig.i: TcpClientConfig.cpp.i
 
 # target to preprocess a source file
 TcpClientConfig.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i
 .PHONY : TcpClientConfig.cpp.i
 
 TcpClientConfig.s: TcpClientConfig.cpp.s
@@ -165,7 +240,7 @@ TcpClientConfig.s: TcpClientConfig.cpp.s
 
 # target to generate assembly for a file
 TcpClientConfig.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s
 .PHONY : TcpClientConfig.cpp.s
 
 TcpClientConnector.o: TcpClientConnector.cpp.o
@@ -173,7 +248,7 @@ TcpClientConnector.o: TcpClientConnector.cpp.o
 
 # target to build an object file
 TcpClientConnector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o
 .PHONY : TcpClientConnector.cpp.o
 
 TcpClientConnector.i: TcpClientConnector.cpp.i
@@ -181,7 +256,7 @@ TcpClientConnector.i: TcpClientConnector.cpp.i
 
 # target to preprocess a source file
 TcpClientConnector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i
 .PHONY : TcpClientConnector.cpp.i
 
 TcpClientConnector.s: TcpClientConnector.cpp.s
@@ -189,7 +264,7 @@ TcpClientConnector.s: TcpClientConnector.cpp.s
 
 # target to generate assembly for a file
 TcpClientConnector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s
 .PHONY : TcpClientConnector.cpp.s
 
 TcpClientThread.o: TcpClientThread.cpp.o
@@ -197,8 +272,8 @@ TcpClientThread.o: TcpClientThread.cpp.o
 
 # target to build an object file
 TcpClientThread.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.o
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o
 .PHONY : TcpClientThread.cpp.o
 
 TcpClientThread.i: TcpClientThread.cpp.i
@@ -206,8 +281,8 @@ TcpClientThread.i: TcpClientThread.cpp.i
 
 # target to preprocess a source file
 TcpClientThread.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.i
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i
 .PHONY : TcpClientThread.cpp.i
 
 TcpClientThread.s: TcpClientThread.cpp.s
@@ -215,8 +290,8 @@ TcpClientThread.s: TcpClientThread.cpp.s
 
 # target to generate assembly for a file
 TcpClientThread.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.s
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpClientThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s
 .PHONY : TcpClientThread.cpp.s
 
 TcpServerConfig.o: TcpServerConfig.cpp.o
@@ -224,7 +299,7 @@ TcpServerConfig.o: TcpServerConfig.cpp.o
 
 # target to build an object file
 TcpServerConfig.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.o
 .PHONY : TcpServerConfig.cpp.o
 
 TcpServerConfig.i: TcpServerConfig.cpp.i
@@ -232,7 +307,7 @@ TcpServerConfig.i: TcpServerConfig.cpp.i
 
 # target to preprocess a source file
 TcpServerConfig.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.i
 .PHONY : TcpServerConfig.cpp.i
 
 TcpServerConfig.s: TcpServerConfig.cpp.s
@@ -240,7 +315,7 @@ TcpServerConfig.s: TcpServerConfig.cpp.s
 
 # target to generate assembly for a file
 TcpServerConfig.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/TcpServerConfig.cpp.s
 .PHONY : TcpServerConfig.cpp.s
 
 tcpClient.o: tcpClient.cpp.o
@@ -248,7 +323,7 @@ tcpClient.o: tcpClient.cpp.o
 
 # target to build an object file
 tcpClient.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o
 .PHONY : tcpClient.cpp.o
 
 tcpClient.i: tcpClient.cpp.i
@@ -256,7 +331,7 @@ tcpClient.i: tcpClient.cpp.i
 
 # target to preprocess a source file
 tcpClient.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.i
 .PHONY : tcpClient.cpp.i
 
 tcpClient.s: tcpClient.cpp.s
@@ -264,7 +339,7 @@ tcpClient.s: tcpClient.cpp.s
 
 # target to generate assembly for a file
 tcpClient.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpClient.dir/build.make test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.s
 .PHONY : tcpClient.cpp.s
 
 tcpServer.o: tcpServer.cpp.o
@@ -272,7 +347,7 @@ tcpServer.o: tcpServer.cpp.o
 
 # target to build an object file
 tcpServer.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.o
 .PHONY : tcpServer.cpp.o
 
 tcpServer.i: tcpServer.cpp.i
@@ -280,7 +355,7 @@ tcpServer.i: tcpServer.cpp.i
 
 # target to preprocess a source file
 tcpServer.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.i
 .PHONY : tcpServer.cpp.i
 
 tcpServer.s: tcpServer.cpp.s
@@ -288,7 +363,7 @@ tcpServer.s: tcpServer.cpp.s
 
 # target to generate assembly for a file
 tcpServer.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f test/tcp_conn_test/CMakeFiles/tcpServer.dir/build.make test/tcp_conn_test/CMakeFiles/tcpServer.dir/tcpServer.cpp.s
 .PHONY : tcpServer.cpp.s
 
 # Help Target
@@ -298,7 +373,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... tcpClient"
 	@echo "... tcpServer"
 	@echo "... TcpClientConfig.o"
@@ -330,6 +412,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

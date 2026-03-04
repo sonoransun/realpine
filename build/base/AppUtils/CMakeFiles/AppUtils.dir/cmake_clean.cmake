@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "../../lib/libAppUtils.pdb"
   "CMakeFiles/AppUtils.dir/AgedQueue.cpp.o"
   "CMakeFiles/AppUtils.dir/AgedQueue.cpp.o.d"
+  "CMakeFiles/AppUtils.dir/EventBus.cpp.o"
+  "CMakeFiles/AppUtils.dir/EventBus.cpp.o.d"
   "CMakeFiles/AppUtils.dir/Log.cpp.o"
   "CMakeFiles/AppUtils.dir/Log.cpp.o.d"
   "CMakeFiles/AppUtils.dir/OptHash.cpp.o"

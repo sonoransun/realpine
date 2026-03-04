@@ -28,6 +28,8 @@ class HttpResponse
 
     static HttpResponse  ok (const string & json);
 
+    static HttpResponse  accepted (const string & json);
+
     static HttpResponse  notFound ();
 
     static HttpResponse  badRequest (const string & message);

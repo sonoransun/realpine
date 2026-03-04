@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Utility rule file for update_mappings.
 
@@ -67,8 +67,8 @@ include AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/compiler_depend
 include AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/progress.make
 
 AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Updating gamepad mappings from upstream repository"
-	cd /Users/user/sonoranpub/realpine/AlpineGui/vendor/glfw/src && /opt/homebrew/bin/cmake -P /Users/user/sonoranpub/realpine/AlpineGui/vendor/glfw/CMake/GenerateMappings.cmake mappings.h.in mappings.h
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Updating gamepad mappings from upstream repository"
+	cd /Users/user/cdev/exrealpine/AlpineGui/vendor/glfw/src && /opt/homebrew/bin/cmake -P /Users/user/cdev/exrealpine/AlpineGui/vendor/glfw/CMake/GenerateMappings.cmake mappings.h.in mappings.h
 
 AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/codegen:
 .PHONY : AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/codegen
@@ -82,10 +82,10 @@ AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build: update_mappings
 .PHONY : AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/build
 
 AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src && $(CMAKE_COMMAND) -P CMakeFiles/update_mappings.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/AlpineGui/vendor/glfw/src && $(CMAKE_COMMAND) -P CMakeFiles/update_mappings.dir/cmake_clean.cmake
 .PHONY : AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/clean
 
 AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/AlpineGui/vendor/glfw/src /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src /Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/DependInfo.cmake "--color=$(COLOR)" update_mappings
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/AlpineGui/vendor/glfw/src /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/AlpineGui/vendor/glfw/src /Users/user/cdev/exrealpine/build/AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/DependInfo.cmake "--color=$(COLOR)" update_mappings
 .PHONY : AlpineGui/vendor/glfw/src/CMakeFiles/update_mappings.dir/depend
 

@@ -26,8 +26,15 @@
 #include <AlpineStack.h>
 #include <CovertChannel.h>
 #include <WifiDiscovery.h>
+#include <InterfaceEnumerator.h>
+#include <UpnpPortMapper.h>
+#include <TorService.h>
 
 #include <ServerSigMethods.h>
+
+#ifdef ALPINE_FUSE_ENABLED
+#include <AlpineFuse.h>
+#endif
 
 
 
@@ -93,6 +100,44 @@ main (int argc, char *argv[])
 
     port = atoi (portStr.c_str());
     port = htons(port);
+
+
+    // VPN interface detection and binding (non-fatal)
+    //
+    string vpnInterfaceStr;
+    string vpnExternalAddressStr;
+    string vpnAutoDetectStr;
+
+    if (Configuration::getValue ("VPN Interface", vpnInterfaceStr) &&
+        !vpnInterfaceStr.empty()) {
+        string vpnAddr;
+        if (InterfaceEnumerator::getInterfaceAddress(vpnInterfaceStr, vpnAddr)) {
+            ipAddressStr = vpnAddr;
+            NetUtils::stringIpToLong(ipAddressStr, ipAddress);
+            Log::Info("VPN interface "s + vpnInterfaceStr +
+                      " detected, binding to " + ipAddressStr);
+        } else {
+            Log::Error("VPN interface "s + vpnInterfaceStr +
+                       " not found (continuing with configured IP).");
+        }
+    } else if (Configuration::getValue ("VPN Auto Detect", vpnAutoDetectStr) &&
+               (vpnAutoDetectStr == "true" || vpnAutoDetectStr == "1")) {
+        std::vector<InterfaceEnumerator::InterfaceInfo> vpnInterfaces;
+        if (InterfaceEnumerator::findVpnInterfaces(vpnInterfaces) &&
+            !vpnInterfaces.empty()) {
+            ipAddressStr = vpnInterfaces[0].ipAddress;
+            NetUtils::stringIpToLong(ipAddressStr, ipAddress);
+            Log::Info("VPN auto-detected interface "s + vpnInterfaces[0].name +
+                      ", binding to " + ipAddressStr);
+        } else {
+            Log::Info("VPN auto-detect enabled but no VPN interfaces found.");
+        }
+    }
+
+    if (Configuration::getValue ("VPN External Address", vpnExternalAddressStr) &&
+        !vpnExternalAddressStr.empty()) {
+        Log::Info("VPN external address configured: "s + vpnExternalAddressStr);
+    }
 
 
     string  interfaceContext;
@@ -197,6 +242,112 @@ main (int argc, char *argv[])
 
 
 
+    // Initialize UPnP port mapping if configured (non-fatal)
+    //
+    string upnpEnabledStr;
+    bool   upnpEnabled = false;
+
+    status = Configuration::getValue ("UPnP Enabled", upnpEnabledStr);
+    if (status && (upnpEnabledStr == "true" || upnpEnabledStr == "1"))
+        upnpEnabled = true;
+
+    if (upnpEnabled) {
+        if (UpnpPortMapper::initialize()) {
+            UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
+                                       "UDP", "Alpine Protocol UDP");
+            UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
+                                       "TCP", "Alpine Protocol TCP");
+
+            string externalIp = UpnpPortMapper::getExternalIpAddress();
+            if (!externalIp.empty())
+                Log::Info("UPnP external IP: "s + externalIp);
+        } else {
+            Log::Error("UPnP initialization failed (continuing without UPnP).");
+        }
+    } else {
+        Log::Info("UPnP port mapping disabled by configuration.");
+    }
+
+
+    // Initialize Tor hidden service if configured (non-fatal)
+    //
+    string torEnabledStr;
+    string torControlPortStr;
+    string torControlAuthStr;
+    bool   torEnabled = false;
+    ushort torControlPort = 9051;
+
+    TorService * torService = nullptr;
+
+    status = Configuration::getValue ("Tor Enabled", torEnabledStr);
+    if (status && (torEnabledStr == "true" || torEnabledStr == "1"))
+        torEnabled = true;
+
+    if (torEnabled) {
+        status = Configuration::getValue ("Tor Control Port", torControlPortStr);
+        if (status && !torControlPortStr.empty())
+            torControlPort = static_cast<ushort>(atoi(torControlPortStr.c_str()));
+
+        Configuration::getValue ("Tor Control Auth", torControlAuthStr);
+
+        torService = new TorService();
+
+        if (torService->initialize(torControlPort, torControlAuthStr)) {
+            torService->addPortMapping(ntohs(port), ntohs(port));
+            // createService() deferred until RPC port is known
+        } else {
+            Log::Error("Tor hidden service failed to initialize (continuing without Tor).");
+            delete torService;
+            torService = nullptr;
+        }
+    } else {
+        Log::Info("Tor hidden service disabled by configuration.");
+    }
+
+
+    // Initialize FUSE virtual filesystem (non-fatal)
+    //
+#ifdef ALPINE_FUSE_ENABLED
+    string fuseEnabledStr;
+    string fuseMountPointStr;
+    string fuseCacheTtlStr;
+    string fuseFeedbackThresholdStr;
+    bool   fuseEnabled = false;
+    string fuseMountPoint = "/tmp/alpine"s;
+    ulong  fuseCacheTtl = 60;
+    ulong  fuseFeedbackThreshold = 5;
+
+    status = Configuration::getValue("FUSE Enabled", fuseEnabledStr);
+    if (status && (fuseEnabledStr == "true" || fuseEnabledStr == "1"))
+        fuseEnabled = true;
+
+    if (fuseEnabled) {
+        if (Configuration::getValue("FUSE Mount Point", fuseMountPointStr) &&
+            !fuseMountPointStr.empty())
+            fuseMountPoint = fuseMountPointStr;
+
+        if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) &&
+            !fuseCacheTtlStr.empty())
+            fuseCacheTtl = static_cast<ulong>(atoi(fuseCacheTtlStr.c_str()));
+
+        if (Configuration::getValue("FUSE Feedback Threshold", fuseFeedbackThresholdStr) &&
+            !fuseFeedbackThresholdStr.empty())
+            fuseFeedbackThreshold = static_cast<ulong>(atoi(fuseFeedbackThresholdStr.c_str()));
+
+        if (AlpineFuse::initialize(fuseMountPoint, fuseCacheTtl, fuseFeedbackThreshold)) {
+            if (AlpineFuse::run())
+                Log::Info("FUSE virtual filesystem mounted at "s + fuseMountPoint);
+            else
+                Log::Error("FUSE virtual filesystem failed to start (continuing without VFS).");
+        } else {
+            Log::Error("FUSE virtual filesystem failed to initialize (continuing without VFS).");
+        }
+    } else {
+        Log::Info("FUSE virtual filesystem disabled by configuration.");
+    }
+#endif
+
+
     // Initialize tester
     //
     ServerSigMethods::initialize ();
@@ -238,6 +389,24 @@ main (int argc, char *argv[])
         }
     }
 
+    // Add UPnP mapping for RPC port
+    if (upnpEnabled && UpnpPortMapper::isAvailable())
+        UpnpPortMapper::addMapping(rpcPort, rpcPort, "TCP", "Alpine RPC");
+
+    // Finalize Tor hidden service with both protocol and RPC ports
+    if (torService) {
+        torService->addPortMapping(rpcPort, rpcPort);
+        if (torService->createService()) {
+            Log::Info("Tor hidden service started at "s +
+                      torService->onionAddress());
+        } else {
+            Log::Error("Tor hidden service creation failed (continuing without Tor).");
+            delete torService;
+            torService = nullptr;
+        }
+    }
+
+
     // Start JSON-RPC server (blocking main loop)
     //
     HttpRouter rpcRouter;
@@ -258,6 +427,20 @@ main (int argc, char *argv[])
 
     rpcServer.start(rpcBindAddress, rpcPort);
 
+
+    // Shutdown services
+#ifdef ALPINE_FUSE_ENABLED
+    if (AlpineFuse::isRunning())
+        AlpineFuse::shutdown();
+#endif
+
+    if (torService) {
+        torService->shutdown();
+        delete torService;
+    }
+
+    UpnpPortMapper::shutdown();
+    WifiDiscovery::shutdown();
 
     Log::Info ("Server finished.  Exiting.");
 

@@ -6,6 +6,7 @@
 #include <AlpineQueryResults.h>
 #include <AlpinePeerMgr.h>
 #include <AlpineStack.h>
+#include <AlpineStackInterface.h>
 #include <WriteLock.h>
 #include <ReadLock.h>
 #include <Log.h>
@@ -13,18 +14,18 @@
 
 
 
-bool                                       AlpineQueryMgr::initialized_s = false;
-ulong                                      AlpineQueryMgr::maxConncurent_s = 0;
-ulong                                      AlpineQueryMgr::currQueryId_s = 0;
-AlpineQueryMgr::t_QueryStateIndex *        AlpineQueryMgr::activeQueryIndex_s = nullptr;
-AlpineQueryMgr::t_QueryStateIndex *        AlpineQueryMgr::pastQueryIndex_s = nullptr;
-AlpineQueryMgr::t_PeerQueryIndex *         AlpineQueryMgr::activePeerQueryIndex_s = nullptr;
-AlpineQueryMgr::t_PeerQueryIndex *         AlpineQueryMgr::pastPeerQueryIndex_s = nullptr;
-ReadWriteSem                               AlpineQueryMgr::dataLock_s;
+bool                                                      AlpineQueryMgr::initialized_s = false;
+ulong                                                     AlpineQueryMgr::maxConncurent_s = 0;
+ulong                                                     AlpineQueryMgr::currQueryId_s = 0;
+std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::activeQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::pastQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::activePeerQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::pastPeerQueryIndex_s;
+ReadWriteSem                                              AlpineQueryMgr::dataLock_s;
 
 
 
-bool  
+bool
 AlpineQueryMgr::initialize (ulong maxConcurrent)
 {
 #ifdef _VERBOSE
@@ -40,10 +41,10 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
     }
     maxConncurent_s = maxConcurrent;
 
-    activeQueryIndex_s     = new t_QueryStateIndex;
-    pastQueryIndex_s       = new t_QueryStateIndex;
-    activePeerQueryIndex_s = new t_PeerQueryIndex;
-    pastPeerQueryIndex_s   = new t_PeerQueryIndex;
+    activeQueryIndex_s     = std::make_unique<t_QueryStateIndex>();
+    pastQueryIndex_s       = std::make_unique<t_QueryStateIndex>();
+    activePeerQueryIndex_s = std::make_unique<t_PeerQueryIndex>();
+    pastPeerQueryIndex_s   = std::make_unique<t_PeerQueryIndex>();
 
     initialized_s = true;
 
@@ -53,7 +54,7 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
 
 
 
-bool  
+bool
 AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
                              ulong &               queryId)
 {
@@ -69,7 +70,7 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     }
     /////
     // The steps required to create query are:
-    // 
+    //
     // - Get a query ID to identify this new query from here on.
     // - Create the AlpineQuery and AlpineQueryResults objects for this query.
     // - Kick off the query broadcast...
@@ -77,13 +78,12 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
 
     queryId = currQueryId_s++;
 
-    t_QueryState *  newState;
-    newState = new t_QueryState;
+    auto newState = std::make_unique<t_QueryState>();
 
     newState->queryId = queryId;
-    newState->query   = new AlpineQuery (options);
-    newState->results = new AlpineQueryResults (queryId, options);
-    newState->pending = nullptr; // only allocate this if needed.
+    newState->query   = std::make_unique<AlpineQuery>(options);
+    newState->results = std::make_unique<AlpineQueryResults>(queryId, options);
+    // pending only allocated if needed
 
 
     // Get list of peers involved in this query for indexing purposes.
@@ -94,10 +94,6 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
 
     if (!status) {
         Log::Error ("getPeerIdList for query failed in call to AlpineQueryMgr::createQuery!");
-
-        delete newState->query;
-        delete newState->results;
-
         return false;
     }
     // Activate query
@@ -107,18 +103,13 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         // This is likely due to invalid options.
         //
         Log::Error ("startQuery failed in call to AlpineQueryMgr::createQuery!");
-        
-        delete newState->query;
-        delete newState->results; 
-
         return false;
     }
     // Index state by query ID and member peer ID's
     //
-    activeQueryIndex_s->emplace (queryId, newState);
+    activeQueryIndex_s->emplace (queryId, std::move(newState));
 
     ulong  currPeerId;
-    t_QueryIdList *  currIdList;
 
     for (auto& item : peerIdList) {
 
@@ -130,23 +121,22 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         auto peerIter = activePeerQueryIndex_s->find (currPeerId);
 
         if (peerIter == activePeerQueryIndex_s->end ()) {
-            currIdList = new t_QueryIdList;
-            activePeerQueryIndex_s->emplace (currPeerId, currIdList);
+            auto idList = std::make_unique<t_QueryIdList>();
+            idList->push_back (queryId);
+            activePeerQueryIndex_s->emplace (currPeerId, std::move(idList));
         }
         else {
-            currIdList = (*peerIter).second;
+            peerIter->second->push_back (queryId);
         }
-
-        currIdList->push_back (queryId);
     }
-        
+
 
     return true;
 }
 
 
 
-bool  
+bool
 AlpineQueryMgr::getQueryStatus (ulong                queryId,
                                 AlpineQueryStatus &  queryStatus)
 {
@@ -170,22 +160,22 @@ AlpineQueryMgr::getQueryStatus (ulong                queryId,
     if (iter == activeQueryIndex_s->end ()) {
         // This may be an inactive query, so check the inactive index before failing.
         //
-        iter = pastQueryIndex_s->find (queryId);
+        auto pastIter = pastQueryIndex_s->find (queryId);
 
-        if (iter == pastQueryIndex_s->end ()) {
+        if (pastIter == pastQueryIndex_s->end ()) {
             // Invalid query ID
             Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::getQueryStatus!");
             return false;
         }
-        currState = (*iter).second;
+        currState = pastIter->second.get();
     }
     else {
-        currState = (*iter).second;
+        currState = iter->second.get();
     }
-   
+
     if (!currState->query) {
         // If the query value is null, this is a completed old query.
-        // We can simply set the completed status to 100% and inactive flag.  
+        // We can simply set the completed status to 100% and inactive flag.
         //
         double percentage;
         percentage = 100.00;
@@ -206,7 +196,7 @@ AlpineQueryMgr::getQueryStatus (ulong                queryId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::exists (ulong  queryId)
 {
 #ifdef _VERBOSE
@@ -226,7 +216,7 @@ AlpineQueryMgr::exists (ulong  queryId)
 
 
 
-bool  
+bool
 AlpineQueryMgr::isActive (ulong  queryId)
 {
 #ifdef _VERBOSE
@@ -245,7 +235,7 @@ AlpineQueryMgr::isActive (ulong  queryId)
 
 
 
-bool  
+bool
 AlpineQueryMgr::inProgress (ulong  queryId)
 {
 #ifdef _VERBOSE
@@ -259,17 +249,14 @@ AlpineQueryMgr::inProgress (ulong  queryId)
         Log::Error ("Call to AlpineQueryMgr::inProgress before initialization!");
         return false;
     }
-    t_QueryState *  currState = nullptr;
-
     auto iter = activeQueryIndex_s->find (queryId);
 
     if (iter == activeQueryIndex_s->end ()) {
         Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::inProgress!");
         return false;
     }
-    currState = (*iter).second;
 
-    return currState->query->inProgress ();
+    return iter->second->query->inProgress ();
 }
 
 
@@ -289,7 +276,6 @@ AlpineQueryMgr::pauseQuery (ulong  queryId)
         return false;
     }
     bool status;
-    t_QueryState *  currState = nullptr;
 
     auto iter = activeQueryIndex_s->find (queryId);
 
@@ -297,7 +283,7 @@ AlpineQueryMgr::pauseQuery (ulong  queryId)
         Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::pauseQuery!");
         return false;
     }
-    currState = (*iter).second;
+    auto & currState = iter->second;
 
     if (!currState->query->inProgress ()) {
         // Query already halted, consider this a success
@@ -313,7 +299,7 @@ AlpineQueryMgr::pauseQuery (ulong  queryId)
 
 
 
-bool  
+bool
 AlpineQueryMgr::resumeQuery (ulong  queryId)
 {
 #ifdef _VERBOSE
@@ -328,7 +314,6 @@ AlpineQueryMgr::resumeQuery (ulong  queryId)
         return false;
     }
     bool status;
-    t_QueryState *  currState = nullptr;
 
     auto iter = activeQueryIndex_s->find (queryId);
 
@@ -336,10 +321,10 @@ AlpineQueryMgr::resumeQuery (ulong  queryId)
         Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::resumeQuery!");
         return false;
     }
-    currState = (*iter).second;
+    auto & currState = iter->second;
 
     if (currState->query->inProgress ()) {
-        // Query already in progress, consider this a success 
+        // Query already in progress, consider this a success
         return true;
     }
     status = currState->query->resume ();
@@ -352,7 +337,7 @@ AlpineQueryMgr::resumeQuery (ulong  queryId)
 
 
 
-bool  
+bool
 AlpineQueryMgr::cancelQuery (ulong  queryId)
 {
 #ifdef _VERBOSE
@@ -367,7 +352,6 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
         return false;
     }
     bool status;
-    t_QueryState *  currState = nullptr;
 
     auto queryIter = activeQueryIndex_s->find (queryId);
 
@@ -375,7 +359,7 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
         Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::cancelQuery!");
         return false;
     }
-    currState = (*queryIter).second;
+    auto & currState = queryIter->second;
 
     status = currState->query->cancel ();
 
@@ -384,18 +368,7 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
         return false;
     }
 
-    delete currState->query;
-    currState->query = nullptr;
-
-    // remove from the active index, and place state in the past index
-    //
-    activeQueryIndex_s->erase (queryId);
-    pastQueryIndex_s->emplace (queryId, currState);
-
-
-    // Remove peer ID indexes for this query from the active index, and
-    // move them to the past index.
-    //
+    // Get peer list before releasing query
     AlpineQuery::t_PeerIdList  peerIdList;
     status = currState->query->getPeerIdList (peerIdList);
 
@@ -403,8 +376,20 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
         Log::Error ("Call to query getPeerIdList failed in AlpineQueryMgr::cancelQuery!");
         return false;
     }
+
+    currState->query.reset();
+
+    // remove from the active index, and place state in the past index
+    //
+    auto statePtr = std::move(queryIter->second);
+    activeQueryIndex_s->erase (queryIter);
+    pastQueryIndex_s->emplace (queryId, std::move(statePtr));
+
+
+    // Remove peer ID indexes for this query from the active index, and
+    // move them to the past index.
+    //
     ulong currPeerId;
-    t_QueryIdList *  currIdList;
 
     for (auto& item : peerIdList) {
 
@@ -421,21 +406,18 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
             continue;
         }
 
-        currIdList = (*peerQueryIter).second;
+        std::erase(*peerQueryIter->second, queryId);
 
-        std::erase(*currIdList, queryId);
+        auto pastPeerIter = pastPeerQueryIndex_s->find (currPeerId);
 
-        peerQueryIter = pastPeerQueryIndex_s->find (currPeerId);
-
-        if (peerQueryIter == activePeerQueryIndex_s->end ()) {
-            currIdList =  new t_QueryIdList;
-            pastPeerQueryIndex_s->emplace (currPeerId, currIdList);
+        if (pastPeerIter == pastPeerQueryIndex_s->end ()) {
+            auto idList = std::make_unique<t_QueryIdList>();
+            idList->push_back (queryId);
+            pastPeerQueryIndex_s->emplace (currPeerId, std::move(idList));
         }
         else {
-            currIdList = (*peerQueryIter).second;
+            pastPeerIter->second->push_back (queryId);
         }
-
-        currIdList->push_back (queryId);
     }
 
 
@@ -444,15 +426,15 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
 
 
 
-bool  
+bool
 AlpineQueryMgr::getAllActiveQueryIds (t_QueryIdList  queryIdList)
 {
 #ifdef _VERBOSE
     Log::Debug ("AlpineQueryMgr::getAllActiveQueryIds invoked.");
-#endif 
+#endif
 
     ReadLock  lock(dataLock_s);
-    
+
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getAllActiveQueryIds before initialization!");
         return false;
@@ -470,7 +452,7 @@ AlpineQueryMgr::getAllActiveQueryIds (t_QueryIdList  queryIdList)
 
 
 
-bool  
+bool
 AlpineQueryMgr::getAllPastQueryIds (t_QueryIdList  queryIdList)
 {
 #ifdef _VERBOSE
@@ -496,7 +478,7 @@ AlpineQueryMgr::getAllPastQueryIds (t_QueryIdList  queryIdList)
 
 
 
-bool  
+bool
 AlpineQueryMgr::getQueryResults (ulong                  queryId,
                                  AlpineQueryResults *&  results)
 {
@@ -511,17 +493,14 @@ AlpineQueryMgr::getQueryResults (ulong                  queryId,
         Log::Error ("Call to AlpineQueryMgr::getQueryResults before initialization!");
         return false;
     }
-    t_QueryState *  currState = nullptr;
-
     auto iter = activeQueryIndex_s->find (queryId);
 
     if (iter == activeQueryIndex_s->end ()) {
         Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::getQueryResults!");
         return false;
     }
-    currState = (*iter).second;
 
-    results = currState->results;
+    results = iter->second->results.get();
 
 
     return true;
@@ -529,7 +508,7 @@ AlpineQueryMgr::getQueryResults (ulong                  queryId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
                                         t_QueryIdList &  queryIdList)
 {
@@ -553,8 +532,7 @@ AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
                              "AlpineQueryMgr::getPeerActiveQueryList.");
         return true;
     }
-    t_QueryIdList *  peerQueryIdList;
-    peerQueryIdList = (*iter).second;
+    auto & peerQueryIdList = iter->second;
 
     if (!peerQueryIdList) {
         // No active queries, return with empty list.
@@ -568,7 +546,7 @@ AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
                                       t_QueryIdList &  queryIdList)
 {
@@ -592,8 +570,7 @@ AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
                              "AlpineQueryMgr::getPeerPastQueryList.");
         return true;
     }
-    t_QueryIdList *  peerQueryIdList;
-    peerQueryIdList = (*iter).second;
+    auto & peerQueryIdList = iter->second;
 
     if (!peerQueryIdList) {
         // No active queries, return with empty list.
@@ -607,7 +584,7 @@ AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::handleQueryDiscover (ulong                peerId,
                                      AlpineQueryPacket *  discoverPacket)
 {
@@ -627,7 +604,7 @@ AlpineQueryMgr::handleQueryDiscover (ulong                peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::handleQueryOffer (ulong                peerId,
                                   AlpineQueryPacket *  offerPacket)
 {
@@ -653,8 +630,6 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     ulong  queryId;
     offerPacket->getQueryId (queryId);
 
-    t_QueryState *  currState = nullptr;
-
     auto iter = activeQueryIndex_s->find (queryId);
 
     if (iter == activeQueryIndex_s->end ()) {
@@ -665,12 +640,12 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
 
         return false;
     }
-    currState = (*iter).second;
+    auto & currState = iter->second;
 
 
     // Process this offer packet.  If correct, a response packet will be populated for transfer
     // back to peer.  This starts the actual transfer of resource locators.
-    //   
+    //
     bool status;
     AlpinePacket  packet;
     AlpineQueryPacket  response;
@@ -704,7 +679,7 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     // when a future packet is received.
     //
     if (!currState->pending) {
-        currState->pending = new t_PendingReplyIndex;
+        currState->pending = std::make_unique<t_PendingReplyIndex>();
     }
 
     currState->pending->emplace (peerId, requestId);
@@ -715,7 +690,7 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::handleQueryRequest (ulong                peerId,
                                     AlpineQueryPacket *  requestPacket)
 {
@@ -735,7 +710,7 @@ AlpineQueryMgr::handleQueryRequest (ulong                peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::handleQueryReply (ulong                peerId,
                                   AlpineQueryPacket *  replyPacket)
 {
@@ -755,8 +730,6 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
     ulong  queryId;
     replyPacket->getQueryId (queryId);
 
-    t_QueryState *  currState = nullptr;
-
     auto iter = activeQueryIndex_s->find (queryId);
 
     if (iter == activeQueryIndex_s->end ()) {
@@ -767,13 +740,13 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
 
         return false;
     }
-    currState = (*iter).second;
+    auto & currState = iter->second;
 
 
     // Process this reply packet.  If correct, a response packet will be populated for transfer
     // back to peer.  The locators contained in the response are then added to the current
     // response information for this query.
-    //   
+    //
     bool status;
     AlpinePacket  packet;
     AlpineQueryPacket  response;
@@ -852,11 +825,11 @@ AlpineQueryMgr::handleSendReceived (ulong  peerId,
 
 
     return status;
-}   
-    
+}
 
 
-bool  
+
+bool
 AlpineQueryMgr::handleSendFailure (ulong  peerId,
                                    ulong  requestId)
 {
@@ -878,7 +851,7 @@ AlpineQueryMgr::handleSendFailure (ulong  peerId,
     //
     AlpinePeerMgr::reliableTransferFailed (peerId);
 
-    bool status; 
+    bool status;
     status = removePendingRequest (peerId, requestId);
 
 
@@ -887,7 +860,7 @@ AlpineQueryMgr::handleSendFailure (ulong  peerId,
 
 
 
-bool  
+bool
 AlpineQueryMgr::cancelAll (ulong  peerId)
 {
 #ifdef _VERBOSE
@@ -924,10 +897,10 @@ AlpineQueryMgr::cancelAll (ulong  peerId)
 
 
 
-void  
+void
 AlpineQueryMgr::processTimedEvents ()
-{   
-#ifdef _VERY_VERBOSE  
+{
+#ifdef _VERY_VERBOSE
     Log::Debug ("AlpineQueryMgr::processTimedEvents invoked.");
 #endif
 
@@ -935,12 +908,28 @@ AlpineQueryMgr::processTimedEvents ()
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::processTimedEvents before initialization!");
+        return;
+    }
+
+    // Check for completed queries that have async callbacks registered.
+    // A query is considered complete when it is no longer in progress.
+    //
+    std::vector<ulong> completedIds;
+
+    for (const auto& [id, state] : *activeQueryIndex_s) {
+        if (state->query && !state->query->inProgress()) {
+            completedIds.push_back(id);
+        }
+    }
+
+    if (!completedIds.empty()) {
+        AlpineStackInterface::notifyAsyncCallbacks(completedIds);
     }
 }
 
 
 
-void  
+void
 AlpineQueryMgr::cleanUp ()
 {
 #ifdef _VERBOSE
@@ -954,56 +943,18 @@ AlpineQueryMgr::cleanUp ()
         return;
     }
 
-    if (activeQueryIndex_s) {
-
-        for (const auto& item : *activeQueryIndex_s) {
-            delete item.second;
-        }
-
-        delete activeQueryIndex_s;
-        activeQueryIndex_s = nullptr;
-        return;
-    }
-
-    if (pastQueryIndex_s) {
-
-        for (const auto& item : *pastQueryIndex_s) {
-            delete item.second;
-        }
-
-        delete pastQueryIndex_s;
-        pastQueryIndex_s = nullptr;
-        return;
-    }
-
-    if (activePeerQueryIndex_s) {
-
-        for (const auto& item : *activePeerQueryIndex_s) {
-            delete item.second;
-        }
-
-        delete activePeerQueryIndex_s;
-        activePeerQueryIndex_s = nullptr;
-        return;
-    }
-
-    if (pastPeerQueryIndex_s) {
-
-        for (const auto& item : *pastPeerQueryIndex_s) {
-            delete item.second;
-        }
-
-        delete pastPeerQueryIndex_s;
-        pastPeerQueryIndex_s = nullptr;
-        return;
-    }
+    // unique_ptr containers automatically clean up their elements
+    activeQueryIndex_s.reset();
+    pastQueryIndex_s.reset();
+    activePeerQueryIndex_s.reset();
+    pastPeerQueryIndex_s.reset();
 
     initialized_s = false;
 }
 
 
 
-bool  
+bool
 AlpineQueryMgr::removePendingRequest (ulong  peerId,
                                       ulong  requestId)
 {
@@ -1022,10 +973,7 @@ AlpineQueryMgr::removePendingRequest (ulong  peerId,
 
         return true;
     }
-    t_QueryIdList *  queryList;
-    queryList = (*peerIter).second;
-
-    t_QueryState *  currState;
+    auto & queryList = peerIter->second;
 
     for (auto& queryItem : *queryList) {
         // Locate query state for this query ID
@@ -1036,7 +984,7 @@ AlpineQueryMgr::removePendingRequest (ulong  peerId,
                                  "AlpineQueryMgr::removePendingRequest!");
             return false;
         }
-        currState = (*stateIter).second;
+        auto & currState = stateIter->second;
 
         // If the request belongs to this query, remove it from the pending index.
         if ( (currState->pending) &&
@@ -1051,6 +999,3 @@ AlpineQueryMgr::removePendingRequest (ulong  peerId,
 
     return true;
 }
-
-
-

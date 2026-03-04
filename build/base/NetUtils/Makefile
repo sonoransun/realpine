@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/base/NetUtils//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/base/NetUtils//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 base/NetUtils/CMakeFiles/NetUtils.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/CMakeFiles/NetUtils.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 base/NetUtils/CMakeFiles/NetUtils.dir/rule
 .PHONY : base/NetUtils/CMakeFiles/NetUtils.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ NetUtils: base/NetUtils/CMakeFiles/NetUtils.dir/rule
 
 # fast build rule for target.
 NetUtils/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/build
 .PHONY : NetUtils/fast
 
 BroadcastUdpConnection.o: BroadcastUdpConnection.cpp.o
@@ -135,7 +210,7 @@ BroadcastUdpConnection.o: BroadcastUdpConnection.cpp.o
 
 # target to build an object file
 BroadcastUdpConnection.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.o
 .PHONY : BroadcastUdpConnection.cpp.o
 
 BroadcastUdpConnection.i: BroadcastUdpConnection.cpp.i
@@ -143,7 +218,7 @@ BroadcastUdpConnection.i: BroadcastUdpConnection.cpp.i
 
 # target to preprocess a source file
 BroadcastUdpConnection.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.i
 .PHONY : BroadcastUdpConnection.cpp.i
 
 BroadcastUdpConnection.s: BroadcastUdpConnection.cpp.s
@@ -151,7 +226,7 @@ BroadcastUdpConnection.s: BroadcastUdpConnection.cpp.s
 
 # target to generate assembly for a file
 BroadcastUdpConnection.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/BroadcastUdpConnection.cpp.s
 .PHONY : BroadcastUdpConnection.cpp.s
 
 CovertChannel.o: CovertChannel.cpp.o
@@ -159,7 +234,7 @@ CovertChannel.o: CovertChannel.cpp.o
 
 # target to build an object file
 CovertChannel.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o
 .PHONY : CovertChannel.cpp.o
 
 CovertChannel.i: CovertChannel.cpp.i
@@ -167,7 +242,7 @@ CovertChannel.i: CovertChannel.cpp.i
 
 # target to preprocess a source file
 CovertChannel.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.i
 .PHONY : CovertChannel.cpp.i
 
 CovertChannel.s: CovertChannel.cpp.s
@@ -175,15 +250,39 @@ CovertChannel.s: CovertChannel.cpp.s
 
 # target to generate assembly for a file
 CovertChannel.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.s
 .PHONY : CovertChannel.cpp.s
+
+InterfaceEnumerator.o: InterfaceEnumerator.cpp.o
+.PHONY : InterfaceEnumerator.o
+
+# target to build an object file
+InterfaceEnumerator.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/InterfaceEnumerator.cpp.o
+.PHONY : InterfaceEnumerator.cpp.o
+
+InterfaceEnumerator.i: InterfaceEnumerator.cpp.i
+.PHONY : InterfaceEnumerator.i
+
+# target to preprocess a source file
+InterfaceEnumerator.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/InterfaceEnumerator.cpp.i
+.PHONY : InterfaceEnumerator.cpp.i
+
+InterfaceEnumerator.s: InterfaceEnumerator.cpp.s
+.PHONY : InterfaceEnumerator.s
+
+# target to generate assembly for a file
+InterfaceEnumerator.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/InterfaceEnumerator.cpp.s
+.PHONY : InterfaceEnumerator.cpp.s
 
 MulticastDiscovery.o: MulticastDiscovery.cpp.o
 .PHONY : MulticastDiscovery.o
 
 # target to build an object file
 MulticastDiscovery.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.o
 .PHONY : MulticastDiscovery.cpp.o
 
 MulticastDiscovery.i: MulticastDiscovery.cpp.i
@@ -191,7 +290,7 @@ MulticastDiscovery.i: MulticastDiscovery.cpp.i
 
 # target to preprocess a source file
 MulticastDiscovery.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.i
 .PHONY : MulticastDiscovery.cpp.i
 
 MulticastDiscovery.s: MulticastDiscovery.cpp.s
@@ -199,7 +298,7 @@ MulticastDiscovery.s: MulticastDiscovery.cpp.s
 
 # target to generate assembly for a file
 MulticastDiscovery.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastDiscovery.cpp.s
 .PHONY : MulticastDiscovery.cpp.s
 
 MulticastUdpConnection.o: MulticastUdpConnection.cpp.o
@@ -207,7 +306,7 @@ MulticastUdpConnection.o: MulticastUdpConnection.cpp.o
 
 # target to build an object file
 MulticastUdpConnection.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.o
 .PHONY : MulticastUdpConnection.cpp.o
 
 MulticastUdpConnection.i: MulticastUdpConnection.cpp.i
@@ -215,7 +314,7 @@ MulticastUdpConnection.i: MulticastUdpConnection.cpp.i
 
 # target to preprocess a source file
 MulticastUdpConnection.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.i
 .PHONY : MulticastUdpConnection.cpp.i
 
 MulticastUdpConnection.s: MulticastUdpConnection.cpp.s
@@ -223,7 +322,7 @@ MulticastUdpConnection.s: MulticastUdpConnection.cpp.s
 
 # target to generate assembly for a file
 MulticastUdpConnection.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/MulticastUdpConnection.cpp.s
 .PHONY : MulticastUdpConnection.cpp.s
 
 NetUtils.o: NetUtils.cpp.o
@@ -231,7 +330,7 @@ NetUtils.o: NetUtils.cpp.o
 
 # target to build an object file
 NetUtils.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.o
 .PHONY : NetUtils.cpp.o
 
 NetUtils.i: NetUtils.cpp.i
@@ -239,7 +338,7 @@ NetUtils.i: NetUtils.cpp.i
 
 # target to preprocess a source file
 NetUtils.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.i
 .PHONY : NetUtils.cpp.i
 
 NetUtils.s: NetUtils.cpp.s
@@ -247,7 +346,7 @@ NetUtils.s: NetUtils.cpp.s
 
 # target to generate assembly for a file
 NetUtils.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/NetUtils.cpp.s
 .PHONY : NetUtils.cpp.s
 
 RawWifiConnection.o: RawWifiConnection.cpp.o
@@ -255,7 +354,7 @@ RawWifiConnection.o: RawWifiConnection.cpp.o
 
 # target to build an object file
 RawWifiConnection.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.o
 .PHONY : RawWifiConnection.cpp.o
 
 RawWifiConnection.i: RawWifiConnection.cpp.i
@@ -263,7 +362,7 @@ RawWifiConnection.i: RawWifiConnection.cpp.i
 
 # target to preprocess a source file
 RawWifiConnection.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.i
 .PHONY : RawWifiConnection.cpp.i
 
 RawWifiConnection.s: RawWifiConnection.cpp.s
@@ -271,7 +370,7 @@ RawWifiConnection.s: RawWifiConnection.cpp.s
 
 # target to generate assembly for a file
 RawWifiConnection.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/RawWifiConnection.cpp.s
 .PHONY : RawWifiConnection.cpp.s
 
 TcpAcceptor.o: TcpAcceptor.cpp.o
@@ -279,7 +378,7 @@ TcpAcceptor.o: TcpAcceptor.cpp.o
 
 # target to build an object file
 TcpAcceptor.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.o
 .PHONY : TcpAcceptor.cpp.o
 
 TcpAcceptor.i: TcpAcceptor.cpp.i
@@ -287,7 +386,7 @@ TcpAcceptor.i: TcpAcceptor.cpp.i
 
 # target to preprocess a source file
 TcpAcceptor.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.i
 .PHONY : TcpAcceptor.cpp.i
 
 TcpAcceptor.s: TcpAcceptor.cpp.s
@@ -295,7 +394,7 @@ TcpAcceptor.s: TcpAcceptor.cpp.s
 
 # target to generate assembly for a file
 TcpAcceptor.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAcceptor.cpp.s
 .PHONY : TcpAcceptor.cpp.s
 
 TcpAsyncConnector.o: TcpAsyncConnector.cpp.o
@@ -303,7 +402,7 @@ TcpAsyncConnector.o: TcpAsyncConnector.cpp.o
 
 # target to build an object file
 TcpAsyncConnector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.o
 .PHONY : TcpAsyncConnector.cpp.o
 
 TcpAsyncConnector.i: TcpAsyncConnector.cpp.i
@@ -311,7 +410,7 @@ TcpAsyncConnector.i: TcpAsyncConnector.cpp.i
 
 # target to preprocess a source file
 TcpAsyncConnector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.i
 .PHONY : TcpAsyncConnector.cpp.i
 
 TcpAsyncConnector.s: TcpAsyncConnector.cpp.s
@@ -319,7 +418,7 @@ TcpAsyncConnector.s: TcpAsyncConnector.cpp.s
 
 # target to generate assembly for a file
 TcpAsyncConnector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpAsyncConnector.cpp.s
 .PHONY : TcpAsyncConnector.cpp.s
 
 TcpConnector.o: TcpConnector.cpp.o
@@ -327,7 +426,7 @@ TcpConnector.o: TcpConnector.cpp.o
 
 # target to build an object file
 TcpConnector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.o
 .PHONY : TcpConnector.cpp.o
 
 TcpConnector.i: TcpConnector.cpp.i
@@ -335,7 +434,7 @@ TcpConnector.i: TcpConnector.cpp.i
 
 # target to preprocess a source file
 TcpConnector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.i
 .PHONY : TcpConnector.cpp.i
 
 TcpConnector.s: TcpConnector.cpp.s
@@ -343,7 +442,7 @@ TcpConnector.s: TcpConnector.cpp.s
 
 # target to generate assembly for a file
 TcpConnector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpConnector.cpp.s
 .PHONY : TcpConnector.cpp.s
 
 TcpTransport.o: TcpTransport.cpp.o
@@ -351,7 +450,7 @@ TcpTransport.o: TcpTransport.cpp.o
 
 # target to build an object file
 TcpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.o
 .PHONY : TcpTransport.cpp.o
 
 TcpTransport.i: TcpTransport.cpp.i
@@ -359,7 +458,7 @@ TcpTransport.i: TcpTransport.cpp.i
 
 # target to preprocess a source file
 TcpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.i
 .PHONY : TcpTransport.cpp.i
 
 TcpTransport.s: TcpTransport.cpp.s
@@ -367,15 +466,63 @@ TcpTransport.s: TcpTransport.cpp.s
 
 # target to generate assembly for a file
 TcpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TcpTransport.cpp.s
 .PHONY : TcpTransport.cpp.s
+
+TorService.o: TorService.cpp.o
+.PHONY : TorService.o
+
+# target to build an object file
+TorService.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorService.cpp.o
+.PHONY : TorService.cpp.o
+
+TorService.i: TorService.cpp.i
+.PHONY : TorService.i
+
+# target to preprocess a source file
+TorService.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorService.cpp.i
+.PHONY : TorService.cpp.i
+
+TorService.s: TorService.cpp.s
+.PHONY : TorService.s
+
+# target to generate assembly for a file
+TorService.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorService.cpp.s
+.PHONY : TorService.cpp.s
+
+TorSocksProxy.o: TorSocksProxy.cpp.o
+.PHONY : TorSocksProxy.o
+
+# target to build an object file
+TorSocksProxy.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorSocksProxy.cpp.o
+.PHONY : TorSocksProxy.cpp.o
+
+TorSocksProxy.i: TorSocksProxy.cpp.i
+.PHONY : TorSocksProxy.i
+
+# target to preprocess a source file
+TorSocksProxy.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorSocksProxy.cpp.i
+.PHONY : TorSocksProxy.cpp.i
+
+TorSocksProxy.s: TorSocksProxy.cpp.s
+.PHONY : TorSocksProxy.s
+
+# target to generate assembly for a file
+TorSocksProxy.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/TorSocksProxy.cpp.s
+.PHONY : TorSocksProxy.cpp.s
 
 UdpConnection.o: UdpConnection.cpp.o
 .PHONY : UdpConnection.o
 
 # target to build an object file
 UdpConnection.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.o
 .PHONY : UdpConnection.cpp.o
 
 UdpConnection.i: UdpConnection.cpp.i
@@ -383,7 +530,7 @@ UdpConnection.i: UdpConnection.cpp.i
 
 # target to preprocess a source file
 UdpConnection.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.i
 .PHONY : UdpConnection.cpp.i
 
 UdpConnection.s: UdpConnection.cpp.s
@@ -391,15 +538,39 @@ UdpConnection.s: UdpConnection.cpp.s
 
 # target to generate assembly for a file
 UdpConnection.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UdpConnection.cpp.s
 .PHONY : UdpConnection.cpp.s
+
+UpnpPortMapper.o: UpnpPortMapper.cpp.o
+.PHONY : UpnpPortMapper.o
+
+# target to build an object file
+UpnpPortMapper.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UpnpPortMapper.cpp.o
+.PHONY : UpnpPortMapper.cpp.o
+
+UpnpPortMapper.i: UpnpPortMapper.cpp.i
+.PHONY : UpnpPortMapper.i
+
+# target to preprocess a source file
+UpnpPortMapper.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UpnpPortMapper.cpp.i
+.PHONY : UpnpPortMapper.cpp.i
+
+UpnpPortMapper.s: UpnpPortMapper.cpp.s
+.PHONY : UpnpPortMapper.s
+
+# target to generate assembly for a file
+UpnpPortMapper.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/UpnpPortMapper.cpp.s
+.PHONY : UpnpPortMapper.cpp.s
 
 WifiBeaconInjector.o: WifiBeaconInjector.cpp.o
 .PHONY : WifiBeaconInjector.o
 
 # target to build an object file
 WifiBeaconInjector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.o
 .PHONY : WifiBeaconInjector.cpp.o
 
 WifiBeaconInjector.i: WifiBeaconInjector.cpp.i
@@ -407,7 +578,7 @@ WifiBeaconInjector.i: WifiBeaconInjector.cpp.i
 
 # target to preprocess a source file
 WifiBeaconInjector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.i
 .PHONY : WifiBeaconInjector.cpp.i
 
 WifiBeaconInjector.s: WifiBeaconInjector.cpp.s
@@ -415,7 +586,7 @@ WifiBeaconInjector.s: WifiBeaconInjector.cpp.s
 
 # target to generate assembly for a file
 WifiBeaconInjector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiBeaconInjector.cpp.s
 .PHONY : WifiBeaconInjector.cpp.s
 
 WifiDiscovery.o: WifiDiscovery.cpp.o
@@ -423,7 +594,7 @@ WifiDiscovery.o: WifiDiscovery.cpp.o
 
 # target to build an object file
 WifiDiscovery.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.o
 .PHONY : WifiDiscovery.cpp.o
 
 WifiDiscovery.i: WifiDiscovery.cpp.i
@@ -431,7 +602,7 @@ WifiDiscovery.i: WifiDiscovery.cpp.i
 
 # target to preprocess a source file
 WifiDiscovery.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.i
 .PHONY : WifiDiscovery.cpp.i
 
 WifiDiscovery.s: WifiDiscovery.cpp.s
@@ -439,7 +610,7 @@ WifiDiscovery.s: WifiDiscovery.cpp.s
 
 # target to generate assembly for a file
 WifiDiscovery.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f base/NetUtils/CMakeFiles/NetUtils.dir/build.make base/NetUtils/CMakeFiles/NetUtils.dir/WifiDiscovery.cpp.s
 .PHONY : WifiDiscovery.cpp.s
 
 # Help Target
@@ -449,7 +620,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... NetUtils"
 	@echo "... BroadcastUdpConnection.o"
 	@echo "... BroadcastUdpConnection.i"
@@ -457,6 +635,9 @@ help:
 	@echo "... CovertChannel.o"
 	@echo "... CovertChannel.i"
 	@echo "... CovertChannel.s"
+	@echo "... InterfaceEnumerator.o"
+	@echo "... InterfaceEnumerator.i"
+	@echo "... InterfaceEnumerator.s"
 	@echo "... MulticastDiscovery.o"
 	@echo "... MulticastDiscovery.i"
 	@echo "... MulticastDiscovery.s"
@@ -481,9 +662,18 @@ help:
 	@echo "... TcpTransport.o"
 	@echo "... TcpTransport.i"
 	@echo "... TcpTransport.s"
+	@echo "... TorService.o"
+	@echo "... TorService.i"
+	@echo "... TorService.s"
+	@echo "... TorSocksProxy.o"
+	@echo "... TorSocksProxy.i"
+	@echo "... TorSocksProxy.s"
 	@echo "... UdpConnection.o"
 	@echo "... UdpConnection.i"
 	@echo "... UdpConnection.s"
+	@echo "... UpnpPortMapper.o"
+	@echo "... UpnpPortMapper.i"
+	@echo "... UpnpPortMapper.s"
 	@echo "... WifiBeaconInjector.o"
 	@echo "... WifiBeaconInjector.i"
 	@echo "... WifiBeaconInjector.s"
@@ -501,6 +691,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

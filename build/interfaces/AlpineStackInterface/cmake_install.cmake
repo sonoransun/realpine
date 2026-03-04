@@ -1,4 +1,4 @@
-# Install script for directory: /Users/user/sonoranpub/realpine/interfaces/AlpineStackInterface
+# Install script for directory: /Users/user/cdev/exrealpine/interfaces/AlpineStackInterface
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,6 +40,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/Users/user/sonoranpub/realpine/build/interfaces/AlpineStackInterface/install_local_manifest.txt"
+  file(WRITE "/Users/user/cdev/exrealpine/build/interfaces/AlpineStackInterface/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

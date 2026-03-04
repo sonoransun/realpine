@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "alpine.fullname" . }}
+  labels:
+    {{- include "alpine.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "alpine.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: rest-api
+      port: {{ .Values.service.restPort }}
+      targetPort: rest-api
+    - name: beacon
+      port: {{ .Values.service.beaconPort }}
+      targetPort: beacon
+    - name: broadcast
+      port: {{ .Values.service.broadcastPort }}
+      targetPort: broadcast
+    - name: protocol
+      port: {{ .Values.service.protocolPort }}
+      targetPort: protocol
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "alpine.fullname" . }}-headless
+  labels:
+    {{- include "alpine.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    {{- include "alpine.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: protocol
+      port: {{ .Values.service.protocolPort }}
+      targetPort: protocol

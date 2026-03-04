@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/AlpineGui//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/AlpineGui//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 AlpineGui/CMakeFiles/AlpineGui.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/CMakeFiles/AlpineGui.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineGui/CMakeFiles/AlpineGui.dir/rule
 .PHONY : AlpineGui/CMakeFiles/AlpineGui.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ AlpineGui: AlpineGui/CMakeFiles/AlpineGui.dir/rule
 
 # fast build rule for target.
 AlpineGui/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/build
 .PHONY : AlpineGui/fast
 
 AlpineGui.o: AlpineGui.cpp.o
@@ -135,7 +210,7 @@ AlpineGui.o: AlpineGui.cpp.o
 
 # target to build an object file
 AlpineGui.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.o
 .PHONY : AlpineGui.cpp.o
 
 AlpineGui.i: AlpineGui.cpp.i
@@ -143,7 +218,7 @@ AlpineGui.i: AlpineGui.cpp.i
 
 # target to preprocess a source file
 AlpineGui.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.i
 .PHONY : AlpineGui.cpp.i
 
 AlpineGui.s: AlpineGui.cpp.s
@@ -151,7 +226,7 @@ AlpineGui.s: AlpineGui.cpp.s
 
 # target to generate assembly for a file
 AlpineGui.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AlpineGui.cpp.s
 .PHONY : AlpineGui.cpp.s
 
 AsyncRpcClient.o: AsyncRpcClient.cpp.o
@@ -159,7 +234,7 @@ AsyncRpcClient.o: AsyncRpcClient.cpp.o
 
 # target to build an object file
 AsyncRpcClient.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.o
 .PHONY : AsyncRpcClient.cpp.o
 
 AsyncRpcClient.i: AsyncRpcClient.cpp.i
@@ -167,7 +242,7 @@ AsyncRpcClient.i: AsyncRpcClient.cpp.i
 
 # target to preprocess a source file
 AsyncRpcClient.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.i
 .PHONY : AsyncRpcClient.cpp.i
 
 AsyncRpcClient.s: AsyncRpcClient.cpp.s
@@ -175,7 +250,7 @@ AsyncRpcClient.s: AsyncRpcClient.cpp.s
 
 # target to generate assembly for a file
 AsyncRpcClient.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/AsyncRpcClient.cpp.s
 .PHONY : AsyncRpcClient.cpp.s
 
 GuiHelpers.o: GuiHelpers.cpp.o
@@ -183,7 +258,7 @@ GuiHelpers.o: GuiHelpers.cpp.o
 
 # target to build an object file
 GuiHelpers.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.o
 .PHONY : GuiHelpers.cpp.o
 
 GuiHelpers.i: GuiHelpers.cpp.i
@@ -191,7 +266,7 @@ GuiHelpers.i: GuiHelpers.cpp.i
 
 # target to preprocess a source file
 GuiHelpers.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.i
 .PHONY : GuiHelpers.cpp.i
 
 GuiHelpers.s: GuiHelpers.cpp.s
@@ -199,7 +274,7 @@ GuiHelpers.s: GuiHelpers.cpp.s
 
 # target to generate assembly for a file
 GuiHelpers.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiHelpers.cpp.s
 .PHONY : GuiHelpers.cpp.s
 
 GuiPanels.o: GuiPanels.cpp.o
@@ -207,7 +282,7 @@ GuiPanels.o: GuiPanels.cpp.o
 
 # target to build an object file
 GuiPanels.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.o
 .PHONY : GuiPanels.cpp.o
 
 GuiPanels.i: GuiPanels.cpp.i
@@ -215,7 +290,7 @@ GuiPanels.i: GuiPanels.cpp.i
 
 # target to preprocess a source file
 GuiPanels.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.i
 .PHONY : GuiPanels.cpp.i
 
 GuiPanels.s: GuiPanels.cpp.s
@@ -223,7 +298,7 @@ GuiPanels.s: GuiPanels.cpp.s
 
 # target to generate assembly for a file
 GuiPanels.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/GuiPanels.cpp.s
 .PHONY : GuiPanels.cpp.s
 
 __/AlpineRestBridge/JsonReader.o: __/AlpineRestBridge/JsonReader.cpp.o
@@ -231,7 +306,7 @@ __/AlpineRestBridge/JsonReader.o: __/AlpineRestBridge/JsonReader.cpp.o
 
 # target to build an object file
 __/AlpineRestBridge/JsonReader.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.o
 .PHONY : __/AlpineRestBridge/JsonReader.cpp.o
 
 __/AlpineRestBridge/JsonReader.i: __/AlpineRestBridge/JsonReader.cpp.i
@@ -239,7 +314,7 @@ __/AlpineRestBridge/JsonReader.i: __/AlpineRestBridge/JsonReader.cpp.i
 
 # target to preprocess a source file
 __/AlpineRestBridge/JsonReader.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.i
 .PHONY : __/AlpineRestBridge/JsonReader.cpp.i
 
 __/AlpineRestBridge/JsonReader.s: __/AlpineRestBridge/JsonReader.cpp.s
@@ -247,7 +322,7 @@ __/AlpineRestBridge/JsonReader.s: __/AlpineRestBridge/JsonReader.cpp.s
 
 # target to generate assembly for a file
 __/AlpineRestBridge/JsonReader.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonReader.cpp.s
 .PHONY : __/AlpineRestBridge/JsonReader.cpp.s
 
 __/AlpineRestBridge/JsonWriter.o: __/AlpineRestBridge/JsonWriter.cpp.o
@@ -255,7 +330,7 @@ __/AlpineRestBridge/JsonWriter.o: __/AlpineRestBridge/JsonWriter.cpp.o
 
 # target to build an object file
 __/AlpineRestBridge/JsonWriter.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.o
 .PHONY : __/AlpineRestBridge/JsonWriter.cpp.o
 
 __/AlpineRestBridge/JsonWriter.i: __/AlpineRestBridge/JsonWriter.cpp.i
@@ -263,7 +338,7 @@ __/AlpineRestBridge/JsonWriter.i: __/AlpineRestBridge/JsonWriter.cpp.i
 
 # target to preprocess a source file
 __/AlpineRestBridge/JsonWriter.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.i
 .PHONY : __/AlpineRestBridge/JsonWriter.cpp.i
 
 __/AlpineRestBridge/JsonWriter.s: __/AlpineRestBridge/JsonWriter.cpp.s
@@ -271,7 +346,7 @@ __/AlpineRestBridge/JsonWriter.s: __/AlpineRestBridge/JsonWriter.cpp.s
 
 # target to generate assembly for a file
 __/AlpineRestBridge/JsonWriter.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/__/AlpineRestBridge/JsonWriter.cpp.s
 .PHONY : __/AlpineRestBridge/JsonWriter.cpp.s
 
 vendor/imgui/backends/imgui_impl_glfw.o: vendor/imgui/backends/imgui_impl_glfw.cpp.o
@@ -279,7 +354,7 @@ vendor/imgui/backends/imgui_impl_glfw.o: vendor/imgui/backends/imgui_impl_glfw.c
 
 # target to build an object file
 vendor/imgui/backends/imgui_impl_glfw.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.o
 .PHONY : vendor/imgui/backends/imgui_impl_glfw.cpp.o
 
 vendor/imgui/backends/imgui_impl_glfw.i: vendor/imgui/backends/imgui_impl_glfw.cpp.i
@@ -287,7 +362,7 @@ vendor/imgui/backends/imgui_impl_glfw.i: vendor/imgui/backends/imgui_impl_glfw.c
 
 # target to preprocess a source file
 vendor/imgui/backends/imgui_impl_glfw.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.i
 .PHONY : vendor/imgui/backends/imgui_impl_glfw.cpp.i
 
 vendor/imgui/backends/imgui_impl_glfw.s: vendor/imgui/backends/imgui_impl_glfw.cpp.s
@@ -295,7 +370,7 @@ vendor/imgui/backends/imgui_impl_glfw.s: vendor/imgui/backends/imgui_impl_glfw.c
 
 # target to generate assembly for a file
 vendor/imgui/backends/imgui_impl_glfw.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_glfw.cpp.s
 .PHONY : vendor/imgui/backends/imgui_impl_glfw.cpp.s
 
 vendor/imgui/backends/imgui_impl_opengl3.o: vendor/imgui/backends/imgui_impl_opengl3.cpp.o
@@ -303,7 +378,7 @@ vendor/imgui/backends/imgui_impl_opengl3.o: vendor/imgui/backends/imgui_impl_ope
 
 # target to build an object file
 vendor/imgui/backends/imgui_impl_opengl3.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.o
 .PHONY : vendor/imgui/backends/imgui_impl_opengl3.cpp.o
 
 vendor/imgui/backends/imgui_impl_opengl3.i: vendor/imgui/backends/imgui_impl_opengl3.cpp.i
@@ -311,7 +386,7 @@ vendor/imgui/backends/imgui_impl_opengl3.i: vendor/imgui/backends/imgui_impl_ope
 
 # target to preprocess a source file
 vendor/imgui/backends/imgui_impl_opengl3.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.i
 .PHONY : vendor/imgui/backends/imgui_impl_opengl3.cpp.i
 
 vendor/imgui/backends/imgui_impl_opengl3.s: vendor/imgui/backends/imgui_impl_opengl3.cpp.s
@@ -319,7 +394,7 @@ vendor/imgui/backends/imgui_impl_opengl3.s: vendor/imgui/backends/imgui_impl_ope
 
 # target to generate assembly for a file
 vendor/imgui/backends/imgui_impl_opengl3.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/backends/imgui_impl_opengl3.cpp.s
 .PHONY : vendor/imgui/backends/imgui_impl_opengl3.cpp.s
 
 vendor/imgui/imgui.o: vendor/imgui/imgui.cpp.o
@@ -327,7 +402,7 @@ vendor/imgui/imgui.o: vendor/imgui/imgui.cpp.o
 
 # target to build an object file
 vendor/imgui/imgui.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.o
 .PHONY : vendor/imgui/imgui.cpp.o
 
 vendor/imgui/imgui.i: vendor/imgui/imgui.cpp.i
@@ -335,7 +410,7 @@ vendor/imgui/imgui.i: vendor/imgui/imgui.cpp.i
 
 # target to preprocess a source file
 vendor/imgui/imgui.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.i
 .PHONY : vendor/imgui/imgui.cpp.i
 
 vendor/imgui/imgui.s: vendor/imgui/imgui.cpp.s
@@ -343,7 +418,7 @@ vendor/imgui/imgui.s: vendor/imgui/imgui.cpp.s
 
 # target to generate assembly for a file
 vendor/imgui/imgui.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui.cpp.s
 .PHONY : vendor/imgui/imgui.cpp.s
 
 vendor/imgui/imgui_demo.o: vendor/imgui/imgui_demo.cpp.o
@@ -351,7 +426,7 @@ vendor/imgui/imgui_demo.o: vendor/imgui/imgui_demo.cpp.o
 
 # target to build an object file
 vendor/imgui/imgui_demo.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.o
 .PHONY : vendor/imgui/imgui_demo.cpp.o
 
 vendor/imgui/imgui_demo.i: vendor/imgui/imgui_demo.cpp.i
@@ -359,7 +434,7 @@ vendor/imgui/imgui_demo.i: vendor/imgui/imgui_demo.cpp.i
 
 # target to preprocess a source file
 vendor/imgui/imgui_demo.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.i
 .PHONY : vendor/imgui/imgui_demo.cpp.i
 
 vendor/imgui/imgui_demo.s: vendor/imgui/imgui_demo.cpp.s
@@ -367,7 +442,7 @@ vendor/imgui/imgui_demo.s: vendor/imgui/imgui_demo.cpp.s
 
 # target to generate assembly for a file
 vendor/imgui/imgui_demo.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_demo.cpp.s
 .PHONY : vendor/imgui/imgui_demo.cpp.s
 
 vendor/imgui/imgui_draw.o: vendor/imgui/imgui_draw.cpp.o
@@ -375,7 +450,7 @@ vendor/imgui/imgui_draw.o: vendor/imgui/imgui_draw.cpp.o
 
 # target to build an object file
 vendor/imgui/imgui_draw.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.o
 .PHONY : vendor/imgui/imgui_draw.cpp.o
 
 vendor/imgui/imgui_draw.i: vendor/imgui/imgui_draw.cpp.i
@@ -383,7 +458,7 @@ vendor/imgui/imgui_draw.i: vendor/imgui/imgui_draw.cpp.i
 
 # target to preprocess a source file
 vendor/imgui/imgui_draw.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.i
 .PHONY : vendor/imgui/imgui_draw.cpp.i
 
 vendor/imgui/imgui_draw.s: vendor/imgui/imgui_draw.cpp.s
@@ -391,7 +466,7 @@ vendor/imgui/imgui_draw.s: vendor/imgui/imgui_draw.cpp.s
 
 # target to generate assembly for a file
 vendor/imgui/imgui_draw.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_draw.cpp.s
 .PHONY : vendor/imgui/imgui_draw.cpp.s
 
 vendor/imgui/imgui_tables.o: vendor/imgui/imgui_tables.cpp.o
@@ -399,7 +474,7 @@ vendor/imgui/imgui_tables.o: vendor/imgui/imgui_tables.cpp.o
 
 # target to build an object file
 vendor/imgui/imgui_tables.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.o
 .PHONY : vendor/imgui/imgui_tables.cpp.o
 
 vendor/imgui/imgui_tables.i: vendor/imgui/imgui_tables.cpp.i
@@ -407,7 +482,7 @@ vendor/imgui/imgui_tables.i: vendor/imgui/imgui_tables.cpp.i
 
 # target to preprocess a source file
 vendor/imgui/imgui_tables.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.i
 .PHONY : vendor/imgui/imgui_tables.cpp.i
 
 vendor/imgui/imgui_tables.s: vendor/imgui/imgui_tables.cpp.s
@@ -415,7 +490,7 @@ vendor/imgui/imgui_tables.s: vendor/imgui/imgui_tables.cpp.s
 
 # target to generate assembly for a file
 vendor/imgui/imgui_tables.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_tables.cpp.s
 .PHONY : vendor/imgui/imgui_tables.cpp.s
 
 vendor/imgui/imgui_widgets.o: vendor/imgui/imgui_widgets.cpp.o
@@ -423,7 +498,7 @@ vendor/imgui/imgui_widgets.o: vendor/imgui/imgui_widgets.cpp.o
 
 # target to build an object file
 vendor/imgui/imgui_widgets.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.o
 .PHONY : vendor/imgui/imgui_widgets.cpp.o
 
 vendor/imgui/imgui_widgets.i: vendor/imgui/imgui_widgets.cpp.i
@@ -431,7 +506,7 @@ vendor/imgui/imgui_widgets.i: vendor/imgui/imgui_widgets.cpp.i
 
 # target to preprocess a source file
 vendor/imgui/imgui_widgets.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.i
 .PHONY : vendor/imgui/imgui_widgets.cpp.i
 
 vendor/imgui/imgui_widgets.s: vendor/imgui/imgui_widgets.cpp.s
@@ -439,7 +514,7 @@ vendor/imgui/imgui_widgets.s: vendor/imgui/imgui_widgets.cpp.s
 
 # target to generate assembly for a file
 vendor/imgui/imgui_widgets.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineGui/CMakeFiles/AlpineGui.dir/build.make AlpineGui/CMakeFiles/AlpineGui.dir/vendor/imgui/imgui_widgets.cpp.s
 .PHONY : vendor/imgui/imgui_widgets.cpp.s
 
 # Help Target
@@ -449,7 +524,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... AlpineGui"
 	@echo "... AlpineGui.o"
 	@echo "... AlpineGui.i"
@@ -501,6 +583,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

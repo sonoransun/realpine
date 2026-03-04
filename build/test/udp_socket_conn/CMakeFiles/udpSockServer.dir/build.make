@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include test/udp_socket_conn/CMakeFiles/udpSockServer.dir/depend.make
@@ -73,18 +73,18 @@ test/udp_socket_conn/CMakeFiles/udpSockServer.dir/codegen:
 .PHONY : test/udp_socket_conn/CMakeFiles/udpSockServer.dir/codegen
 
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o: test/udp_socket_conn/CMakeFiles/udpSockServer.dir/flags.make
-test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o: /Users/user/sonoranpub/realpine/test/udp_socket_conn/udpSockServer.cpp
+test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o: /Users/user/cdev/exrealpine/test/udp_socket_conn/udpSockServer.cpp
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o: test/udp_socket_conn/CMakeFiles/udpSockServer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o -MF CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o.d -o CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o -c /Users/user/sonoranpub/realpine/test/udp_socket_conn/udpSockServer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o -MF CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o.d -o CMakeFiles/udpSockServer.dir/udpSockServer.cpp.o -c /Users/user/cdev/exrealpine/test/udp_socket_conn/udpSockServer.cpp
 
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/udpSockServer.dir/udpSockServer.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/udp_socket_conn/udpSockServer.cpp > CMakeFiles/udpSockServer.dir/udpSockServer.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/udp_socket_conn/udpSockServer.cpp > CMakeFiles/udpSockServer.dir/udpSockServer.cpp.i
 
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/udpSockServer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/udpSockServer.dir/udpSockServer.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/udp_socket_conn/udpSockServer.cpp -o CMakeFiles/udpSockServer.dir/udpSockServer.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/udp_socket_conn && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/udp_socket_conn/udpSockServer.cpp -o CMakeFiles/udpSockServer.dir/udpSockServer.cpp.s
 
 # Object files for target udpSockServer
 udpSockServer_OBJECTS = \
@@ -100,19 +100,21 @@ bin/udpSockServer: lib/libNetUtils.a
 bin/udpSockServer: lib/libThreadUtils.a
 bin/udpSockServer: lib/libSysUtils.a
 bin/udpSockServer: lib/libAppUtils.a
+bin/udpSockServer: lib/libspdlog.a
+bin/udpSockServer: lib/libminiupnpc.a
 bin/udpSockServer: test/udp_socket_conn/CMakeFiles/udpSockServer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../../bin/udpSockServer"
-	cd /Users/user/sonoranpub/realpine/build/test/udp_socket_conn && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/udpSockServer.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../../bin/udpSockServer"
+	cd /Users/user/cdev/exrealpine/build/test/udp_socket_conn && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/udpSockServer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/build: bin/udpSockServer
 .PHONY : test/udp_socket_conn/CMakeFiles/udpSockServer.dir/build
 
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/test/udp_socket_conn && $(CMAKE_COMMAND) -P CMakeFiles/udpSockServer.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/test/udp_socket_conn && $(CMAKE_COMMAND) -P CMakeFiles/udpSockServer.dir/cmake_clean.cmake
 .PHONY : test/udp_socket_conn/CMakeFiles/udpSockServer.dir/clean
 
 test/udp_socket_conn/CMakeFiles/udpSockServer.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/test/udp_socket_conn /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/test/udp_socket_conn /Users/user/sonoranpub/realpine/build/test/udp_socket_conn/CMakeFiles/udpSockServer.dir/DependInfo.cmake "--color=$(COLOR)" udpSockServer
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/test/udp_socket_conn /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/test/udp_socket_conn /Users/user/cdev/exrealpine/build/test/udp_socket_conn/CMakeFiles/udpSockServer.dir/DependInfo.cmake "--color=$(COLOR)" udpSockServer
 .PHONY : test/udp_socket_conn/CMakeFiles/udpSockServer.dir/depend
 

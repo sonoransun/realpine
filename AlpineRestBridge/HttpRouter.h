@@ -11,8 +11,8 @@
 using AuthMiddleware = std::function<bool(const HttpRequest&, HttpResponse&)>;
 
 
-typedef HttpResponse (*RouteHandler)(const HttpRequest & request,
-                                     const std::unordered_map<string, string> & params);
+using RouteHandler = HttpResponse (*)(const HttpRequest & request,
+                                      const std::unordered_map<string, string> & params);
 
 
 class HttpRouter

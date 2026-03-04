@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "alpine.fullname" . }}
+  labels:
+    {{- include "alpine.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "alpine.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "alpine.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.restPort }}
+              name: rest-api
+            - containerPort: {{ .Values.service.beaconPort }}
+              name: beacon
+            - containerPort: {{ .Values.service.broadcastPort }}
+              name: broadcast
+            - containerPort: {{ .Values.service.protocolPort }}
+              name: protocol
+          env:
+            - name: REST_PORT
+              value: "{{ .Values.service.restPort }}"
+            - name: REST_BIND_ADDRESS
+              value: "0.0.0.0"
+            - name: LOG_LEVEL
+              value: "{{ .Values.config.logLevel }}"
+            - name: BEACON_ENABLED
+              value: "{{ .Values.config.beaconEnabled }}"
+            - name: BROADCAST_ENABLED
+              value: "{{ .Values.config.broadcastEnabled }}"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: rest-api
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: rest-api
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

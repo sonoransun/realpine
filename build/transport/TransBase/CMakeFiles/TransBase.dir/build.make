@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include transport/TransBase/CMakeFiles/TransBase.dir/depend.make
@@ -73,102 +73,102 @@ transport/TransBase/CMakeFiles/TransBase.dir/codegen:
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/codegen
 
 transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/AcceptorInterface.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/AcceptorInterface.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o -MF CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o.d -o CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/AcceptorInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o -MF CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o.d -o CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/AcceptorInterface.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/AcceptorInterface.cpp > CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/AcceptorInterface.cpp > CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/AcceptorInterface.cpp -o CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/AcceptorInterface.cpp -o CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/ConnectorInterface.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/ConnectorInterface.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o -MF CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o.d -o CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/ConnectorInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o -MF CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o.d -o CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/ConnectorInterface.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/ConnectorInterface.cpp > CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/ConnectorInterface.cpp > CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/ConnectorInterface.cpp -o CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/ConnectorInterface.cpp -o CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/DataBlock.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/DataBlock.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o -MF CMakeFiles/TransBase.dir/DataBlock.cpp.o.d -o CMakeFiles/TransBase.dir/DataBlock.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/DataBlock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o -MF CMakeFiles/TransBase.dir/DataBlock.cpp.o.d -o CMakeFiles/TransBase.dir/DataBlock.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/DataBlock.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/DataBlock.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/DataBlock.cpp > CMakeFiles/TransBase.dir/DataBlock.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/DataBlock.cpp > CMakeFiles/TransBase.dir/DataBlock.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/DataBlock.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/DataBlock.cpp -o CMakeFiles/TransBase.dir/DataBlock.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/DataBlock.cpp -o CMakeFiles/TransBase.dir/DataBlock.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/DataBuffer.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/DataBuffer.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o -MF CMakeFiles/TransBase.dir/DataBuffer.cpp.o.d -o CMakeFiles/TransBase.dir/DataBuffer.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/DataBuffer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o -MF CMakeFiles/TransBase.dir/DataBuffer.cpp.o.d -o CMakeFiles/TransBase.dir/DataBuffer.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/DataBuffer.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/DataBuffer.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/DataBuffer.cpp > CMakeFiles/TransBase.dir/DataBuffer.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/DataBuffer.cpp > CMakeFiles/TransBase.dir/DataBuffer.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/DataBuffer.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/DataBuffer.cpp -o CMakeFiles/TransBase.dir/DataBuffer.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/DataBuffer.cpp -o CMakeFiles/TransBase.dir/DataBuffer.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/MuxInterface.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/MuxInterface.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o -MF CMakeFiles/TransBase.dir/MuxInterface.cpp.o.d -o CMakeFiles/TransBase.dir/MuxInterface.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/MuxInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o -MF CMakeFiles/TransBase.dir/MuxInterface.cpp.o.d -o CMakeFiles/TransBase.dir/MuxInterface.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/MuxInterface.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/MuxInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/MuxInterface.cpp > CMakeFiles/TransBase.dir/MuxInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/MuxInterface.cpp > CMakeFiles/TransBase.dir/MuxInterface.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/MuxInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/MuxInterface.cpp -o CMakeFiles/TransBase.dir/MuxInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/MuxInterface.cpp -o CMakeFiles/TransBase.dir/MuxInterface.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/StackLinkInterface.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/StackLinkInterface.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o -MF CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o.d -o CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/StackLinkInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o -MF CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o.d -o CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/StackLinkInterface.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/StackLinkInterface.cpp > CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/StackLinkInterface.cpp > CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/StackLinkInterface.cpp -o CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/StackLinkInterface.cpp -o CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s
 
 transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/flags.make
-transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o: /Users/user/sonoranpub/realpine/transport/TransBase/TransportInterface.cpp
+transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o: /Users/user/cdev/exrealpine/transport/TransBase/TransportInterface.cpp
 transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o: transport/TransBase/CMakeFiles/TransBase.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o -MF CMakeFiles/TransBase.dir/TransportInterface.cpp.o.d -o CMakeFiles/TransBase.dir/TransportInterface.cpp.o -c /Users/user/sonoranpub/realpine/transport/TransBase/TransportInterface.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o -MF CMakeFiles/TransBase.dir/TransportInterface.cpp.o.d -o CMakeFiles/TransBase.dir/TransportInterface.cpp.o -c /Users/user/cdev/exrealpine/transport/TransBase/TransportInterface.cpp
 
 transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/TransBase.dir/TransportInterface.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/TransBase/TransportInterface.cpp > CMakeFiles/TransBase.dir/TransportInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/TransBase/TransportInterface.cpp > CMakeFiles/TransBase.dir/TransportInterface.cpp.i
 
 transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/TransBase.dir/TransportInterface.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/TransBase/TransportInterface.cpp -o CMakeFiles/TransBase.dir/TransportInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/TransBase/TransportInterface.cpp -o CMakeFiles/TransBase.dir/TransportInterface.cpp.s
 
 # Object files for target TransBase
 TransBase_OBJECTS = \
@@ -192,19 +192,19 @@ lib/libTransBase.a: transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterf
 lib/libTransBase.a: transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o
 lib/libTransBase.a: transport/TransBase/CMakeFiles/TransBase.dir/build.make
 lib/libTransBase.a: transport/TransBase/CMakeFiles/TransBase.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library ../../lib/libTransBase.a"
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && $(CMAKE_COMMAND) -P CMakeFiles/TransBase.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/TransBase.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library ../../lib/libTransBase.a"
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && $(CMAKE_COMMAND) -P CMakeFiles/TransBase.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/TransBase.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 transport/TransBase/CMakeFiles/TransBase.dir/build: lib/libTransBase.a
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/build
 
 transport/TransBase/CMakeFiles/TransBase.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/transport/TransBase && $(CMAKE_COMMAND) -P CMakeFiles/TransBase.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/TransBase && $(CMAKE_COMMAND) -P CMakeFiles/TransBase.dir/cmake_clean.cmake
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/clean
 
 transport/TransBase/CMakeFiles/TransBase.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/transport/TransBase /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/transport/TransBase /Users/user/sonoranpub/realpine/build/transport/TransBase/CMakeFiles/TransBase.dir/DependInfo.cmake "--color=$(COLOR)" TransBase
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/transport/TransBase /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/transport/TransBase /Users/user/cdev/exrealpine/build/transport/TransBase/CMakeFiles/TransBase.dir/DependInfo.cmake "--color=$(COLOR)" TransBase
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/depend
 

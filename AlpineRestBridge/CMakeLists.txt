@@ -6,11 +6,11 @@ add_executable(AlpineRestBridge
     HttpResponse.cpp
     HttpRouter.cpp
     HttpServer.cpp
+    RateLimiter.cpp
     ApiKeyAuth.cpp
     RestBridgeConfig.cpp
     DiscoveryBeacon.cpp
     BroadcastQueryHandler.cpp
-    TorHiddenService.cpp
     TorTunnel.cpp
     ContentStore.cpp
     DlnaHandler.cpp
@@ -21,6 +21,8 @@ add_executable(AlpineRestBridge
     QueryHandler.cpp
     PeerHandler.cpp
     StatusHandler.cpp
+    MetricsHandler.cpp
+    WebSocketSession.cpp
     AlpineRestBridge.cpp
 )
 target_include_directories(AlpineRestBridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -37,3 +39,12 @@ target_link_libraries(AlpineRestBridge PRIVATE
     nlohmann_json::nlohmann_json
     Asio::Asio
 )
+
+if(ALPINE_ENABLE_TLS)
+    target_link_libraries(AlpineRestBridge PRIVATE jwt-cpp::jwt-cpp OpenSSL::SSL OpenSSL::Crypto)
+    target_compile_definitions(AlpineRestBridge PRIVATE ALPINE_TLS_ENABLED)
+endif()
+if(ALPINE_ENABLE_FUSE)
+    target_link_libraries(AlpineRestBridge PRIVATE Alpine::VfsUtils)
+    target_compile_definitions(AlpineRestBridge PRIVATE ALPINE_FUSE_ENABLED)
+endif()

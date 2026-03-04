@@ -6,6 +6,10 @@
 #include <TransportInterface.h>
 #include <Platform.h>
 
+#ifdef ALPINE_TLS_ENABLED
+class DtlsWrapper;
+class TlsContext;
+#endif
 
 class DtcpBaseUdpTransport;
 class DtcpBaseConnMux;
@@ -100,7 +104,14 @@ class DtcpBaseConnTransport : public TransportInterface
 
     bool deactivate ();
 
-    
+
+#ifdef ALPINE_TLS_ENABLED
+    bool enableTls (TlsContext & tlsCtx);
+
+    bool isTlsEnabled () const;
+#endif
+
+
 
   private:
 
@@ -118,6 +129,10 @@ class DtcpBaseConnTransport : public TransportInterface
     ulong                   requestId_;
     ulong                   sendSequenceNum_;
     ulong                   recvSequenceNum_;
+
+#ifdef ALPINE_TLS_ENABLED
+    DtlsWrapper *           dtlsWrapper_{nullptr};
+#endif
 
     static ulong            currSequenceNum_s;
 

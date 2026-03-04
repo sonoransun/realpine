@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include test/auto_thread_test/CMakeFiles/threadTest.dir/depend.make
@@ -73,32 +73,32 @@ test/auto_thread_test/CMakeFiles/threadTest.dir/codegen:
 .PHONY : test/auto_thread_test/CMakeFiles/threadTest.dir/codegen
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o: test/auto_thread_test/CMakeFiles/threadTest.dir/flags.make
-test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o: /Users/user/sonoranpub/realpine/test/auto_thread_test/TestThread.cpp
+test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o: /Users/user/cdev/exrealpine/test/auto_thread_test/TestThread.cpp
 test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o: test/auto_thread_test/CMakeFiles/threadTest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o -MF CMakeFiles/threadTest.dir/TestThread.cpp.o.d -o CMakeFiles/threadTest.dir/TestThread.cpp.o -c /Users/user/sonoranpub/realpine/test/auto_thread_test/TestThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.o -MF CMakeFiles/threadTest.dir/TestThread.cpp.o.d -o CMakeFiles/threadTest.dir/TestThread.cpp.o -c /Users/user/cdev/exrealpine/test/auto_thread_test/TestThread.cpp
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/threadTest.dir/TestThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/auto_thread_test/TestThread.cpp > CMakeFiles/threadTest.dir/TestThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/auto_thread_test/TestThread.cpp > CMakeFiles/threadTest.dir/TestThread.cpp.i
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/TestThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/threadTest.dir/TestThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/auto_thread_test/TestThread.cpp -o CMakeFiles/threadTest.dir/TestThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/auto_thread_test/TestThread.cpp -o CMakeFiles/threadTest.dir/TestThread.cpp.s
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o: test/auto_thread_test/CMakeFiles/threadTest.dir/flags.make
-test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o: /Users/user/sonoranpub/realpine/test/auto_thread_test/threadTest.cpp
+test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o: /Users/user/cdev/exrealpine/test/auto_thread_test/threadTest.cpp
 test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o: test/auto_thread_test/CMakeFiles/threadTest.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o -MF CMakeFiles/threadTest.dir/threadTest.cpp.o.d -o CMakeFiles/threadTest.dir/threadTest.cpp.o -c /Users/user/sonoranpub/realpine/test/auto_thread_test/threadTest.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.o -MF CMakeFiles/threadTest.dir/threadTest.cpp.o.d -o CMakeFiles/threadTest.dir/threadTest.cpp.o -c /Users/user/cdev/exrealpine/test/auto_thread_test/threadTest.cpp
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/threadTest.dir/threadTest.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/auto_thread_test/threadTest.cpp > CMakeFiles/threadTest.dir/threadTest.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/auto_thread_test/threadTest.cpp > CMakeFiles/threadTest.dir/threadTest.cpp.i
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/threadTest.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/threadTest.dir/threadTest.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/auto_thread_test/threadTest.cpp -o CMakeFiles/threadTest.dir/threadTest.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/auto_thread_test/threadTest.cpp -o CMakeFiles/threadTest.dir/threadTest.cpp.s
 
 # Object files for target threadTest
 threadTest_OBJECTS = \
@@ -115,19 +115,20 @@ bin/threadTest: lib/libAppUtils.a
 bin/threadTest: lib/libThreadUtils.a
 bin/threadTest: lib/libSysUtils.a
 bin/threadTest: lib/libAppUtils.a
+bin/threadTest: lib/libspdlog.a
 bin/threadTest: test/auto_thread_test/CMakeFiles/threadTest.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/threadTest"
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/threadTest.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/threadTest"
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/threadTest.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/auto_thread_test/CMakeFiles/threadTest.dir/build: bin/threadTest
 .PHONY : test/auto_thread_test/CMakeFiles/threadTest.dir/build
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/test/auto_thread_test && $(CMAKE_COMMAND) -P CMakeFiles/threadTest.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/test/auto_thread_test && $(CMAKE_COMMAND) -P CMakeFiles/threadTest.dir/cmake_clean.cmake
 .PHONY : test/auto_thread_test/CMakeFiles/threadTest.dir/clean
 
 test/auto_thread_test/CMakeFiles/threadTest.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/test/auto_thread_test /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/test/auto_thread_test /Users/user/sonoranpub/realpine/build/test/auto_thread_test/CMakeFiles/threadTest.dir/DependInfo.cmake "--color=$(COLOR)" threadTest
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/test/auto_thread_test /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/test/auto_thread_test /Users/user/cdev/exrealpine/build/test/auto_thread_test/CMakeFiles/threadTest.dir/DependInfo.cmake "--color=$(COLOR)" threadTest
 .PHONY : test/auto_thread_test/CMakeFiles/threadTest.dir/depend
 

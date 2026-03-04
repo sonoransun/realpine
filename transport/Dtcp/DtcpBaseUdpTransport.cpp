@@ -995,7 +995,7 @@ DtcpBaseUdpTransport::sendReliablePacket (StackLinkInterface *     packet,
     DataBlock * dataBlock;
     dataBlock = new DataBlock (dataLength);
 
-    memcpy (dataBlock->buffer_, data, dataLength);
+    memcpy (dataBlock->buffer_.get(), data, dataLength);
     dataBlock->length_ = dataLength;
 
 
@@ -1141,7 +1141,7 @@ DtcpBaseUdpTransport::sendReliableData (const ulong              ipAddress,
     DataBlock * dataBlock;
     dataBlock = new DataBlock (dataLength);
 
-    memcpy (dataBlock->buffer_, data, dataLength);
+    memcpy (dataBlock->buffer_.get(), data, dataLength);
     dataBlock->length_ = dataLength;
 
     // scope lock

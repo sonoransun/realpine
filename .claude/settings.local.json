@@ -23,7 +23,9 @@
       "Bash(echo === Final counts ===:*)",
       "WebFetch(domain:github.com)",
       "Bash(swift:*)",
-      "Bash(swiftc:*)"
+      "Bash(swiftc:*)",
+      "WebFetch(domain:caprunner.readthedocs.io)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

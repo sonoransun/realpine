@@ -1,4 +1,4 @@
-# Install script for directory: /Users/user/sonoranpub/realpine/base/AppUtils
+# Install script for directory: /Users/user/cdev/exrealpine/base/AppUtils
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,6 +40,6 @@ endif()
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/Users/user/sonoranpub/realpine/build/base/AppUtils/install_local_manifest.txt"
+  file(WRITE "/Users/user/cdev/exrealpine/build/base/AppUtils/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

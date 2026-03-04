@@ -1,7 +1,7 @@
 base/NetUtils/CMakeFiles/NetUtils.dir/CovertChannel.cpp.o: \
-  /Users/user/sonoranpub/realpine/base/NetUtils/CovertChannel.cpp \
-  /Users/user/sonoranpub/realpine/base/NetUtils/CovertChannel.h \
-  /Users/user/sonoranpub/realpine/base/Common.h \
+  /Users/user/cdev/exrealpine/base/NetUtils/CovertChannel.cpp \
+  /Users/user/cdev/exrealpine/base/NetUtils/CovertChannel.h \
+  /Users/user/cdev/exrealpine/base/Common.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/cstdint \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__assert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__config \

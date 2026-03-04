@@ -9,6 +9,7 @@
 #include <ReadLock.h>
 #include <Log.h>
 #include <StringUtils.h>
+#include <format>
 
 
 
@@ -21,6 +22,7 @@ bool                                   Configuration::initialized_s       = fals
 std::once_flag                         Configuration::initFlag_s;
 
 ReadWriteSem                           Configuration::dataLock_s;
+string                                 Configuration::configFilePath_s;
 
 
 
@@ -103,6 +105,7 @@ Configuration::initialize (int                                argc,
             return false;
         }
 
+        configFilePath_s = configFilePath;
         initialized_s = true;
         result = true;
     });
@@ -315,7 +318,7 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
 
     // Check config file first.
     //
-    if (element->fileOptionName.size ())
+    if (!element->fileOptionName.empty())
         status = configFile_s->get (element->fileOptionName, value);
 
     if (status) {
@@ -329,7 +332,7 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
     if (!status) {
         // Try arguments
         //
-        if (element->argOptionName.size ())
+        if (!element->argOptionName.empty())
             status = argumentMap_s->get (element->argOptionName, value);
 
         if (status) {
@@ -345,7 +348,7 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
     if (!status) {
         // Try program environment
         //
-        if (element->envOptionName.size ())
+        if (!element->envOptionName.empty())
             status = environMap_s->get (element->envOptionName, value);
 
         if (status) {
@@ -371,14 +374,68 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
 
 
 
-void  
+void
 Configuration::parseValueList (const string &             values,
                                ConfigData::t_ValueList &  valueList)
 {
 #ifdef _VERBOSE
     Log::Debug ("Configuration::parseValueList invoked.");
-#endif                     
+#endif
 }
 
 
 
+bool
+Configuration::reload ()
+{
+#ifdef _VERBOSE
+    Log::Debug ("Configuration::reload invoked.");
+#endif
+
+    if (!initialized_s || configFilePath_s.empty()) {
+        Log::Error("Configuration::reload called before initialize.");
+        return false;
+    }
+
+    WriteLock lock(dataLock_s);
+
+    bool status = configFile_s->initialize(configFilePath_s);
+
+    if (!status) {
+        Log::Error("Configuration::reload — failed to re-read config file.");
+        return false;
+    }
+
+    status = populateValues();
+
+    if (!status) {
+        Log::Error("Configuration::reload — populateValues() failed.");
+        return false;
+    }
+
+    Log::Info("Configuration reloaded successfully."s);
+    return true;
+}
+
+
+
+bool
+Configuration::enableAutoReload (const string & configFilePath)
+{
+#ifdef _VERBOSE
+    Log::Debug ("Configuration::enableAutoReload invoked.");
+#endif
+
+    if (!initialized_s) {
+        Log::Error("Configuration::enableAutoReload called before initialize.");
+        return false;
+    }
+
+    {
+        WriteLock lock(dataLock_s);
+        configFilePath_s = configFilePath;
+    }
+
+    Log::Info("Configuration auto-reload enabled for: "s + configFilePath);
+    return true;
+}

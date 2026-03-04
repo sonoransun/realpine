@@ -275,7 +275,7 @@ AlpineDtcpConnTransport::sendReliableData (const byte * data,
 
     DataBlock *  requestData;
     requestData = new DataBlock (dataLength);
-    memcpy (requestData->buffer_, data, dataLength);
+    memcpy (requestData->buffer_.get(), data, dataLength);
 
     t_ReliableRequest *  newRequest;
     newRequest = new t_ReliableRequest;
@@ -465,7 +465,7 @@ AlpineDtcpConnTransport::checkPendingRequests ()
         requestId_ = currRequest->requestId;
 
         bool status;
-        status = DtcpBaseConnTransport::sendReliableData (currRequest->data->buffer_,
+        status = DtcpBaseConnTransport::sendReliableData (currRequest->data->buffer_.get(),
                                                          currRequest->data->length_);
 
         delete currRequest->data;

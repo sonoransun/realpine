@@ -13,7 +13,7 @@ class HttpRequest
     HttpRequest () = default;
     ~HttpRequest () = default;
 
-    static bool  parse (const byte *  data,
+    [[nodiscard]] static bool  parse (const byte *  data,
                         ulong         dataLength,
                         HttpRequest & request);
 

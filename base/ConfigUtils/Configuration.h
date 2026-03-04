@@ -23,25 +23,28 @@ class Configuration
 
 
 
-    static bool  initialize (int                                argc,
+    [[nodiscard]] static bool  initialize (int                                argc,
                              char **                            argv,
                              ConfigData::t_ConfigElementList &  configElements,
                              const string &                     configFilePath);
 
-    static bool  save ();
+    [[nodiscard]] static bool  save ();
 
-    static bool  getValue (const string & name,
+    [[nodiscard]] static bool  getValue (const string & name,
                            string &       value);
 
-    static bool  getValue (const string &             name,
+    [[nodiscard]] static bool  getValue (const string &             name,
                            ConfigData::t_ValueList &  valueList);
 
-    static bool  setValue (const string & name,
+    [[nodiscard]] static bool  setValue (const string & name,
                            string &       value);
 
-    static bool  setValue (const string &             name,
+    [[nodiscard]] static bool  setValue (const string &             name,
                            ConfigData::t_ValueList &  valueList);
 
+    static bool  reload ();
+
+    static bool  enableAutoReload (const string & configFilePath);
 
 
   private:
@@ -55,6 +58,7 @@ class Configuration
     static std::once_flag                     initFlag_s;
 
     static ReadWriteSem                       dataLock_s;
+    static string                             configFilePath_s;
 
 
     static void  copyConfigElementList (ConfigData::t_ConfigElementList &  source,

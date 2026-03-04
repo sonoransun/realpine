@@ -304,6 +304,42 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back(currElement);
+
+    // FUSE Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Enabled";
+    currElement->argOptionName = "fuseEnabled";
+    currElement->envOptionName = "FUSE_ENABLED";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // FUSE Mount Point
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Mount Point";
+    currElement->argOptionName = "fuseMountPoint";
+    currElement->envOptionName = "FUSE_MOUNT_POINT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // FUSE Cache TTL
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Cache TTL";
+    currElement->argOptionName = "fuseCacheTtl";
+    currElement->envOptionName = "FUSE_CACHE_TTL";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // FUSE Feedback Threshold
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Feedback Threshold";
+    currElement->argOptionName = "fuseFeedbackThreshold";
+    currElement->envOptionName = "FUSE_FEEDBACK_THRESHOLD";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 

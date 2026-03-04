@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include base/SysUtils/CMakeFiles/SysUtils.dir/depend.make
@@ -73,74 +73,74 @@ base/SysUtils/CMakeFiles/SysUtils.dir/codegen:
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/codegen
 
 base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/flags.make
-base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o: /Users/user/sonoranpub/realpine/base/SysUtils/DynamicLoader.cpp
+base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o: /Users/user/cdev/exrealpine/base/SysUtils/DynamicLoader.cpp
 base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o -MF CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o.d -o CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o -c /Users/user/sonoranpub/realpine/base/SysUtils/DynamicLoader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o -MF CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o.d -o CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o -c /Users/user/cdev/exrealpine/base/SysUtils/DynamicLoader.cpp
 
 base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/SysUtils/DynamicLoader.cpp > CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/SysUtils/DynamicLoader.cpp > CMakeFiles/SysUtils.dir/DynamicLoader.cpp.i
 
 base/SysUtils/CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/SysUtils/DynamicLoader.cpp -o CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/SysUtils/DynamicLoader.cpp -o CMakeFiles/SysUtils.dir/DynamicLoader.cpp.s
 
 base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/flags.make
-base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o: /Users/user/sonoranpub/realpine/base/SysUtils/FileUtils.cpp
+base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o: /Users/user/cdev/exrealpine/base/SysUtils/FileUtils.cpp
 base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o -MF CMakeFiles/SysUtils.dir/FileUtils.cpp.o.d -o CMakeFiles/SysUtils.dir/FileUtils.cpp.o -c /Users/user/sonoranpub/realpine/base/SysUtils/FileUtils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.o -MF CMakeFiles/SysUtils.dir/FileUtils.cpp.o.d -o CMakeFiles/SysUtils.dir/FileUtils.cpp.o -c /Users/user/cdev/exrealpine/base/SysUtils/FileUtils.cpp
 
 base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SysUtils.dir/FileUtils.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/SysUtils/FileUtils.cpp > CMakeFiles/SysUtils.dir/FileUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/SysUtils/FileUtils.cpp > CMakeFiles/SysUtils.dir/FileUtils.cpp.i
 
 base/SysUtils/CMakeFiles/SysUtils.dir/FileUtils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SysUtils.dir/FileUtils.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/SysUtils/FileUtils.cpp -o CMakeFiles/SysUtils.dir/FileUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/SysUtils/FileUtils.cpp -o CMakeFiles/SysUtils.dir/FileUtils.cpp.s
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/flags.make
-base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o: /Users/user/sonoranpub/realpine/base/SysUtils/SignalSet.cpp
+base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o: /Users/user/cdev/exrealpine/base/SysUtils/SignalSet.cpp
 base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o -MF CMakeFiles/SysUtils.dir/SignalSet.cpp.o.d -o CMakeFiles/SysUtils.dir/SignalSet.cpp.o -c /Users/user/sonoranpub/realpine/base/SysUtils/SignalSet.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.o -MF CMakeFiles/SysUtils.dir/SignalSet.cpp.o.d -o CMakeFiles/SysUtils.dir/SignalSet.cpp.o -c /Users/user/cdev/exrealpine/base/SysUtils/SignalSet.cpp
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SysUtils.dir/SignalSet.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/SysUtils/SignalSet.cpp > CMakeFiles/SysUtils.dir/SignalSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/SysUtils/SignalSet.cpp > CMakeFiles/SysUtils.dir/SignalSet.cpp.i
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SignalSet.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SysUtils.dir/SignalSet.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/SysUtils/SignalSet.cpp -o CMakeFiles/SysUtils.dir/SignalSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/SysUtils/SignalSet.cpp -o CMakeFiles/SysUtils.dir/SignalSet.cpp.s
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/flags.make
-base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o: /Users/user/sonoranpub/realpine/base/SysUtils/SpawnProcess.cpp
+base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o: /Users/user/cdev/exrealpine/base/SysUtils/SpawnProcess.cpp
 base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o -MF CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o.d -o CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o -c /Users/user/sonoranpub/realpine/base/SysUtils/SpawnProcess.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o -MF CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o.d -o CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o -c /Users/user/cdev/exrealpine/base/SysUtils/SpawnProcess.cpp
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/SysUtils/SpawnProcess.cpp > CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/SysUtils/SpawnProcess.cpp > CMakeFiles/SysUtils.dir/SpawnProcess.cpp.i
 
 base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/SysUtils/SpawnProcess.cpp -o CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/SysUtils/SpawnProcess.cpp -o CMakeFiles/SysUtils.dir/SpawnProcess.cpp.s
 
 base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/flags.make
-base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o: /Users/user/sonoranpub/realpine/base/SysUtils/UserUtils.cpp
+base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o: /Users/user/cdev/exrealpine/base/SysUtils/UserUtils.cpp
 base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o: base/SysUtils/CMakeFiles/SysUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o -MF CMakeFiles/SysUtils.dir/UserUtils.cpp.o.d -o CMakeFiles/SysUtils.dir/UserUtils.cpp.o -c /Users/user/sonoranpub/realpine/base/SysUtils/UserUtils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o -MF CMakeFiles/SysUtils.dir/UserUtils.cpp.o.d -o CMakeFiles/SysUtils.dir/UserUtils.cpp.o -c /Users/user/cdev/exrealpine/base/SysUtils/UserUtils.cpp
 
 base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SysUtils.dir/UserUtils.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/SysUtils/UserUtils.cpp > CMakeFiles/SysUtils.dir/UserUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/SysUtils/UserUtils.cpp > CMakeFiles/SysUtils.dir/UserUtils.cpp.i
 
 base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SysUtils.dir/UserUtils.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/SysUtils/UserUtils.cpp -o CMakeFiles/SysUtils.dir/UserUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/SysUtils/UserUtils.cpp -o CMakeFiles/SysUtils.dir/UserUtils.cpp.s
 
 # Object files for target SysUtils
 SysUtils_OBJECTS = \
@@ -160,19 +160,19 @@ lib/libSysUtils.a: base/SysUtils/CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o
 lib/libSysUtils.a: base/SysUtils/CMakeFiles/SysUtils.dir/UserUtils.cpp.o
 lib/libSysUtils.a: base/SysUtils/CMakeFiles/SysUtils.dir/build.make
 lib/libSysUtils.a: base/SysUtils/CMakeFiles/SysUtils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library ../../lib/libSysUtils.a"
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && $(CMAKE_COMMAND) -P CMakeFiles/SysUtils.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SysUtils.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library ../../lib/libSysUtils.a"
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && $(CMAKE_COMMAND) -P CMakeFiles/SysUtils.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SysUtils.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 base/SysUtils/CMakeFiles/SysUtils.dir/build: lib/libSysUtils.a
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/build
 
 base/SysUtils/CMakeFiles/SysUtils.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/base/SysUtils && $(CMAKE_COMMAND) -P CMakeFiles/SysUtils.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/base/SysUtils && $(CMAKE_COMMAND) -P CMakeFiles/SysUtils.dir/cmake_clean.cmake
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/clean
 
 base/SysUtils/CMakeFiles/SysUtils.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/base/SysUtils /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/base/SysUtils /Users/user/sonoranpub/realpine/build/base/SysUtils/CMakeFiles/SysUtils.dir/DependInfo.cmake "--color=$(COLOR)" SysUtils
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/base/SysUtils /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/base/SysUtils /Users/user/cdev/exrealpine/build/base/SysUtils/CMakeFiles/SysUtils.dir/DependInfo.cmake "--color=$(COLOR)" SysUtils
 .PHONY : base/SysUtils/CMakeFiles/SysUtils.dir/depend
 

@@ -13,8 +13,14 @@
 #include <AlpineGroup.h>
 #include <AlpineExtensionIndex.h>
 #include <AlpineModuleMgr.h>
+#include <MutexLock.h>
 #include <Log.h>
 #include <StringUtils.h>
+
+
+std::unordered_map<ulong, AlpineStackInterface::QueryCallback, OptHash<ulong>>
+    AlpineStackInterface::asyncCallbacks_s;
+Mutex  AlpineStackInterface::callbackLock_s;
 
 
 
@@ -862,7 +868,7 @@ AlpineStackInterface::listActiveModules (t_IdList &  idList)
 
 
 
-bool  
+bool
 AlpineStackInterface::listAllModules (t_IdList &  idList)
 {
 #ifdef _VERBOSE
@@ -882,5 +888,282 @@ AlpineStackInterface::listAllModules (t_IdList &  idList)
     return true;
 }
 
+
+
+// ---------------------------------------------------------------------------
+// Modern interface — std::expected overloads
+// ---------------------------------------------------------------------------
+
+Result<ulong>
+AlpineStackInterface::startQuery2 (const t_QueryOptions &  options,
+                                   const string &          queryString)
+{
+    ulong queryId = 0;
+    if (!startQuery(options, queryString, queryId))
+        return std::unexpected(AlpineError::InternalError);
+    return queryId;
+}
+
+
+Result<AlpineStackInterface::t_QueryStatus>
+AlpineStackInterface::getQueryStatus2 (ulong  queryId)
+{
+    t_QueryStatus status{};
+    if (!getQueryStatus(queryId, status))
+        return std::unexpected(AlpineError::NotFound);
+    return status;
+}
+
+
+Status
+AlpineStackInterface::pauseQuery2 (ulong  queryId)
+{
+    if (!pauseQuery(queryId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Status
+AlpineStackInterface::resumeQuery2 (ulong  queryId)
+{
+    if (!resumeQuery(queryId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Status
+AlpineStackInterface::cancelQuery2 (ulong  queryId)
+{
+    if (!cancelQuery(queryId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Result<AlpineStackInterface::t_PeerResourcesIndex>
+AlpineStackInterface::getQueryResults2 (ulong  queryId)
+{
+    t_PeerResourcesIndex results;
+    if (!getQueryResults(queryId, results))
+        return std::unexpected(AlpineError::NotFound);
+    return results;
+}
+
+
+Result<ulong>
+AlpineStackInterface::createGroup2 (const string &  name,
+                                    const string &  description)
+{
+    ulong groupId = 0;
+    if (!createGroup(name, description, groupId))
+        return std::unexpected(AlpineError::InternalError);
+    return groupId;
+}
+
+
+Status
+AlpineStackInterface::deleteGroup2 (ulong  groupId)
+{
+    if (!deleteGroup(groupId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Result<AlpineStackInterface::t_IdList>
+AlpineStackInterface::listGroups2 ()
+{
+    t_IdList idList;
+    if (!listGroups(idList))
+        return std::unexpected(AlpineError::InternalError);
+    return idList;
+}
+
+
+Result<AlpineStackInterface::t_GroupInfo>
+AlpineStackInterface::getGroupInfo2 (ulong  groupId)
+{
+    t_GroupInfo info{};
+    if (!getGroupInfo(groupId, info))
+        return std::unexpected(AlpineError::NotFound);
+    return info;
+}
+
+
+Result<AlpineStackInterface::t_GroupInfo>
+AlpineStackInterface::getDefaultGroupInfo2 ()
+{
+    t_GroupInfo info{};
+    if (!getDefaultGroupInfo(info))
+        return std::unexpected(AlpineError::InternalError);
+    return info;
+}
+
+
+Result<AlpineStackInterface::t_IdList>
+AlpineStackInterface::getGroupPeerList2 (ulong  groupId)
+{
+    t_IdList peerIdList;
+    if (!getGroupPeerList(groupId, peerIdList))
+        return std::unexpected(AlpineError::NotFound);
+    return peerIdList;
+}
+
+
+Result<AlpineStackInterface::t_PeerProfile>
+AlpineStackInterface::getGroupPeerProfile2 (ulong  groupId,
+                                            ulong  peerId)
+{
+    t_PeerProfile profile{};
+    if (!getGroupPeerProfile(groupId, peerId, profile))
+        return std::unexpected(AlpineError::NotFound);
+    return profile;
+}
+
+
+Result<AlpineStackInterface::t_PeerProfile>
+AlpineStackInterface::getDefaultPeerProfile2 (ulong  peerId)
+{
+    t_PeerProfile profile{};
+    if (!getDefaultPeerProfile(peerId, profile))
+        return std::unexpected(AlpineError::NotFound);
+    return profile;
+}
+
+
+Status
+AlpineStackInterface::addPeerToGroup2 (ulong  groupId,
+                                       ulong  peerId)
+{
+    if (!addPeerToGroup(groupId, peerId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Status
+AlpineStackInterface::removePeerFromGroup2 (ulong  groupId,
+                                            ulong  peerId)
+{
+    if (!removePeerFromGroup(groupId, peerId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Result<ulong>
+AlpineStackInterface::registerModule2 (const string &  libraryPath,
+                                       const string &  bootstrapSymbol)
+{
+    ulong moduleId = 0;
+    if (!registerModule(libraryPath, bootstrapSymbol, moduleId))
+        return std::unexpected(AlpineError::InternalError);
+    return moduleId;
+}
+
+
+Status
+AlpineStackInterface::unregisterModule2 (ulong  moduleId)
+{
+    if (!unregisterModule(moduleId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Result<AlpineStackInterface::t_ModuleInfo>
+AlpineStackInterface::getModuleInfo2 (ulong  moduleId)
+{
+    t_ModuleInfo info{};
+    if (!getModuleInfo(moduleId, info))
+        return std::unexpected(AlpineError::NotFound);
+    return info;
+}
+
+
+Status
+AlpineStackInterface::loadModule2 (ulong  moduleId)
+{
+    if (!loadModule(moduleId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Status
+AlpineStackInterface::unloadModule2 (ulong  moduleId)
+{
+    if (!unloadModule(moduleId))
+        return std::unexpected(AlpineError::NotFound);
+    return {};
+}
+
+
+Result<AlpineStackInterface::t_IdList>
+AlpineStackInterface::listActiveModules2 ()
+{
+    t_IdList idList;
+    if (!listActiveModules(idList))
+        return std::unexpected(AlpineError::InternalError);
+    return idList;
+}
+
+
+Result<AlpineStackInterface::t_IdList>
+AlpineStackInterface::listAllModules2 ()
+{
+    t_IdList idList;
+    if (!listAllModules(idList))
+        return std::unexpected(AlpineError::InternalError);
+    return idList;
+}
+
+
+// ---------------------------------------------------------------------------
+// Async query interface
+// ---------------------------------------------------------------------------
+
+Result<ulong>
+AlpineStackInterface::startQueryAsync (const t_QueryOptions &  options,
+                                       const string &          queryString,
+                                       QueryCallback           callback)
+{
+    auto result = startQuery2(options, queryString);
+    if (!result)
+        return result;
+
+    ulong queryId = *result;
+
+    {
+        MutexLock lock(callbackLock_s);
+        asyncCallbacks_s.emplace(queryId, std::move(callback));
+    }
+
+    return queryId;
+}
+
+
+void
+AlpineStackInterface::notifyAsyncCallbacks (const std::vector<ulong> & completedIds)
+{
+    for (ulong queryId : completedIds) {
+
+        QueryCallback callback;
+
+        {
+            MutexLock lock(callbackLock_s);
+            auto it = asyncCallbacks_s.find(queryId);
+            if (it == asyncCallbacks_s.end())
+                continue;
+            callback = std::move(it->second);
+            asyncCallbacks_s.erase(it);
+        }
+
+        auto results = getQueryResults2(queryId);
+        callback(std::move(results));
+    }
+}
 
 

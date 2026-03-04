@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alpine-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: alpine
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow intra-cluster peer communication
+    - from:
+        - podSelector:
+            matchLabels:
+              app: alpine
+      ports:
+        - port: 9000
+          protocol: TCP
+        - port: 8089
+          protocol: UDP
+        - port: 8090
+          protocol: UDP
+    # Allow external REST API access
+    - from: []
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    # Allow intra-cluster peer communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: alpine
+      ports:
+        - port: 9000
+          protocol: TCP
+        - port: 8089
+          protocol: UDP
+        - port: 8090
+          protocol: UDP
+    # Allow DNS
+    - to: []
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP

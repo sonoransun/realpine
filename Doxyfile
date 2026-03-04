@@ -1,0 +1,46 @@
+# Doxyfile for Alpine C++ API Documentation
+
+PROJECT_NAME           = "Alpine"
+PROJECT_NUMBER         = "0.0.19"
+PROJECT_BRIEF          = "Decentralized P2P Resource Discovery Platform"
+OUTPUT_DIRECTORY       = docs/api
+
+INPUT                  = interfaces/AlpineStackInterface \
+                         interfaces/DtcpStackInterface \
+                         AlpineRestBridge/HttpServer.h \
+                         AlpineRestBridge/HttpRouter.h \
+                         AlpineRestBridge/HttpRequest.h \
+                         AlpineRestBridge/HttpResponse.h \
+                         AlpineRestBridge/ApiKeyAuth.h \
+                         AlpineRestBridge/RateLimiter.h \
+                         base/AppUtils/Log.h \
+                         base/AppUtils/EventBus.h \
+                         base/AppUtils/OptHash.h \
+                         base/ThreadUtils/AutoThread.h \
+                         base/ThreadUtils/Mutex.h \
+                         base/ThreadUtils/ReadWriteSem.h \
+                         base/ConfigUtils/Configuration.h \
+                         base/Error.h \
+                         base/Common.h \
+                         transport/TransBase/DataBlock.h \
+                         transport/Dtcp/DtcpStack.h \
+                         protocols/Alpine/AlpineQueryMgr.h
+
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.cpp
+
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = NO
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+
+HAVE_DOT               = NO
+CLASS_DIAGRAMS         = YES
+
+QUIET                  = YES
+WARNINGS               = YES

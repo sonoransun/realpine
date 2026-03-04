@@ -1,4 +1,4 @@
-# Install script for directory: /Users/user/sonoranpub/realpine/AlpineGui
+# Install script for directory: /Users/user/cdev/exrealpine/AlpineGui
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,12 +39,12 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/Users/user/sonoranpub/realpine/build/AlpineGui/vendor/glfw/cmake_install.cmake")
+  include("/Users/user/cdev/exrealpine/build/AlpineGui/vendor/glfw/cmake_install.cmake")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "/Users/user/sonoranpub/realpine/build/AlpineGui/install_local_manifest.txt"
+  file(WRITE "/Users/user/cdev/exrealpine/build/AlpineGui/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

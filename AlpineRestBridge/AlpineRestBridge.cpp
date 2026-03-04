@@ -24,13 +24,21 @@
 #include <StatusHandler.h>
 #include <DiscoveryBeacon.h>
 #include <BroadcastQueryHandler.h>
-#include <TorHiddenService.h>
+#include <TorService.h>
+#include <TorSocksProxy.h>
 #include <TorTunnel.h>
+#include <UpnpPortMapper.h>
+#include <InterfaceEnumerator.h>
 #include <ContentStore.h>
 #include <DlnaServer.h>
 #include <SsdpService.h>
 #include <MdnsService.h>
 #include <WifiDiscovery.h>
+
+#ifdef ALPINE_FUSE_ENABLED
+#include <AlpineFuse.h>
+#include <VfsStatsHandler.h>
+#endif
 
 
 
@@ -154,6 +162,51 @@ main (int argc, char *argv[])
     string corsOrigin;
     if (Configuration::getValue("CORS Origin", corsOrigin))
         HttpResponse::setCorsOrigin(corsOrigin);
+
+
+    // Initialize FUSE virtual filesystem (non-fatal)
+    //
+#ifdef ALPINE_FUSE_ENABLED
+    string fuseEnabledStr;
+    string fuseMountPointStr;
+    string fuseCacheTtlStr;
+    string fuseFeedbackThresholdStr;
+    bool   fuseEnabled = false;
+    string fuseMountPoint = "/tmp/alpine"s;
+    ulong  fuseCacheTtl = 60;
+    ulong  fuseFeedbackThreshold = 5;
+
+    status = Configuration::getValue("FUSE Enabled", fuseEnabledStr);
+    if (status && (fuseEnabledStr == "true" || fuseEnabledStr == "1"))
+        fuseEnabled = true;
+
+    if (fuseEnabled) {
+        if (Configuration::getValue("FUSE Mount Point", fuseMountPointStr) &&
+            !fuseMountPointStr.empty())
+            fuseMountPoint = fuseMountPointStr;
+
+        if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) &&
+            !fuseCacheTtlStr.empty())
+            fuseCacheTtl = static_cast<ulong>(atoi(fuseCacheTtlStr.c_str()));
+
+        if (Configuration::getValue("FUSE Feedback Threshold", fuseFeedbackThresholdStr) &&
+            !fuseFeedbackThresholdStr.empty())
+            fuseFeedbackThreshold = static_cast<ulong>(atoi(fuseFeedbackThresholdStr.c_str()));
+
+        if (AlpineFuse::initialize(fuseMountPoint, fuseCacheTtl, fuseFeedbackThreshold)) {
+            if (AlpineFuse::run()) {
+                Log::Info("FUSE virtual filesystem mounted at "s + fuseMountPoint);
+                VfsStatsHandler::registerRoutes(router);
+            } else {
+                Log::Error("FUSE virtual filesystem failed to start (continuing without VFS).");
+            }
+        } else {
+            Log::Error("FUSE virtual filesystem failed to initialize (continuing without VFS).");
+        }
+    } else {
+        Log::Info("FUSE virtual filesystem disabled by configuration.");
+    }
+#endif
 
 
     // Start discovery beacon (non-fatal if it fails)
@@ -283,6 +336,27 @@ main (int argc, char *argv[])
     }
 
 
+    // Initialize UPnP port mapping (non-fatal)
+    //
+    if (UpnpPortMapper::initialize()) {
+        UpnpPortMapper::addMapping(restPort, restPort, "TCP", "Alpine REST API");
+        UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
+                                   "UDP", "Alpine Protocol UDP");
+        UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
+                                   "TCP", "Alpine Protocol TCP");
+        if (beaconEnabled)
+            UpnpPortMapper::addMapping(beaconPort, beaconPort,
+                                       "UDP", "Alpine Beacon");
+        if (broadcastEnabled)
+            UpnpPortMapper::addMapping(broadcastPort, broadcastPort,
+                                       "UDP", "Alpine Broadcast");
+
+        string externalIp = UpnpPortMapper::getExternalIpAddress();
+        if (!externalIp.empty())
+            Log::Info("UPnP external IP: "s + externalIp);
+    }
+
+
     // Start Tor hidden service and tunnel (non-fatal if it fails)
     //
     string torEnabledStr;
@@ -316,26 +390,34 @@ main (int argc, char *argv[])
 
     Configuration::getValue("Tor Peers", torPeersStr);
 
-    TorHiddenService * torService = nullptr;
-    TorTunnel *        torTunnel  = nullptr;
+    TorService * torService = nullptr;
+    TorTunnel *  torTunnel  = nullptr;
 
     if (torEnabled) {
-        torService = new TorHiddenService();
+        torService = new TorService();
 
-        if (torService->initialize(torListenPort, torControlPort,
-                                   broadcastPort, torControlAuthStr)) {
-            torTunnel = new TorTunnel();
+        if (torService->initialize(torControlPort, torControlAuthStr)) {
+            torService->addPortMapping(broadcastPort, torListenPort);
+            torService->addPortMapping(restPort, restPort);
 
-            if (torTunnel->initialize(torListenPort, torSocksPort,
-                                      torPeersStr,
-                                      torService->onionAddress(), restPort)) {
-                torTunnel->run();
-                Log::Info("Tor tunnel started, hidden service at "s +
-                          torService->onionAddress());
+            if (torService->createService()) {
+                torTunnel = new TorTunnel();
+
+                if (torTunnel->initialize(torListenPort, torSocksPort,
+                                          torPeersStr,
+                                          torService->onionAddress(), restPort)) {
+                    torTunnel->run();
+                    Log::Info("Tor tunnel started, hidden service at "s +
+                              torService->onionAddress());
+                } else {
+                    Log::Error("Tor tunnel failed to initialize (continuing without Tor tunnel).");
+                    delete torTunnel;
+                    torTunnel = nullptr;
+                }
             } else {
-                Log::Error("Tor tunnel failed to initialize (continuing without Tor tunnel).");
-                delete torTunnel;
-                torTunnel = nullptr;
+                Log::Error("Tor hidden service creation failed (continuing without Tor).");
+                delete torService;
+                torService = nullptr;
             }
         } else {
             Log::Error("Tor hidden service failed to initialize (continuing without Tor).");
@@ -445,6 +527,10 @@ main (int argc, char *argv[])
 
     if (!server.start(restBindAddress, restPort)) {
         Log::Error(string("Failed to start HTTP server.  Exiting."));
+#ifdef ALPINE_FUSE_ENABLED
+        if (AlpineFuse::isRunning())
+            AlpineFuse::shutdown();
+#endif
         WifiDiscovery::shutdown();
         if (mdnsService)  { mdnsService->stop(); delete mdnsService; }
         if (ssdpService)  { ssdpService->stop(); delete ssdpService; }
@@ -452,15 +538,22 @@ main (int argc, char *argv[])
         if (contentStore) { delete contentStore; }
         if (torTunnel)  { torTunnel->stop(); delete torTunnel; }
         if (torService) { torService->shutdown(); delete torService; }
+        UpnpPortMapper::shutdown();
         if (beacon) { beacon->stop(); delete beacon; }
         if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
         return 1;
     }
 
     // Clean up in reverse order
+#ifdef ALPINE_FUSE_ENABLED
+    if (AlpineFuse::isRunning())
+        AlpineFuse::shutdown();
+#endif
+
     WifiDiscovery::shutdown();
     if (torTunnel)  { torTunnel->stop(); delete torTunnel; }
     if (torService) { torService->shutdown(); delete torService; }
+    UpnpPortMapper::shutdown();
     if (mdnsService)  { mdnsService->stop(); delete mdnsService; }
     if (ssdpService)  { ssdpService->stop(); delete ssdpService; }
     if (dlnaServer)   { dlnaServer->stop(); delete dlnaServer; }

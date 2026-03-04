@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/transport/TransBase//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/transport/TransBase//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 transport/TransBase/CMakeFiles/TransBase.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/CMakeFiles/TransBase.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/TransBase/CMakeFiles/TransBase.dir/rule
 .PHONY : transport/TransBase/CMakeFiles/TransBase.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ TransBase: transport/TransBase/CMakeFiles/TransBase.dir/rule
 
 # fast build rule for target.
 TransBase/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/build
 .PHONY : TransBase/fast
 
 AcceptorInterface.o: AcceptorInterface.cpp.o
@@ -135,7 +210,7 @@ AcceptorInterface.o: AcceptorInterface.cpp.o
 
 # target to build an object file
 AcceptorInterface.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.o
 .PHONY : AcceptorInterface.cpp.o
 
 AcceptorInterface.i: AcceptorInterface.cpp.i
@@ -143,7 +218,7 @@ AcceptorInterface.i: AcceptorInterface.cpp.i
 
 # target to preprocess a source file
 AcceptorInterface.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.i
 .PHONY : AcceptorInterface.cpp.i
 
 AcceptorInterface.s: AcceptorInterface.cpp.s
@@ -151,7 +226,7 @@ AcceptorInterface.s: AcceptorInterface.cpp.s
 
 # target to generate assembly for a file
 AcceptorInterface.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/AcceptorInterface.cpp.s
 .PHONY : AcceptorInterface.cpp.s
 
 ConnectorInterface.o: ConnectorInterface.cpp.o
@@ -159,7 +234,7 @@ ConnectorInterface.o: ConnectorInterface.cpp.o
 
 # target to build an object file
 ConnectorInterface.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.o
 .PHONY : ConnectorInterface.cpp.o
 
 ConnectorInterface.i: ConnectorInterface.cpp.i
@@ -167,7 +242,7 @@ ConnectorInterface.i: ConnectorInterface.cpp.i
 
 # target to preprocess a source file
 ConnectorInterface.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.i
 .PHONY : ConnectorInterface.cpp.i
 
 ConnectorInterface.s: ConnectorInterface.cpp.s
@@ -175,7 +250,7 @@ ConnectorInterface.s: ConnectorInterface.cpp.s
 
 # target to generate assembly for a file
 ConnectorInterface.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/ConnectorInterface.cpp.s
 .PHONY : ConnectorInterface.cpp.s
 
 DataBlock.o: DataBlock.cpp.o
@@ -183,7 +258,7 @@ DataBlock.o: DataBlock.cpp.o
 
 # target to build an object file
 DataBlock.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.o
 .PHONY : DataBlock.cpp.o
 
 DataBlock.i: DataBlock.cpp.i
@@ -191,7 +266,7 @@ DataBlock.i: DataBlock.cpp.i
 
 # target to preprocess a source file
 DataBlock.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.i
 .PHONY : DataBlock.cpp.i
 
 DataBlock.s: DataBlock.cpp.s
@@ -199,7 +274,7 @@ DataBlock.s: DataBlock.cpp.s
 
 # target to generate assembly for a file
 DataBlock.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBlock.cpp.s
 .PHONY : DataBlock.cpp.s
 
 DataBuffer.o: DataBuffer.cpp.o
@@ -207,7 +282,7 @@ DataBuffer.o: DataBuffer.cpp.o
 
 # target to build an object file
 DataBuffer.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.o
 .PHONY : DataBuffer.cpp.o
 
 DataBuffer.i: DataBuffer.cpp.i
@@ -215,7 +290,7 @@ DataBuffer.i: DataBuffer.cpp.i
 
 # target to preprocess a source file
 DataBuffer.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.i
 .PHONY : DataBuffer.cpp.i
 
 DataBuffer.s: DataBuffer.cpp.s
@@ -223,7 +298,7 @@ DataBuffer.s: DataBuffer.cpp.s
 
 # target to generate assembly for a file
 DataBuffer.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/DataBuffer.cpp.s
 .PHONY : DataBuffer.cpp.s
 
 MuxInterface.o: MuxInterface.cpp.o
@@ -231,7 +306,7 @@ MuxInterface.o: MuxInterface.cpp.o
 
 # target to build an object file
 MuxInterface.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.o
 .PHONY : MuxInterface.cpp.o
 
 MuxInterface.i: MuxInterface.cpp.i
@@ -239,7 +314,7 @@ MuxInterface.i: MuxInterface.cpp.i
 
 # target to preprocess a source file
 MuxInterface.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.i
 .PHONY : MuxInterface.cpp.i
 
 MuxInterface.s: MuxInterface.cpp.s
@@ -247,7 +322,7 @@ MuxInterface.s: MuxInterface.cpp.s
 
 # target to generate assembly for a file
 MuxInterface.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/MuxInterface.cpp.s
 .PHONY : MuxInterface.cpp.s
 
 StackLinkInterface.o: StackLinkInterface.cpp.o
@@ -255,7 +330,7 @@ StackLinkInterface.o: StackLinkInterface.cpp.o
 
 # target to build an object file
 StackLinkInterface.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.o
 .PHONY : StackLinkInterface.cpp.o
 
 StackLinkInterface.i: StackLinkInterface.cpp.i
@@ -263,7 +338,7 @@ StackLinkInterface.i: StackLinkInterface.cpp.i
 
 # target to preprocess a source file
 StackLinkInterface.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.i
 .PHONY : StackLinkInterface.cpp.i
 
 StackLinkInterface.s: StackLinkInterface.cpp.s
@@ -271,7 +346,7 @@ StackLinkInterface.s: StackLinkInterface.cpp.s
 
 # target to generate assembly for a file
 StackLinkInterface.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/StackLinkInterface.cpp.s
 .PHONY : StackLinkInterface.cpp.s
 
 TransportInterface.o: TransportInterface.cpp.o
@@ -279,7 +354,7 @@ TransportInterface.o: TransportInterface.cpp.o
 
 # target to build an object file
 TransportInterface.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.o
 .PHONY : TransportInterface.cpp.o
 
 TransportInterface.i: TransportInterface.cpp.i
@@ -287,7 +362,7 @@ TransportInterface.i: TransportInterface.cpp.i
 
 # target to preprocess a source file
 TransportInterface.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.i
 .PHONY : TransportInterface.cpp.i
 
 TransportInterface.s: TransportInterface.cpp.s
@@ -295,7 +370,7 @@ TransportInterface.s: TransportInterface.cpp.s
 
 # target to generate assembly for a file
 TransportInterface.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/TransBase/CMakeFiles/TransBase.dir/build.make transport/TransBase/CMakeFiles/TransBase.dir/TransportInterface.cpp.s
 .PHONY : TransportInterface.cpp.s
 
 # Help Target
@@ -305,7 +380,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... TransBase"
 	@echo "... AcceptorInterface.o"
 	@echo "... AcceptorInterface.i"
@@ -339,6 +421,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

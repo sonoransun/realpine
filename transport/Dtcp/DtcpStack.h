@@ -38,45 +38,45 @@ class DtcpStack
 
 
 
-    static bool  initialize ();
+    [[nodiscard]] static bool  initialize ();
 
 
     static uint  numConnTransports ();
 
-    static bool  exists (ulong   ipAddress,
+    [[nodiscard]] static bool  exists (ulong   ipAddress,
                          ushort  port);
 
-    static bool  exists (ulong  transportId);
+    [[nodiscard]] static bool  exists (ulong  transportId);
 
-    static bool  getAllConnTransports (t_ConnTransportList & transportList);
+    [[nodiscard]] static bool  getAllConnTransports (t_ConnTransportList & transportList);
 
-    static bool  locateTransport (ulong                    transportId,
+    [[nodiscard]] static bool  locateTransport (ulong                    transportId,
                                   DtcpBaseConnTransport *& transport);
 
-    static bool  locateTransport (ulong                    ipAddress,
+    [[nodiscard]] static bool  locateTransport (ulong                    ipAddress,
                                   ushort                   port,
                                   DtcpBaseConnTransport *& transport);
 
-    static bool  createTransport  (ulong                    ipAddress,
+    [[nodiscard]] static bool  createTransport  (ulong                    ipAddress,
                                    ushort                   port,
                                    DtcpBaseConnTransport *& transport);
 
-    static bool  hostIsExcluded (ulong  ipAddress);
+    [[nodiscard]] static bool  hostIsExcluded (ulong  ipAddress);
 
-    static bool  subnetIsExcluded (ulong  subnetIpAddress);
+    [[nodiscard]] static bool  subnetIsExcluded (ulong  subnetIpAddress);
 
-    static bool  excludeHost (ulong ipAddress);
+    [[nodiscard]] static bool  excludeHost (ulong ipAddress);
 
-    static bool  excludeSubnet (ulong  subnetIpAddress,
+    [[nodiscard]] static bool  excludeSubnet (ulong  subnetIpAddress,
                                 ulong  subnetMask);
 
-    static bool  allowHost (ulong ipAddress);
+    [[nodiscard]] static bool  allowHost (ulong ipAddress);
 
-    static bool  allowSubnet (ulong  subnetIpAddress);
+    [[nodiscard]] static bool  allowSubnet (ulong  subnetIpAddress);
 
-    static bool  getAllExcludedHosts (t_IpAddressList & ipAddressList);
+    [[nodiscard]] static bool  getAllExcludedHosts (t_IpAddressList & ipAddressList);
 
-    static bool  getAllExcludedSubnets (t_SubnetAddressList & subnetList);
+    [[nodiscard]] static bool  getAllExcludedSubnets (t_SubnetAddressList & subnetList);
 
 
 

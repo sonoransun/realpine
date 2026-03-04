@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include applcore/ApplCore/CMakeFiles/ApplCore.dir/depend.make
@@ -73,32 +73,32 @@ applcore/ApplCore/CMakeFiles/ApplCore.dir/codegen:
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/codegen
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o: applcore/ApplCore/CMakeFiles/ApplCore.dir/flags.make
-applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o: /Users/user/sonoranpub/realpine/applcore/ApplCore/ApplCore.cpp
+applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o: /Users/user/cdev/exrealpine/applcore/ApplCore/ApplCore.cpp
 applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o: applcore/ApplCore/CMakeFiles/ApplCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o -MF CMakeFiles/ApplCore.dir/ApplCore.cpp.o.d -o CMakeFiles/ApplCore.dir/ApplCore.cpp.o -c /Users/user/sonoranpub/realpine/applcore/ApplCore/ApplCore.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o -MF CMakeFiles/ApplCore.dir/ApplCore.cpp.o.d -o CMakeFiles/ApplCore.dir/ApplCore.cpp.o -c /Users/user/cdev/exrealpine/applcore/ApplCore/ApplCore.cpp
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ApplCore.dir/ApplCore.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/applcore/ApplCore/ApplCore.cpp > CMakeFiles/ApplCore.dir/ApplCore.cpp.i
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/applcore/ApplCore/ApplCore.cpp > CMakeFiles/ApplCore.dir/ApplCore.cpp.i
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ApplCore.dir/ApplCore.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/applcore/ApplCore/ApplCore.cpp -o CMakeFiles/ApplCore.dir/ApplCore.cpp.s
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/applcore/ApplCore/ApplCore.cpp -o CMakeFiles/ApplCore.dir/ApplCore.cpp.s
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o: applcore/ApplCore/CMakeFiles/ApplCore.dir/flags.make
-applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o: /Users/user/sonoranpub/realpine/applcore/ApplCore/SignalMonitorThread.cpp
+applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o: /Users/user/cdev/exrealpine/applcore/ApplCore/SignalMonitorThread.cpp
 applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o: applcore/ApplCore/CMakeFiles/ApplCore.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o -MF CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o.d -o CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o -c /Users/user/sonoranpub/realpine/applcore/ApplCore/SignalMonitorThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o -MF CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o.d -o CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o -c /Users/user/cdev/exrealpine/applcore/ApplCore/SignalMonitorThread.cpp
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/applcore/ApplCore/SignalMonitorThread.cpp > CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/applcore/ApplCore/SignalMonitorThread.cpp > CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.i
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/applcore/ApplCore/SignalMonitorThread.cpp -o CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/applcore/ApplCore/SignalMonitorThread.cpp -o CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.s
 
 # Object files for target ApplCore
 ApplCore_OBJECTS = \
@@ -112,19 +112,19 @@ lib/libApplCore.a: applcore/ApplCore/CMakeFiles/ApplCore.dir/ApplCore.cpp.o
 lib/libApplCore.a: applcore/ApplCore/CMakeFiles/ApplCore.dir/SignalMonitorThread.cpp.o
 lib/libApplCore.a: applcore/ApplCore/CMakeFiles/ApplCore.dir/build.make
 lib/libApplCore.a: applcore/ApplCore/CMakeFiles/ApplCore.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library ../../lib/libApplCore.a"
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -P CMakeFiles/ApplCore.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ApplCore.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library ../../lib/libApplCore.a"
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -P CMakeFiles/ApplCore.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ApplCore.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 applcore/ApplCore/CMakeFiles/ApplCore.dir/build: lib/libApplCore.a
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/build
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -P CMakeFiles/ApplCore.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/applcore/ApplCore && $(CMAKE_COMMAND) -P CMakeFiles/ApplCore.dir/cmake_clean.cmake
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/clean
 
 applcore/ApplCore/CMakeFiles/ApplCore.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/applcore/ApplCore /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/applcore/ApplCore /Users/user/sonoranpub/realpine/build/applcore/ApplCore/CMakeFiles/ApplCore.dir/DependInfo.cmake "--color=$(COLOR)" ApplCore
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/applcore/ApplCore /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/applcore/ApplCore /Users/user/cdev/exrealpine/build/applcore/ApplCore/CMakeFiles/ApplCore.dir/DependInfo.cmake "--color=$(COLOR)" ApplCore
 .PHONY : applcore/ApplCore/CMakeFiles/ApplCore.dir/depend
 

@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/depend.make
@@ -73,46 +73,46 @@ test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/codegen:
 .PHONY : test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/codegen
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/flags.make
-test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o: /Users/user/sonoranpub/realpine/test/dtcp_stack/dtcpStackTestServer.cpp
+test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o: /Users/user/cdev/exrealpine/test/dtcp_stack/dtcpStackTestServer.cpp
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o -c /Users/user/sonoranpub/realpine/test/dtcp_stack/dtcpStackTestServer.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.o -c /Users/user/cdev/exrealpine/test/dtcp_stack/dtcpStackTestServer.cpp
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/dtcp_stack/dtcpStackTestServer.cpp > CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/dtcp_stack/dtcpStackTestServer.cpp > CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.i
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/dtcp_stack/dtcpStackTestServer.cpp -o CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/dtcp_stack/dtcpStackTestServer.cpp -o CMakeFiles/dtcpStackTestServer.dir/dtcpStackTestServer.cpp.s
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/flags.make
-test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o: /Users/user/sonoranpub/realpine/test/dtcp_stack/DtcpStackTest.cpp
+test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o: /Users/user/cdev/exrealpine/test/dtcp_stack/DtcpStackTest.cpp
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o -c /Users/user/sonoranpub/realpine/test/dtcp_stack/DtcpStackTest.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.o -c /Users/user/cdev/exrealpine/test/dtcp_stack/DtcpStackTest.cpp
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/dtcp_stack/DtcpStackTest.cpp > CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/dtcp_stack/DtcpStackTest.cpp > CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.i
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/dtcp_stack/DtcpStackTest.cpp -o CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/dtcp_stack/DtcpStackTest.cpp -o CMakeFiles/dtcpStackTestServer.dir/DtcpStackTest.cpp.s
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/flags.make
-test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o: /Users/user/sonoranpub/realpine/test/dtcp_stack/ServerTestConfig.cpp
+test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o: /Users/user/cdev/exrealpine/test/dtcp_stack/ServerTestConfig.cpp
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o -c /Users/user/sonoranpub/realpine/test/dtcp_stack/ServerTestConfig.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o -MF CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o.d -o CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.o -c /Users/user/cdev/exrealpine/test/dtcp_stack/ServerTestConfig.cpp
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/dtcp_stack/ServerTestConfig.cpp > CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/dtcp_stack/ServerTestConfig.cpp > CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.i
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/dtcp_stack/ServerTestConfig.cpp -o CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/dtcp_stack/ServerTestConfig.cpp -o CMakeFiles/dtcpStackTestServer.dir/ServerTestConfig.cpp.s
 
 # Object files for target dtcpStackTestServer
 dtcpStackTestServer_OBJECTS = \
@@ -135,23 +135,25 @@ bin/dtcpStackTestServer: lib/libNetUtils.a
 bin/dtcpStackTestServer: lib/libConfigUtils.a
 bin/dtcpStackTestServer: lib/libDtcp.a
 bin/dtcpStackTestServer: lib/libNetUtils.a
+bin/dtcpStackTestServer: lib/libminiupnpc.a
 bin/dtcpStackTestServer: lib/libThreadUtils.a
 bin/dtcpStackTestServer: lib/libSysUtils.a
 bin/dtcpStackTestServer: lib/libTransBase.a
 bin/dtcpStackTestServer: lib/libAppUtils.a
+bin/dtcpStackTestServer: lib/libspdlog.a
 bin/dtcpStackTestServer: test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable ../../bin/dtcpStackTestServer"
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dtcpStackTestServer.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable ../../bin/dtcpStackTestServer"
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dtcpStackTestServer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/build: bin/dtcpStackTestServer
 .PHONY : test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/build
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/test/dtcp_stack && $(CMAKE_COMMAND) -P CMakeFiles/dtcpStackTestServer.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/test/dtcp_stack && $(CMAKE_COMMAND) -P CMakeFiles/dtcpStackTestServer.dir/cmake_clean.cmake
 .PHONY : test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/clean
 
 test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/test/dtcp_stack /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/test/dtcp_stack /Users/user/sonoranpub/realpine/build/test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DependInfo.cmake "--color=$(COLOR)" dtcpStackTestServer
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/test/dtcp_stack /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/test/dtcp_stack /Users/user/cdev/exrealpine/build/test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/DependInfo.cmake "--color=$(COLOR)" dtcpStackTestServer
 .PHONY : test/dtcp_stack/CMakeFiles/dtcpStackTestServer.dir/depend
 

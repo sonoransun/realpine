@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/AlpineRestBridge//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/AlpineRestBridge//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
 .PHONY : AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ AlpineRestBridge: AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/rule
 
 # fast build rule for target.
 AlpineRestBridge/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build
 .PHONY : AlpineRestBridge/fast
 
 AlpineRestBridge.o: AlpineRestBridge.cpp.o
@@ -135,7 +210,7 @@ AlpineRestBridge.o: AlpineRestBridge.cpp.o
 
 # target to build an object file
 AlpineRestBridge.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.o
 .PHONY : AlpineRestBridge.cpp.o
 
 AlpineRestBridge.i: AlpineRestBridge.cpp.i
@@ -143,7 +218,7 @@ AlpineRestBridge.i: AlpineRestBridge.cpp.i
 
 # target to preprocess a source file
 AlpineRestBridge.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.i
 .PHONY : AlpineRestBridge.cpp.i
 
 AlpineRestBridge.s: AlpineRestBridge.cpp.s
@@ -151,15 +226,39 @@ AlpineRestBridge.s: AlpineRestBridge.cpp.s
 
 # target to generate assembly for a file
 AlpineRestBridge.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/AlpineRestBridge.cpp.s
 .PHONY : AlpineRestBridge.cpp.s
+
+ApiKeyAuth.o: ApiKeyAuth.cpp.o
+.PHONY : ApiKeyAuth.o
+
+# target to build an object file
+ApiKeyAuth.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ApiKeyAuth.cpp.o
+.PHONY : ApiKeyAuth.cpp.o
+
+ApiKeyAuth.i: ApiKeyAuth.cpp.i
+.PHONY : ApiKeyAuth.i
+
+# target to preprocess a source file
+ApiKeyAuth.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ApiKeyAuth.cpp.i
+.PHONY : ApiKeyAuth.cpp.i
+
+ApiKeyAuth.s: ApiKeyAuth.cpp.s
+.PHONY : ApiKeyAuth.s
+
+# target to generate assembly for a file
+ApiKeyAuth.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ApiKeyAuth.cpp.s
+.PHONY : ApiKeyAuth.cpp.s
 
 BroadcastQueryHandler.o: BroadcastQueryHandler.cpp.o
 .PHONY : BroadcastQueryHandler.o
 
 # target to build an object file
 BroadcastQueryHandler.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.o
 .PHONY : BroadcastQueryHandler.cpp.o
 
 BroadcastQueryHandler.i: BroadcastQueryHandler.cpp.i
@@ -167,7 +266,7 @@ BroadcastQueryHandler.i: BroadcastQueryHandler.cpp.i
 
 # target to preprocess a source file
 BroadcastQueryHandler.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.i
 .PHONY : BroadcastQueryHandler.cpp.i
 
 BroadcastQueryHandler.s: BroadcastQueryHandler.cpp.s
@@ -175,7 +274,7 @@ BroadcastQueryHandler.s: BroadcastQueryHandler.cpp.s
 
 # target to generate assembly for a file
 BroadcastQueryHandler.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/BroadcastQueryHandler.cpp.s
 .PHONY : BroadcastQueryHandler.cpp.s
 
 ContentStore.o: ContentStore.cpp.o
@@ -183,7 +282,7 @@ ContentStore.o: ContentStore.cpp.o
 
 # target to build an object file
 ContentStore.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.o
 .PHONY : ContentStore.cpp.o
 
 ContentStore.i: ContentStore.cpp.i
@@ -191,7 +290,7 @@ ContentStore.i: ContentStore.cpp.i
 
 # target to preprocess a source file
 ContentStore.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.i
 .PHONY : ContentStore.cpp.i
 
 ContentStore.s: ContentStore.cpp.s
@@ -199,7 +298,7 @@ ContentStore.s: ContentStore.cpp.s
 
 # target to generate assembly for a file
 ContentStore.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/ContentStore.cpp.s
 .PHONY : ContentStore.cpp.s
 
 DiscoveryBeacon.o: DiscoveryBeacon.cpp.o
@@ -207,7 +306,7 @@ DiscoveryBeacon.o: DiscoveryBeacon.cpp.o
 
 # target to build an object file
 DiscoveryBeacon.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.o
 .PHONY : DiscoveryBeacon.cpp.o
 
 DiscoveryBeacon.i: DiscoveryBeacon.cpp.i
@@ -215,7 +314,7 @@ DiscoveryBeacon.i: DiscoveryBeacon.cpp.i
 
 # target to preprocess a source file
 DiscoveryBeacon.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.i
 .PHONY : DiscoveryBeacon.cpp.i
 
 DiscoveryBeacon.s: DiscoveryBeacon.cpp.s
@@ -223,7 +322,7 @@ DiscoveryBeacon.s: DiscoveryBeacon.cpp.s
 
 # target to generate assembly for a file
 DiscoveryBeacon.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DiscoveryBeacon.cpp.s
 .PHONY : DiscoveryBeacon.cpp.s
 
 DlnaHandler.o: DlnaHandler.cpp.o
@@ -231,7 +330,7 @@ DlnaHandler.o: DlnaHandler.cpp.o
 
 # target to build an object file
 DlnaHandler.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.o
 .PHONY : DlnaHandler.cpp.o
 
 DlnaHandler.i: DlnaHandler.cpp.i
@@ -239,7 +338,7 @@ DlnaHandler.i: DlnaHandler.cpp.i
 
 # target to preprocess a source file
 DlnaHandler.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.i
 .PHONY : DlnaHandler.cpp.i
 
 DlnaHandler.s: DlnaHandler.cpp.s
@@ -247,7 +346,7 @@ DlnaHandler.s: DlnaHandler.cpp.s
 
 # target to generate assembly for a file
 DlnaHandler.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaHandler.cpp.s
 .PHONY : DlnaHandler.cpp.s
 
 DlnaServer.o: DlnaServer.cpp.o
@@ -255,7 +354,7 @@ DlnaServer.o: DlnaServer.cpp.o
 
 # target to build an object file
 DlnaServer.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.o
 .PHONY : DlnaServer.cpp.o
 
 DlnaServer.i: DlnaServer.cpp.i
@@ -263,7 +362,7 @@ DlnaServer.i: DlnaServer.cpp.i
 
 # target to preprocess a source file
 DlnaServer.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.i
 .PHONY : DlnaServer.cpp.i
 
 DlnaServer.s: DlnaServer.cpp.s
@@ -271,7 +370,7 @@ DlnaServer.s: DlnaServer.cpp.s
 
 # target to generate assembly for a file
 DlnaServer.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/DlnaServer.cpp.s
 .PHONY : DlnaServer.cpp.s
 
 HttpRequest.o: HttpRequest.cpp.o
@@ -279,7 +378,7 @@ HttpRequest.o: HttpRequest.cpp.o
 
 # target to build an object file
 HttpRequest.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.o
 .PHONY : HttpRequest.cpp.o
 
 HttpRequest.i: HttpRequest.cpp.i
@@ -287,7 +386,7 @@ HttpRequest.i: HttpRequest.cpp.i
 
 # target to preprocess a source file
 HttpRequest.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.i
 .PHONY : HttpRequest.cpp.i
 
 HttpRequest.s: HttpRequest.cpp.s
@@ -295,7 +394,7 @@ HttpRequest.s: HttpRequest.cpp.s
 
 # target to generate assembly for a file
 HttpRequest.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRequest.cpp.s
 .PHONY : HttpRequest.cpp.s
 
 HttpResponse.o: HttpResponse.cpp.o
@@ -303,7 +402,7 @@ HttpResponse.o: HttpResponse.cpp.o
 
 # target to build an object file
 HttpResponse.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.o
 .PHONY : HttpResponse.cpp.o
 
 HttpResponse.i: HttpResponse.cpp.i
@@ -311,7 +410,7 @@ HttpResponse.i: HttpResponse.cpp.i
 
 # target to preprocess a source file
 HttpResponse.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.i
 .PHONY : HttpResponse.cpp.i
 
 HttpResponse.s: HttpResponse.cpp.s
@@ -319,7 +418,7 @@ HttpResponse.s: HttpResponse.cpp.s
 
 # target to generate assembly for a file
 HttpResponse.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpResponse.cpp.s
 .PHONY : HttpResponse.cpp.s
 
 HttpRouter.o: HttpRouter.cpp.o
@@ -327,7 +426,7 @@ HttpRouter.o: HttpRouter.cpp.o
 
 # target to build an object file
 HttpRouter.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.o
 .PHONY : HttpRouter.cpp.o
 
 HttpRouter.i: HttpRouter.cpp.i
@@ -335,7 +434,7 @@ HttpRouter.i: HttpRouter.cpp.i
 
 # target to preprocess a source file
 HttpRouter.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.i
 .PHONY : HttpRouter.cpp.i
 
 HttpRouter.s: HttpRouter.cpp.s
@@ -343,7 +442,7 @@ HttpRouter.s: HttpRouter.cpp.s
 
 # target to generate assembly for a file
 HttpRouter.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpRouter.cpp.s
 .PHONY : HttpRouter.cpp.s
 
 HttpServer.o: HttpServer.cpp.o
@@ -351,7 +450,7 @@ HttpServer.o: HttpServer.cpp.o
 
 # target to build an object file
 HttpServer.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.o
 .PHONY : HttpServer.cpp.o
 
 HttpServer.i: HttpServer.cpp.i
@@ -359,7 +458,7 @@ HttpServer.i: HttpServer.cpp.i
 
 # target to preprocess a source file
 HttpServer.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.i
 .PHONY : HttpServer.cpp.i
 
 HttpServer.s: HttpServer.cpp.s
@@ -367,7 +466,7 @@ HttpServer.s: HttpServer.cpp.s
 
 # target to generate assembly for a file
 HttpServer.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/HttpServer.cpp.s
 .PHONY : HttpServer.cpp.s
 
 JsonReader.o: JsonReader.cpp.o
@@ -375,7 +474,7 @@ JsonReader.o: JsonReader.cpp.o
 
 # target to build an object file
 JsonReader.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.o
 .PHONY : JsonReader.cpp.o
 
 JsonReader.i: JsonReader.cpp.i
@@ -383,7 +482,7 @@ JsonReader.i: JsonReader.cpp.i
 
 # target to preprocess a source file
 JsonReader.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.i
 .PHONY : JsonReader.cpp.i
 
 JsonReader.s: JsonReader.cpp.s
@@ -391,7 +490,7 @@ JsonReader.s: JsonReader.cpp.s
 
 # target to generate assembly for a file
 JsonReader.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonReader.cpp.s
 .PHONY : JsonReader.cpp.s
 
 JsonWriter.o: JsonWriter.cpp.o
@@ -399,7 +498,7 @@ JsonWriter.o: JsonWriter.cpp.o
 
 # target to build an object file
 JsonWriter.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.o
 .PHONY : JsonWriter.cpp.o
 
 JsonWriter.i: JsonWriter.cpp.i
@@ -407,7 +506,7 @@ JsonWriter.i: JsonWriter.cpp.i
 
 # target to preprocess a source file
 JsonWriter.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.i
 .PHONY : JsonWriter.cpp.i
 
 JsonWriter.s: JsonWriter.cpp.s
@@ -415,7 +514,7 @@ JsonWriter.s: JsonWriter.cpp.s
 
 # target to generate assembly for a file
 JsonWriter.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/JsonWriter.cpp.s
 .PHONY : JsonWriter.cpp.s
 
 MdnsService.o: MdnsService.cpp.o
@@ -423,7 +522,7 @@ MdnsService.o: MdnsService.cpp.o
 
 # target to build an object file
 MdnsService.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.o
 .PHONY : MdnsService.cpp.o
 
 MdnsService.i: MdnsService.cpp.i
@@ -431,7 +530,7 @@ MdnsService.i: MdnsService.cpp.i
 
 # target to preprocess a source file
 MdnsService.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.i
 .PHONY : MdnsService.cpp.i
 
 MdnsService.s: MdnsService.cpp.s
@@ -439,7 +538,7 @@ MdnsService.s: MdnsService.cpp.s
 
 # target to generate assembly for a file
 MdnsService.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MdnsService.cpp.s
 .PHONY : MdnsService.cpp.s
 
 MediaStreamer.o: MediaStreamer.cpp.o
@@ -447,7 +546,7 @@ MediaStreamer.o: MediaStreamer.cpp.o
 
 # target to build an object file
 MediaStreamer.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.o
 .PHONY : MediaStreamer.cpp.o
 
 MediaStreamer.i: MediaStreamer.cpp.i
@@ -455,7 +554,7 @@ MediaStreamer.i: MediaStreamer.cpp.i
 
 # target to preprocess a source file
 MediaStreamer.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.i
 .PHONY : MediaStreamer.cpp.i
 
 MediaStreamer.s: MediaStreamer.cpp.s
@@ -463,15 +562,39 @@ MediaStreamer.s: MediaStreamer.cpp.s
 
 # target to generate assembly for a file
 MediaStreamer.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MediaStreamer.cpp.s
 .PHONY : MediaStreamer.cpp.s
+
+MetricsHandler.o: MetricsHandler.cpp.o
+.PHONY : MetricsHandler.o
+
+# target to build an object file
+MetricsHandler.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MetricsHandler.cpp.o
+.PHONY : MetricsHandler.cpp.o
+
+MetricsHandler.i: MetricsHandler.cpp.i
+.PHONY : MetricsHandler.i
+
+# target to preprocess a source file
+MetricsHandler.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MetricsHandler.cpp.i
+.PHONY : MetricsHandler.cpp.i
+
+MetricsHandler.s: MetricsHandler.cpp.s
+.PHONY : MetricsHandler.s
+
+# target to generate assembly for a file
+MetricsHandler.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/MetricsHandler.cpp.s
+.PHONY : MetricsHandler.cpp.s
 
 PeerHandler.o: PeerHandler.cpp.o
 .PHONY : PeerHandler.o
 
 # target to build an object file
 PeerHandler.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.o
 .PHONY : PeerHandler.cpp.o
 
 PeerHandler.i: PeerHandler.cpp.i
@@ -479,7 +602,7 @@ PeerHandler.i: PeerHandler.cpp.i
 
 # target to preprocess a source file
 PeerHandler.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.i
 .PHONY : PeerHandler.cpp.i
 
 PeerHandler.s: PeerHandler.cpp.s
@@ -487,7 +610,7 @@ PeerHandler.s: PeerHandler.cpp.s
 
 # target to generate assembly for a file
 PeerHandler.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/PeerHandler.cpp.s
 .PHONY : PeerHandler.cpp.s
 
 QueryHandler.o: QueryHandler.cpp.o
@@ -495,7 +618,7 @@ QueryHandler.o: QueryHandler.cpp.o
 
 # target to build an object file
 QueryHandler.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.o
 .PHONY : QueryHandler.cpp.o
 
 QueryHandler.i: QueryHandler.cpp.i
@@ -503,7 +626,7 @@ QueryHandler.i: QueryHandler.cpp.i
 
 # target to preprocess a source file
 QueryHandler.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.i
 .PHONY : QueryHandler.cpp.i
 
 QueryHandler.s: QueryHandler.cpp.s
@@ -511,15 +634,39 @@ QueryHandler.s: QueryHandler.cpp.s
 
 # target to generate assembly for a file
 QueryHandler.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/QueryHandler.cpp.s
 .PHONY : QueryHandler.cpp.s
+
+RateLimiter.o: RateLimiter.cpp.o
+.PHONY : RateLimiter.o
+
+# target to build an object file
+RateLimiter.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RateLimiter.cpp.o
+.PHONY : RateLimiter.cpp.o
+
+RateLimiter.i: RateLimiter.cpp.i
+.PHONY : RateLimiter.i
+
+# target to preprocess a source file
+RateLimiter.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RateLimiter.cpp.i
+.PHONY : RateLimiter.cpp.i
+
+RateLimiter.s: RateLimiter.cpp.s
+.PHONY : RateLimiter.s
+
+# target to generate assembly for a file
+RateLimiter.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RateLimiter.cpp.s
+.PHONY : RateLimiter.cpp.s
 
 RestBridgeConfig.o: RestBridgeConfig.cpp.o
 .PHONY : RestBridgeConfig.o
 
 # target to build an object file
 RestBridgeConfig.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.o
 .PHONY : RestBridgeConfig.cpp.o
 
 RestBridgeConfig.i: RestBridgeConfig.cpp.i
@@ -527,7 +674,7 @@ RestBridgeConfig.i: RestBridgeConfig.cpp.i
 
 # target to preprocess a source file
 RestBridgeConfig.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.i
 .PHONY : RestBridgeConfig.cpp.i
 
 RestBridgeConfig.s: RestBridgeConfig.cpp.s
@@ -535,7 +682,7 @@ RestBridgeConfig.s: RestBridgeConfig.cpp.s
 
 # target to generate assembly for a file
 RestBridgeConfig.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/RestBridgeConfig.cpp.s
 .PHONY : RestBridgeConfig.cpp.s
 
 SsdpService.o: SsdpService.cpp.o
@@ -543,7 +690,7 @@ SsdpService.o: SsdpService.cpp.o
 
 # target to build an object file
 SsdpService.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.o
 .PHONY : SsdpService.cpp.o
 
 SsdpService.i: SsdpService.cpp.i
@@ -551,7 +698,7 @@ SsdpService.i: SsdpService.cpp.i
 
 # target to preprocess a source file
 SsdpService.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.i
 .PHONY : SsdpService.cpp.i
 
 SsdpService.s: SsdpService.cpp.s
@@ -559,7 +706,7 @@ SsdpService.s: SsdpService.cpp.s
 
 # target to generate assembly for a file
 SsdpService.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/SsdpService.cpp.s
 .PHONY : SsdpService.cpp.s
 
 StatusHandler.o: StatusHandler.cpp.o
@@ -567,7 +714,7 @@ StatusHandler.o: StatusHandler.cpp.o
 
 # target to build an object file
 StatusHandler.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.o
 .PHONY : StatusHandler.cpp.o
 
 StatusHandler.i: StatusHandler.cpp.i
@@ -575,7 +722,7 @@ StatusHandler.i: StatusHandler.cpp.i
 
 # target to preprocess a source file
 StatusHandler.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.i
 .PHONY : StatusHandler.cpp.i
 
 StatusHandler.s: StatusHandler.cpp.s
@@ -583,39 +730,15 @@ StatusHandler.s: StatusHandler.cpp.s
 
 # target to generate assembly for a file
 StatusHandler.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/StatusHandler.cpp.s
 .PHONY : StatusHandler.cpp.s
-
-TorHiddenService.o: TorHiddenService.cpp.o
-.PHONY : TorHiddenService.o
-
-# target to build an object file
-TorHiddenService.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorHiddenService.cpp.o
-.PHONY : TorHiddenService.cpp.o
-
-TorHiddenService.i: TorHiddenService.cpp.i
-.PHONY : TorHiddenService.i
-
-# target to preprocess a source file
-TorHiddenService.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorHiddenService.cpp.i
-.PHONY : TorHiddenService.cpp.i
-
-TorHiddenService.s: TorHiddenService.cpp.s
-.PHONY : TorHiddenService.s
-
-# target to generate assembly for a file
-TorHiddenService.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorHiddenService.cpp.s
-.PHONY : TorHiddenService.cpp.s
 
 TorTunnel.o: TorTunnel.cpp.o
 .PHONY : TorTunnel.o
 
 # target to build an object file
 TorTunnel.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.o
 .PHONY : TorTunnel.cpp.o
 
 TorTunnel.i: TorTunnel.cpp.i
@@ -623,7 +746,7 @@ TorTunnel.i: TorTunnel.cpp.i
 
 # target to preprocess a source file
 TorTunnel.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.i
 .PHONY : TorTunnel.cpp.i
 
 TorTunnel.s: TorTunnel.cpp.s
@@ -631,15 +754,39 @@ TorTunnel.s: TorTunnel.cpp.s
 
 # target to generate assembly for a file
 TorTunnel.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/TorTunnel.cpp.s
 .PHONY : TorTunnel.cpp.s
+
+WebSocketSession.o: WebSocketSession.cpp.o
+.PHONY : WebSocketSession.o
+
+# target to build an object file
+WebSocketSession.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/WebSocketSession.cpp.o
+.PHONY : WebSocketSession.cpp.o
+
+WebSocketSession.i: WebSocketSession.cpp.i
+.PHONY : WebSocketSession.i
+
+# target to preprocess a source file
+WebSocketSession.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/WebSocketSession.cpp.i
+.PHONY : WebSocketSession.cpp.i
+
+WebSocketSession.s: WebSocketSession.cpp.s
+.PHONY : WebSocketSession.s
+
+# target to generate assembly for a file
+WebSocketSession.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/WebSocketSession.cpp.s
+.PHONY : WebSocketSession.cpp.s
 
 XmlWriter.o: XmlWriter.cpp.o
 .PHONY : XmlWriter.o
 
 # target to build an object file
 XmlWriter.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.o
 .PHONY : XmlWriter.cpp.o
 
 XmlWriter.i: XmlWriter.cpp.i
@@ -647,7 +794,7 @@ XmlWriter.i: XmlWriter.cpp.i
 
 # target to preprocess a source file
 XmlWriter.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.i
 .PHONY : XmlWriter.cpp.i
 
 XmlWriter.s: XmlWriter.cpp.s
@@ -655,7 +802,7 @@ XmlWriter.s: XmlWriter.cpp.s
 
 # target to generate assembly for a file
 XmlWriter.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/build.make AlpineRestBridge/CMakeFiles/AlpineRestBridge.dir/XmlWriter.cpp.s
 .PHONY : XmlWriter.cpp.s
 
 # Help Target
@@ -665,11 +812,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... AlpineRestBridge"
 	@echo "... AlpineRestBridge.o"
 	@echo "... AlpineRestBridge.i"
 	@echo "... AlpineRestBridge.s"
+	@echo "... ApiKeyAuth.o"
+	@echo "... ApiKeyAuth.i"
+	@echo "... ApiKeyAuth.s"
 	@echo "... BroadcastQueryHandler.o"
 	@echo "... BroadcastQueryHandler.i"
 	@echo "... BroadcastQueryHandler.s"
@@ -709,12 +866,18 @@ help:
 	@echo "... MediaStreamer.o"
 	@echo "... MediaStreamer.i"
 	@echo "... MediaStreamer.s"
+	@echo "... MetricsHandler.o"
+	@echo "... MetricsHandler.i"
+	@echo "... MetricsHandler.s"
 	@echo "... PeerHandler.o"
 	@echo "... PeerHandler.i"
 	@echo "... PeerHandler.s"
 	@echo "... QueryHandler.o"
 	@echo "... QueryHandler.i"
 	@echo "... QueryHandler.s"
+	@echo "... RateLimiter.o"
+	@echo "... RateLimiter.i"
+	@echo "... RateLimiter.s"
 	@echo "... RestBridgeConfig.o"
 	@echo "... RestBridgeConfig.i"
 	@echo "... RestBridgeConfig.s"
@@ -724,12 +887,12 @@ help:
 	@echo "... StatusHandler.o"
 	@echo "... StatusHandler.i"
 	@echo "... StatusHandler.s"
-	@echo "... TorHiddenService.o"
-	@echo "... TorHiddenService.i"
-	@echo "... TorHiddenService.s"
 	@echo "... TorTunnel.o"
 	@echo "... TorTunnel.i"
 	@echo "... TorTunnel.s"
+	@echo "... WebSocketSession.o"
+	@echo "... WebSocketSession.i"
+	@echo "... WebSocketSession.s"
 	@echo "... XmlWriter.o"
 	@echo "... XmlWriter.i"
 	@echo "... XmlWriter.s"
@@ -744,6 +907,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

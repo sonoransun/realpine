@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include test/tcp_conn_test/CMakeFiles/tcpClient.dir/depend.make
@@ -73,60 +73,60 @@ test/tcp_conn_test/CMakeFiles/tcpClient.dir/codegen:
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpClient.dir/codegen
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/flags.make
-test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o: /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientThread.cpp
+test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o: /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientThread.cpp
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o -c /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientThread.cpp.o -c /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientThread.cpp
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientThread.cpp > CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientThread.cpp > CMakeFiles/tcpClient.dir/TcpClientThread.cpp.i
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientThread.cpp -o CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientThread.cpp -o CMakeFiles/tcpClient.dir/TcpClientThread.cpp.s
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/flags.make
-test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o: /Users/user/sonoranpub/realpine/test/tcp_conn_test/tcpClient.cpp
+test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o: /Users/user/cdev/exrealpine/test/tcp_conn_test/tcpClient.cpp
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o -MF CMakeFiles/tcpClient.dir/tcpClient.cpp.o.d -o CMakeFiles/tcpClient.dir/tcpClient.cpp.o -c /Users/user/sonoranpub/realpine/test/tcp_conn_test/tcpClient.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.o -MF CMakeFiles/tcpClient.dir/tcpClient.cpp.o.d -o CMakeFiles/tcpClient.dir/tcpClient.cpp.o -c /Users/user/cdev/exrealpine/test/tcp_conn_test/tcpClient.cpp
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/tcpClient.dir/tcpClient.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/tcp_conn_test/tcpClient.cpp > CMakeFiles/tcpClient.dir/tcpClient.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/tcp_conn_test/tcpClient.cpp > CMakeFiles/tcpClient.dir/tcpClient.cpp.i
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/tcpClient.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/tcpClient.dir/tcpClient.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/tcp_conn_test/tcpClient.cpp -o CMakeFiles/tcpClient.dir/tcpClient.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/tcp_conn_test/tcpClient.cpp -o CMakeFiles/tcpClient.dir/tcpClient.cpp.s
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/flags.make
-test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o: /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConfig.cpp
+test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o: /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConfig.cpp
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o -c /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConfig.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.o -c /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConfig.cpp
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConfig.cpp > CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConfig.cpp > CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.i
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConfig.cpp -o CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConfig.cpp -o CMakeFiles/tcpClient.dir/TcpClientConfig.cpp.s
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/flags.make
-test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o: /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConnector.cpp
+test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o: /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConnector.cpp
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o: test/tcp_conn_test/CMakeFiles/tcpClient.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o -c /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConnector.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o -MF CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o.d -o CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.o -c /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConnector.cpp
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConnector.cpp > CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConnector.cpp > CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.i
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/test/tcp_conn_test/TcpClientConnector.cpp -o CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/test/tcp_conn_test/TcpClientConnector.cpp -o CMakeFiles/tcpClient.dir/TcpClientConnector.cpp.s
 
 # Object files for target tcpClient
 tcpClient_OBJECTS = \
@@ -148,22 +148,24 @@ bin/tcpClient: lib/libAppUtils.a
 bin/tcpClient: lib/libNetUtils.a
 bin/tcpClient: lib/libThreadUtils.a
 bin/tcpClient: lib/libConfigUtils.a
+bin/tcpClient: lib/libminiupnpc.a
 bin/tcpClient: lib/libThreadUtils.a
 bin/tcpClient: lib/libSysUtils.a
 bin/tcpClient: lib/libAppUtils.a
+bin/tcpClient: lib/libspdlog.a
 bin/tcpClient: test/tcp_conn_test/CMakeFiles/tcpClient.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable ../../bin/tcpClient"
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/tcpClient.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable ../../bin/tcpClient"
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/tcpClient.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/build: bin/tcpClient
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpClient.dir/build
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/test/tcp_conn_test && $(CMAKE_COMMAND) -P CMakeFiles/tcpClient.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/test/tcp_conn_test && $(CMAKE_COMMAND) -P CMakeFiles/tcpClient.dir/cmake_clean.cmake
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpClient.dir/clean
 
 test/tcp_conn_test/CMakeFiles/tcpClient.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/test/tcp_conn_test /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/test/tcp_conn_test /Users/user/sonoranpub/realpine/build/test/tcp_conn_test/CMakeFiles/tcpClient.dir/DependInfo.cmake "--color=$(COLOR)" tcpClient
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/test/tcp_conn_test /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/test/tcp_conn_test /Users/user/cdev/exrealpine/build/test/tcp_conn_test/CMakeFiles/tcpClient.dir/DependInfo.cmake "--color=$(COLOR)" tcpClient
 .PHONY : test/tcp_conn_test/CMakeFiles/tcpClient.dir/depend
 

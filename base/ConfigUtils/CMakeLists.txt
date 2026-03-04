@@ -2,6 +2,7 @@ add_library(ConfigUtils
     ArgumentMap.cpp
     ConfigData.cpp
     ConfigFile.cpp
+    ConfigSchema.cpp
     Configuration.cpp
     EnvironMap.cpp
 )

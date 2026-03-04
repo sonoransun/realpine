@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include base/AppUtils/CMakeFiles/AppUtils.dir/depend.make
@@ -73,78 +73,93 @@ base/AppUtils/CMakeFiles/AppUtils.dir/codegen:
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/codegen
 
 base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
-base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o: /Users/user/sonoranpub/realpine/base/AppUtils/AgedQueue.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/AgedQueue.cpp
 base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o -MF CMakeFiles/AppUtils.dir/AgedQueue.cpp.o.d -o CMakeFiles/AppUtils.dir/AgedQueue.cpp.o -c /Users/user/sonoranpub/realpine/base/AppUtils/AgedQueue.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o -MF CMakeFiles/AppUtils.dir/AgedQueue.cpp.o.d -o CMakeFiles/AppUtils.dir/AgedQueue.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/AgedQueue.cpp
 
 base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/AgedQueue.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/AppUtils/AgedQueue.cpp > CMakeFiles/AppUtils.dir/AgedQueue.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/AgedQueue.cpp > CMakeFiles/AppUtils.dir/AgedQueue.cpp.i
 
 base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/AgedQueue.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/AppUtils/AgedQueue.cpp -o CMakeFiles/AppUtils.dir/AgedQueue.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/AgedQueue.cpp -o CMakeFiles/AppUtils.dir/AgedQueue.cpp.s
+
+base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
+base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/EventBus.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o -MF CMakeFiles/AppUtils.dir/EventBus.cpp.o.d -o CMakeFiles/AppUtils.dir/EventBus.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/EventBus.cpp
+
+base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/EventBus.cpp.i"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/EventBus.cpp > CMakeFiles/AppUtils.dir/EventBus.cpp.i
+
+base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/EventBus.cpp.s"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/EventBus.cpp -o CMakeFiles/AppUtils.dir/EventBus.cpp.s
 
 base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
-base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o: /Users/user/sonoranpub/realpine/base/AppUtils/Log.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/Log.cpp
 base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o -MF CMakeFiles/AppUtils.dir/Log.cpp.o.d -o CMakeFiles/AppUtils.dir/Log.cpp.o -c /Users/user/sonoranpub/realpine/base/AppUtils/Log.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o -MF CMakeFiles/AppUtils.dir/Log.cpp.o.d -o CMakeFiles/AppUtils.dir/Log.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/Log.cpp
 
 base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/Log.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/AppUtils/Log.cpp > CMakeFiles/AppUtils.dir/Log.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/Log.cpp > CMakeFiles/AppUtils.dir/Log.cpp.i
 
 base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/Log.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/AppUtils/Log.cpp -o CMakeFiles/AppUtils.dir/Log.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/Log.cpp -o CMakeFiles/AppUtils.dir/Log.cpp.s
 
 base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
-base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o: /Users/user/sonoranpub/realpine/base/AppUtils/OptHash.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/OptHash.cpp
 base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o -MF CMakeFiles/AppUtils.dir/OptHash.cpp.o.d -o CMakeFiles/AppUtils.dir/OptHash.cpp.o -c /Users/user/sonoranpub/realpine/base/AppUtils/OptHash.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o -MF CMakeFiles/AppUtils.dir/OptHash.cpp.o.d -o CMakeFiles/AppUtils.dir/OptHash.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/OptHash.cpp
 
 base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/OptHash.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/AppUtils/OptHash.cpp > CMakeFiles/AppUtils.dir/OptHash.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/OptHash.cpp > CMakeFiles/AppUtils.dir/OptHash.cpp.i
 
 base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/OptHash.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/AppUtils/OptHash.cpp -o CMakeFiles/AppUtils.dir/OptHash.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/OptHash.cpp -o CMakeFiles/AppUtils.dir/OptHash.cpp.s
 
 base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
-base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o: /Users/user/sonoranpub/realpine/base/AppUtils/PollSet.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/PollSet.cpp
 base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o -MF CMakeFiles/AppUtils.dir/PollSet.cpp.o.d -o CMakeFiles/AppUtils.dir/PollSet.cpp.o -c /Users/user/sonoranpub/realpine/base/AppUtils/PollSet.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o -MF CMakeFiles/AppUtils.dir/PollSet.cpp.o.d -o CMakeFiles/AppUtils.dir/PollSet.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/PollSet.cpp
 
 base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/PollSet.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/AppUtils/PollSet.cpp > CMakeFiles/AppUtils.dir/PollSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/PollSet.cpp > CMakeFiles/AppUtils.dir/PollSet.cpp.i
 
 base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/PollSet.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/AppUtils/PollSet.cpp -o CMakeFiles/AppUtils.dir/PollSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/PollSet.cpp -o CMakeFiles/AppUtils.dir/PollSet.cpp.s
 
 base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/flags.make
-base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o: /Users/user/sonoranpub/realpine/base/AppUtils/StringUtils.cpp
+base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o: /Users/user/cdev/exrealpine/base/AppUtils/StringUtils.cpp
 base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o: base/AppUtils/CMakeFiles/AppUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o -MF CMakeFiles/AppUtils.dir/StringUtils.cpp.o.d -o CMakeFiles/AppUtils.dir/StringUtils.cpp.o -c /Users/user/sonoranpub/realpine/base/AppUtils/StringUtils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o -MF CMakeFiles/AppUtils.dir/StringUtils.cpp.o.d -o CMakeFiles/AppUtils.dir/StringUtils.cpp.o -c /Users/user/cdev/exrealpine/base/AppUtils/StringUtils.cpp
 
 base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AppUtils.dir/StringUtils.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/AppUtils/StringUtils.cpp > CMakeFiles/AppUtils.dir/StringUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/AppUtils/StringUtils.cpp > CMakeFiles/AppUtils.dir/StringUtils.cpp.i
 
 base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AppUtils.dir/StringUtils.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/AppUtils/StringUtils.cpp -o CMakeFiles/AppUtils.dir/StringUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/AppUtils/StringUtils.cpp -o CMakeFiles/AppUtils.dir/StringUtils.cpp.s
 
 # Object files for target AppUtils
 AppUtils_OBJECTS = \
 "CMakeFiles/AppUtils.dir/AgedQueue.cpp.o" \
+"CMakeFiles/AppUtils.dir/EventBus.cpp.o" \
 "CMakeFiles/AppUtils.dir/Log.cpp.o" \
 "CMakeFiles/AppUtils.dir/OptHash.cpp.o" \
 "CMakeFiles/AppUtils.dir/PollSet.cpp.o" \
@@ -154,25 +169,26 @@ AppUtils_OBJECTS = \
 AppUtils_EXTERNAL_OBJECTS =
 
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/AgedQueue.cpp.o
+lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/EventBus.cpp.o
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/Log.cpp.o
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/OptHash.cpp.o
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/PollSet.cpp.o
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/StringUtils.cpp.o
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/build.make
 lib/libAppUtils.a: base/AppUtils/CMakeFiles/AppUtils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library ../../lib/libAppUtils.a"
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && $(CMAKE_COMMAND) -P CMakeFiles/AppUtils.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AppUtils.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX static library ../../lib/libAppUtils.a"
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && $(CMAKE_COMMAND) -P CMakeFiles/AppUtils.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AppUtils.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 base/AppUtils/CMakeFiles/AppUtils.dir/build: lib/libAppUtils.a
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/build
 
 base/AppUtils/CMakeFiles/AppUtils.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/base/AppUtils && $(CMAKE_COMMAND) -P CMakeFiles/AppUtils.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/base/AppUtils && $(CMAKE_COMMAND) -P CMakeFiles/AppUtils.dir/cmake_clean.cmake
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/clean
 
 base/AppUtils/CMakeFiles/AppUtils.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/base/AppUtils /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/base/AppUtils /Users/user/sonoranpub/realpine/build/base/AppUtils/CMakeFiles/AppUtils.dir/DependInfo.cmake "--color=$(COLOR)" AppUtils
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/base/AppUtils /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/base/AppUtils /Users/user/cdev/exrealpine/build/base/AppUtils/CMakeFiles/AppUtils.dir/DependInfo.cmake "--color=$(COLOR)" AppUtils
 .PHONY : base/AppUtils/CMakeFiles/AppUtils.dir/depend
 

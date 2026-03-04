@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/depend.make
@@ -73,74 +73,74 @@ AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen:
 .PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/codegen
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/flags.make
-AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o: /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineConfig.cpp
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o: /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineConfig.cpp
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o -c /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineConfig.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.o -c /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineConfig.cpp
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineConfig.cpp > CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineConfig.cpp > CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.i
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineConfig.cpp -o CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineConfig.cpp -o CMakeFiles/AlpineCmdIf.dir/AlpineConfig.cpp.s
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/flags.make
-AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o: /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineCmdIf.cpp
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o: /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineCmdIf.cpp
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o -c /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineCmdIf.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.o -c /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineCmdIf.cpp
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineCmdIf.cpp > CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.i
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineCmdIf.cpp > CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.i
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineCmdIf/AlpineCmdIf.cpp -o CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.s
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/AlpineCmdIf/AlpineCmdIf.cpp -o CMakeFiles/AlpineCmdIf.dir/AlpineCmdIf.cpp.s
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/flags.make
-AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o: /Users/user/sonoranpub/realpine/AlpineCmdIf/JsonRpcClient.cpp
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o: /Users/user/cdev/exrealpine/AlpineCmdIf/JsonRpcClient.cpp
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o -c /Users/user/sonoranpub/realpine/AlpineCmdIf/JsonRpcClient.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.o -c /Users/user/cdev/exrealpine/AlpineCmdIf/JsonRpcClient.cpp
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineCmdIf/JsonRpcClient.cpp > CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.i
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/AlpineCmdIf/JsonRpcClient.cpp > CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.i
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineCmdIf/JsonRpcClient.cpp -o CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.s
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/AlpineCmdIf/JsonRpcClient.cpp -o CMakeFiles/AlpineCmdIf.dir/JsonRpcClient.cpp.s
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/flags.make
-AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o: /Users/user/cdev/exrealpine/AlpineRestBridge/JsonWriter.cpp
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.o -c /Users/user/cdev/exrealpine/AlpineRestBridge/JsonWriter.cpp
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp > CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.i
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/AlpineRestBridge/JsonWriter.cpp > CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.i
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonWriter.cpp -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.s
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/AlpineRestBridge/JsonWriter.cpp -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonWriter.cpp.s
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/flags.make
-AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o: /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp
+AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o: /Users/user/cdev/exrealpine/AlpineRestBridge/JsonReader.cpp
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o -c /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o -MF CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o.d -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.o -c /Users/user/cdev/exrealpine/AlpineRestBridge/JsonReader.cpp
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp > CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.i
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/AlpineRestBridge/JsonReader.cpp > CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.i
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/AlpineRestBridge/JsonReader.cpp -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.s
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/AlpineRestBridge/JsonReader.cpp -o CMakeFiles/AlpineCmdIf.dir/__/AlpineRestBridge/JsonReader.cpp.s
 
 # Object files for target AlpineCmdIf
 AlpineCmdIf_OBJECTS = \
@@ -163,22 +163,24 @@ bin/AlpineCmdIf: lib/libApplCore.a
 bin/AlpineCmdIf: lib/libAppUtils.a
 bin/AlpineCmdIf: lib/libNetUtils.a
 bin/AlpineCmdIf: lib/libConfigUtils.a
+bin/AlpineCmdIf: lib/libminiupnpc.a
 bin/AlpineCmdIf: lib/libThreadUtils.a
 bin/AlpineCmdIf: lib/libSysUtils.a
 bin/AlpineCmdIf: lib/libAppUtils.a
+bin/AlpineCmdIf: lib/libspdlog.a
 bin/AlpineCmdIf: AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable ../bin/AlpineCmdIf"
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AlpineCmdIf.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable ../bin/AlpineCmdIf"
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AlpineCmdIf.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build: bin/AlpineCmdIf
 .PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/build
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/AlpineCmdIf && $(CMAKE_COMMAND) -P CMakeFiles/AlpineCmdIf.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/AlpineCmdIf && $(CMAKE_COMMAND) -P CMakeFiles/AlpineCmdIf.dir/cmake_clean.cmake
 .PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/clean
 
 AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/AlpineCmdIf /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/AlpineCmdIf /Users/user/sonoranpub/realpine/build/AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/DependInfo.cmake "--color=$(COLOR)" AlpineCmdIf
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/AlpineCmdIf /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/AlpineCmdIf /Users/user/cdev/exrealpine/build/AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/DependInfo.cmake "--color=$(COLOR)" AlpineCmdIf
 .PHONY : AlpineCmdIf/CMakeFiles/AlpineCmdIf.dir/depend
 

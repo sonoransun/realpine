@@ -154,6 +154,123 @@ AlpineConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back (currElement);
+
+    // UPnP Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "UPnP Enabled";
+    currElement->argOptionName = "upnpEnabled";
+    currElement->envOptionName = "UPNP_ENABLED";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // UPnP Lease Duration
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "UPnP Lease Duration";
+    currElement->argOptionName = "upnpLeaseDuration";
+    currElement->envOptionName = "UPNP_LEASE_DURATION";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // VPN Interface
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "VPN Interface";
+    currElement->argOptionName = "vpnInterface";
+    currElement->envOptionName = "VPN_INTERFACE";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // VPN External Address
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "VPN External Address";
+    currElement->argOptionName = "vpnExternalAddress";
+    currElement->envOptionName = "VPN_EXTERNAL_ADDRESS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // VPN Auto Detect
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "VPN Auto Detect";
+    currElement->argOptionName = "vpnAutoDetect";
+    currElement->envOptionName = "VPN_AUTO_DETECT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // Tor Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Tor Enabled";
+    currElement->argOptionName = "torEnabled";
+    currElement->envOptionName = "TOR_ENABLED";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // Tor Control Port
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Tor Control Port";
+    currElement->argOptionName = "torControlPort";
+    currElement->envOptionName = "TOR_CONTROL_PORT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // Tor SOCKS Port
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Tor SOCKS Port";
+    currElement->argOptionName = "torSocksPort";
+    currElement->envOptionName = "TOR_SOCKS_PORT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // Tor Control Auth
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Tor Control Auth";
+    currElement->argOptionName = "torControlAuth";
+    currElement->envOptionName = "TOR_CONTROL_AUTH";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // FUSE Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Enabled";
+    currElement->argOptionName = "fuseEnabled";
+    currElement->envOptionName = "FUSE_ENABLED";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // FUSE Mount Point
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Mount Point";
+    currElement->argOptionName = "fuseMountPoint";
+    currElement->envOptionName = "FUSE_MOUNT_POINT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // FUSE Cache TTL
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Cache TTL";
+    currElement->argOptionName = "fuseCacheTtl";
+    currElement->envOptionName = "FUSE_CACHE_TTL";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
+
+    // FUSE Feedback Threshold
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "FUSE Feedback Threshold";
+    currElement->argOptionName = "fuseFeedbackThreshold";
+    currElement->envOptionName = "FUSE_FEEDBACK_THRESHOLD";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
 }
 
 

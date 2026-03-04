@@ -29,4 +29,7 @@ class QueryHandler
     static HttpResponse  cancelQuery (const HttpRequest & request,
                                       const std::unordered_map<string, string> & params);
 
+    static HttpResponse  streamQueryResults (const HttpRequest & request,
+                                              const std::unordered_map<string, string> & params);
+
 };

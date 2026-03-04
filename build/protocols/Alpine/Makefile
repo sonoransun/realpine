@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/protocols/Alpine//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/protocols/Alpine//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
 .PHONY : protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ AlpineProtocol: protocols/Alpine/CMakeFiles/AlpineProtocol.dir/rule
 
 # fast build rule for target.
 AlpineProtocol/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build
 .PHONY : AlpineProtocol/fast
 
 AlpineBaseOptionData.o: AlpineBaseOptionData.cpp.o
@@ -135,7 +210,7 @@ AlpineBaseOptionData.o: AlpineBaseOptionData.cpp.o
 
 # target to build an object file
 AlpineBaseOptionData.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.o
 .PHONY : AlpineBaseOptionData.cpp.o
 
 AlpineBaseOptionData.i: AlpineBaseOptionData.cpp.i
@@ -143,7 +218,7 @@ AlpineBaseOptionData.i: AlpineBaseOptionData.cpp.i
 
 # target to preprocess a source file
 AlpineBaseOptionData.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.i
 .PHONY : AlpineBaseOptionData.cpp.i
 
 AlpineBaseOptionData.s: AlpineBaseOptionData.cpp.s
@@ -151,7 +226,7 @@ AlpineBaseOptionData.s: AlpineBaseOptionData.cpp.s
 
 # target to generate assembly for a file
 AlpineBaseOptionData.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBaseOptionData.cpp.s
 .PHONY : AlpineBaseOptionData.cpp.s
 
 AlpineBroadcast.o: AlpineBroadcast.cpp.o
@@ -159,7 +234,7 @@ AlpineBroadcast.o: AlpineBroadcast.cpp.o
 
 # target to build an object file
 AlpineBroadcast.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.o
 .PHONY : AlpineBroadcast.cpp.o
 
 AlpineBroadcast.i: AlpineBroadcast.cpp.i
@@ -167,7 +242,7 @@ AlpineBroadcast.i: AlpineBroadcast.cpp.i
 
 # target to preprocess a source file
 AlpineBroadcast.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.i
 .PHONY : AlpineBroadcast.cpp.i
 
 AlpineBroadcast.s: AlpineBroadcast.cpp.s
@@ -175,7 +250,7 @@ AlpineBroadcast.s: AlpineBroadcast.cpp.s
 
 # target to generate assembly for a file
 AlpineBroadcast.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineBroadcast.cpp.s
 .PHONY : AlpineBroadcast.cpp.s
 
 AlpineExtensionIndex.o: AlpineExtensionIndex.cpp.o
@@ -183,7 +258,7 @@ AlpineExtensionIndex.o: AlpineExtensionIndex.cpp.o
 
 # target to build an object file
 AlpineExtensionIndex.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.o
 .PHONY : AlpineExtensionIndex.cpp.o
 
 AlpineExtensionIndex.i: AlpineExtensionIndex.cpp.i
@@ -191,7 +266,7 @@ AlpineExtensionIndex.i: AlpineExtensionIndex.cpp.i
 
 # target to preprocess a source file
 AlpineExtensionIndex.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.i
 .PHONY : AlpineExtensionIndex.cpp.i
 
 AlpineExtensionIndex.s: AlpineExtensionIndex.cpp.s
@@ -199,7 +274,7 @@ AlpineExtensionIndex.s: AlpineExtensionIndex.cpp.s
 
 # target to generate assembly for a file
 AlpineExtensionIndex.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineExtensionIndex.cpp.s
 .PHONY : AlpineExtensionIndex.cpp.s
 
 AlpineGroup.o: AlpineGroup.cpp.o
@@ -207,7 +282,7 @@ AlpineGroup.o: AlpineGroup.cpp.o
 
 # target to build an object file
 AlpineGroup.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.o
 .PHONY : AlpineGroup.cpp.o
 
 AlpineGroup.i: AlpineGroup.cpp.i
@@ -215,7 +290,7 @@ AlpineGroup.i: AlpineGroup.cpp.i
 
 # target to preprocess a source file
 AlpineGroup.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.i
 .PHONY : AlpineGroup.cpp.i
 
 AlpineGroup.s: AlpineGroup.cpp.s
@@ -223,7 +298,7 @@ AlpineGroup.s: AlpineGroup.cpp.s
 
 # target to generate assembly for a file
 AlpineGroup.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroup.cpp.s
 .PHONY : AlpineGroup.cpp.s
 
 AlpineGroupMgr.o: AlpineGroupMgr.cpp.o
@@ -231,7 +306,7 @@ AlpineGroupMgr.o: AlpineGroupMgr.cpp.o
 
 # target to build an object file
 AlpineGroupMgr.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.o
 .PHONY : AlpineGroupMgr.cpp.o
 
 AlpineGroupMgr.i: AlpineGroupMgr.cpp.i
@@ -239,7 +314,7 @@ AlpineGroupMgr.i: AlpineGroupMgr.cpp.i
 
 # target to preprocess a source file
 AlpineGroupMgr.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.i
 .PHONY : AlpineGroupMgr.cpp.i
 
 AlpineGroupMgr.s: AlpineGroupMgr.cpp.s
@@ -247,7 +322,7 @@ AlpineGroupMgr.s: AlpineGroupMgr.cpp.s
 
 # target to generate assembly for a file
 AlpineGroupMgr.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineGroupMgr.cpp.s
 .PHONY : AlpineGroupMgr.cpp.s
 
 AlpineModuleMgr.o: AlpineModuleMgr.cpp.o
@@ -255,7 +330,7 @@ AlpineModuleMgr.o: AlpineModuleMgr.cpp.o
 
 # target to build an object file
 AlpineModuleMgr.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.o
 .PHONY : AlpineModuleMgr.cpp.o
 
 AlpineModuleMgr.i: AlpineModuleMgr.cpp.i
@@ -263,7 +338,7 @@ AlpineModuleMgr.i: AlpineModuleMgr.cpp.i
 
 # target to preprocess a source file
 AlpineModuleMgr.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.i
 .PHONY : AlpineModuleMgr.cpp.i
 
 AlpineModuleMgr.s: AlpineModuleMgr.cpp.s
@@ -271,7 +346,7 @@ AlpineModuleMgr.s: AlpineModuleMgr.cpp.s
 
 # target to generate assembly for a file
 AlpineModuleMgr.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineModuleMgr.cpp.s
 .PHONY : AlpineModuleMgr.cpp.s
 
 AlpinePacket.o: AlpinePacket.cpp.o
@@ -279,7 +354,7 @@ AlpinePacket.o: AlpinePacket.cpp.o
 
 # target to build an object file
 AlpinePacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.o
 .PHONY : AlpinePacket.cpp.o
 
 AlpinePacket.i: AlpinePacket.cpp.i
@@ -287,7 +362,7 @@ AlpinePacket.i: AlpinePacket.cpp.i
 
 # target to preprocess a source file
 AlpinePacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.i
 .PHONY : AlpinePacket.cpp.i
 
 AlpinePacket.s: AlpinePacket.cpp.s
@@ -295,7 +370,7 @@ AlpinePacket.s: AlpinePacket.cpp.s
 
 # target to generate assembly for a file
 AlpinePacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePacket.cpp.s
 .PHONY : AlpinePacket.cpp.s
 
 AlpinePeerLocation.o: AlpinePeerLocation.cpp.o
@@ -303,7 +378,7 @@ AlpinePeerLocation.o: AlpinePeerLocation.cpp.o
 
 # target to build an object file
 AlpinePeerLocation.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.o
 .PHONY : AlpinePeerLocation.cpp.o
 
 AlpinePeerLocation.i: AlpinePeerLocation.cpp.i
@@ -311,7 +386,7 @@ AlpinePeerLocation.i: AlpinePeerLocation.cpp.i
 
 # target to preprocess a source file
 AlpinePeerLocation.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.i
 .PHONY : AlpinePeerLocation.cpp.i
 
 AlpinePeerLocation.s: AlpinePeerLocation.cpp.s
@@ -319,7 +394,7 @@ AlpinePeerLocation.s: AlpinePeerLocation.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerLocation.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerLocation.cpp.s
 .PHONY : AlpinePeerLocation.cpp.s
 
 AlpinePeerMgr.o: AlpinePeerMgr.cpp.o
@@ -327,7 +402,7 @@ AlpinePeerMgr.o: AlpinePeerMgr.cpp.o
 
 # target to build an object file
 AlpinePeerMgr.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.o
 .PHONY : AlpinePeerMgr.cpp.o
 
 AlpinePeerMgr.i: AlpinePeerMgr.cpp.i
@@ -335,7 +410,7 @@ AlpinePeerMgr.i: AlpinePeerMgr.cpp.i
 
 # target to preprocess a source file
 AlpinePeerMgr.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.i
 .PHONY : AlpinePeerMgr.cpp.i
 
 AlpinePeerMgr.s: AlpinePeerMgr.cpp.s
@@ -343,7 +418,7 @@ AlpinePeerMgr.s: AlpinePeerMgr.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerMgr.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerMgr.cpp.s
 .PHONY : AlpinePeerMgr.cpp.s
 
 AlpinePeerOptionData.o: AlpinePeerOptionData.cpp.o
@@ -351,7 +426,7 @@ AlpinePeerOptionData.o: AlpinePeerOptionData.cpp.o
 
 # target to build an object file
 AlpinePeerOptionData.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.o
 .PHONY : AlpinePeerOptionData.cpp.o
 
 AlpinePeerOptionData.i: AlpinePeerOptionData.cpp.i
@@ -359,7 +434,7 @@ AlpinePeerOptionData.i: AlpinePeerOptionData.cpp.i
 
 # target to preprocess a source file
 AlpinePeerOptionData.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.i
 .PHONY : AlpinePeerOptionData.cpp.i
 
 AlpinePeerOptionData.s: AlpinePeerOptionData.cpp.s
@@ -367,7 +442,7 @@ AlpinePeerOptionData.s: AlpinePeerOptionData.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerOptionData.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerOptionData.cpp.s
 .PHONY : AlpinePeerOptionData.cpp.s
 
 AlpinePeerPacket.o: AlpinePeerPacket.cpp.o
@@ -375,7 +450,7 @@ AlpinePeerPacket.o: AlpinePeerPacket.cpp.o
 
 # target to build an object file
 AlpinePeerPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.o
 .PHONY : AlpinePeerPacket.cpp.o
 
 AlpinePeerPacket.i: AlpinePeerPacket.cpp.i
@@ -383,7 +458,7 @@ AlpinePeerPacket.i: AlpinePeerPacket.cpp.i
 
 # target to preprocess a source file
 AlpinePeerPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.i
 .PHONY : AlpinePeerPacket.cpp.i
 
 AlpinePeerPacket.s: AlpinePeerPacket.cpp.s
@@ -391,7 +466,7 @@ AlpinePeerPacket.s: AlpinePeerPacket.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerPacket.cpp.s
 .PHONY : AlpinePeerPacket.cpp.s
 
 AlpinePeerProfile.o: AlpinePeerProfile.cpp.o
@@ -399,7 +474,7 @@ AlpinePeerProfile.o: AlpinePeerProfile.cpp.o
 
 # target to build an object file
 AlpinePeerProfile.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.o
 .PHONY : AlpinePeerProfile.cpp.o
 
 AlpinePeerProfile.i: AlpinePeerProfile.cpp.i
@@ -407,7 +482,7 @@ AlpinePeerProfile.i: AlpinePeerProfile.cpp.i
 
 # target to preprocess a source file
 AlpinePeerProfile.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.i
 .PHONY : AlpinePeerProfile.cpp.i
 
 AlpinePeerProfile.s: AlpinePeerProfile.cpp.s
@@ -415,7 +490,7 @@ AlpinePeerProfile.s: AlpinePeerProfile.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerProfile.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfile.cpp.s
 .PHONY : AlpinePeerProfile.cpp.s
 
 AlpinePeerProfileIndex.o: AlpinePeerProfileIndex.cpp.o
@@ -423,7 +498,7 @@ AlpinePeerProfileIndex.o: AlpinePeerProfileIndex.cpp.o
 
 # target to build an object file
 AlpinePeerProfileIndex.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.o
 .PHONY : AlpinePeerProfileIndex.cpp.o
 
 AlpinePeerProfileIndex.i: AlpinePeerProfileIndex.cpp.i
@@ -431,7 +506,7 @@ AlpinePeerProfileIndex.i: AlpinePeerProfileIndex.cpp.i
 
 # target to preprocess a source file
 AlpinePeerProfileIndex.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.i
 .PHONY : AlpinePeerProfileIndex.cpp.i
 
 AlpinePeerProfileIndex.s: AlpinePeerProfileIndex.cpp.s
@@ -439,7 +514,7 @@ AlpinePeerProfileIndex.s: AlpinePeerProfileIndex.cpp.s
 
 # target to generate assembly for a file
 AlpinePeerProfileIndex.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpinePeerProfileIndex.cpp.s
 .PHONY : AlpinePeerProfileIndex.cpp.s
 
 AlpineProtocol.o: AlpineProtocol.cpp.o
@@ -447,7 +522,7 @@ AlpineProtocol.o: AlpineProtocol.cpp.o
 
 # target to build an object file
 AlpineProtocol.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.o
 .PHONY : AlpineProtocol.cpp.o
 
 AlpineProtocol.i: AlpineProtocol.cpp.i
@@ -455,7 +530,7 @@ AlpineProtocol.i: AlpineProtocol.cpp.i
 
 # target to preprocess a source file
 AlpineProtocol.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.i
 .PHONY : AlpineProtocol.cpp.i
 
 AlpineProtocol.s: AlpineProtocol.cpp.s
@@ -463,7 +538,7 @@ AlpineProtocol.s: AlpineProtocol.cpp.s
 
 # target to generate assembly for a file
 AlpineProtocol.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProtocol.cpp.s
 .PHONY : AlpineProtocol.cpp.s
 
 AlpineProxyOptionData.o: AlpineProxyOptionData.cpp.o
@@ -471,7 +546,7 @@ AlpineProxyOptionData.o: AlpineProxyOptionData.cpp.o
 
 # target to build an object file
 AlpineProxyOptionData.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.o
 .PHONY : AlpineProxyOptionData.cpp.o
 
 AlpineProxyOptionData.i: AlpineProxyOptionData.cpp.i
@@ -479,7 +554,7 @@ AlpineProxyOptionData.i: AlpineProxyOptionData.cpp.i
 
 # target to preprocess a source file
 AlpineProxyOptionData.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.i
 .PHONY : AlpineProxyOptionData.cpp.i
 
 AlpineProxyOptionData.s: AlpineProxyOptionData.cpp.s
@@ -487,7 +562,7 @@ AlpineProxyOptionData.s: AlpineProxyOptionData.cpp.s
 
 # target to generate assembly for a file
 AlpineProxyOptionData.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyOptionData.cpp.s
 .PHONY : AlpineProxyOptionData.cpp.s
 
 AlpineProxyPacket.o: AlpineProxyPacket.cpp.o
@@ -495,7 +570,7 @@ AlpineProxyPacket.o: AlpineProxyPacket.cpp.o
 
 # target to build an object file
 AlpineProxyPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.o
 .PHONY : AlpineProxyPacket.cpp.o
 
 AlpineProxyPacket.i: AlpineProxyPacket.cpp.i
@@ -503,7 +578,7 @@ AlpineProxyPacket.i: AlpineProxyPacket.cpp.i
 
 # target to preprocess a source file
 AlpineProxyPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.i
 .PHONY : AlpineProxyPacket.cpp.i
 
 AlpineProxyPacket.s: AlpineProxyPacket.cpp.s
@@ -511,7 +586,7 @@ AlpineProxyPacket.s: AlpineProxyPacket.cpp.s
 
 # target to generate assembly for a file
 AlpineProxyPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineProxyPacket.cpp.s
 .PHONY : AlpineProxyPacket.cpp.s
 
 AlpineQuery.o: AlpineQuery.cpp.o
@@ -519,7 +594,7 @@ AlpineQuery.o: AlpineQuery.cpp.o
 
 # target to build an object file
 AlpineQuery.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.o
 .PHONY : AlpineQuery.cpp.o
 
 AlpineQuery.i: AlpineQuery.cpp.i
@@ -527,7 +602,7 @@ AlpineQuery.i: AlpineQuery.cpp.i
 
 # target to preprocess a source file
 AlpineQuery.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.i
 .PHONY : AlpineQuery.cpp.i
 
 AlpineQuery.s: AlpineQuery.cpp.s
@@ -535,7 +610,7 @@ AlpineQuery.s: AlpineQuery.cpp.s
 
 # target to generate assembly for a file
 AlpineQuery.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQuery.cpp.s
 .PHONY : AlpineQuery.cpp.s
 
 AlpineQueryMgr.o: AlpineQueryMgr.cpp.o
@@ -543,7 +618,7 @@ AlpineQueryMgr.o: AlpineQueryMgr.cpp.o
 
 # target to build an object file
 AlpineQueryMgr.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.o
 .PHONY : AlpineQueryMgr.cpp.o
 
 AlpineQueryMgr.i: AlpineQueryMgr.cpp.i
@@ -551,7 +626,7 @@ AlpineQueryMgr.i: AlpineQueryMgr.cpp.i
 
 # target to preprocess a source file
 AlpineQueryMgr.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.i
 .PHONY : AlpineQueryMgr.cpp.i
 
 AlpineQueryMgr.s: AlpineQueryMgr.cpp.s
@@ -559,7 +634,7 @@ AlpineQueryMgr.s: AlpineQueryMgr.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryMgr.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryMgr.cpp.s
 .PHONY : AlpineQueryMgr.cpp.s
 
 AlpineQueryModuleIndex.o: AlpineQueryModuleIndex.cpp.o
@@ -567,7 +642,7 @@ AlpineQueryModuleIndex.o: AlpineQueryModuleIndex.cpp.o
 
 # target to build an object file
 AlpineQueryModuleIndex.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.o
 .PHONY : AlpineQueryModuleIndex.cpp.o
 
 AlpineQueryModuleIndex.i: AlpineQueryModuleIndex.cpp.i
@@ -575,7 +650,7 @@ AlpineQueryModuleIndex.i: AlpineQueryModuleIndex.cpp.i
 
 # target to preprocess a source file
 AlpineQueryModuleIndex.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.i
 .PHONY : AlpineQueryModuleIndex.cpp.i
 
 AlpineQueryModuleIndex.s: AlpineQueryModuleIndex.cpp.s
@@ -583,7 +658,7 @@ AlpineQueryModuleIndex.s: AlpineQueryModuleIndex.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryModuleIndex.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryModuleIndex.cpp.s
 .PHONY : AlpineQueryModuleIndex.cpp.s
 
 AlpineQueryOptionData.o: AlpineQueryOptionData.cpp.o
@@ -591,7 +666,7 @@ AlpineQueryOptionData.o: AlpineQueryOptionData.cpp.o
 
 # target to build an object file
 AlpineQueryOptionData.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.o
 .PHONY : AlpineQueryOptionData.cpp.o
 
 AlpineQueryOptionData.i: AlpineQueryOptionData.cpp.i
@@ -599,7 +674,7 @@ AlpineQueryOptionData.i: AlpineQueryOptionData.cpp.i
 
 # target to preprocess a source file
 AlpineQueryOptionData.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.i
 .PHONY : AlpineQueryOptionData.cpp.i
 
 AlpineQueryOptionData.s: AlpineQueryOptionData.cpp.s
@@ -607,7 +682,7 @@ AlpineQueryOptionData.s: AlpineQueryOptionData.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryOptionData.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptionData.cpp.s
 .PHONY : AlpineQueryOptionData.cpp.s
 
 AlpineQueryOptions.o: AlpineQueryOptions.cpp.o
@@ -615,7 +690,7 @@ AlpineQueryOptions.o: AlpineQueryOptions.cpp.o
 
 # target to build an object file
 AlpineQueryOptions.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.o
 .PHONY : AlpineQueryOptions.cpp.o
 
 AlpineQueryOptions.i: AlpineQueryOptions.cpp.i
@@ -623,7 +698,7 @@ AlpineQueryOptions.i: AlpineQueryOptions.cpp.i
 
 # target to preprocess a source file
 AlpineQueryOptions.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.i
 .PHONY : AlpineQueryOptions.cpp.i
 
 AlpineQueryOptions.s: AlpineQueryOptions.cpp.s
@@ -631,7 +706,7 @@ AlpineQueryOptions.s: AlpineQueryOptions.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryOptions.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryOptions.cpp.s
 .PHONY : AlpineQueryOptions.cpp.s
 
 AlpineQueryPacket.o: AlpineQueryPacket.cpp.o
@@ -639,7 +714,7 @@ AlpineQueryPacket.o: AlpineQueryPacket.cpp.o
 
 # target to build an object file
 AlpineQueryPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.o
 .PHONY : AlpineQueryPacket.cpp.o
 
 AlpineQueryPacket.i: AlpineQueryPacket.cpp.i
@@ -647,7 +722,7 @@ AlpineQueryPacket.i: AlpineQueryPacket.cpp.i
 
 # target to preprocess a source file
 AlpineQueryPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.i
 .PHONY : AlpineQueryPacket.cpp.i
 
 AlpineQueryPacket.s: AlpineQueryPacket.cpp.s
@@ -655,7 +730,7 @@ AlpineQueryPacket.s: AlpineQueryPacket.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryPacket.cpp.s
 .PHONY : AlpineQueryPacket.cpp.s
 
 AlpineQueryRequest.o: AlpineQueryRequest.cpp.o
@@ -663,7 +738,7 @@ AlpineQueryRequest.o: AlpineQueryRequest.cpp.o
 
 # target to build an object file
 AlpineQueryRequest.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.o
 .PHONY : AlpineQueryRequest.cpp.o
 
 AlpineQueryRequest.i: AlpineQueryRequest.cpp.i
@@ -671,7 +746,7 @@ AlpineQueryRequest.i: AlpineQueryRequest.cpp.i
 
 # target to preprocess a source file
 AlpineQueryRequest.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.i
 .PHONY : AlpineQueryRequest.cpp.i
 
 AlpineQueryRequest.s: AlpineQueryRequest.cpp.s
@@ -679,7 +754,7 @@ AlpineQueryRequest.s: AlpineQueryRequest.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryRequest.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryRequest.cpp.s
 .PHONY : AlpineQueryRequest.cpp.s
 
 AlpineQueryResults.o: AlpineQueryResults.cpp.o
@@ -687,7 +762,7 @@ AlpineQueryResults.o: AlpineQueryResults.cpp.o
 
 # target to build an object file
 AlpineQueryResults.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.o
 .PHONY : AlpineQueryResults.cpp.o
 
 AlpineQueryResults.i: AlpineQueryResults.cpp.i
@@ -695,7 +770,7 @@ AlpineQueryResults.i: AlpineQueryResults.cpp.i
 
 # target to preprocess a source file
 AlpineQueryResults.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.i
 .PHONY : AlpineQueryResults.cpp.i
 
 AlpineQueryResults.s: AlpineQueryResults.cpp.s
@@ -703,7 +778,7 @@ AlpineQueryResults.s: AlpineQueryResults.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryResults.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryResults.cpp.s
 .PHONY : AlpineQueryResults.cpp.s
 
 AlpineQueryStatus.o: AlpineQueryStatus.cpp.o
@@ -711,7 +786,7 @@ AlpineQueryStatus.o: AlpineQueryStatus.cpp.o
 
 # target to build an object file
 AlpineQueryStatus.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.o
 .PHONY : AlpineQueryStatus.cpp.o
 
 AlpineQueryStatus.i: AlpineQueryStatus.cpp.i
@@ -719,7 +794,7 @@ AlpineQueryStatus.i: AlpineQueryStatus.cpp.i
 
 # target to preprocess a source file
 AlpineQueryStatus.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.i
 .PHONY : AlpineQueryStatus.cpp.i
 
 AlpineQueryStatus.s: AlpineQueryStatus.cpp.s
@@ -727,7 +802,7 @@ AlpineQueryStatus.s: AlpineQueryStatus.cpp.s
 
 # target to generate assembly for a file
 AlpineQueryStatus.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineQueryStatus.cpp.s
 .PHONY : AlpineQueryStatus.cpp.s
 
 AlpineRatingEngine.o: AlpineRatingEngine.cpp.o
@@ -735,7 +810,7 @@ AlpineRatingEngine.o: AlpineRatingEngine.cpp.o
 
 # target to build an object file
 AlpineRatingEngine.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.o
 .PHONY : AlpineRatingEngine.cpp.o
 
 AlpineRatingEngine.i: AlpineRatingEngine.cpp.i
@@ -743,7 +818,7 @@ AlpineRatingEngine.i: AlpineRatingEngine.cpp.i
 
 # target to preprocess a source file
 AlpineRatingEngine.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.i
 .PHONY : AlpineRatingEngine.cpp.i
 
 AlpineRatingEngine.s: AlpineRatingEngine.cpp.s
@@ -751,7 +826,7 @@ AlpineRatingEngine.s: AlpineRatingEngine.cpp.s
 
 # target to generate assembly for a file
 AlpineRatingEngine.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineRatingEngine.cpp.s
 .PHONY : AlpineRatingEngine.cpp.s
 
 AlpineResourceDesc.o: AlpineResourceDesc.cpp.o
@@ -759,7 +834,7 @@ AlpineResourceDesc.o: AlpineResourceDesc.cpp.o
 
 # target to build an object file
 AlpineResourceDesc.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.o
 .PHONY : AlpineResourceDesc.cpp.o
 
 AlpineResourceDesc.i: AlpineResourceDesc.cpp.i
@@ -767,7 +842,7 @@ AlpineResourceDesc.i: AlpineResourceDesc.cpp.i
 
 # target to preprocess a source file
 AlpineResourceDesc.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.i
 .PHONY : AlpineResourceDesc.cpp.i
 
 AlpineResourceDesc.s: AlpineResourceDesc.cpp.s
@@ -775,7 +850,7 @@ AlpineResourceDesc.s: AlpineResourceDesc.cpp.s
 
 # target to generate assembly for a file
 AlpineResourceDesc.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDesc.cpp.s
 .PHONY : AlpineResourceDesc.cpp.s
 
 AlpineResourceDescSet.o: AlpineResourceDescSet.cpp.o
@@ -783,7 +858,7 @@ AlpineResourceDescSet.o: AlpineResourceDescSet.cpp.o
 
 # target to build an object file
 AlpineResourceDescSet.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.o
 .PHONY : AlpineResourceDescSet.cpp.o
 
 AlpineResourceDescSet.i: AlpineResourceDescSet.cpp.i
@@ -791,7 +866,7 @@ AlpineResourceDescSet.i: AlpineResourceDescSet.cpp.i
 
 # target to preprocess a source file
 AlpineResourceDescSet.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.i
 .PHONY : AlpineResourceDescSet.cpp.i
 
 AlpineResourceDescSet.s: AlpineResourceDescSet.cpp.s
@@ -799,7 +874,7 @@ AlpineResourceDescSet.s: AlpineResourceDescSet.cpp.s
 
 # target to generate assembly for a file
 AlpineResourceDescSet.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineResourceDescSet.cpp.s
 .PHONY : AlpineResourceDescSet.cpp.s
 
 AlpineServiceThread.o: AlpineServiceThread.cpp.o
@@ -807,7 +882,7 @@ AlpineServiceThread.o: AlpineServiceThread.cpp.o
 
 # target to build an object file
 AlpineServiceThread.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.o
 .PHONY : AlpineServiceThread.cpp.o
 
 AlpineServiceThread.i: AlpineServiceThread.cpp.i
@@ -815,7 +890,7 @@ AlpineServiceThread.i: AlpineServiceThread.cpp.i
 
 # target to preprocess a source file
 AlpineServiceThread.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.i
 .PHONY : AlpineServiceThread.cpp.i
 
 AlpineServiceThread.s: AlpineServiceThread.cpp.s
@@ -823,7 +898,7 @@ AlpineServiceThread.s: AlpineServiceThread.cpp.s
 
 # target to generate assembly for a file
 AlpineServiceThread.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineServiceThread.cpp.s
 .PHONY : AlpineServiceThread.cpp.s
 
 AlpineStack.o: AlpineStack.cpp.o
@@ -831,7 +906,7 @@ AlpineStack.o: AlpineStack.cpp.o
 
 # target to build an object file
 AlpineStack.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.o
 .PHONY : AlpineStack.cpp.o
 
 AlpineStack.i: AlpineStack.cpp.i
@@ -839,7 +914,7 @@ AlpineStack.i: AlpineStack.cpp.i
 
 # target to preprocess a source file
 AlpineStack.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.i
 .PHONY : AlpineStack.cpp.i
 
 AlpineStack.s: AlpineStack.cpp.s
@@ -847,7 +922,7 @@ AlpineStack.s: AlpineStack.cpp.s
 
 # target to generate assembly for a file
 AlpineStack.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStack.cpp.s
 .PHONY : AlpineStack.cpp.s
 
 AlpineStackConfig.o: AlpineStackConfig.cpp.o
@@ -855,7 +930,7 @@ AlpineStackConfig.o: AlpineStackConfig.cpp.o
 
 # target to build an object file
 AlpineStackConfig.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.o
 .PHONY : AlpineStackConfig.cpp.o
 
 AlpineStackConfig.i: AlpineStackConfig.cpp.i
@@ -863,7 +938,7 @@ AlpineStackConfig.i: AlpineStackConfig.cpp.i
 
 # target to preprocess a source file
 AlpineStackConfig.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.i
 .PHONY : AlpineStackConfig.cpp.i
 
 AlpineStackConfig.s: AlpineStackConfig.cpp.s
@@ -871,8 +946,32 @@ AlpineStackConfig.s: AlpineStackConfig.cpp.s
 
 # target to generate assembly for a file
 AlpineStackConfig.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/AlpineStackConfig.cpp.s
 .PHONY : AlpineStackConfig.cpp.s
+
+QueryCache.o: QueryCache.cpp.o
+.PHONY : QueryCache.o
+
+# target to build an object file
+QueryCache.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/QueryCache.cpp.o
+.PHONY : QueryCache.cpp.o
+
+QueryCache.i: QueryCache.cpp.i
+.PHONY : QueryCache.i
+
+# target to preprocess a source file
+QueryCache.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/QueryCache.cpp.i
+.PHONY : QueryCache.cpp.i
+
+QueryCache.s: QueryCache.cpp.s
+.PHONY : QueryCache.s
+
+# target to generate assembly for a file
+QueryCache.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f protocols/Alpine/CMakeFiles/AlpineProtocol.dir/build.make protocols/Alpine/CMakeFiles/AlpineProtocol.dir/QueryCache.cpp.s
+.PHONY : QueryCache.cpp.s
 
 # Help Target
 help:
@@ -881,7 +980,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... AlpineProtocol"
 	@echo "... AlpineBaseOptionData.o"
 	@echo "... AlpineBaseOptionData.i"
@@ -976,6 +1082,9 @@ help:
 	@echo "... AlpineStackConfig.o"
 	@echo "... AlpineStackConfig.i"
 	@echo "... AlpineStackConfig.s"
+	@echo "... QueryCache.o"
+	@echo "... QueryCache.i"
+	@echo "... QueryCache.s"
 .PHONY : help
 
 
@@ -987,6 +1096,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

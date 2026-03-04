@@ -23,6 +23,11 @@
 #include <ReadLock.h>
 #include <Platform.h>
 
+#ifdef ALPINE_TLS_ENABLED
+#include <PeerTlsVerifier.h>
+#include <DtlsWrapper.h>
+#endif
+
 
 
 bool                              AlpineStack::initialized_s = false;
@@ -301,13 +306,28 @@ AlpineStack::cleanUp ()
 
 
 
-bool  
+bool
 AlpineStack::registerTransport (ulong                      peerId,
                                 AlpineDtcpConnTransport *  transport)
 {
 #ifdef _VERBOSE
     Log::Debug ("AlpineStack::registerTransport invoked.  Peer ID: "s +
                 std::to_string (peerId));
+#endif
+
+#ifdef ALPINE_TLS_ENABLED
+    // Mutual TLS verification chokepoint — reject unverified peers
+    if (PeerTlsVerifier::isMutualTlsEnabled()) {
+        if (!transport->isTlsEnabled()) {
+            Log::Error("AlpineStack::registerTransport: mutual TLS required but "
+                       "peer transport has no TLS. Rejecting peer "s +
+                       std::to_string(peerId));
+            return false;
+        }
+
+        Log::Info("AlpineStack::registerTransport: peer "s +
+                  std::to_string(peerId) + " passed mutual TLS verification"s);
+    }
 #endif
 
     // The PeerMgr is the only one that requires this information at the moment...

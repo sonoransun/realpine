@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include transport/Alpine/CMakeFiles/AlpineTransport.dir/depend.make
@@ -73,116 +73,116 @@ transport/Alpine/CMakeFiles/AlpineTransport.dir/codegen:
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/codegen
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineBroadcastUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnAcceptor.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnConnector.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnConnector.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnConnector.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnConnector.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnConnector.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnConnector.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnConnector.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnConnector.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnMux.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnMux.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnMux.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnMux.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnMux.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnMux.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnMux.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnMux.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnTransport.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnTransport.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpConnTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpConnTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpUdpTransport.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpUdpTransport.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineDtcpUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineDtcpUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineMulticastUdpTransport.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineMulticastUdpTransport.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineMulticastUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineMulticastUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineMulticastUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/flags.make
-transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o: /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp
+transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o: /Users/user/cdev/exrealpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o: transport/Alpine/CMakeFiles/AlpineTransport.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o -c /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o -MF CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o.d -o CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o -c /Users/user/cdev/exrealpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp > CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/transport/Alpine/AlpineRawWifiUdpTransport.cpp -o CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s
 
 # Object files for target AlpineTransport
 AlpineTransport_OBJECTS = \
@@ -208,19 +208,19 @@ lib/libAlpineTransport.a: transport/Alpine/CMakeFiles/AlpineTransport.dir/Alpine
 lib/libAlpineTransport.a: transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o
 lib/libAlpineTransport.a: transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make
 lib/libAlpineTransport.a: transport/Alpine/CMakeFiles/AlpineTransport.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library ../../lib/libAlpineTransport.a"
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && $(CMAKE_COMMAND) -P CMakeFiles/AlpineTransport.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AlpineTransport.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library ../../lib/libAlpineTransport.a"
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && $(CMAKE_COMMAND) -P CMakeFiles/AlpineTransport.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/AlpineTransport.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 transport/Alpine/CMakeFiles/AlpineTransport.dir/build: lib/libAlpineTransport.a
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/build
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/transport/Alpine && $(CMAKE_COMMAND) -P CMakeFiles/AlpineTransport.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/transport/Alpine && $(CMAKE_COMMAND) -P CMakeFiles/AlpineTransport.dir/cmake_clean.cmake
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/clean
 
 transport/Alpine/CMakeFiles/AlpineTransport.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/transport/Alpine /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/transport/Alpine /Users/user/sonoranpub/realpine/build/transport/Alpine/CMakeFiles/AlpineTransport.dir/DependInfo.cmake "--color=$(COLOR)" AlpineTransport
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/transport/Alpine /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/transport/Alpine /Users/user/cdev/exrealpine/build/transport/Alpine/CMakeFiles/AlpineTransport.dir/DependInfo.cmake "--color=$(COLOR)" AlpineTransport
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/depend
 

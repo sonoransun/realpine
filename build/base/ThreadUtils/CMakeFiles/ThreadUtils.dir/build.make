@@ -53,10 +53,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 # Include any dependencies generated for this target.
 include base/ThreadUtils/CMakeFiles/ThreadUtils.dir/depend.make
@@ -73,130 +73,130 @@ base/ThreadUtils/CMakeFiles/ThreadUtils.dir/codegen:
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/codegen
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/AutoThread.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/AutoThread.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o -MF CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o.d -o CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/AutoThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o -MF CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o.d -o CMakeFiles/ThreadUtils.dir/AutoThread.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/AutoThread.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/AutoThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/AutoThread.cpp > CMakeFiles/ThreadUtils.dir/AutoThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/AutoThread.cpp > CMakeFiles/ThreadUtils.dir/AutoThread.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/AutoThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/AutoThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/AutoThread.cpp -o CMakeFiles/ThreadUtils.dir/AutoThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/AutoThread.cpp -o CMakeFiles/ThreadUtils.dir/AutoThread.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/Mutex.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/Mutex.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o -MF CMakeFiles/ThreadUtils.dir/Mutex.cpp.o.d -o CMakeFiles/ThreadUtils.dir/Mutex.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/Mutex.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.o -MF CMakeFiles/ThreadUtils.dir/Mutex.cpp.o.d -o CMakeFiles/ThreadUtils.dir/Mutex.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/Mutex.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/Mutex.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/Mutex.cpp > CMakeFiles/ThreadUtils.dir/Mutex.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/Mutex.cpp > CMakeFiles/ThreadUtils.dir/Mutex.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/Mutex.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/Mutex.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/Mutex.cpp -o CMakeFiles/ThreadUtils.dir/Mutex.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/Mutex.cpp -o CMakeFiles/ThreadUtils.dir/Mutex.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/MutexLock.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/MutexLock.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/MutexLock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/MutexLock.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/MutexLock.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/MutexLock.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/MutexLock.cpp > CMakeFiles/ThreadUtils.dir/MutexLock.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/MutexLock.cpp > CMakeFiles/ThreadUtils.dir/MutexLock.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/MutexLock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/MutexLock.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/MutexLock.cpp -o CMakeFiles/ThreadUtils.dir/MutexLock.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/MutexLock.cpp -o CMakeFiles/ThreadUtils.dir/MutexLock.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadLock.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/ReadLock.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadLock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ReadLock.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/ReadLock.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/ReadLock.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadLock.cpp > CMakeFiles/ThreadUtils.dir/ReadLock.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/ReadLock.cpp > CMakeFiles/ThreadUtils.dir/ReadLock.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadLock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/ReadLock.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadLock.cpp -o CMakeFiles/ThreadUtils.dir/ReadLock.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/ReadLock.cpp -o CMakeFiles/ThreadUtils.dir/ReadLock.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadWriteSem.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/ReadWriteSem.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o -MF CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadWriteSem.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o -MF CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/ReadWriteSem.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadWriteSem.cpp > CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/ReadWriteSem.cpp > CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/ReadWriteSem.cpp -o CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/ReadWriteSem.cpp -o CMakeFiles/ThreadUtils.dir/ReadWriteSem.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/SysThread.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/SysThread.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o -MF CMakeFiles/ThreadUtils.dir/SysThread.cpp.o.d -o CMakeFiles/ThreadUtils.dir/SysThread.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/SysThread.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.o -MF CMakeFiles/ThreadUtils.dir/SysThread.cpp.o.d -o CMakeFiles/ThreadUtils.dir/SysThread.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/SysThread.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/SysThread.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/SysThread.cpp > CMakeFiles/ThreadUtils.dir/SysThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/SysThread.cpp > CMakeFiles/ThreadUtils.dir/SysThread.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/SysThread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/SysThread.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/SysThread.cpp -o CMakeFiles/ThreadUtils.dir/SysThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/SysThread.cpp -o CMakeFiles/ThreadUtils.dir/SysThread.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadSigMask.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadSigMask.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o -MF CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadSigMask.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o -MF CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadSigMask.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadSigMask.cpp > CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadSigMask.cpp > CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadSigMask.cpp -o CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadSigMask.cpp -o CMakeFiles/ThreadUtils.dir/ThreadSigMask.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadUtils.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadUtils.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o -MF CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadUtils.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o -MF CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o.d -o CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadUtils.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadUtils.cpp > CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadUtils.cpp > CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/ThreadUtils.cpp -o CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/ThreadUtils.cpp -o CMakeFiles/ThreadUtils.dir/ThreadUtils.cpp.s
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/flags.make
-base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o: /Users/user/sonoranpub/realpine/base/ThreadUtils/WriteLock.cpp
+base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o: /Users/user/cdev/exrealpine/base/ThreadUtils/WriteLock.cpp
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o -c /Users/user/sonoranpub/realpine/base/ThreadUtils/WriteLock.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o -MF CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o.d -o CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o -c /Users/user/cdev/exrealpine/base/ThreadUtils/WriteLock.cpp
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/ThreadUtils.dir/WriteLock.cpp.i"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/sonoranpub/realpine/base/ThreadUtils/WriteLock.cpp > CMakeFiles/ThreadUtils.dir/WriteLock.cpp.i
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/user/cdev/exrealpine/base/ThreadUtils/WriteLock.cpp > CMakeFiles/ThreadUtils.dir/WriteLock.cpp.i
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/ThreadUtils.dir/WriteLock.cpp.s"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/sonoranpub/realpine/base/ThreadUtils/WriteLock.cpp -o CMakeFiles/ThreadUtils.dir/WriteLock.cpp.s
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/user/cdev/exrealpine/base/ThreadUtils/WriteLock.cpp -o CMakeFiles/ThreadUtils.dir/WriteLock.cpp.s
 
 # Object files for target ThreadUtils
 ThreadUtils_OBJECTS = \
@@ -224,19 +224,19 @@ lib/libThreadUtils.a: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/ThreadUtils.cp
 lib/libThreadUtils.a: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/WriteLock.cpp.o
 lib/libThreadUtils.a: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build.make
 lib/libThreadUtils.a: base/ThreadUtils/CMakeFiles/ThreadUtils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/sonoranpub/realpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library ../../lib/libThreadUtils.a"
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -P CMakeFiles/ThreadUtils.dir/cmake_clean_target.cmake
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ThreadUtils.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/user/cdev/exrealpine/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library ../../lib/libThreadUtils.a"
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -P CMakeFiles/ThreadUtils.dir/cmake_clean_target.cmake
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ThreadUtils.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build: lib/libThreadUtils.a
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/build
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/clean:
-	cd /Users/user/sonoranpub/realpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -P CMakeFiles/ThreadUtils.dir/cmake_clean.cmake
+	cd /Users/user/cdev/exrealpine/build/base/ThreadUtils && $(CMAKE_COMMAND) -P CMakeFiles/ThreadUtils.dir/cmake_clean.cmake
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/clean
 
 base/ThreadUtils/CMakeFiles/ThreadUtils.dir/depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/sonoranpub/realpine /Users/user/sonoranpub/realpine/base/ThreadUtils /Users/user/sonoranpub/realpine/build /Users/user/sonoranpub/realpine/build/base/ThreadUtils /Users/user/sonoranpub/realpine/build/base/ThreadUtils/CMakeFiles/ThreadUtils.dir/DependInfo.cmake "--color=$(COLOR)" ThreadUtils
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/user/cdev/exrealpine /Users/user/cdev/exrealpine/base/ThreadUtils /Users/user/cdev/exrealpine/build /Users/user/cdev/exrealpine/build/base/ThreadUtils /Users/user/cdev/exrealpine/build/base/ThreadUtils/CMakeFiles/ThreadUtils.dir/DependInfo.cmake "--color=$(COLOR)" ThreadUtils
 .PHONY : base/ThreadUtils/CMakeFiles/ThreadUtils.dir/depend
 

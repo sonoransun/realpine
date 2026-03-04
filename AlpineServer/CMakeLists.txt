@@ -34,3 +34,7 @@ if(ALPINE_ENABLE_CORBA)
         Alpine::AlpineCorbaServer
     )
 endif()
+if(ALPINE_ENABLE_FUSE)
+    target_link_libraries(AlpineServer PRIVATE Alpine::VfsUtils)
+    target_compile_definitions(AlpineServer PRIVATE ALPINE_FUSE_ENABLED)
+endif()

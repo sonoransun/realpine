@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/transport/Dtcp//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/transport/Dtcp//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 transport/Dtcp/CMakeFiles/Dtcp.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/CMakeFiles/Dtcp.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Dtcp/CMakeFiles/Dtcp.dir/rule
 .PHONY : transport/Dtcp/CMakeFiles/Dtcp.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ Dtcp: transport/Dtcp/CMakeFiles/Dtcp.dir/rule
 
 # fast build rule for target.
 Dtcp/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/build
 .PHONY : Dtcp/fast
 
 DtcpBaseConnAcceptor.o: DtcpBaseConnAcceptor.cpp.o
@@ -135,7 +210,7 @@ DtcpBaseConnAcceptor.o: DtcpBaseConnAcceptor.cpp.o
 
 # target to build an object file
 DtcpBaseConnAcceptor.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.o
 .PHONY : DtcpBaseConnAcceptor.cpp.o
 
 DtcpBaseConnAcceptor.i: DtcpBaseConnAcceptor.cpp.i
@@ -143,7 +218,7 @@ DtcpBaseConnAcceptor.i: DtcpBaseConnAcceptor.cpp.i
 
 # target to preprocess a source file
 DtcpBaseConnAcceptor.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.i
 .PHONY : DtcpBaseConnAcceptor.cpp.i
 
 DtcpBaseConnAcceptor.s: DtcpBaseConnAcceptor.cpp.s
@@ -151,7 +226,7 @@ DtcpBaseConnAcceptor.s: DtcpBaseConnAcceptor.cpp.s
 
 # target to generate assembly for a file
 DtcpBaseConnAcceptor.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnAcceptor.cpp.s
 .PHONY : DtcpBaseConnAcceptor.cpp.s
 
 DtcpBaseConnConnector.o: DtcpBaseConnConnector.cpp.o
@@ -159,7 +234,7 @@ DtcpBaseConnConnector.o: DtcpBaseConnConnector.cpp.o
 
 # target to build an object file
 DtcpBaseConnConnector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.o
 .PHONY : DtcpBaseConnConnector.cpp.o
 
 DtcpBaseConnConnector.i: DtcpBaseConnConnector.cpp.i
@@ -167,7 +242,7 @@ DtcpBaseConnConnector.i: DtcpBaseConnConnector.cpp.i
 
 # target to preprocess a source file
 DtcpBaseConnConnector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.i
 .PHONY : DtcpBaseConnConnector.cpp.i
 
 DtcpBaseConnConnector.s: DtcpBaseConnConnector.cpp.s
@@ -175,7 +250,7 @@ DtcpBaseConnConnector.s: DtcpBaseConnConnector.cpp.s
 
 # target to generate assembly for a file
 DtcpBaseConnConnector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnConnector.cpp.s
 .PHONY : DtcpBaseConnConnector.cpp.s
 
 DtcpBaseConnMux.o: DtcpBaseConnMux.cpp.o
@@ -183,7 +258,7 @@ DtcpBaseConnMux.o: DtcpBaseConnMux.cpp.o
 
 # target to build an object file
 DtcpBaseConnMux.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.o
 .PHONY : DtcpBaseConnMux.cpp.o
 
 DtcpBaseConnMux.i: DtcpBaseConnMux.cpp.i
@@ -191,7 +266,7 @@ DtcpBaseConnMux.i: DtcpBaseConnMux.cpp.i
 
 # target to preprocess a source file
 DtcpBaseConnMux.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.i
 .PHONY : DtcpBaseConnMux.cpp.i
 
 DtcpBaseConnMux.s: DtcpBaseConnMux.cpp.s
@@ -199,7 +274,7 @@ DtcpBaseConnMux.s: DtcpBaseConnMux.cpp.s
 
 # target to generate assembly for a file
 DtcpBaseConnMux.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnMux.cpp.s
 .PHONY : DtcpBaseConnMux.cpp.s
 
 DtcpBaseConnTransport.o: DtcpBaseConnTransport.cpp.o
@@ -207,7 +282,7 @@ DtcpBaseConnTransport.o: DtcpBaseConnTransport.cpp.o
 
 # target to build an object file
 DtcpBaseConnTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.o
 .PHONY : DtcpBaseConnTransport.cpp.o
 
 DtcpBaseConnTransport.i: DtcpBaseConnTransport.cpp.i
@@ -215,7 +290,7 @@ DtcpBaseConnTransport.i: DtcpBaseConnTransport.cpp.i
 
 # target to preprocess a source file
 DtcpBaseConnTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.i
 .PHONY : DtcpBaseConnTransport.cpp.i
 
 DtcpBaseConnTransport.s: DtcpBaseConnTransport.cpp.s
@@ -223,7 +298,7 @@ DtcpBaseConnTransport.s: DtcpBaseConnTransport.cpp.s
 
 # target to generate assembly for a file
 DtcpBaseConnTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseConnTransport.cpp.s
 .PHONY : DtcpBaseConnTransport.cpp.s
 
 DtcpBaseUdpTransport.o: DtcpBaseUdpTransport.cpp.o
@@ -231,7 +306,7 @@ DtcpBaseUdpTransport.o: DtcpBaseUdpTransport.cpp.o
 
 # target to build an object file
 DtcpBaseUdpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.o
 .PHONY : DtcpBaseUdpTransport.cpp.o
 
 DtcpBaseUdpTransport.i: DtcpBaseUdpTransport.cpp.i
@@ -239,7 +314,7 @@ DtcpBaseUdpTransport.i: DtcpBaseUdpTransport.cpp.i
 
 # target to preprocess a source file
 DtcpBaseUdpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.i
 .PHONY : DtcpBaseUdpTransport.cpp.i
 
 DtcpBaseUdpTransport.s: DtcpBaseUdpTransport.cpp.s
@@ -247,7 +322,7 @@ DtcpBaseUdpTransport.s: DtcpBaseUdpTransport.cpp.s
 
 # target to generate assembly for a file
 DtcpBaseUdpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBaseUdpTransport.cpp.s
 .PHONY : DtcpBaseUdpTransport.cpp.s
 
 DtcpBroadcast.o: DtcpBroadcast.cpp.o
@@ -255,7 +330,7 @@ DtcpBroadcast.o: DtcpBroadcast.cpp.o
 
 # target to build an object file
 DtcpBroadcast.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.o
 .PHONY : DtcpBroadcast.cpp.o
 
 DtcpBroadcast.i: DtcpBroadcast.cpp.i
@@ -263,7 +338,7 @@ DtcpBroadcast.i: DtcpBroadcast.cpp.i
 
 # target to preprocess a source file
 DtcpBroadcast.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.i
 .PHONY : DtcpBroadcast.cpp.i
 
 DtcpBroadcast.s: DtcpBroadcast.cpp.s
@@ -271,7 +346,7 @@ DtcpBroadcast.s: DtcpBroadcast.cpp.s
 
 # target to generate assembly for a file
 DtcpBroadcast.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcast.cpp.s
 .PHONY : DtcpBroadcast.cpp.s
 
 DtcpBroadcastMgr.o: DtcpBroadcastMgr.cpp.o
@@ -279,7 +354,7 @@ DtcpBroadcastMgr.o: DtcpBroadcastMgr.cpp.o
 
 # target to build an object file
 DtcpBroadcastMgr.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.o
 .PHONY : DtcpBroadcastMgr.cpp.o
 
 DtcpBroadcastMgr.i: DtcpBroadcastMgr.cpp.i
@@ -287,7 +362,7 @@ DtcpBroadcastMgr.i: DtcpBroadcastMgr.cpp.i
 
 # target to preprocess a source file
 DtcpBroadcastMgr.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.i
 .PHONY : DtcpBroadcastMgr.cpp.i
 
 DtcpBroadcastMgr.s: DtcpBroadcastMgr.cpp.s
@@ -295,7 +370,7 @@ DtcpBroadcastMgr.s: DtcpBroadcastMgr.cpp.s
 
 # target to generate assembly for a file
 DtcpBroadcastMgr.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastMgr.cpp.s
 .PHONY : DtcpBroadcastMgr.cpp.s
 
 DtcpBroadcastSet.o: DtcpBroadcastSet.cpp.o
@@ -303,7 +378,7 @@ DtcpBroadcastSet.o: DtcpBroadcastSet.cpp.o
 
 # target to build an object file
 DtcpBroadcastSet.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.o
 .PHONY : DtcpBroadcastSet.cpp.o
 
 DtcpBroadcastSet.i: DtcpBroadcastSet.cpp.i
@@ -311,7 +386,7 @@ DtcpBroadcastSet.i: DtcpBroadcastSet.cpp.i
 
 # target to preprocess a source file
 DtcpBroadcastSet.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.i
 .PHONY : DtcpBroadcastSet.cpp.i
 
 DtcpBroadcastSet.s: DtcpBroadcastSet.cpp.s
@@ -319,7 +394,7 @@ DtcpBroadcastSet.s: DtcpBroadcastSet.cpp.s
 
 # target to generate assembly for a file
 DtcpBroadcastSet.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastSet.cpp.s
 .PHONY : DtcpBroadcastSet.cpp.s
 
 DtcpBroadcastStates.o: DtcpBroadcastStates.cpp.o
@@ -327,7 +402,7 @@ DtcpBroadcastStates.o: DtcpBroadcastStates.cpp.o
 
 # target to build an object file
 DtcpBroadcastStates.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.o
 .PHONY : DtcpBroadcastStates.cpp.o
 
 DtcpBroadcastStates.i: DtcpBroadcastStates.cpp.i
@@ -335,7 +410,7 @@ DtcpBroadcastStates.i: DtcpBroadcastStates.cpp.i
 
 # target to preprocess a source file
 DtcpBroadcastStates.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.i
 .PHONY : DtcpBroadcastStates.cpp.i
 
 DtcpBroadcastStates.s: DtcpBroadcastStates.cpp.s
@@ -343,7 +418,7 @@ DtcpBroadcastStates.s: DtcpBroadcastStates.cpp.s
 
 # target to generate assembly for a file
 DtcpBroadcastStates.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpBroadcastStates.cpp.s
 .PHONY : DtcpBroadcastStates.cpp.s
 
 DtcpConnPacket.o: DtcpConnPacket.cpp.o
@@ -351,7 +426,7 @@ DtcpConnPacket.o: DtcpConnPacket.cpp.o
 
 # target to build an object file
 DtcpConnPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.o
 .PHONY : DtcpConnPacket.cpp.o
 
 DtcpConnPacket.i: DtcpConnPacket.cpp.i
@@ -359,7 +434,7 @@ DtcpConnPacket.i: DtcpConnPacket.cpp.i
 
 # target to preprocess a source file
 DtcpConnPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.i
 .PHONY : DtcpConnPacket.cpp.i
 
 DtcpConnPacket.s: DtcpConnPacket.cpp.s
@@ -367,7 +442,7 @@ DtcpConnPacket.s: DtcpConnPacket.cpp.s
 
 # target to generate assembly for a file
 DtcpConnPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnPacket.cpp.s
 .PHONY : DtcpConnPacket.cpp.s
 
 DtcpConnectionMap.o: DtcpConnectionMap.cpp.o
@@ -375,7 +450,7 @@ DtcpConnectionMap.o: DtcpConnectionMap.cpp.o
 
 # target to build an object file
 DtcpConnectionMap.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.o
 .PHONY : DtcpConnectionMap.cpp.o
 
 DtcpConnectionMap.i: DtcpConnectionMap.cpp.i
@@ -383,7 +458,7 @@ DtcpConnectionMap.i: DtcpConnectionMap.cpp.i
 
 # target to preprocess a source file
 DtcpConnectionMap.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.i
 .PHONY : DtcpConnectionMap.cpp.i
 
 DtcpConnectionMap.s: DtcpConnectionMap.cpp.s
@@ -391,7 +466,7 @@ DtcpConnectionMap.s: DtcpConnectionMap.cpp.s
 
 # target to generate assembly for a file
 DtcpConnectionMap.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpConnectionMap.cpp.s
 .PHONY : DtcpConnectionMap.cpp.s
 
 DtcpDataPacket.o: DtcpDataPacket.cpp.o
@@ -399,7 +474,7 @@ DtcpDataPacket.o: DtcpDataPacket.cpp.o
 
 # target to build an object file
 DtcpDataPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.o
 .PHONY : DtcpDataPacket.cpp.o
 
 DtcpDataPacket.i: DtcpDataPacket.cpp.i
@@ -407,7 +482,7 @@ DtcpDataPacket.i: DtcpDataPacket.cpp.i
 
 # target to preprocess a source file
 DtcpDataPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.i
 .PHONY : DtcpDataPacket.cpp.i
 
 DtcpDataPacket.s: DtcpDataPacket.cpp.s
@@ -415,7 +490,7 @@ DtcpDataPacket.s: DtcpDataPacket.cpp.s
 
 # target to generate assembly for a file
 DtcpDataPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpDataPacket.cpp.s
 .PHONY : DtcpDataPacket.cpp.s
 
 DtcpFilter.o: DtcpFilter.cpp.o
@@ -423,7 +498,7 @@ DtcpFilter.o: DtcpFilter.cpp.o
 
 # target to build an object file
 DtcpFilter.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.o
 .PHONY : DtcpFilter.cpp.o
 
 DtcpFilter.i: DtcpFilter.cpp.i
@@ -431,7 +506,7 @@ DtcpFilter.i: DtcpFilter.cpp.i
 
 # target to preprocess a source file
 DtcpFilter.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.i
 .PHONY : DtcpFilter.cpp.i
 
 DtcpFilter.s: DtcpFilter.cpp.s
@@ -439,7 +514,7 @@ DtcpFilter.s: DtcpFilter.cpp.s
 
 # target to generate assembly for a file
 DtcpFilter.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpFilter.cpp.s
 .PHONY : DtcpFilter.cpp.s
 
 DtcpIORecord.o: DtcpIORecord.cpp.o
@@ -447,7 +522,7 @@ DtcpIORecord.o: DtcpIORecord.cpp.o
 
 # target to build an object file
 DtcpIORecord.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.o
 .PHONY : DtcpIORecord.cpp.o
 
 DtcpIORecord.i: DtcpIORecord.cpp.i
@@ -455,7 +530,7 @@ DtcpIORecord.i: DtcpIORecord.cpp.i
 
 # target to preprocess a source file
 DtcpIORecord.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.i
 .PHONY : DtcpIORecord.cpp.i
 
 DtcpIORecord.s: DtcpIORecord.cpp.s
@@ -463,7 +538,7 @@ DtcpIORecord.s: DtcpIORecord.cpp.s
 
 # target to generate assembly for a file
 DtcpIORecord.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpIORecord.cpp.s
 .PHONY : DtcpIORecord.cpp.s
 
 DtcpMonitorThread.o: DtcpMonitorThread.cpp.o
@@ -471,7 +546,7 @@ DtcpMonitorThread.o: DtcpMonitorThread.cpp.o
 
 # target to build an object file
 DtcpMonitorThread.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.o
 .PHONY : DtcpMonitorThread.cpp.o
 
 DtcpMonitorThread.i: DtcpMonitorThread.cpp.i
@@ -479,7 +554,7 @@ DtcpMonitorThread.i: DtcpMonitorThread.cpp.i
 
 # target to preprocess a source file
 DtcpMonitorThread.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.i
 .PHONY : DtcpMonitorThread.cpp.i
 
 DtcpMonitorThread.s: DtcpMonitorThread.cpp.s
@@ -487,7 +562,7 @@ DtcpMonitorThread.s: DtcpMonitorThread.cpp.s
 
 # target to generate assembly for a file
 DtcpMonitorThread.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpMonitorThread.cpp.s
 .PHONY : DtcpMonitorThread.cpp.s
 
 DtcpNetId.o: DtcpNetId.cpp.o
@@ -495,7 +570,7 @@ DtcpNetId.o: DtcpNetId.cpp.o
 
 # target to build an object file
 DtcpNetId.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.o
 .PHONY : DtcpNetId.cpp.o
 
 DtcpNetId.i: DtcpNetId.cpp.i
@@ -503,7 +578,7 @@ DtcpNetId.i: DtcpNetId.cpp.i
 
 # target to preprocess a source file
 DtcpNetId.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.i
 .PHONY : DtcpNetId.cpp.i
 
 DtcpNetId.s: DtcpNetId.cpp.s
@@ -511,7 +586,7 @@ DtcpNetId.s: DtcpNetId.cpp.s
 
 # target to generate assembly for a file
 DtcpNetId.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpNetId.cpp.s
 .PHONY : DtcpNetId.cpp.s
 
 DtcpPacket.o: DtcpPacket.cpp.o
@@ -519,7 +594,7 @@ DtcpPacket.o: DtcpPacket.cpp.o
 
 # target to build an object file
 DtcpPacket.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.o
 .PHONY : DtcpPacket.cpp.o
 
 DtcpPacket.i: DtcpPacket.cpp.i
@@ -527,7 +602,7 @@ DtcpPacket.i: DtcpPacket.cpp.i
 
 # target to preprocess a source file
 DtcpPacket.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.i
 .PHONY : DtcpPacket.cpp.i
 
 DtcpPacket.s: DtcpPacket.cpp.s
@@ -535,7 +610,7 @@ DtcpPacket.s: DtcpPacket.cpp.s
 
 # target to generate assembly for a file
 DtcpPacket.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPacket.cpp.s
 .PHONY : DtcpPacket.cpp.s
 
 DtcpPendingAckMap.o: DtcpPendingAckMap.cpp.o
@@ -543,7 +618,7 @@ DtcpPendingAckMap.o: DtcpPendingAckMap.cpp.o
 
 # target to build an object file
 DtcpPendingAckMap.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.o
 .PHONY : DtcpPendingAckMap.cpp.o
 
 DtcpPendingAckMap.i: DtcpPendingAckMap.cpp.i
@@ -551,7 +626,7 @@ DtcpPendingAckMap.i: DtcpPendingAckMap.cpp.i
 
 # target to preprocess a source file
 DtcpPendingAckMap.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.i
 .PHONY : DtcpPendingAckMap.cpp.i
 
 DtcpPendingAckMap.s: DtcpPendingAckMap.cpp.s
@@ -559,7 +634,7 @@ DtcpPendingAckMap.s: DtcpPendingAckMap.cpp.s
 
 # target to generate assembly for a file
 DtcpPendingAckMap.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpPendingAckMap.cpp.s
 .PHONY : DtcpPendingAckMap.cpp.s
 
 DtcpSendQueue.o: DtcpSendQueue.cpp.o
@@ -567,7 +642,7 @@ DtcpSendQueue.o: DtcpSendQueue.cpp.o
 
 # target to build an object file
 DtcpSendQueue.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.o
 .PHONY : DtcpSendQueue.cpp.o
 
 DtcpSendQueue.i: DtcpSendQueue.cpp.i
@@ -575,7 +650,7 @@ DtcpSendQueue.i: DtcpSendQueue.cpp.i
 
 # target to preprocess a source file
 DtcpSendQueue.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.i
 .PHONY : DtcpSendQueue.cpp.i
 
 DtcpSendQueue.s: DtcpSendQueue.cpp.s
@@ -583,7 +658,7 @@ DtcpSendQueue.s: DtcpSendQueue.cpp.s
 
 # target to generate assembly for a file
 DtcpSendQueue.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSendQueue.cpp.s
 .PHONY : DtcpSendQueue.cpp.s
 
 DtcpSocketThread.o: DtcpSocketThread.cpp.o
@@ -591,7 +666,7 @@ DtcpSocketThread.o: DtcpSocketThread.cpp.o
 
 # target to build an object file
 DtcpSocketThread.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.o
 .PHONY : DtcpSocketThread.cpp.o
 
 DtcpSocketThread.i: DtcpSocketThread.cpp.i
@@ -599,7 +674,7 @@ DtcpSocketThread.i: DtcpSocketThread.cpp.i
 
 # target to preprocess a source file
 DtcpSocketThread.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.i
 .PHONY : DtcpSocketThread.cpp.i
 
 DtcpSocketThread.s: DtcpSocketThread.cpp.s
@@ -607,7 +682,7 @@ DtcpSocketThread.s: DtcpSocketThread.cpp.s
 
 # target to generate assembly for a file
 DtcpSocketThread.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpSocketThread.cpp.s
 .PHONY : DtcpSocketThread.cpp.s
 
 DtcpStack.o: DtcpStack.cpp.o
@@ -615,7 +690,7 @@ DtcpStack.o: DtcpStack.cpp.o
 
 # target to build an object file
 DtcpStack.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.o
 .PHONY : DtcpStack.cpp.o
 
 DtcpStack.i: DtcpStack.cpp.i
@@ -623,7 +698,7 @@ DtcpStack.i: DtcpStack.cpp.i
 
 # target to preprocess a source file
 DtcpStack.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.i
 .PHONY : DtcpStack.cpp.i
 
 DtcpStack.s: DtcpStack.cpp.s
@@ -631,7 +706,7 @@ DtcpStack.s: DtcpStack.cpp.s
 
 # target to generate assembly for a file
 DtcpStack.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStack.cpp.s
 .PHONY : DtcpStack.cpp.s
 
 DtcpStackThread.o: DtcpStackThread.cpp.o
@@ -639,7 +714,7 @@ DtcpStackThread.o: DtcpStackThread.cpp.o
 
 # target to build an object file
 DtcpStackThread.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.o
 .PHONY : DtcpStackThread.cpp.o
 
 DtcpStackThread.i: DtcpStackThread.cpp.i
@@ -647,7 +722,7 @@ DtcpStackThread.i: DtcpStackThread.cpp.i
 
 # target to preprocess a source file
 DtcpStackThread.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.i
 .PHONY : DtcpStackThread.cpp.i
 
 DtcpStackThread.s: DtcpStackThread.cpp.s
@@ -655,7 +730,7 @@ DtcpStackThread.s: DtcpStackThread.cpp.s
 
 # target to generate assembly for a file
 DtcpStackThread.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpStackThread.cpp.s
 .PHONY : DtcpStackThread.cpp.s
 
 DtcpThreadTable.o: DtcpThreadTable.cpp.o
@@ -663,7 +738,7 @@ DtcpThreadTable.o: DtcpThreadTable.cpp.o
 
 # target to build an object file
 DtcpThreadTable.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.o
 .PHONY : DtcpThreadTable.cpp.o
 
 DtcpThreadTable.i: DtcpThreadTable.cpp.i
@@ -671,7 +746,7 @@ DtcpThreadTable.i: DtcpThreadTable.cpp.i
 
 # target to preprocess a source file
 DtcpThreadTable.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.i
 .PHONY : DtcpThreadTable.cpp.i
 
 DtcpThreadTable.s: DtcpThreadTable.cpp.s
@@ -679,8 +754,56 @@ DtcpThreadTable.s: DtcpThreadTable.cpp.s
 
 # target to generate assembly for a file
 DtcpThreadTable.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtcpThreadTable.cpp.s
 .PHONY : DtcpThreadTable.cpp.s
+
+DtlsWrapper.o: DtlsWrapper.cpp.o
+.PHONY : DtlsWrapper.o
+
+# target to build an object file
+DtlsWrapper.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.o
+.PHONY : DtlsWrapper.cpp.o
+
+DtlsWrapper.i: DtlsWrapper.cpp.i
+.PHONY : DtlsWrapper.i
+
+# target to preprocess a source file
+DtlsWrapper.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.i
+.PHONY : DtlsWrapper.cpp.i
+
+DtlsWrapper.s: DtlsWrapper.cpp.s
+.PHONY : DtlsWrapper.s
+
+# target to generate assembly for a file
+DtlsWrapper.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/DtlsWrapper.cpp.s
+.PHONY : DtlsWrapper.cpp.s
+
+PeerTlsVerifier.o: PeerTlsVerifier.cpp.o
+.PHONY : PeerTlsVerifier.o
+
+# target to build an object file
+PeerTlsVerifier.cpp.o:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.o
+.PHONY : PeerTlsVerifier.cpp.o
+
+PeerTlsVerifier.i: PeerTlsVerifier.cpp.i
+.PHONY : PeerTlsVerifier.i
+
+# target to preprocess a source file
+PeerTlsVerifier.cpp.i:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.i
+.PHONY : PeerTlsVerifier.cpp.i
+
+PeerTlsVerifier.s: PeerTlsVerifier.cpp.s
+.PHONY : PeerTlsVerifier.s
+
+# target to generate assembly for a file
+PeerTlsVerifier.cpp.s:
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Dtcp/CMakeFiles/Dtcp.dir/build.make transport/Dtcp/CMakeFiles/Dtcp.dir/PeerTlsVerifier.cpp.s
+.PHONY : PeerTlsVerifier.cpp.s
 
 # Help Target
 help:
@@ -689,7 +812,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... Dtcp"
 	@echo "... DtcpBaseConnAcceptor.o"
 	@echo "... DtcpBaseConnAcceptor.i"
@@ -760,6 +890,12 @@ help:
 	@echo "... DtcpThreadTable.o"
 	@echo "... DtcpThreadTable.i"
 	@echo "... DtcpThreadTable.s"
+	@echo "... DtlsWrapper.o"
+	@echo "... DtlsWrapper.i"
+	@echo "... DtlsWrapper.s"
+	@echo "... PeerTlsVerifier.o"
+	@echo "... PeerTlsVerifier.i"
+	@echo "... PeerTlsVerifier.s"
 .PHONY : help
 
 
@@ -771,6 +907,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

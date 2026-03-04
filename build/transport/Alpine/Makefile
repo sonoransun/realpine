@@ -57,13 +57,43 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/user/sonoranpub/realpine
+CMAKE_SOURCE_DIR = /Users/user/cdev/exrealpine
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/user/sonoranpub/realpine/build
+CMAKE_BINARY_DIR = /Users/user/cdev/exrealpine/build
 
 #=============================================================================
 # Targets provided globally by CMake.
+
+# Special rule for the target package
+package: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackConfig.cmake
+.PHONY : package
+
+# Special rule for the target package
+package/fast: package
+.PHONY : package/fast
+
+# Special rule for the target package_source
+package_source:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
+	cd /Users/user/cdev/exrealpine/build && /opt/homebrew/bin/cpack --config ./CPackSourceConfig.cmake
+.PHONY : package_source
+
+# Special rule for the target package_source
+package_source/fast: package_source
+.PHONY : package_source/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/opt/homebrew/bin/ctest $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -85,16 +115,61 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
+	/opt/homebrew/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
+	/opt/homebrew/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
 # The main all target
 all: cmake_check_build_system
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles /Users/user/sonoranpub/realpine/build/transport/Alpine//CMakeFiles/progress.marks
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/sonoranpub/realpine/build/CMakeFiles 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles /Users/user/cdev/exrealpine/build/transport/Alpine//CMakeFiles/progress.marks
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/user/cdev/exrealpine/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/clean
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/clean
 .PHONY : clean
 
 # The main clean target
@@ -103,22 +178,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/preinstall
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 transport/Alpine/CMakeFiles/AlpineTransport.dir/rule:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
 .PHONY : transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
 
 # Convenience name for target.
@@ -127,7 +202,7 @@ AlpineTransport: transport/Alpine/CMakeFiles/AlpineTransport.dir/rule
 
 # fast build rule for target.
 AlpineTransport/fast:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/build
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/build
 .PHONY : AlpineTransport/fast
 
 AlpineBroadcastUdpTransport.o: AlpineBroadcastUdpTransport.cpp.o
@@ -135,7 +210,7 @@ AlpineBroadcastUdpTransport.o: AlpineBroadcastUdpTransport.cpp.o
 
 # target to build an object file
 AlpineBroadcastUdpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.o
 .PHONY : AlpineBroadcastUdpTransport.cpp.o
 
 AlpineBroadcastUdpTransport.i: AlpineBroadcastUdpTransport.cpp.i
@@ -143,7 +218,7 @@ AlpineBroadcastUdpTransport.i: AlpineBroadcastUdpTransport.cpp.i
 
 # target to preprocess a source file
 AlpineBroadcastUdpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.i
 .PHONY : AlpineBroadcastUdpTransport.cpp.i
 
 AlpineBroadcastUdpTransport.s: AlpineBroadcastUdpTransport.cpp.s
@@ -151,7 +226,7 @@ AlpineBroadcastUdpTransport.s: AlpineBroadcastUdpTransport.cpp.s
 
 # target to generate assembly for a file
 AlpineBroadcastUdpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineBroadcastUdpTransport.cpp.s
 .PHONY : AlpineBroadcastUdpTransport.cpp.s
 
 AlpineDtcpConnAcceptor.o: AlpineDtcpConnAcceptor.cpp.o
@@ -159,7 +234,7 @@ AlpineDtcpConnAcceptor.o: AlpineDtcpConnAcceptor.cpp.o
 
 # target to build an object file
 AlpineDtcpConnAcceptor.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.o
 .PHONY : AlpineDtcpConnAcceptor.cpp.o
 
 AlpineDtcpConnAcceptor.i: AlpineDtcpConnAcceptor.cpp.i
@@ -167,7 +242,7 @@ AlpineDtcpConnAcceptor.i: AlpineDtcpConnAcceptor.cpp.i
 
 # target to preprocess a source file
 AlpineDtcpConnAcceptor.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.i
 .PHONY : AlpineDtcpConnAcceptor.cpp.i
 
 AlpineDtcpConnAcceptor.s: AlpineDtcpConnAcceptor.cpp.s
@@ -175,7 +250,7 @@ AlpineDtcpConnAcceptor.s: AlpineDtcpConnAcceptor.cpp.s
 
 # target to generate assembly for a file
 AlpineDtcpConnAcceptor.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnAcceptor.cpp.s
 .PHONY : AlpineDtcpConnAcceptor.cpp.s
 
 AlpineDtcpConnConnector.o: AlpineDtcpConnConnector.cpp.o
@@ -183,7 +258,7 @@ AlpineDtcpConnConnector.o: AlpineDtcpConnConnector.cpp.o
 
 # target to build an object file
 AlpineDtcpConnConnector.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.o
 .PHONY : AlpineDtcpConnConnector.cpp.o
 
 AlpineDtcpConnConnector.i: AlpineDtcpConnConnector.cpp.i
@@ -191,7 +266,7 @@ AlpineDtcpConnConnector.i: AlpineDtcpConnConnector.cpp.i
 
 # target to preprocess a source file
 AlpineDtcpConnConnector.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.i
 .PHONY : AlpineDtcpConnConnector.cpp.i
 
 AlpineDtcpConnConnector.s: AlpineDtcpConnConnector.cpp.s
@@ -199,7 +274,7 @@ AlpineDtcpConnConnector.s: AlpineDtcpConnConnector.cpp.s
 
 # target to generate assembly for a file
 AlpineDtcpConnConnector.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnConnector.cpp.s
 .PHONY : AlpineDtcpConnConnector.cpp.s
 
 AlpineDtcpConnMux.o: AlpineDtcpConnMux.cpp.o
@@ -207,7 +282,7 @@ AlpineDtcpConnMux.o: AlpineDtcpConnMux.cpp.o
 
 # target to build an object file
 AlpineDtcpConnMux.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.o
 .PHONY : AlpineDtcpConnMux.cpp.o
 
 AlpineDtcpConnMux.i: AlpineDtcpConnMux.cpp.i
@@ -215,7 +290,7 @@ AlpineDtcpConnMux.i: AlpineDtcpConnMux.cpp.i
 
 # target to preprocess a source file
 AlpineDtcpConnMux.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.i
 .PHONY : AlpineDtcpConnMux.cpp.i
 
 AlpineDtcpConnMux.s: AlpineDtcpConnMux.cpp.s
@@ -223,7 +298,7 @@ AlpineDtcpConnMux.s: AlpineDtcpConnMux.cpp.s
 
 # target to generate assembly for a file
 AlpineDtcpConnMux.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnMux.cpp.s
 .PHONY : AlpineDtcpConnMux.cpp.s
 
 AlpineDtcpConnTransport.o: AlpineDtcpConnTransport.cpp.o
@@ -231,7 +306,7 @@ AlpineDtcpConnTransport.o: AlpineDtcpConnTransport.cpp.o
 
 # target to build an object file
 AlpineDtcpConnTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.o
 .PHONY : AlpineDtcpConnTransport.cpp.o
 
 AlpineDtcpConnTransport.i: AlpineDtcpConnTransport.cpp.i
@@ -239,7 +314,7 @@ AlpineDtcpConnTransport.i: AlpineDtcpConnTransport.cpp.i
 
 # target to preprocess a source file
 AlpineDtcpConnTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.i
 .PHONY : AlpineDtcpConnTransport.cpp.i
 
 AlpineDtcpConnTransport.s: AlpineDtcpConnTransport.cpp.s
@@ -247,7 +322,7 @@ AlpineDtcpConnTransport.s: AlpineDtcpConnTransport.cpp.s
 
 # target to generate assembly for a file
 AlpineDtcpConnTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpConnTransport.cpp.s
 .PHONY : AlpineDtcpConnTransport.cpp.s
 
 AlpineDtcpUdpTransport.o: AlpineDtcpUdpTransport.cpp.o
@@ -255,7 +330,7 @@ AlpineDtcpUdpTransport.o: AlpineDtcpUdpTransport.cpp.o
 
 # target to build an object file
 AlpineDtcpUdpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.o
 .PHONY : AlpineDtcpUdpTransport.cpp.o
 
 AlpineDtcpUdpTransport.i: AlpineDtcpUdpTransport.cpp.i
@@ -263,7 +338,7 @@ AlpineDtcpUdpTransport.i: AlpineDtcpUdpTransport.cpp.i
 
 # target to preprocess a source file
 AlpineDtcpUdpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.i
 .PHONY : AlpineDtcpUdpTransport.cpp.i
 
 AlpineDtcpUdpTransport.s: AlpineDtcpUdpTransport.cpp.s
@@ -271,7 +346,7 @@ AlpineDtcpUdpTransport.s: AlpineDtcpUdpTransport.cpp.s
 
 # target to generate assembly for a file
 AlpineDtcpUdpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineDtcpUdpTransport.cpp.s
 .PHONY : AlpineDtcpUdpTransport.cpp.s
 
 AlpineMulticastUdpTransport.o: AlpineMulticastUdpTransport.cpp.o
@@ -279,7 +354,7 @@ AlpineMulticastUdpTransport.o: AlpineMulticastUdpTransport.cpp.o
 
 # target to build an object file
 AlpineMulticastUdpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.o
 .PHONY : AlpineMulticastUdpTransport.cpp.o
 
 AlpineMulticastUdpTransport.i: AlpineMulticastUdpTransport.cpp.i
@@ -287,7 +362,7 @@ AlpineMulticastUdpTransport.i: AlpineMulticastUdpTransport.cpp.i
 
 # target to preprocess a source file
 AlpineMulticastUdpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.i
 .PHONY : AlpineMulticastUdpTransport.cpp.i
 
 AlpineMulticastUdpTransport.s: AlpineMulticastUdpTransport.cpp.s
@@ -295,7 +370,7 @@ AlpineMulticastUdpTransport.s: AlpineMulticastUdpTransport.cpp.s
 
 # target to generate assembly for a file
 AlpineMulticastUdpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineMulticastUdpTransport.cpp.s
 .PHONY : AlpineMulticastUdpTransport.cpp.s
 
 AlpineRawWifiUdpTransport.o: AlpineRawWifiUdpTransport.cpp.o
@@ -303,7 +378,7 @@ AlpineRawWifiUdpTransport.o: AlpineRawWifiUdpTransport.cpp.o
 
 # target to build an object file
 AlpineRawWifiUdpTransport.cpp.o:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.o
 .PHONY : AlpineRawWifiUdpTransport.cpp.o
 
 AlpineRawWifiUdpTransport.i: AlpineRawWifiUdpTransport.cpp.i
@@ -311,7 +386,7 @@ AlpineRawWifiUdpTransport.i: AlpineRawWifiUdpTransport.cpp.i
 
 # target to preprocess a source file
 AlpineRawWifiUdpTransport.cpp.i:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.i
 .PHONY : AlpineRawWifiUdpTransport.cpp.i
 
 AlpineRawWifiUdpTransport.s: AlpineRawWifiUdpTransport.cpp.s
@@ -319,7 +394,7 @@ AlpineRawWifiUdpTransport.s: AlpineRawWifiUdpTransport.cpp.s
 
 # target to generate assembly for a file
 AlpineRawWifiUdpTransport.cpp.s:
-	cd /Users/user/sonoranpub/realpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s
+	cd /Users/user/cdev/exrealpine/build && $(MAKE) $(MAKESILENT) -f transport/Alpine/CMakeFiles/AlpineTransport.dir/build.make transport/Alpine/CMakeFiles/AlpineTransport.dir/AlpineRawWifiUdpTransport.cpp.s
 .PHONY : AlpineRawWifiUdpTransport.cpp.s
 
 # Help Target
@@ -329,7 +404,14 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
+	@echo "... package"
+	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... AlpineTransport"
 	@echo "... AlpineBroadcastUdpTransport.o"
 	@echo "... AlpineBroadcastUdpTransport.i"
@@ -366,6 +448,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/user/sonoranpub/realpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/user/cdev/exrealpine/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

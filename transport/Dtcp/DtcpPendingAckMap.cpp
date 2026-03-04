@@ -255,7 +255,7 @@ DtcpPendingAckMap::processTimers ()
 
                 udpTransport_->sendData (currRecord->destIpAddress,
                                          currRecord->destPort,
-                                         currRecord->data->buffer_,
+                                         currRecord->data->buffer_.get(),
                                          currRecord->data->length_);
 
                 currRecord->sendTime.tv_sec  = currTime_.tv_sec;
@@ -335,7 +335,7 @@ DtcpPendingAckMap::processTimers ()
 
                 udpTransport_->sendData (currRecord->destIpAddress,
                                          currRecord->destPort,
-                                         currRecord->data->buffer_,
+                                         currRecord->data->buffer_.get(),
                                          currRecord->data->length_);
 
                 currRecord->sendTime.tv_sec  = currTime_.tv_sec;
@@ -453,7 +453,7 @@ DtcpPendingAckMap::processTimers ()
 
                     udpTransport_->sendData (currRecord->destIpAddress,
                                              currRecord->destPort,
-                                             currRecord->data->buffer_,
+                                             currRecord->data->buffer_.get(),
                                              currRecord->data->length_);
 
                     // first timeout, touch aged queue location and update next timeout.

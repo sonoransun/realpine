@@ -126,6 +126,15 @@ HttpResponse::ok (const string & json)
 
 
 HttpResponse
+HttpResponse::accepted (const string & json)
+{
+    HttpResponse resp(202, "Accepted");
+    resp.setJsonBody(json);
+    return resp;
+}
+
+
+HttpResponse
 HttpResponse::notFound ()
 {
     HttpResponse resp(404, "Not Found");

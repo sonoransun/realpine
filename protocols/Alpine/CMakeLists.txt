@@ -37,6 +37,7 @@ add_library(AlpineProtocol
     AlpineServiceThread.cpp
     AlpineStack.cpp
     AlpineStackConfig.cpp
+    QueryCache.cpp
 )
 add_library(Alpine::AlpineProtocol ALIAS AlpineProtocol)
 target_include_directories(AlpineProtocol PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/AlpineServer.dir/JsonRpcHandler.cpp.o.d"
   "CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.o"
   "CMakeFiles/AlpineServer.dir/ServerSigMethods.cpp.o.d"
+  "CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/ApiKeyAuth.cpp.o"
+  "CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/ApiKeyAuth.cpp.o.d"
   "CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o"
   "CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpRequest.cpp.o.d"
   "CMakeFiles/AlpineServer.dir/__/AlpineRestBridge/HttpResponse.cpp.o"

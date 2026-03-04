@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alpine-config
+  labels:
+    app: alpine
+data:
+  PORT: "9000"
+  REST_PORT: "8080"
+  REST_BIND_ADDRESS: "0.0.0.0"
+  BEACON_ENABLED: "true"
+  BEACON_PORT: "8089"
+  BROADCAST_ENABLED: "true"
+  BROADCAST_PORT: "8090"
+  LOG_LEVEL: "Info"
+  WIFI_MULTICAST_GROUP: "239.255.0.1"
+  WIFI_MULTICAST_PORT: "8091"
+  TOR_ENABLED: "false"
+  DLNA_ENABLED: "false"

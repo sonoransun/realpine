@@ -1,0 +1,335 @@
+openapi: 3.0.3
+info:
+  title: Alpine REST API
+  description: REST API for the Alpine decentralized P2P resource discovery platform
+  version: 0.0.19
+  contact:
+    name: sonoransun
+  license:
+    name: LGPL
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /query/start:
+    post:
+      summary: Start a new query
+      operationId: startQuery
+      tags: [Query]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryStartRequest'
+      responses:
+        '200':
+          description: Query started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryStartResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /query/{id}:
+    get:
+      summary: Get query status
+      operationId: getQuery
+      tags: [Query]
+      parameters:
+        - $ref: '#/components/parameters/QueryId'
+      responses:
+        '200':
+          description: Query status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryStatus'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Cancel a query
+      operationId: cancelQuery
+      tags: [Query]
+      parameters:
+        - $ref: '#/components/parameters/QueryId'
+      responses:
+        '200':
+          description: Query cancelled
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /query/{id}/results:
+    get:
+      summary: Get query results
+      operationId: getQueryResults
+      tags: [Query]
+      parameters:
+        - $ref: '#/components/parameters/QueryId'
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResults'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /query/{id}/stream:
+    get:
+      summary: Stream query results (SSE)
+      operationId: streamQueryResults
+      tags: [Query]
+      description: |
+        Returns query results as Server-Sent Events (SSE). If the query is complete,
+        returns a single 'complete' event with all results. If the query is in progress,
+        returns 'progress' and 'partial' events with current status and partial results.
+        For real-time streaming, use WebSocket subscription to query events.
+      parameters:
+        - $ref: '#/components/parameters/QueryId'
+      responses:
+        '200':
+          description: SSE event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /peer:
+    get:
+      summary: List all known peers
+      operationId: listPeers
+      tags: [Peer]
+      responses:
+        '200':
+          description: List of peers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  peers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PeerProfile'
+
+  /peer/{id}:
+    get:
+      summary: Get peer details
+      operationId: getPeer
+      tags: [Peer]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Peer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeerProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /status:
+    get:
+      summary: Get server status
+      operationId: getStatus
+      tags: [Status]
+      security: []
+      responses:
+        '200':
+          description: Server status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerStatus'
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      operationId: getMetrics
+      tags: [Operations]
+      security: []
+      responses:
+        '200':
+          description: Prometheus text exposition format
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key or JWT token
+
+  parameters:
+    QueryId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    QueryStartRequest:
+      type: object
+      required: [queryString]
+      properties:
+        queryString:
+          type: string
+          description: The search query string
+        groupName:
+          type: string
+          description: Group to query within
+        autoHaltLimit:
+          type: integer
+          description: Maximum results before auto-halting
+        autoDownload:
+          type: boolean
+          default: false
+        peerDescMax:
+          type: integer
+          description: Maximum peer descriptions to collect
+
+    QueryStartResponse:
+      type: object
+      properties:
+        queryId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [started, cached]
+
+    QueryStatus:
+      type: object
+      properties:
+        queryId:
+          type: integer
+          format: int64
+        totalPeers:
+          type: integer
+        peersQueried:
+          type: integer
+        numPeerResponses:
+          type: integer
+        totalHits:
+          type: integer
+        active:
+          type: boolean
+
+    QueryResults:
+      type: object
+      properties:
+        queryId:
+          type: integer
+          format: int64
+        peerResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeerResources'
+
+    PeerResources:
+      type: object
+      properties:
+        peerId:
+          type: integer
+          format: int64
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceDesc'
+
+    ResourceDesc:
+      type: object
+      properties:
+        resourceId:
+          type: integer
+          format: int64
+        size:
+          type: integer
+        locators:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+
+    PeerProfile:
+      type: object
+      properties:
+        peerId:
+          type: integer
+          format: int64
+        relativeQuality:
+          type: integer
+        totalQueries:
+          type: integer
+        totalResponses:
+          type: integer
+
+    ServerStatus:
+      type: object
+      properties:
+        version:
+          type: string
+        uptime:
+          type: integer
+        activePeers:
+          type: integer
+        activeQueries:
+          type: integer
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
