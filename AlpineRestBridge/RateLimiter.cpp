@@ -7,16 +7,23 @@
 
 double                                         RateLimiter::rate_s         = 10.0;
 uint                                           RateLimiter::burst_s        = 20;
-std::unordered_map<string, RateLimiter::t_TokenBucket>  RateLimiter::buckets_s;
-std::mutex                                     RateLimiter::mutex_s;
+std::array<RateLimiter::t_Shard, RateLimiter::SHARD_COUNT>  RateLimiter::shards_s;
 bool                                           RateLimiter::initialized_s  = false;
+
+
+
+size_t
+RateLimiter::shardIndex (const string & clientIp)
+{
+    return std::hash<string>{}(clientIp) % SHARD_COUNT;
+}
+
 
 
 void
 RateLimiter::initialize (double  requestsPerSecond,
                          uint    burstSize)
 {
-    std::lock_guard lock(mutex_s);
     rate_s = requestsPerSecond;
     burst_s = burstSize;
     initialized_s = true;
@@ -26,19 +33,22 @@ RateLimiter::initialize (double  requestsPerSecond,
 }
 
 
+
 bool
 RateLimiter::allowRequest (const string & clientIp)
 {
     if (!initialized_s)
         return true;
 
-    std::lock_guard lock(mutex_s);
-
+    auto & shard = shards_s[shardIndex(clientIp)];
     auto now = std::chrono::steady_clock::now();
-    auto it = buckets_s.find(clientIp);
 
-    if (it == buckets_s.end()) {
-        buckets_s[clientIp] = t_TokenBucket{
+    std::unique_lock lock(shard.mutex);
+
+    auto it = shard.buckets.find(clientIp);
+
+    if (it == shard.buckets.end()) {
+        shard.buckets[clientIp] = t_TokenBucket{
             static_cast<double>(burst_s) - 1.0,
             now
         };
@@ -57,6 +67,7 @@ RateLimiter::allowRequest (const string & clientIp)
 }
 
 
+
 void
 RateLimiter::refillBucket (t_TokenBucket & bucket)
 {
@@ -71,18 +82,21 @@ RateLimiter::refillBucket (t_TokenBucket & bucket)
 }
 
 
+
 void
 RateLimiter::cleanup ()
 {
-    std::lock_guard lock(mutex_s);
-
     auto now = std::chrono::steady_clock::now();
-    auto it = buckets_s.begin();
 
-    while (it != buckets_s.end()) {
-        if (now - it->second.lastRefill > STALE_TIMEOUT)
-            it = buckets_s.erase(it);
-        else
-            ++it;
+    for (auto & shard : shards_s) {
+        std::unique_lock lock(shard.mutex);
+
+        auto it = shard.buckets.begin();
+        while (it != shard.buckets.end()) {
+            if (now - it->second.lastRefill > STALE_TIMEOUT)
+                it = shard.buckets.erase(it);
+            else
+                ++it;
+        }
     }
 }

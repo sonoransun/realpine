@@ -280,9 +280,16 @@ class AlpineStackInterface
     using QueryCallback  = std::function<void(Result<t_PeerResourcesIndex>)>;
     using StatusCallback = std::function<void(Result<t_QueryStatus>)>;
 
+    // Callback invoked incrementally as each peer replies.
+    // Parameters: queryId, peerId that just replied.
+    using QueryResultCallback = std::function<void(ulong queryId, ulong peerId)>;
+
     [[nodiscard]] static Result<ulong>  startQueryAsync (const t_QueryOptions &  options,
                                                          const string &          queryString,
                                                          QueryCallback           callback);
+
+    [[nodiscard]] static bool  registerQueryResultCallback (ulong                  queryId,
+                                                            QueryResultCallback    callback);
 
 
   private:

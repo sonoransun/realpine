@@ -5,7 +5,8 @@
 #include <Common.h>
 #include <AutoThread.h>
 #include <ReadWriteSem.h>
-#include <list>
+#include <chrono>
+#include <vector>
 
 
 class DtcpBaseUdpTransport;
@@ -60,14 +61,13 @@ class DtcpThreadTable
     //
     bool  locateRecord (t_ThreadId       threadId,
                         DtcpIORecord *&  record);
-    
+
 
 
     // types
     //
-    using t_DataBufferList = list <DataBuffer *>;
-
-    using t_IORecordList = list <DtcpIORecord *>;
+    using t_Clock = std::chrono::steady_clock;
+    using t_TimePoint = t_Clock::time_point;
 
     using t_ThreadList = list <DtcpStackThread *>;
 
@@ -78,9 +78,9 @@ class DtcpThreadTable
 
     using t_ThreadObjIndexPair = std::pair <t_ThreadId, DtcpStackThread *>;
 
-    using t_ThreadIdIndex = std::unordered_map <t_ThreadId, DtcpIORecord *>;
+    using t_ThreadIdIndex = std::unordered_map <t_ThreadId, int>;
 
-    using t_ThreadIdIndexPair = std::pair <t_ThreadId, DtcpIORecord *>;
+    using t_ThreadIdIndexPair = std::pair <t_ThreadId, int>;
 
 
   private:
@@ -91,24 +91,36 @@ class DtcpThreadTable
     uint              maxRecords_;
     uint              maxBuffers_;
 
-    t_IORecordList    allRecordList_;
-    t_IORecordList    availableRecordList_;
-    t_IORecordList    recordQueue_;
+    // Record pool: contiguous vector with index-based free list.
+    // Each record tracks last-activity time for LRU eviction.
+    //
+    std::vector<DtcpIORecord *>  recordPool_;
+    std::vector<int>             freeRecordIndices_;
+    std::vector<t_TimePoint>     recordLastActivity_;
+    std::vector<int>             recordQueue_;
+
+    // Buffer pool: contiguous vector with index-based free list.
+    //
+    std::vector<DataBuffer *>    bufferPool_;
+    std::vector<int>             freeBufferIndices_;
+
+    // Consolidated lock: protects records, buffers, and index mappings.
+    // Lock ordering: always threadLock_ before recordLock_.
+    //
     ReadWriteSem      recordLock_;
 
+    // Thread indices (merged from former indexLock_ into recordLock_)
+    //
+    t_ThreadObjIndex  threadObjectIndex_;
+    t_ThreadIdIndex   activeThreadIndex_;     // maps thread ID -> record index
+    t_ThreadIdIndex   externalThreadIndex_;   // maps thread ID -> record index
+
+    // Thread lifecycle lock
+    //
     t_ThreadList      allThreadList_;
     t_ThreadList      idleThreadList_;
     ReadWriteSem      threadLock_;
 
-    t_ThreadObjIndex  threadObjectIndex_;
-    t_ThreadIdIndex   activeThreadIndex_;
-    t_ThreadIdIndex   externalThreadIndex_;
-    ReadWriteSem      indexLock_;
-
-    t_DataBufferList  allBufferList_;
-    t_DataBufferList  availableBufferList_;
-    ReadWriteSem      bufferLock_;
-    
 
 
     // called by DtcpStackThreads to get next
@@ -122,6 +134,10 @@ class DtcpThreadTable
     bool  wakeThread ();
 
     bool  threadIdle (t_ThreadId  id);
+
+    // LRU eviction: find the idle record with oldest activity timestamp
+    //
+    int   evictLruRecord ();
 
 
 

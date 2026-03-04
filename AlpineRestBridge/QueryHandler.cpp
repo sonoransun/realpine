@@ -195,121 +195,94 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
                                    const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
-    if (it == params.end()) {
+    if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
-    }
 
     ulong queryId = strtoul(it->second.c_str(), nullptr, 10);
 
-    // Check that the query exists
-    if (!AlpineStackInterface::queryInProgress(queryId)) {
-        // If not in progress, return the final results as a single SSE event
-        auto resultsResult = AlpineStackInterface::getQueryResults2(queryId);
-        if (!resultsResult) {
-            return HttpResponse::notFound();
-        }
-        auto & results = *resultsResult;
+    bool inProgress = AlpineStackInterface::queryInProgress(queryId);
 
-        JsonWriter writer;
-        writer.beginObject();
-        writer.key("event");
-        writer.value("complete"s);
-        writer.key("queryId");
-        writer.value(queryId);
-        writer.key("peers");
-        writer.beginArray();
+    auto resultsResult = AlpineStackInterface::getQueryResults2(queryId);
+    if (!resultsResult)
+        return HttpResponse::notFound();
 
-        for (const auto& [peerId, peerRes] : results) {
-            writer.beginObject();
-            writer.key("peerId");
-            writer.value(peerId);
-            writer.key("resources");
-            writer.beginArray();
-            for (const auto& res : peerRes.resourceDescList) {
-                writer.beginObject();
-                writer.key("resourceId");
-                writer.value(res.resourceId);
-                writer.key("size");
-                writer.value(res.size);
-                writer.key("description");
-                writer.value(res.description);
-                writer.endObject();
-            }
-            writer.endArray();
-            writer.endObject();
-        }
+    auto & results = *resultsResult;
 
-        writer.endArray();
-        writer.endObject();
-
-        HttpResponse response(200, "OK");
-        response.setHeader("Content-Type", "text/event-stream");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Connection", "keep-alive");
-        response.setBody("event: complete\ndata: "s + writer.result() + "\n\n"s);
-        return response;
-    }
-
-    // Query is still in progress — return current status and partial results as SSE snapshot.
-    // Full real-time streaming would require keeping the connection open;
-    // for that, clients should use WebSocket (connect to ws:// and subscribe to query events).
+    // Build per-peer result events — one SSE "result" event per peer with full resource data
     //
-    auto statusResult = AlpineStackInterface::getQueryStatus2(queryId);
-    AlpineStackInterface::t_QueryStatus status{};
-    if (statusResult) {
-        status = *statusResult;
-    }
-
-    auto resultsResult2 = AlpineStackInterface::getQueryResults2(queryId);
-    AlpineStackInterface::t_PeerResourcesIndex results;
-    if (resultsResult2) {
-        results = std::move(*resultsResult2);
-    }
-
-    JsonWriter statusWriter;
-    statusWriter.beginObject();
-    statusWriter.key("event");
-    statusWriter.value("progress"s);
-    statusWriter.key("queryId");
-    statusWriter.value(queryId);
-    statusWriter.key("totalPeers");
-    statusWriter.value(status.totalPeers);
-    statusWriter.key("peersQueried");
-    statusWriter.value(status.peersQueried);
-    statusWriter.key("totalHits");
-    statusWriter.value(status.totalHits);
-    statusWriter.endObject();
-
-    JsonWriter dataWriter;
-    dataWriter.beginObject();
-    dataWriter.key("event");
-    dataWriter.value("partial"s);
-    dataWriter.key("queryId");
-    dataWriter.value(queryId);
-    dataWriter.key("peerCount");
-    dataWriter.value(static_cast<ulong>(results.size()));
-    dataWriter.key("peers");
-    dataWriter.beginArray();
+    string sseBody;
 
     for (const auto& [peerId, peerRes] : results) {
-        dataWriter.beginObject();
-        dataWriter.key("peerId");
-        dataWriter.value(peerId);
-        dataWriter.key("resourceCount");
-        dataWriter.value(static_cast<ulong>(peerRes.resourceDescList.size()));
-        dataWriter.endObject();
+        JsonWriter peerWriter;
+        peerWriter.beginObject();
+        peerWriter.key("queryId");
+        peerWriter.value(queryId);
+        peerWriter.key("peerId");
+        peerWriter.value(peerId);
+        peerWriter.key("resources");
+        peerWriter.beginArray();
+
+        for (const auto& res : peerRes.resourceDescList) {
+            peerWriter.beginObject();
+            peerWriter.key("resourceId");
+            peerWriter.value(res.resourceId);
+            peerWriter.key("size");
+            peerWriter.value(res.size);
+            peerWriter.key("description");
+            peerWriter.value(res.description);
+            peerWriter.key("locators");
+            peerWriter.beginArray();
+            for (const auto& loc : res.locators) {
+                peerWriter.value(loc);
+            }
+            peerWriter.endArray();
+            peerWriter.endObject();
+        }
+
+        peerWriter.endArray();
+        peerWriter.endObject();
+
+        sseBody += "event: result\ndata: "s + peerWriter.result() + "\n\n"s;
     }
 
-    dataWriter.endArray();
-    dataWriter.endObject();
+    // Append a progress or complete event depending on query state
+    //
+    if (inProgress) {
+        auto statusResult = AlpineStackInterface::getQueryStatus2(queryId);
+        AlpineStackInterface::t_QueryStatus status{};
+        if (statusResult)
+            status = *statusResult;
+
+        JsonWriter statusWriter;
+        statusWriter.beginObject();
+        statusWriter.key("queryId");
+        statusWriter.value(queryId);
+        statusWriter.key("totalPeers");
+        statusWriter.value(status.totalPeers);
+        statusWriter.key("peersQueried");
+        statusWriter.value(status.peersQueried);
+        statusWriter.key("totalHits");
+        statusWriter.value(status.totalHits);
+        statusWriter.endObject();
+
+        sseBody += "event: progress\ndata: "s + statusWriter.result() + "\n\n"s;
+    }
+    else {
+        JsonWriter completeWriter;
+        completeWriter.beginObject();
+        completeWriter.key("queryId");
+        completeWriter.value(queryId);
+        completeWriter.key("totalPeers");
+        completeWriter.value(static_cast<ulong>(results.size()));
+        completeWriter.endObject();
+
+        sseBody += "event: complete\ndata: "s + completeWriter.result() + "\n\n"s;
+    }
 
     HttpResponse response(200, "OK");
     response.setHeader("Content-Type", "text/event-stream");
     response.setHeader("Cache-Control", "no-cache");
     response.setHeader("Connection", "keep-alive");
-    response.setBody(
-        "event: progress\ndata: "s + statusWriter.result() + "\n\n"s +
-        "event: partial\ndata: "s + dataWriter.result() + "\n\n"s
-    );
+    response.setBody(std::move(sseBody));
     return response;
 }

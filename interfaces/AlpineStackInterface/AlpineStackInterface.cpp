@@ -1125,11 +1125,37 @@ AlpineStackInterface::listAllModules2 ()
 // Async query interface
 // ---------------------------------------------------------------------------
 
+bool
+AlpineStackInterface::registerQueryResultCallback (ulong                  queryId,
+                                                   QueryResultCallback    callback)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineStackInterface::registerQueryResultCallback invoked.");
+#endif
+
+    return AlpineQueryMgr::registerResultCallback(queryId, std::move(callback));
+}
+
+
 Result<ulong>
 AlpineStackInterface::startQueryAsync (const t_QueryOptions &  options,
                                        const string &          queryString,
                                        QueryCallback           callback)
 {
+    // Lazily register the completed-query bridge so processTimedEvents
+    // forwards completions to our callback map.
+    {
+        static bool registered = false;
+        MutexLock lock(callbackLock_s);
+        if (!registered) {
+            AlpineStack::setCompletedQueryCallback(
+                [](const std::vector<ulong> & ids) {
+                    notifyAsyncCallbacks(ids);
+                });
+            registered = true;
+        }
+    }
+
     auto result = startQuery2(options, queryString);
     if (!result)
         return result;

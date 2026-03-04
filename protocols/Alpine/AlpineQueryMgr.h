@@ -9,6 +9,8 @@
 #include <OptHash.h>
 #include <vector>
 #include <memory>
+#include <shared_mutex>
+#include <functional>
 
 
 class AlpineQuery;
@@ -24,6 +26,10 @@ class AlpineQueryMgr
     // Public types
     //
     using t_QueryIdList = vector<ulong>;
+
+    // Callback invoked when a query receives new results from a peer.
+    // Parameters: queryId, peerId that just replied.
+    using QueryResultCallback = std::function<void(ulong queryId, ulong peerId)>;
 
 
     // Public operations
@@ -53,6 +59,9 @@ class AlpineQueryMgr
     [[nodiscard]] static bool  getQueryResults (ulong                  queryId,
                                   AlpineQueryResults *&  results);
 
+    static bool  registerResultCallback (ulong                queryId,
+                                         QueryResultCallback  callback);
+
     [[nodiscard]] static bool  getPeerActiveQueryList (ulong            peerId,
                                          t_QueryIdList &  queryIdList);
 
@@ -76,6 +85,8 @@ class AlpineQueryMgr
         std::unique_ptr<AlpineQuery>           query;    // only present while active
         std::unique_ptr<AlpineQueryResults>    results;
         std::unique_ptr<t_PendingReplyIndex>   pending;
+        mutable std::shared_mutex              queryMutex;  // per-query lock for result accumulation
+        QueryResultCallback                    onResultCallback;  // invoked when new results arrive
     };
 
     using t_QueryStateIndex = std::unordered_map< ulong,   // query ID
@@ -104,7 +115,10 @@ class AlpineQueryMgr
     static std::unique_ptr<t_QueryStateIndex>      pastQueryIndex_s;
     static std::unique_ptr<t_PeerQueryIndex>       activePeerQueryIndex_s;
     static std::unique_ptr<t_PeerQueryIndex>       pastPeerQueryIndex_s;
-    static ReadWriteSem                            dataLock_s;
+
+    // Split locks: active queries (hot path) vs past queries (cold, read-mostly)
+    static ReadWriteSem                            activeQueryLock_s;
+    static ReadWriteSem                            pastQueryLock_s;
 
 
 
@@ -138,8 +152,9 @@ class AlpineQueryMgr
 
     // Timer and event management entry point
     // Used solely by the AlpineStack
+    // Returns list of query IDs that completed this cycle (for async callback notification).
     //
-    static void  processTimedEvents ();
+    static std::vector<ulong>  processTimedEvents ();
 
 
     static void  cleanUp ();

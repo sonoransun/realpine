@@ -39,6 +39,7 @@ target_include_directories(AlpineGui PRIVATE
 target_link_libraries(AlpineGui PRIVATE
     Alpine::Flags
     Alpine::NetUtils
+    nlohmann_json::nlohmann_json
     glfw
     OpenGL::GL
 )

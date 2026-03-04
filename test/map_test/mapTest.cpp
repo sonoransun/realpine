@@ -8,6 +8,8 @@
 #include <functional>
 #include <Log.h>
 #include <StringUtils.h>
+
+using std::cout; using std::cerr; using std::endl;
 #include <OptHash.h>
 
 
@@ -72,7 +74,7 @@ main (int argc, char *argv[])
 
 
     t_IndexMap *  map = new t_IndexMap;
-    map->resize (mapSize + (ulong)(mapSize * 0.25));
+    map->reserve (mapSize + (ulong)(mapSize * 0.25));
 
     populateMap (map, mapSize, elementSize);
 

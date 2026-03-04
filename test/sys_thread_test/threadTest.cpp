@@ -17,7 +17,7 @@ main (int argc, char *argv[])
     int debugLevel;
 
     if (argc != 4) {
-        cerr << "Usage: " << argv[0] << " <debug filename> <debugLevel 1-4> <thread count>" << endl;
+        std::cerr << "Usage: " << argv[0] << " <debug filename> <debugLevel 1-4> <thread count>" << std::endl;
         return 1;
     }
     logFilename = argv[1];
@@ -36,7 +36,7 @@ main (int argc, char *argv[])
         Log::initialize (logFilename, Log::t_LogLevel::Debug);
     }
     else {
-        cout << "Invalid log level." << endl;
+        std::cout << "Invalid log level." << std::endl;
         return 1;
     }
     int threadCount;

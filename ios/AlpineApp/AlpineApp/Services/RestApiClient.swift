@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import os
 
@@ -9,6 +10,7 @@ actor RestApiClient {
     let baseURL: URL
     private let apiKey: String
     private var sessionToken: String?
+    private let tlsConfig: TlsConfig
     private let session: URLSession
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
@@ -23,10 +25,18 @@ actor RestApiClient {
         self.apiKey = apiKey
         self.sessionToken = sessionToken
 
+        self.tlsConfig = tlsConfig
+
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         config.timeoutIntervalForResource = 60
-        self.session = URLSession(configuration: config)
+
+        if tlsConfig.mode == .pinned && !tlsConfig.allFingerprints.isEmpty {
+            let delegate = CertificatePinningDelegate(allowedFingerprints: tlsConfig.allFingerprints)
+            self.session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
+        } else {
+            self.session = URLSession(configuration: config)
+        }
 
         self.encoder = JSONEncoder()
         self.decoder = JSONDecoder()
@@ -239,5 +249,57 @@ actor RestApiClient {
         let errorDesc = lastError?.localizedDescription ?? "Unknown error"
         logger.error("Retry loop exhausted for \(method) \(url): \(errorDesc)")
         throw ApiError.retryExhausted(lastError: errorDesc)
+    }
+}
+
+// MARK: - Certificate Pinning
+
+private final class CertificatePinningDelegate: NSObject, URLSessionDelegate {
+    let allowedFingerprints: [String]
+
+    init(allowedFingerprints: [String]) {
+        self.allowedFingerprints = allowedFingerprints
+    }
+
+    func urlSession(_ session: URLSession,
+                    didReceive challenge: URLAuthenticationChallenge,
+                    completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+
+        // Get the server's certificate
+        guard SecTrustGetCertificateCount(serverTrust) > 0,
+              let certificate = SecTrustCopyCertificateChain(serverTrust) as? [SecCertificate],
+              let serverCert = certificate.first else {
+            logger.error("Certificate pinning: no server certificate found")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        // Get the public key data and compute SHA-256 fingerprint
+        guard let publicKey = SecCertificateCopyKey(serverCert),
+              let publicKeyData = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else {
+            logger.error("Certificate pinning: failed to extract public key")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+            return
+        }
+
+        // Compute SHA-256 hex fingerprint of the public key
+        let fingerprint = sha256Hex(publicKeyData)
+
+        if allowedFingerprints.contains(where: { $0.lowercased() == fingerprint.lowercased() }) {
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        } else {
+            logger.error("Certificate pinning: fingerprint mismatch. Got: \(fingerprint)")
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
+    }
+
+    private func sha256Hex(_ data: Data) -> String {
+        let hash = SHA256.hash(data: data)
+        return hash.map { String(format: "%02x", $0) }.joined()
     }
 }

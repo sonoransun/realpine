@@ -104,4 +104,28 @@ final class BiometricAuthService {
             }
         }
     }
+
+    /// Returns the current biometric domain state, which changes when biometric enrollment changes.
+    /// Returns nil if biometrics are not available.
+    func currentBiometricDomainState() -> Data? {
+        let context = LAContext()
+        var error: NSError?
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            return nil
+        }
+        return context.evaluatedPolicyDomainState
+    }
+
+    /// Returns true if the biometric enrollment has changed since the given state was captured.
+    func hasEnrollmentChanged(storedState: Data?) -> Bool {
+        guard let current = currentBiometricDomainState() else {
+            // Biometrics not available — treat as changed if we had a stored state
+            return storedState != nil
+        }
+        guard let stored = storedState else {
+            // No stored state — first run, not a change
+            return false
+        }
+        return current != stored
+    }
 }

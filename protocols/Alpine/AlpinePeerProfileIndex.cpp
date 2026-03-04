@@ -8,6 +8,9 @@
 #include <StringUtils.h>
 #include <ReadLock.h>
 #include <WriteLock.h>
+#include <algorithm>
+#include <cmath>
+#include <queue>
 
 
 
@@ -603,7 +606,7 @@ AlpinePeerProfileIndex::getAllPeers (t_PeerIdList &  peerIdList)
 
 
 
-bool  
+bool
 AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
                                              ulong           limit)
 {
@@ -611,7 +614,93 @@ AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
     Log::Debug ("AlpinePeerProfileIndex::getWeightedPeerList invoked.");
 #endif
 
-    // MRP_TEMP build weighted list
+    peerIdList.clear();
+
+    ReadLock lock(dataLock_);
+
+    if (numRecords_ == 0)
+        return true;
+
+    // Collect peer IDs and their weights from the rating engine
+    // Weight = score^2 (amplifies good peers, suppresses bad)
+    //
+    static constexpr double  kBanThreshold     = 0.1;
+    static constexpr double  kUnscoredWeight   = 0.25;
+
+    struct t_WeightedPeer {
+        ulong   peerId;
+        double  weight;
+    };
+
+    vector<t_WeightedPeer>  scoredPeers;
+    vector<ulong>           unscoredPeers;
+
+    for (const auto & [peerId, arrayIndex] : *profileIndex_) {
+        double score = AlpineRatingEngine::getScore(peerId);
+
+        // Default score (0.5) means unscored — treat as unscored fallback
+        if (score == 0.5) {
+            unscoredPeers.push_back(peerId);
+            continue;
+        }
+        if (score < kBanThreshold)
+            continue;
+
+        double weight = score * score;
+        scoredPeers.push_back({peerId, weight});
+    }
+
+    // Efraimidis-Spirakis weighted reservoir sampling
+    // Key = pow(random(0,1), 1/weight) — higher weight = higher expected key
+    //
+    ulong selectCount = limit;
+    if (selectCount == 0)
+        selectCount = static_cast<ulong>(scoredPeers.size() + unscoredPeers.size());
+
+    // Min-heap of (key, peerId) — keeps the top-N highest keys
+    //
+    using t_KeyPeer = std::pair<double, ulong>;
+    std::priority_queue<t_KeyPeer, vector<t_KeyPeer>, std::greater<t_KeyPeer>>  reservoir;
+
+    thread_local std::mt19937  rng(std::random_device{}());
+    std::uniform_real_distribution<double>  dist(0.0001, 1.0);
+
+    for (const auto & peer : scoredPeers) {
+        double key = std::pow(dist(rng), 1.0 / peer.weight);
+
+        if (reservoir.size() < selectCount) {
+            reservoir.push({key, peer.peerId});
+        }
+        else if (key > reservoir.top().first) {
+            reservoir.pop();
+            reservoir.push({key, peer.peerId});
+        }
+    }
+
+    // Fallback: if we have fewer than limit scored peers, include unscored at weight 0.25
+    //
+    if (reservoir.size() < selectCount) {
+        for (ulong peerId : unscoredPeers) {
+            double key = std::pow(dist(rng), 1.0 / kUnscoredWeight);
+
+            if (reservoir.size() < selectCount) {
+                reservoir.push({key, peerId});
+            }
+            else if (key > reservoir.top().first) {
+                reservoir.pop();
+                reservoir.push({key, peerId});
+            }
+        }
+    }
+
+    // Extract results — highest weight first
+    //
+    peerIdList.resize(reservoir.size());
+    for (auto i = static_cast<long>(peerIdList.size()) - 1; i >= 0; --i) {
+        peerIdList[static_cast<size_t>(i)] = reservoir.top().second;
+        reservoir.pop();
+    }
+
 
     return true;
 }

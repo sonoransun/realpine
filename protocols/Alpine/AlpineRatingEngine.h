@@ -3,6 +3,9 @@
 
 #pragma once
 #include <Common.h>
+#include <ReadWriteSem.h>
+#include <chrono>
+#include <unordered_map>
 
 
 class AlpinePeerProfile;
@@ -20,6 +23,14 @@ class AlpineRatingEngine
     // Public types
     //
     enum class t_ResourceRating { Low, Average, High };
+
+    struct t_PeerRating
+    {
+        double                                    score        = 0.5;
+        ulong                                     successCount = 0;
+        ulong                                     failureCount = 0;
+        std::chrono::steady_clock::time_point     lastUpdate   = std::chrono::steady_clock::now();
+    };
 
 
     // Peer responded with matches for a query
@@ -61,7 +72,37 @@ class AlpineRatingEngine
                                            short &              qualityDelta);
 
 
+    // Score lookup for external consumers (e.g. weighted peer selection)
+    //
+    static double  getScore (ulong peerId);
+
+
+    // Persistence
+    //
+    static bool  persist ();
+    static bool  load ();
+
+
   private:
+
+    static constexpr double  kInitialScore   = 0.5;
+    static constexpr double  kAlpha          = 0.1;
+    static constexpr double  kMinScore       = 0.0;
+    static constexpr double  kMaxScore       = 1.0;
+    static constexpr double  kDecayTarget    = 0.5;
+    static constexpr double  kDecayRatePerHr = 0.01;
+
+    static std::unordered_map<ulong, t_PeerRating>  ratings_s;
+    static ReadWriteSem                              lock_s;
+
+
+    static ulong   getPeerId (AlpinePeerProfile * profile);
+
+    static double  applyDecay (t_PeerRating & rating);
+
+    static double  applyDelta (t_PeerRating & rating, double delta, bool isSuccess);
+
+    static double  clampScore (double score);
 
 };
 

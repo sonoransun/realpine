@@ -14,4 +14,5 @@ target_link_libraries(AlpineCmdIf PRIVATE
     Alpine::AppUtils
     Alpine::NetUtils
     Alpine::ConfigUtils
+    nlohmann_json::nlohmann_json
 )

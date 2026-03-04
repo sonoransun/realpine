@@ -6,8 +6,8 @@
 #include <HttpResponse.h>
 #include <WebSocketSession.h>
 #include <RateLimiter.h>
+#include <RestBridgeConfig.h>
 #include <Log.h>
-#include <format>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <TlsContext.h>
@@ -33,6 +33,13 @@ bool
 HttpServer::start (ulong   ipAddress,
                    ushort  port)
 {
+    // Load configurable limits
+    minThreads_          = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_          = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_      = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_  = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+
     try {
         asio::ip::address addr;
         if (ipAddress == 0) {
@@ -51,13 +58,17 @@ HttpServer::start (ulong   ipAddress,
         running_ = true;
         doAccept();
 
-        for (int i = 0; i < THREAD_POOL_SIZE; ++i) {
-            workers_.emplace_back([this]() {
-                ioContext_.run();
-            });
-        }
+        // Start pool monitor timer
+        poolMonitorTimer_ = std::make_unique<asio::steady_timer>(ioContext_);
+        monitorPool();
 
-        Log::Info(std::format("HttpServer started on port {}", port));
+        // Spawn initial worker threads
+        for (int i = 0; i < minThreads_; ++i)
+            spawnWorker();
+
+        Log::Info("HttpServer started on port "s + std::to_string(port)
+                  + " (threads "s + std::to_string(minThreads_) + "-"s + std::to_string(maxThreads_)
+                  + ", max connections "s + std::to_string(maxConnections_) + ")"s);
         return true;
     } catch (const std::exception & e) {
         Log::Error("HttpServer::start failed: "s + e.what());
@@ -77,15 +88,19 @@ HttpServer::startTls (ulong         ipAddress,
         return false;
     }
 
+    // Load configurable limits
+    minThreads_          = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_          = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_      = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_  = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+
     try {
         tlsContext_ = &tlsCtx;
 
-        // Create an asio ssl context backed by the same OpenSSL SSL_CTX.
-        // We create a fresh context and replace its native handle.
         sslContext_ = std::make_unique<asio::ssl::context>(asio::ssl::context::tlsv12);
         auto * nativeCtx = sslContext_->native_handle();
 
-        // Copy certificate and key from the TlsContext's SSL_CTX
         auto * srcCtx = tlsCtx.context();
         if (SSL_CTX_get0_certificate(srcCtx)) {
             X509 * cert = SSL_CTX_get0_certificate(srcCtx);
@@ -117,13 +132,17 @@ HttpServer::startTls (ulong         ipAddress,
         running_ = true;
         doAcceptTls();
 
-        for (int i = 0; i < THREAD_POOL_SIZE; ++i) {
-            workers_.emplace_back([this]() {
-                ioContext_.run();
-            });
-        }
+        // Start pool monitor timer
+        poolMonitorTimer_ = std::make_unique<asio::steady_timer>(ioContext_);
+        monitorPool();
 
-        Log::Info(std::format("HttpServer (TLS) started on port {}", port));
+        // Spawn initial worker threads
+        for (int i = 0; i < minThreads_; ++i)
+            spawnWorker();
+
+        Log::Info("HttpServer (TLS) started on port "s + std::to_string(port)
+                  + " (threads "s + std::to_string(minThreads_) + "-"s + std::to_string(maxThreads_)
+                  + ", max connections "s + std::to_string(maxConnections_) + ")"s);
         return true;
     } catch (const std::exception & e) {
         Log::Error("HttpServer::startTls failed: "s + e.what());
@@ -140,17 +159,24 @@ HttpServer::stop ()
         return;
     running_ = false;
 
+    if (poolMonitorTimer_) {
+        poolMonitorTimer_->cancel();
+    }
+
     if (acceptor_) {
         asio::error_code ec;
         acceptor_->close(ec);
     }
     ioContext_.stop();
 
-    for (auto & w : workers_) {
-        if (w.joinable())
-            w.join();
+    {
+        std::lock_guard lock(workerMutex_);
+        for (auto & w : workers_) {
+            if (w.joinable())
+                w.join();
+        }
+        workers_.clear();
     }
-    workers_.clear();
 
 #ifdef ALPINE_TLS_ENABLED
     sslContext_.reset();
@@ -162,21 +188,143 @@ HttpServer::stop ()
 
 
 void
+HttpServer::spawnWorker ()
+{
+    std::lock_guard lock(workerMutex_);
+    if (activeWorkers_ >= maxThreads_)
+        return;
+
+    ++activeWorkers_;
+    workers_.emplace_back([this]() {
+        auto lastActivity = std::chrono::steady_clock::now();
+
+        while (running_) {
+            // Run handlers for up to 1 second, then check idle
+            auto count = ioContext_.run_one_for(std::chrono::seconds(1));
+            if (count > 0) {
+                lastActivity = std::chrono::steady_clock::now();
+            } else {
+                // No work done — check idle timeout
+                auto idle = std::chrono::steady_clock::now() - lastActivity;
+                if (idle >= std::chrono::seconds(30) && activeWorkers_ > minThreads_) {
+                    --activeWorkers_;
+                    return;
+                }
+            }
+        }
+        --activeWorkers_;
+    });
+}
+
+
+void
+HttpServer::monitorPool ()
+{
+    if (!running_)
+        return;
+
+    poolMonitorTimer_->expires_after(std::chrono::seconds(1));
+    poolMonitorTimer_->async_wait([this](asio::error_code ec) {
+        if (ec || !running_)
+            return;
+
+        // If busy workers approach thread count, spawn more
+        int current = activeWorkers_.load();
+        int busy    = busyWorkers_.load();
+        if (busy > 0 && busy >= current - 1 && current < maxThreads_) {
+            int toSpawn = std::min(2, maxThreads_ - current);
+            for (int i = 0; i < toSpawn; ++i)
+                spawnWorker();
+            Log::Debug("HttpServer: scaled thread pool to "s + std::to_string(activeWorkers_.load()));
+        }
+
+        // Drain any queued connections
+        drainQueue();
+
+        monitorPool();
+    });
+}
+
+
+void
+HttpServer::sendServiceUnavailable (asio::ip::tcp::socket & socket)
+{
+    auto resp = HttpResponse(503, "Service Unavailable");
+    resp.setHeader("Retry-After"s, "5"s);
+    resp.setJsonBody("{\"error\":\"Server at capacity, please retry\"}"s);
+    auto respStr = resp.build();
+    asio::error_code ec;
+    asio::write(socket, asio::buffer(respStr), ec);
+}
+
+
+bool
+HttpServer::acquireConnectionSlot (const string & ip)
+{
+    std::lock_guard lock(ipCountMutex_);
+    auto & count = ipConnectionCounts_[ip];
+    if (count >= maxConnectionsPerIp_)
+        return false;
+    ++count;
+    return true;
+}
+
+
+void
+HttpServer::releaseConnectionSlot (const string & ip)
+{
+    std::lock_guard lock(ipCountMutex_);
+    auto it = ipConnectionCounts_.find(ip);
+    if (it != ipConnectionCounts_.end()) {
+        --it->second;
+        if (it->second <= 0)
+            ipConnectionCounts_.erase(it);
+    }
+}
+
+
+void
+HttpServer::drainQueue ()
+{
+    std::lock_guard lock(queueMutex_);
+    while (!connectionQueue_.empty() && activeConnections_ < maxConnections_) {
+        auto socket = std::move(connectionQueue_.front());
+        connectionQueue_.pop();
+        ++activeConnections_;
+        asio::post(ioContext_, [this, sock = std::move(socket)]() mutable {
+            handleConnection(std::move(sock));
+        });
+    }
+}
+
+
+void
 HttpServer::doAccept ()
 {
     if (!running_)
         return;
     acceptor_->async_accept([this](asio::error_code ec, asio::ip::tcp::socket socket) {
         if (!ec && running_) {
-            if (activeConnections_ < MAX_CONNECTIONS) {
+            if (activeConnections_ < maxConnections_) {
                 ++activeConnections_;
                 asio::post(ioContext_, [this, sock = std::move(socket)]() mutable {
                     handleConnection(std::move(sock));
                 });
             } else {
-                Log::Error("HttpServer: max connections reached, rejecting");
-                asio::error_code closeEc;
-                socket.close(closeEc);
+                // Try to queue the connection; if queue full, reject with 503
+                bool queued = false;
+                {
+                    std::lock_guard lock(queueMutex_);
+                    if (static_cast<int>(connectionQueue_.size()) < CONNECTION_QUEUE_CAPACITY) {
+                        connectionQueue_.push(std::move(socket));
+                        queued = true;
+                    }
+                }
+                if (!queued) {
+                    sendServiceUnavailable(socket);
+                    asio::error_code closeEc;
+                    socket.close(closeEc);
+                }
             }
         }
         doAccept();
@@ -192,7 +340,7 @@ HttpServer::doAcceptTls ()
         return;
     acceptor_->async_accept([this](asio::error_code ec, asio::ip::tcp::socket socket) {
         if (!ec && running_) {
-            if (activeConnections_ < MAX_CONNECTIONS) {
+            if (activeConnections_ < maxConnections_) {
                 ++activeConnections_;
                 auto stream = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(
                     std::move(socket), *sslContext_);
@@ -200,9 +348,19 @@ HttpServer::doAcceptTls ()
                     handleTlsConnection(std::move(*stream));
                 });
             } else {
-                Log::Error("HttpServer: max connections reached, rejecting");
-                asio::error_code closeEc;
-                socket.close(closeEc);
+                bool queued = false;
+                {
+                    std::lock_guard lock(queueMutex_);
+                    if (static_cast<int>(connectionQueue_.size()) < CONNECTION_QUEUE_CAPACITY) {
+                        connectionQueue_.push(std::move(socket));
+                        queued = true;
+                    }
+                }
+                if (!queued) {
+                    sendServiceUnavailable(socket);
+                    asio::error_code closeEc;
+                    socket.close(closeEc);
+                }
             }
         }
         doAcceptTls();
@@ -214,18 +372,47 @@ HttpServer::doAcceptTls ()
 void
 HttpServer::handleConnection (asio::ip::tcp::socket socket)
 {
+    string clientIp;
     try {
-        // Rate limiting check
         auto remoteEp = socket.remote_endpoint();
-        auto clientIp = remoteEp.address().to_string();
-        if (!RateLimiter::allowRequest(clientIp)) {
-            asio::error_code ec;
+        clientIp = remoteEp.address().to_string();
+
+        // Per-IP connection limit
+        if (!acquireConnectionSlot(clientIp)) {
             auto resp = HttpResponse(429, "Too Many Requests");
-            resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}");
+            resp.setJsonBody("{\"error\":\"Per-IP connection limit exceeded\"}"s);
             auto respStr = resp.build();
+            asio::error_code ec;
             asio::write(socket, asio::buffer(respStr), ec);
             --activeConnections_;
             return;
+        }
+
+        ++busyWorkers_;
+
+        // Rate limiting check
+        if (!RateLimiter::allowRequest(clientIp)) {
+            asio::error_code ec;
+            auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}"s);
+            auto respStr = resp.build();
+            asio::write(socket, asio::buffer(respStr), ec);
+            --busyWorkers_;
+            releaseConnectionSlot(clientIp);
+            --activeConnections_;
+            return;
+        }
+
+        // Set idle timeout on the socket
+        if (idleTimeoutSeconds_ > 0) {
+            asio::socket_base::linger lingerOpt(true, idleTimeoutSeconds_);
+            socket.set_option(lingerOpt);
+            // Use SO_RCVTIMEO for read idle timeout
+            struct timeval tv;
+            tv.tv_sec  = idleTimeoutSeconds_;
+            tv.tv_usec = 0;
+            setsockopt(socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO,
+                       reinterpret_cast<const char *>(&tv), sizeof(tv));
         }
 
         // Peek at the request to check for WebSocket upgrade
@@ -233,6 +420,8 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
         std::vector<byte> buffer(65536);
         auto bytesRead = socket.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
         if (ec || bytesRead == 0) {
+            --busyWorkers_;
+            releaseConnectionSlot(clientIp);
             --activeConnections_;
             return;
         }
@@ -242,12 +431,16 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             auto resp = HttpResponse::badRequest("Malformed HTTP request");
             auto respStr = resp.build();
             asio::write(socket, asio::buffer(respStr), ec);
+            --busyWorkers_;
+            releaseConnectionSlot(clientIp);
             --activeConnections_;
             return;
         }
 
         if (WebSocketSession::isWebSocketUpgrade(request.headers)) {
+            --busyWorkers_;
             upgradeToWebSocket(std::move(socket), request);
+            releaseConnectionSlot(clientIp);
             return;
         }
 
@@ -260,6 +453,9 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
         Log::Error("HttpServer::handleConnection exception: "s + e.what());
     }
 
+    --busyWorkers_;
+    if (!clientIp.empty())
+        releaseConnectionSlot(clientIp);
     --activeConnections_;
 }
 
@@ -268,6 +464,7 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
 void
 HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream)
 {
+    string clientIp;
     try {
         // Perform TLS handshake
         asio::error_code hsEc;
@@ -278,15 +475,31 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
             return;
         }
 
-        // Rate limiting check
         auto remoteEp = stream.lowest_layer().remote_endpoint();
-        auto clientIp = remoteEp.address().to_string();
+        clientIp = remoteEp.address().to_string();
+
+        // Per-IP connection limit
+        if (!acquireConnectionSlot(clientIp)) {
+            auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setJsonBody("{\"error\":\"Per-IP connection limit exceeded\"}"s);
+            auto respStr = resp.build();
+            asio::error_code ec;
+            asio::write(stream, asio::buffer(respStr), ec);
+            --activeConnections_;
+            return;
+        }
+
+        ++busyWorkers_;
+
+        // Rate limiting check
         if (!RateLimiter::allowRequest(clientIp)) {
             asio::error_code ec;
             auto resp = HttpResponse(429, "Too Many Requests");
-            resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}");
+            resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}"s);
             auto respStr = resp.build();
             asio::write(stream, asio::buffer(respStr), ec);
+            --busyWorkers_;
+            releaseConnectionSlot(clientIp);
             --activeConnections_;
             return;
         }
@@ -301,6 +514,9 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
         Log::Error("HttpServer::handleTlsConnection exception: "s + e.what());
     }
 
+    --busyWorkers_;
+    if (!clientIp.empty())
+        releaseConnectionSlot(clientIp);
     --activeConnections_;
 }
 #endif

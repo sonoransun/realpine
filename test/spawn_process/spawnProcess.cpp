@@ -9,6 +9,8 @@
 #include <StringUtils.h>
 #include <SpawnProcess.h>
 
+using std::cout; using std::cerr; using std::endl;
+
 
 
 int 

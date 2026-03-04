@@ -2,22 +2,19 @@
 
 
 #include <DtcpPendingAckMap.h>
-#include <AgedQueue.h>
 #include <DtcpBaseUdpTransport.h>
 #include <DtcpBaseConnTransport.h>
 #include <DataBlock.h>
+#include <Configuration.h>
 #include <Log.h>
 #include <StringUtils.h>
 #include <Platform.h>
-
-
-const uint  lowInterval  = 500;     // 500 ms
-const uint  midInterval  = 2000;    // 2 seconds
-const uint  highInterval = 20000;   // 20 seconds
+#include <cmath>
 
 
 
 DtcpPendingAckMap::DtcpPendingAckMap (DtcpBaseUdpTransport * udpTransport)
+    : rng_ (std::random_device{}())
 {
 #ifdef _VERBOSE
     Log::Debug ("DtcpPendingAckMap constructor invoked.");
@@ -28,9 +25,23 @@ DtcpPendingAckMap::DtcpPendingAckMap (DtcpBaseUdpTransport * udpTransport)
     recordIndex_ = new t_RecordIndex;
     currId_ = 1;
 
-    lowQueue_  = new AgedQueue;
-    midQueue_  = new AgedQueue;
-    highQueue_ = new AgedQueue;
+    // Read configurable max retries
+    //
+    maxRetries_ = kDefaultMaxRetries;
+
+    string maxRetriesStr;
+    if (Configuration::getValue ("dtcp.maxRetries"s, maxRetriesStr) &&
+        !maxRetriesStr.empty ()) {
+        try {
+            auto val = std::stoi (maxRetriesStr);
+            if (val > 0 && val <= 255) {
+                maxRetries_ = static_cast<ushort>(val);
+            }
+        }
+        catch (...) {
+            Log::Error ("Invalid dtcp.maxRetries value, using default.");
+        }
+    }
 }
 
 
@@ -41,16 +52,19 @@ DtcpPendingAckMap::~DtcpPendingAckMap ()
     Log::Debug ("DtcpPendingAckMap destructor invoked.");
 #endif
 
+    // Clean up all remaining pending records
+    //
+    for (auto & [id, record] : *recordIndex_) {
+        delete record->data;
+        delete record;
+    }
+
     delete recordIndex_;
-
-    delete lowQueue_;
-
-    delete highQueue_;
 }
 
 
 
-bool  
+bool
 DtcpPendingAckMap::add (DtcpBaseConnTransport * requestor,
                         DataBlock *             data,
                         ulong                   destIpAddress,
@@ -67,35 +81,34 @@ DtcpPendingAckMap::add (DtcpBaseConnTransport * requestor,
     //
     id = currId_++;
 
-    gettimeofday (&currTime_, nullptr);
+    auto now = t_Clock::now ();
+
+
+    // Compute initial RTO based on peer RTT estimate
+    //
+    auto rto = computeRto (destIpAddress);
+    auto nextRetry = now + applyJitter (rto);
 
 
     // Create new record for this reliable transfer
     //
-    t_PendingRecord *  newRecord;
-    newRecord = new t_PendingRecord;
+    auto * newRecord = new t_PendingRecord;
 
-    newRecord->id                 = id;
-    newRecord->requestor          = requestor;
-    newRecord->data               = data;
-    newRecord->destIpAddress      = destIpAddress;
-    newRecord->destPort           = destPort;
-    newRecord->sendTime.tv_sec    = currTime_.tv_sec;
-    newRecord->sendTime.tv_usec   = currTime_.tv_usec;
-    newRecord->resendCount        = 0;
-    newRecord->currQueue          = lowQueue_;
+    newRecord->id               = id;
+    newRecord->requestor        = requestor;
+    newRecord->data             = data;
+    newRecord->destIpAddress    = destIpAddress;
+    newRecord->destPort         = destPort;
+    newRecord->sendTime         = now;
+    newRecord->nextRetryTime    = nextRetry;
+    newRecord->retryCount       = 0;
+    newRecord->currentRto       = rto;
 
 
-    // Place in low interval queue and index by ID.
+    // Place in priority queue and index by ID.
     //
-    bool status;
-    status = lowQueue_->add (reinterpret_cast<void *>(newRecord));
-
-    if (!status) {
-        Log::Error ("Could not add new record to aged queue in DtcpPendingAckMap::add!");
-        return false;
-    }
     recordIndex_->emplace (id, newRecord);
+    retryQueue_.push ({id, nextRetry});
 
 
     return true;
@@ -103,7 +116,7 @@ DtcpPendingAckMap::add (DtcpBaseConnTransport * requestor,
 
 
 
-bool  
+bool
 DtcpPendingAckMap::remove (ulong  id)
 {
 #ifdef _VERBOSE
@@ -124,356 +137,133 @@ DtcpPendingAckMap::remove (ulong  id)
 
         return false;
     }
-    t_PendingRecord * record;
-    record = (*iter).second;
+    auto * record = iter->second;
 
 
-    // Free data block and remove from aged queue
+    // Compute RTT sample from first send time (only valid if not retransmitted,
+    // to avoid retransmission ambiguity per Karn's algorithm)
+    //
+    if (record->retryCount == 0) {
+        auto now = t_Clock::now ();
+        auto sampleMs = std::chrono::duration<double, std::milli>(now - record->sendTime).count ();
+        updatePeerRtt (record->destIpAddress, sampleMs);
+    }
+
+
+    // Free data block and erase from index
     //
     delete record->data;
+    delete record;
 
-    bool status;
-    status = record->currQueue->remove (reinterpret_cast<void *>(record));
+    recordIndex_->erase (iter);
 
-    if (!status) {
-        // This should never happen...
-        //
-        Log::Error ("Unable to remove record from aged queue in DtcpPendingAckMap::remove.");
-        return false;
-    }
-    // Erase from index, and return success
-    //
-    recordIndex_->erase (id);
-     
+    // Note: stale entries in retryQueue_ are handled lazily in processTimers()
+    // by checking if the ID still exists in the recordIndex_.
+
 
     return true;
 }
 
 
 
-bool  
+bool
 DtcpPendingAckMap::processTimers ()
 {
 #ifdef _VERY_VERBOSE
     Log::Debug ("DtcpPendingAckMap::processTimers invoked.");
 #endif
 
-    ////
-    //
-    // The basic process here is to check the oldest records
-    // in the low, mid, and high queues.  If the record has
-    // a resend timeout, we resend the packet, and increment
-    // its resendCount.  If the resend count is max for the
-    // queue in which it resides, it is then moved to the next
-    // queue.  If a record has maxed out its resend count in
-    // the high queue, it has completely expired.  The
-    // requesting transport is then notified of the send failure
-    // to perform any recover needed.
-    //
-
-    gettimeofday (&currTime_, nullptr);
-   
- 
-    // Check queue sizes before processing timeouts to prevent
-    // chasing timeout records needlessly.
-    //
-    bool  checkLowQueue  = false;
-    bool  checkMidQueue  = false;
-    bool  checkHighQueue = false;
-
-    if (lowQueue_->size ())
-        checkLowQueue = true;
-
-    if (midQueue_->size ())
-        checkMidQueue = true;
-
-    if (highQueue_->size ())
-        checkHighQueue = true;
-
-
-    // used for processing timed queues
-    //
-    t_PendingRecord * currRecord  = nullptr;
-    t_PendingRecord * firstRecord = nullptr; // prevent extra time checks
-    bool   status;
-    bool   finished;
-    ulong  timeDiff;
-
-
-    // Check low queue first. 
-    // This queue has one resend, then sent to mid queue.  resend count unused.
-    //
-
-    if (checkLowQueue) {
-
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- Processing low timer queue...");
-#endif
-       
-        firstRecord = nullptr;
-        finished = false;
-
-        while (!finished) {
-
-            void *  recordAddr;
-            status = lowQueue_->oldest (recordAddr);
-            currRecord = reinterpret_cast<t_PendingRecord *>(recordAddr);
- 
-
-            if (!status) {
-                // This should never happen.  Serious error?
-                //
-                Log::Error ("Unable to retreive low oldest record in DtcpPendingAckMap::processTimers.");
-                return false;
-
-            }
-            if (!currRecord) {
-                Log::Error ("Null record in pending queue!!!");
-                return false;
-            }
-            if (!firstRecord) {
-                // set first record to catch wraparound condition
-                firstRecord = currRecord;
-            }
-            else if (firstRecord == currRecord) {
-                // wrap around
-                finished = true;
-                continue;
-            }
-
-            // Check for resend timeout
-            //
-            timeDiff = msecTimeDiff (currRecord->sendTime, currTime_);
-
-            if (timeDiff > lowInterval) {
-
-                // Timeout, resend packet and place in midQueue_.
-                //
-#ifdef _VERBOSE
-                Log::Debug ("Low timeout for pending packet in DtcpPendingAckMap.  Resending...");
-#endif
-
-                udpTransport_->sendData (currRecord->destIpAddress,
-                                         currRecord->destPort,
-                                         currRecord->data->buffer_.get(),
-                                         currRecord->data->length_);
-
-                currRecord->sendTime.tv_sec  = currTime_.tv_sec;
-                currRecord->sendTime.tv_usec = currTime_.tv_usec;
-                currRecord->resendCount = 0;
-
-                lowQueue_->remove (reinterpret_cast<void *>(currRecord));
-                midQueue_->add (reinterpret_cast<void *>(currRecord));
-
-                currRecord->currQueue = midQueue_;
-
-                // if we removed the only entry in the queue, we are finished.
-                //
-                if (lowQueue_->size () == 0) {
-                    finished = true;
-                }
-            }
-            else {
-                // stop checking at this point, all remaining records will be newer
-                finished = true;
-            }
-        }
-
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- low timer complete...");
-#endif
+    if (retryQueue_.empty ()) {
+        return true;
     }
 
-    gettimeofday (&currTime_, nullptr);
+    auto now = t_Clock::now ();
 
-    // Check mid interval queue (1 second interval queue)
-    // This queue has two resends, then sent to high queue.
-    //
+    while (!retryQueue_.empty ()) {
 
-    if (checkMidQueue) {
-       
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- Processing mid timer queue...");
-#endif
+        const auto & top = retryQueue_.top ();
 
-        firstRecord = nullptr;
-        finished = false;
-
-        while (!finished) { 
-
-            void *  recordAddr;
-            status = midQueue_->oldest (recordAddr);
-            currRecord = reinterpret_cast<t_PendingRecord *>(recordAddr);
-
-            if (!status) {
-                // This should never happen.  Serious error?
-                //
-                Log::Error ("Unable to retreive mid oldest record in DtcpPendingAckMap::processTimers.");
-                return false;
-            }
-            if (!firstRecord) {
-                // set first record to catch wraparound condition
-                firstRecord = currRecord;
-            }
-            else if (firstRecord == currRecord) {
-                // wrap around
-                finished = true;
-                continue;
-            }
-
-            // Check for resend timeout
-            //
-            timeDiff = msecTimeDiff (currRecord->sendTime, currTime_);
-
-            if (timeDiff > midInterval) {
-
-                // Timeout, resend packet and update or place in highQueue
-                //
-#ifdef _VERBOSE
-                Log::Debug ("Mid timeout for pending packet in DtcpPendingAckMap.  Resending...");
-#endif
-
-                udpTransport_->sendData (currRecord->destIpAddress,
-                                         currRecord->destPort,
-                                         currRecord->data->buffer_.get(),
-                                         currRecord->data->length_);
-
-                currRecord->sendTime.tv_sec  = currTime_.tv_sec;
-                currRecord->sendTime.tv_usec = currTime_.tv_usec;
-
-                if (currRecord->resendCount >= 1) {
-                    // Second timeout, place in high queue...
-                    //
-                    currRecord->resendCount = 0;
-
-                    midQueue_->remove (reinterpret_cast<void *>(currRecord));
-                    highQueue_->add (reinterpret_cast<void *>(currRecord));
-
-                    currRecord->currQueue = highQueue_;
-
-                    // if we removed the only entry in the queue, we are finished.
-                    //
-                    if (midQueue_->size () == 0) {
-                        finished = true;
-                    }
-                }
-                else {
-                    // first timeout, touch aged queue location and update next timeout.
-                    //
-                    currRecord->resendCount++;
-
-                    midQueue_->touch (reinterpret_cast<void *>(currRecord));
-                }
-            }
-            else {
-                // stop checking at this point, all remaining records will be newer
-                finished = true;
-            }
+        // Stop when we reach entries that haven't expired yet
+        //
+        if (top.nextRetryTime > now) {
+            break;
         }
 
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- mid timer complete...");
-#endif
-    }
+        auto entry = retryQueue_.top ();
+        retryQueue_.pop ();
 
-    gettimeofday (&currTime_, nullptr);
 
-    // Check high interval queue (10 second interval queue)
-    // This queue has two resends, then request is failed.
-    //
-
-    if (checkHighQueue) {
-       
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- Processing high timer queue...");
-#endif
-
-        firstRecord = nullptr;
-        finished = false;
-
-        while (!finished) { 
-
-            void *  recordAddr;
-            status = highQueue_->oldest (recordAddr);
-            currRecord = reinterpret_cast<t_PendingRecord *>(recordAddr);
-
-            if (!status) {
-                // This should never happen.  Serious error?
-                //
-                Log::Error ("Unable to retreive high oldest record in DtcpPendingAckMap::processTimers.");
-                return false;
-            }
-            if (!firstRecord) {
-                // set first record to catch wraparound condition
-                firstRecord = currRecord;
-            }
-            else if (firstRecord == currRecord) {
-                // wrap around
-                finished = true;
-                continue;
-            }
-
-            // Check for resend timeout
-            //
-            timeDiff = msecTimeDiff (currRecord->sendTime, currTime_);
-
-            if (timeDiff > highInterval) {
-
-                if (currRecord->resendCount >= 1) {
-
-                    // Second timeout, error
-                    //
-                    highQueue_->remove (reinterpret_cast<void *>(currRecord));
-                    recordIndex_->erase (currRecord->id);
-
-                    // if connTransport requestor is null, this was sent by the udpTransport.
-                    //
-                    if (currRecord->requestor) {
-                        currRecord->requestor->handleSendFailure (currRecord->id);
-                    }
-                    else {
-                        udpTransport_->handleSendFailure (currRecord->id);
-                    }
-
-                    delete currRecord->data;
-                    delete currRecord;
-
-                    // if we removed the only entry in the queue, we are finished.
-                    //
-                    if (highQueue_->size () == 0) {
-                        finished = true;
-                    }
-                }
-                else {
-                    // Timeout, resend packet and update or timeout
-                    //
-#ifdef _VERBOSE
-                    Log::Debug ("High timeout for pending packet in DtcpPendingAckMap.  Resending...");
-#endif
-
-                    udpTransport_->sendData (currRecord->destIpAddress,
-                                             currRecord->destPort,
-                                             currRecord->data->buffer_.get(),
-                                             currRecord->data->length_);
-
-                    // first timeout, touch aged queue location and update next timeout.
-                    //
-                    currRecord->sendTime.tv_sec  = currTime_.tv_sec;
-                    currRecord->sendTime.tv_usec = currTime_.tv_usec;
-                    currRecord->resendCount++;
-
-                    highQueue_->touch (reinterpret_cast<void *>(currRecord));
-                }
-            }
-            else {
-                // stop checking at this point, all remaining records will be newer
-                finished = true;
-            }
+        // Check if the record still exists (may have been removed by ack)
+        //
+        auto iter = recordIndex_->find (entry.id);
+        if (iter == recordIndex_->end ()) {
+            // Stale entry — record was already acked and removed
+            continue;
         }
 
-#ifdef _VERY_VERBOSE
-        Log::Debug ("- high timer complete...");
+        auto * record = iter->second;
+
+
+        // Check if this is a stale queue entry (record was re-enqueued with a newer time)
+        //
+        if (record->nextRetryTime != entry.nextRetryTime) {
+            continue;
+        }
+
+
+        if (record->retryCount >= maxRetries_) {
+
+            // Max retries exceeded — notify requestor of failure
+            //
+#ifdef _VERBOSE
+            Log::Debug ("Max retries ("s + std::to_string (maxRetries_) +
+                        ") exceeded for pending packet in DtcpPendingAckMap.");
 #endif
+
+            recordIndex_->erase (iter);
+
+            // Notify requestor of send failure (this chains to
+            // AlpinePeerMgr::reliableTransferFailed which feeds
+            // AlpineRatingEngine::transferFailureEvent)
+            //
+            if (record->requestor) {
+                record->requestor->handleSendFailure (record->id);
+            }
+            else {
+                udpTransport_->handleSendFailure (record->id);
+            }
+
+            delete record->data;
+            delete record;
+        }
+        else {
+            // Resend packet with exponential backoff
+            //
+#ifdef _VERBOSE
+            Log::Debug ("Retry "s + std::to_string (record->retryCount + 1) +
+                        " for pending packet in DtcpPendingAckMap.  Resending...");
+#endif
+
+            udpTransport_->sendData (record->destIpAddress,
+                                     record->destPort,
+                                     record->data->buffer_.get(),
+                                     record->data->length_);
+
+            record->retryCount++;
+
+            // Exponential backoff: double the RTO
+            //
+            record->currentRto = std::min (
+                record->currentRto * 2,
+                std::chrono::duration_cast<t_Duration>(
+                    std::chrono::duration<double, std::milli>(kMaxRtoMs)));
+
+            auto nextRetry = now + applyJitter (record->currentRto);
+            record->sendTime      = now;
+            record->nextRetryTime = nextRetry;
+
+            retryQueue_.push ({record->id, nextRetry});
+        }
     }
 
 #ifdef _VERY_VERBOSE
@@ -486,34 +276,80 @@ DtcpPendingAckMap::processTimers ()
 
 
 
-ulong  
-DtcpPendingAckMap::msecTimeDiff (const t_SysTime &  beginTime,
-                                 const t_SysTime &  endTime)
+DtcpPendingAckMap::t_Duration
+DtcpPendingAckMap::computeRto (ulong  destIpAddress) const
 {
-#ifdef _VERY_VERBOSE
-    Log::Debug ("DtcpPendingAckMap::msecTimeDiff invoked.");
-#endif
+    auto iter = peerRttIndex_.find (destIpAddress);
 
-    ulong diff = 0;
-    ulong usec;
+    double rtoMs;
 
-    diff = endTime.tv_sec - beginTime.tv_sec;
-    diff *= 1000;  // convert to milliseconds
+    if (iter != peerRttIndex_.end () && iter->second.initialized) {
+        // RTO = SRTT + 4 * RTTVAR
+        //
+        rtoMs = iter->second.srtt + 4.0 * iter->second.rttvar;
 
-    if (endTime.tv_usec > beginTime.tv_usec) {
-        usec = endTime.tv_usec - beginTime.tv_usec;
-        usec = usec / 1000;
-        diff += usec / 1000;
+        // Clamp to reasonable range
+        //
+        rtoMs = std::max (rtoMs, 10.0);
+        rtoMs = std::min (rtoMs, kMaxRtoMs);
     }
     else {
-        usec = (1000000 - beginTime.tv_usec) + endTime.tv_usec;
-        usec = usec / 1000;
-        diff -= 1000;
-        diff += usec;
+        // No RTT data for this peer yet
+        //
+        rtoMs = kDefaultRtoMs;
     }
-       
 
-    return diff;
+    return std::chrono::duration_cast<t_Duration>(
+        std::chrono::duration<double, std::milli>(rtoMs));
 }
 
+
+
+DtcpPendingAckMap::t_Duration
+DtcpPendingAckMap::applyJitter (t_Duration  base)
+{
+    auto baseMs = std::chrono::duration<double, std::milli>(base).count ();
+
+    std::uniform_real_distribution<double> dist (
+        baseMs * (1.0 - kJitterFraction),
+        baseMs * (1.0 + kJitterFraction));
+
+    auto jitteredMs = dist (rng_);
+
+    return std::chrono::duration_cast<t_Duration>(
+        std::chrono::duration<double, std::milli>(jitteredMs));
+}
+
+
+
+void
+DtcpPendingAckMap::updatePeerRtt (ulong  destIpAddress,
+                                   double sampleMs)
+{
+#ifdef _VERBOSE
+    Log::Debug ("DtcpPendingAckMap::updatePeerRtt — sample: "s +
+                std::to_string (sampleMs) + " ms for peer "s +
+                std::to_string (destIpAddress));
+#endif
+
+    auto & rtt = peerRttIndex_[destIpAddress];
+
+    if (!rtt.initialized) {
+        // First sample: initialize directly per RFC 6298
+        //
+        rtt.srtt   = sampleMs;
+        rtt.rttvar = sampleMs / 2.0;
+        rtt.initialized = true;
+    }
+    else {
+        // EWMA update per RFC 6298:
+        //   RTTVAR = (1 - beta) * RTTVAR + beta * |SRTT - sample|
+        //   SRTT   = (1 - alpha) * SRTT + alpha * sample
+        //
+        rtt.rttvar = (1.0 - kSrttBeta) * rtt.rttvar +
+                     kSrttBeta * std::abs (rtt.srtt - sampleMs);
+        rtt.srtt   = (1.0 - kSrttAlpha) * rtt.srtt +
+                     kSrttAlpha * sampleMs;
+    }
+}
 

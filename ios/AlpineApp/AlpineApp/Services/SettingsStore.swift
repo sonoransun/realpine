@@ -60,6 +60,14 @@ final class SettingsStore {
         didSet { Self.defaults.set(autoLockTimeout, forKey: Self.keyPrefix + "autoLockTimeout") }
     }
 
+    var requireBiometricForData: Bool {
+        didSet { Self.defaults.set(requireBiometricForData, forKey: Self.keyPrefix + "requireBiometricForData") }
+    }
+
+    var secureEnclaveEnabled: Bool {
+        didSet { Self.defaults.set(secureEnclaveEnabled, forKey: Self.keyPrefix + "secureEnclaveEnabled") }
+    }
+
     init() {
         let defaults = Self.defaults
         let prefix = Self.keyPrefix
@@ -105,5 +113,8 @@ final class SettingsStore {
         } else {
             self.autoLockTimeout = -1
         }
+
+        self.requireBiometricForData = defaults.bool(forKey: prefix + "requireBiometricForData")
+        self.secureEnclaveEnabled = defaults.bool(forKey: prefix + "secureEnclaveEnabled")
     }
 }

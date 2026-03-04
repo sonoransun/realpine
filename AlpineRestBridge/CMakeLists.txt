@@ -21,8 +21,10 @@ add_executable(AlpineRestBridge
     QueryHandler.cpp
     PeerHandler.cpp
     StatusHandler.cpp
+    AuthHandler.cpp
     MetricsHandler.cpp
     WebSocketSession.cpp
+    ClusterCoordinator.cpp
     AlpineRestBridge.cpp
 )
 target_include_directories(AlpineRestBridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

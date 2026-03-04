@@ -44,11 +44,11 @@ main (int argc, char *argv[])
     destIpAddressStr = argv[4];
     destPortStr = argv[5];
 
-    !if (NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
+    if (!NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
-    !if (NetUtils::stringIpToLong (destIpAddressStr, destIpAddress)) {
+    if (!NetUtils::stringIpToLong (destIpAddressStr, destIpAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
@@ -91,7 +91,7 @@ main (int argc, char *argv[])
  
     // Create socket...
     UdpConnection  udpConnection;
-    !if (udpConnection.create (ipAddress, port)) {
+    if (!udpConnection.create (ipAddress, port)) {
         Log::Error ("Creating connection failed.  Exiting.");
         return 1;
     }

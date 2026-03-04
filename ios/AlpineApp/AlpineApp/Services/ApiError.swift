@@ -26,6 +26,8 @@ enum ApiError: Error, LocalizedError, Sendable {
     case retryExhausted(lastError: String)
     /// Request timed out
     case timeout
+    /// Certificate pinning validation failed
+    case certificatePinningFailed
 
     var errorDescription: String? {
         switch self {
@@ -53,6 +55,8 @@ enum ApiError: Error, LocalizedError, Sendable {
             "Request failed after multiple retries: \(lastError)"
         case .timeout:
             "Request timed out"
+        case .certificatePinningFailed:
+            "Certificate pinning validation failed"
         }
     }
 }

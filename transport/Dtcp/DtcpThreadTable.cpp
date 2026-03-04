@@ -9,6 +9,8 @@
 #include <WriteLock.h>
 #include <Log.h>
 #include <StringUtils.h>
+#include <Configuration.h>
+#include <algorithm>
 
 
 
@@ -29,33 +31,46 @@ DtcpThreadTable::DtcpThreadTable (DtcpBaseUdpTransport * udpTransport,
                 "\n");
 #endif
 
-    WriteLock  recordLock(recordLock_);
     WriteLock  threadLock(threadLock_);
-    WriteLock  indexLock(indexLock_);
-    WriteLock  bufferLock(bufferLock_);
+    WriteLock  recordLock(recordLock_);
 
     udpTransport_ = udpTransport;
     maxThreads_   = maxThreads;
-    maxRecords_   = maxRecords;
     maxBuffers_   = maxBuffers;
 
-    // allocate a DtcpIORecord and DataBuffer for each maxThread...
-    // 
-    uint i;
-    DtcpIORecord * newRecord;
+    // Check for configurable max pool size
+    //
+    string maxConnStr;
+    if (Configuration::getValue("dtcp.maxConnections"s, maxConnStr)) {
+        auto val = static_cast<uint>(std::stoul(maxConnStr));
+        if (val > 0) {
+            maxRecords = val;
+        }
+    }
+    maxRecords_ = maxRecords;
 
-    for (i = 0; i < maxThreads; i++) {
-        newRecord = new DtcpIORecord (defaultBufferSize);
-        allRecordList_.push_back (newRecord);
-        availableRecordList_.push_back (newRecord);
+    // Pre-allocate record pool with index-based free list
+    //
+    recordPool_.reserve(maxThreads);
+    freeRecordIndices_.reserve(maxThreads);
+    recordLastActivity_.reserve(maxThreads);
+
+    for (uint i = 0; i < maxThreads; i++) {
+        auto * newRecord = new DtcpIORecord(defaultBufferSize);
+        recordPool_.push_back(newRecord);
+        freeRecordIndices_.push_back(static_cast<int>(i));
+        recordLastActivity_.push_back(t_Clock::now());
     }
 
-    DataBuffer * newBuffer;
+    // Pre-allocate buffer pool with index-based free list
+    //
+    bufferPool_.reserve(maxThreads);
+    freeBufferIndices_.reserve(maxThreads);
 
-    for (i = 0; i < maxThreads; i++) {
-        newBuffer = new DataBuffer (defaultBufferSize);
-        allBufferList_.push_back (newBuffer);
-        availableBufferList_.push_back (newBuffer);
+    for (uint i = 0; i < maxThreads; i++) {
+        auto * newBuffer = new DataBuffer(defaultBufferSize);
+        bufferPool_.push_back(newBuffer);
+        freeBufferIndices_.push_back(static_cast<int>(i));
     }
 }
 
@@ -67,13 +82,20 @@ DtcpThreadTable::~DtcpThreadTable ()
     Log::Debug ("DtcpThreadTable destructor invoked.");
 #endif
 
-    // cleanup all allocated threads and IO records...
+    // cleanup all allocated records
     //
-    for (const auto& record : allRecordList_) {
+    for (const auto& record : recordPool_) {
         delete record;
     }
 
+    // cleanup all allocated buffers
+    //
+    for (const auto& buffer : bufferPool_) {
+        delete buffer;
+    }
 
+    // cleanup all allocated threads
+    //
     for (const auto& thread : allThreadList_) {
         delete thread;
     }
@@ -81,7 +103,7 @@ DtcpThreadTable::~DtcpThreadTable ()
 
 
 
-bool  
+bool
 DtcpThreadTable::allocateRecord (DtcpIORecord *&  record)
 {
 #ifdef _VERBOSE
@@ -92,23 +114,37 @@ DtcpThreadTable::allocateRecord (DtcpIORecord *&  record)
 
     WriteLock  lock(recordLock_);
 
-    if (!availableRecordList_.empty()) {
-        record = availableRecordList_.front ();
-        availableRecordList_.pop_front ();
-
-        return true;
-
-    }
-    if (allRecordList_.size () < maxRecords_) {
-        record = new DtcpIORecord (defaultBufferSize);
-        allRecordList_.push_back (record);
+    if (!freeRecordIndices_.empty()) {
+        int idx = freeRecordIndices_.back();
+        freeRecordIndices_.pop_back();
+        record = recordPool_[idx];
+        recordLastActivity_[idx] = t_Clock::now();
 
         return true;
     }
-    // reached our limit!
+
+    if (recordPool_.size() < maxRecords_) {
+        auto * newRecord = new DtcpIORecord(defaultBufferSize);
+        int idx = static_cast<int>(recordPool_.size());
+        recordPool_.push_back(newRecord);
+        recordLastActivity_.push_back(t_Clock::now());
+        record = newRecord;
+
+        return true;
+    }
+
+    // Pool full — attempt LRU eviction of an idle record
+    //
+    int evicted = evictLruRecord();
+    if (evicted >= 0) {
+        record = recordPool_[evicted];
+        recordLastActivity_[evicted] = t_Clock::now();
+        return true;
+    }
+
+    // reached our limit, no idle records to evict
     //
     Log::Error ("Maximum number of DtcpIORecords allocated; none available.");
-
 
     return false;
 }
@@ -129,12 +165,22 @@ DtcpThreadTable::returnRecord (DtcpIORecord * record)
 
     WriteLock  lock(recordLock_);
 
-    availableRecordList_.push_back (record);
+    // Find index of record in pool
+    //
+    for (int i = 0; i < static_cast<int>(recordPool_.size()); i++) {
+        if (recordPool_[i] == record) {
+            freeRecordIndices_.push_back(i);
+            recordLastActivity_[i] = t_Clock::now();
+            return;
+        }
+    }
+
+    Log::Error ("Record not found in pool in DtcpThreadTable::returnRecord.");
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::allocateBuffer (DataBuffer *&  buffer)
 {
 #ifdef _VERBOSE
@@ -143,32 +189,36 @@ DtcpThreadTable::allocateBuffer (DataBuffer *&  buffer)
 
     buffer = nullptr;
 
-    WriteLock  lock(bufferLock_);
+    WriteLock  lock(recordLock_);
 
-    if (!availableBufferList_.empty()) {
-        buffer = availableBufferList_.front ();
-        availableBufferList_.pop_front ();
-
-        return true;
-
-    }
-    if (allBufferList_.size () < maxBuffers_) {
-        buffer = new DataBuffer (defaultBufferSize);
-        allBufferList_.push_back (buffer);
+    if (!freeBufferIndices_.empty()) {
+        int idx = freeBufferIndices_.back();
+        freeBufferIndices_.pop_back();
+        buffer = bufferPool_[idx];
 
         return true;
     }
+
+    if (bufferPool_.size() < maxBuffers_) {
+        auto * newBuffer = new DataBuffer(defaultBufferSize);
+        bufferPool_.push_back(newBuffer);
+        freeBufferIndices_.push_back(static_cast<int>(bufferPool_.size()) - 1);
+        freeBufferIndices_.pop_back();
+        buffer = newBuffer;
+
+        return true;
+    }
+
     // reached our limit!
     //
     Log::Error ("Maximum number of DataBuffers allocated; none available.");
 
-
-    return true;
+    return false;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::releaseBuffer (DataBuffer * buffer)
 {
 #ifdef _VERBOSE
@@ -179,16 +229,23 @@ DtcpThreadTable::releaseBuffer (DataBuffer * buffer)
         Log::Error ("Null buffer passed to DtcpThreadTable::releaseBuffer!");
         return false;
     }
-    WriteLock  lock(bufferLock_);
-    availableBufferList_.push_back (buffer);
 
+    WriteLock  lock(recordLock_);
 
-    return true;
+    for (int i = 0; i < static_cast<int>(bufferPool_.size()); i++) {
+        if (bufferPool_[i] == buffer) {
+            freeBufferIndices_.push_back(i);
+            return true;
+        }
+    }
+
+    Log::Error ("Buffer not found in pool in DtcpThreadTable::releaseBuffer.");
+    return false;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::processRecord (DtcpIORecord * record)
 {
 #ifdef _VERBOSE
@@ -199,11 +256,23 @@ DtcpThreadTable::processRecord (DtcpIORecord * record)
         Log::Error ("Null record passed to DtcpThreadTable::processRecord.  Ignoring.");
         return false;
     }
-    // throw record onto the queue...
+
+    // Find record index and enqueue
     //
     {
         WriteLock  lock(recordLock_);
-        recordQueue_.push_back (record);
+
+        int recIdx = -1;
+        for (int i = 0; i < static_cast<int>(recordPool_.size()); i++) {
+            if (recordPool_[i] == record) {
+                recIdx = i;
+                break;
+            }
+        }
+        if (recIdx >= 0) {
+            recordLastActivity_[recIdx] = t_Clock::now();
+        }
+        recordQueue_.push_back(recIdx);
     }
 
 
@@ -228,7 +297,7 @@ DtcpThreadTable::processRecord (DtcpIORecord * record)
     bool newThread = false;
     {
         ReadLock  lock(threadLock_);
-    
+
         if (allThreadList_.size () < maxThreads_) {
             newThread = true;
         }
@@ -240,8 +309,8 @@ DtcpThreadTable::processRecord (DtcpIORecord * record)
     }
     // All threads are busy, no more allowed.  Once a thread
     // becomes available it will process the pending records.
-   
- 
+
+
     return true;
 }
 
@@ -256,49 +325,32 @@ DtcpThreadTable::processComplete (t_ThreadId  id)
 #endif
 
     // Remove thread / record from active index and add to available queue.
-    //
-    DtcpIORecord * oldRecord = nullptr;
-
-    {
-        WriteLock  lock(indexLock_);
-
-        auto iter = activeThreadIndex_.find (id);
-
-        if (iter == activeThreadIndex_.end ()) {
-            // serious error, this should not occur
-            Log::Error ("Unable to locate active thread record "
-                                 "in DtcpThreadTable::processComplete!");
-
-            return false;
-        }
-        oldRecord = (*iter).second;
-
-        if (!oldRecord) {
-            // serious error, this should not occur
-            Log::Error ("Active thread record is NULL "
-                                 "in DtcpThreadTable::processComplete!");
-
-            return false;
-        }
-        activeThreadIndex_.erase (id);
-    }
-
-
-    // Add IORecord to available list.
+    // recordLock_ protects both activeThreadIndex_ and freeRecordIndices_.
     //
     {
         WriteLock  lock(recordLock_);
 
-        availableRecordList_.push_back (oldRecord);
-    }
+        auto iter = activeThreadIndex_.find(id);
 
+        if (iter == activeThreadIndex_.end()) {
+            Log::Error ("Unable to locate active thread record "
+                                 "in DtcpThreadTable::processComplete!");
+            return false;
+        }
+
+        int recIdx = iter->second;
+        activeThreadIndex_.erase(id);
+
+        freeRecordIndices_.push_back(recIdx);
+        recordLastActivity_[recIdx] = t_Clock::now();
+    }
 
     return true;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::locateRecord (t_ThreadId       threadId,
                                DtcpIORecord *&  record)
 {
@@ -306,68 +358,66 @@ DtcpThreadTable::locateRecord (t_ThreadId       threadId,
     Log::Debug ("DtcpThreadTable::locateRecord invoked.");
 #endif
 
-    // locate record associated with this thread...
-    //
-
     record = nullptr;
 
-    // scope lock
+    // scope lock — recordLock_ protects all index maps
     {
-        ReadLock  lock(indexLock_);
+        ReadLock  lock(recordLock_);
 
-        auto iter = activeThreadIndex_.find (threadId);
+        auto iter = activeThreadIndex_.find(threadId);
 
-        if (iter != activeThreadIndex_.end ()) {
-            record = (*iter).second;
+        if (iter != activeThreadIndex_.end()) {
+            record = recordPool_[iter->second];
         }
-
 
         // if we did not find the record in the active thread index,
         // check the external index
         //
         if (!record) {
-            iter = externalThreadIndex_.find (threadId);
+            iter = externalThreadIndex_.find(threadId);
 
-            if (iter != externalThreadIndex_.end ()) {
-                record = (*iter).second;
+            if (iter != externalThreadIndex_.end()) {
+                record = recordPool_[iter->second];
             }
         }
     }
 
     if (record) {
-        // found a match
         return true;
     }
+
     // at this point we need to associate an available DtcpIORecord with
     // this external thread.
     //
     bool status;
-    status = allocateRecord (record);
+    status = allocateRecord(record);
 
     if (!status) {
-        // no more free records?
         Log::Error ("Unable to allocate DtcpIORecord for this thread.");
-
         return false;
-}
+    }
+
 #ifdef _VERBOSE
     Log::Debug ("Allocated new record for this external thread.");
 #endif
 
-
-    // Index new record with this thread.
+    // Find index of the allocated record and add to external index
     //
-    WriteLock  lock(indexLock_);
+    WriteLock  lock(recordLock_);
 
-    externalThreadIndex_.emplace (threadId, record);
-
+    for (int i = 0; i < static_cast<int>(recordPool_.size()); i++) {
+        if (recordPool_[i] == record) {
+            externalThreadIndex_.emplace(threadId, i);
+            break;
+        }
+    }
 
     return true;
 }
 
 
-    
-bool  
+
+bool
 DtcpThreadTable::getNextRecord (t_ThreadId       threadId,
                                 DtcpIORecord *&  record)
 {
@@ -380,108 +430,104 @@ DtcpThreadTable::getNextRecord (t_ThreadId       threadId,
     // otherwise, return and let thread go to idle.
     //
     record = nullptr;
+    int recIdx = -1;
+    int oldRecIdx = -1;
 
     {
         WriteLock  lock(recordLock_);
 
         if (!recordQueue_.empty()) {
-            record = recordQueue_.front ();
-            recordQueue_.pop_front ();
+            recIdx = recordQueue_.front();
+            recordQueue_.erase(recordQueue_.begin());
         }
     }
 
-    if (!record) {
-        // nothing in the queue...
+    if (recIdx < 0) {
         return false;
     }
+
     // perform required setup to associate this record with this thread,
     // hand back to calling thread to process.
     //
-    DtcpIORecord *   oldRecord = nullptr;
-
     {
-        WriteLock  lock(indexLock_);
+        WriteLock  lock(recordLock_);
 
-        auto iter = activeThreadIndex_.find (threadId);
+        auto iter = activeThreadIndex_.find(threadId);
 
-        if (iter != activeThreadIndex_.end ()) {
-            oldRecord = (*iter).second;
-            activeThreadIndex_.erase (threadId);
+        if (iter != activeThreadIndex_.end()) {
+            oldRecIdx = iter->second;
+            activeThreadIndex_.erase(threadId);
         }
 
         // index new record with this thread.
         //
-        activeThreadIndex_.emplace (threadId, record);
+        activeThreadIndex_.emplace(threadId, recIdx);
+        recordLastActivity_[recIdx] = t_Clock::now();
     }
 
-    if (oldRecord) {
+    record = recordPool_[recIdx];
+
+    if (oldRecIdx >= 0) {
         // add old record back on available list.
         //
-        {
-            WriteLock  lock(recordLock_);
-
-            availableRecordList_.push_back (oldRecord);
-        }
+        WriteLock  lock(recordLock_);
+        freeRecordIndices_.push_back(oldRecIdx);
+        recordLastActivity_[oldRecIdx] = t_Clock::now();
     }
-
 
     return true;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::createThread ()
 {
 #ifdef _VERBOSE
     Log::Debug ("DtcpThreadTable::createThread invoked.");
 #endif
 
-    DtcpStackThread * newThread;
-    bool status;
+    auto * newThread = new DtcpStackThread(udpTransport_);
 
-    newThread = new DtcpStackThread (udpTransport_);
-
-    status = newThread->create ();
+    bool status = newThread->create();
 
     if (!status) {
         Log::Error ("Create thread failed in DtcpThreadTable::createThread.");
+        delete newThread;
         return false;
     }
+
     // Add thread to allThreadList for cleanup or search later.
+    // Lock ordering: threadLock_ before recordLock_
     //
     {
         WriteLock  lock(threadLock_);
-
-        allThreadList_.push_back (newThread);
+        allThreadList_.push_back(newThread);
     }
 
     // Add thread ID to thread object mapping in threadObjectIndex
-    // for use in threadIdle method.
     //
     t_ThreadId  id;
-    newThread->getThreadId (id);
+    newThread->getThreadId(id);
     {
-        WriteLock  lock(indexLock_);
-
-        threadObjectIndex_.emplace(id,newThread);
+        WriteLock  lock(recordLock_);
+        threadObjectIndex_.emplace(id, newThread);
     }
 
 #ifdef _VERBOSE
-    Log::Debug ("-DtcpStackThread created with ID: "s + threadIdToString (id));
+    Log::Debug ("-DtcpStackThread created with ID: "s + threadIdToString(id));
 #endif
 
     // start thread, it will then receive a pending buffer to process.
     //
-    newThread->resume ();
-
+    newThread->resume();
 
     return true;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::wakeThread ()
 {
 #ifdef _VERBOSE
@@ -490,73 +536,98 @@ DtcpThreadTable::wakeThread ()
 
     // attempt to start idle thread...
     //
-
     DtcpStackThread *  idleThread = nullptr;
 
     {
         WriteLock  lock(threadLock_);
-    
-        // If there is a thread in the thread list, wake it.
-        // otherwise, someone else must have woken the thread
-        // before we got to it...  ignore.
-        //    
+
         if (!idleThreadList_.empty()) {
-            idleThread = idleThreadList_.front ();
-            idleThreadList_.pop_front ();
+            idleThread = idleThreadList_.front();
+            idleThreadList_.pop_front();
         }
     }
 
     if (idleThread) {
-        idleThread->resume ();
-        return true;
+        idleThread->resume();
     }
-
 
     return true;
 }
 
 
 
-bool  
+bool
 DtcpThreadTable::threadIdle (t_ThreadId  id)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpThreadTable::threadIdle invoked for thread ID: "s + threadIdToString (id));
+    Log::Debug ("DtcpThreadTable::threadIdle invoked for thread ID: "s + threadIdToString(id));
 #endif
 
     DtcpStackThread * threadObj = nullptr;
 
-    // Add thread to idle list.
+    // Lookup thread object — threadObjectIndex_ is under recordLock_
     //
     {
-        ReadLock  lock(indexLock_);
+        ReadLock  lock(recordLock_);
 
-        auto iter = threadObjectIndex_.find (id);
+        auto iter = threadObjectIndex_.find(id);
 
-        if (iter == threadObjectIndex_.end ()) {
-            // serious error, this should not occur
+        if (iter == threadObjectIndex_.end()) {
             Log::Error ("Unable to locate thread object in DtcpThreadTable::threadIdle!");
-
             return false;
         }
-        threadObj = (*iter).second;
+        threadObj = iter->second;
 
         if (!threadObj) {
-            // serious error, this should not occur
             Log::Error ("NULL thread object indexed in DtcpThreadTable::threadIdle!");
-
             return false;
         }
     }
 
+    // Add thread to idle list
+    //
     {
         WriteLock  lock(threadLock_);
- 
-        idleThreadList_.push_back (threadObj);
+        idleThreadList_.push_back(threadObj);
     }
 
-
     return true;
+}
+
+
+
+int
+DtcpThreadTable::evictLruRecord ()
+{
+    // Caller must hold recordLock_ in write mode.
+    // Find the free record index with the oldest last-activity timestamp.
+    // If no free records exist, scan for an idle record not in active use.
+    //
+
+    if (!freeRecordIndices_.empty()) {
+        // Find the LRU among free records
+        //
+        auto oldestTime = t_TimePoint::max();
+        int oldestPos = -1;
+
+        for (int i = 0; i < static_cast<int>(freeRecordIndices_.size()); i++) {
+            int idx = freeRecordIndices_[i];
+            if (recordLastActivity_[idx] < oldestTime) {
+                oldestTime = recordLastActivity_[idx];
+                oldestPos = i;
+            }
+        }
+
+        if (oldestPos >= 0) {
+            int idx = freeRecordIndices_[oldestPos];
+            // Swap-and-pop for O(1) removal
+            freeRecordIndices_[oldestPos] = freeRecordIndices_.back();
+            freeRecordIndices_.pop_back();
+            return idx;
+        }
+    }
+
+    return -1;
 }
 
 

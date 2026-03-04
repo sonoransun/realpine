@@ -5,9 +5,19 @@
 #include <Log.h>
 
 #include <cstdio>
+#include <chrono>
+#include <thread>
 
 #include <dirent.h>
 #include <sys/stat.h>
+
+#if defined(ALPINE_PLATFORM_DARWIN)
+    #include <sys/event.h>
+    #include <fcntl.h>
+#elif defined(ALPINE_PLATFORM_LINUX)
+    #include <sys/inotify.h>
+    #include <poll.h>
+#endif
 
 
 const std::unordered_map<string, string>  ContentStore::mimeTypes_s = {
@@ -42,58 +52,82 @@ ContentStore::initialize (const string & mediaDirectory)
     Log::Info("ContentStore: Scanned "s + std::to_string(items_.size()) +
               " video files from " + mediaDirectory_);
 
+    startWatcher();
+
     return true;
+}
+
+
+void
+ContentStore::shutdown ()
+{
+    stopWatcher();
 }
 
 
 void
 ContentStore::rescan ()
 {
-    lock_.acquire();
+    lock_.acquireWrite();
 
     items_.clear();
-    idIndex_.clear();
+    idToPath_.clear();
     nextId_ = 1;
     scanDirectory(mediaDirectory_);
     systemUpdateId_++;
 
-    lock_.release();
+    lock_.releaseWrite();
 }
 
 
 bool
 ContentStore::getItem (const string & id, MediaItem & item)
 {
-    lock_.acquire();
+    lock_.acquireRead();
 
-    auto it = idIndex_.find(id);
+    auto pathIt = idToPath_.find(id);
 
-    if (it != idIndex_.end()) {
-        item = items_[it->second];
-        lock_.release();
-        return true;
+    if (pathIt != idToPath_.end()) {
+        auto itemIt = items_.find(pathIt->second);
+        if (itemIt != items_.end()) {
+            item = itemIt->second;
+            lock_.releaseRead();
+            return true;
+        }
     }
 
-    lock_.release();
+    lock_.releaseRead();
     return false;
+}
+
+
+const ContentStore::ItemMap &
+ContentStore::getAllItemsMap ()
+{
+    return items_;
 }
 
 
 void
 ContentStore::getAllItems (vector<MediaItem> & items)
 {
-    lock_.acquire();
-    items = items_;
-    lock_.release();
+    lock_.acquireRead();
+
+    items.clear();
+    items.reserve(items_.size());
+    for (const auto & [path, item] : items_)
+        items.push_back(item);
+
+    lock_.releaseRead();
 }
 
 
 ulong
 ContentStore::getItemCount ()
 {
-    lock_.acquire();
+    lock_.acquireRead();
     ulong count = items_.size();
-    lock_.release();
+    lock_.releaseRead();
     return count;
 }
 
@@ -101,10 +135,78 @@ ContentStore::getItemCount ()
 ulong
 ContentStore::getSystemUpdateId ()
 {
-    lock_.acquire();
+    lock_.acquireRead();
     ulong id = systemUpdateId_;
-    lock_.release();
+    lock_.releaseRead();
     return id;
+}
+
+
+void
+ContentStore::indexFile (const string & fullPath)
+{
+    struct stat fileStat;
+
+    if (stat(fullPath.c_str(), &fileStat) != 0 || !S_ISREG(fileStat.st_mode))
+        return;
+
+    auto slashPos = fullPath.rfind('/');
+    string name = (slashPos != string::npos) ? fullPath.substr(slashPos + 1) : fullPath;
+
+    auto dotPos = name.rfind('.');
+
+    if (dotPos == string::npos)
+        return;
+
+    string ext = name.substr(dotPos + 1);
+    auto mimeIt = mimeTypes_s.find(ext);
+
+    if (mimeIt == mimeTypes_s.end())
+        return;
+
+    lock_.acquireWrite();
+
+    auto existing = items_.find(fullPath);
+
+    if (existing != items_.end()) {
+        existing->second.fileSize = (ulong)fileStat.st_size;
+        systemUpdateId_++;
+        lock_.releaseWrite();
+        return;
+    }
+
+    MediaItem item;
+    char idBuf[16];
+    snprintf(idBuf, sizeof(idBuf), "media-%03lu", nextId_++);
+    item.id       = idBuf;
+    item.path     = fullPath;
+    item.fileName = name;
+    item.title    = name.substr(0, dotPos);
+    item.mimeType = mimeIt->second;
+    item.fileSize = (ulong)fileStat.st_size;
+
+    idToPath_[item.id] = fullPath;
+    items_.emplace(fullPath, std::move(item));
+    systemUpdateId_++;
+
+    lock_.releaseWrite();
+}
+
+
+void
+ContentStore::removeFile (const string & fullPath)
+{
+    lock_.acquireWrite();
+
+    auto it = items_.find(fullPath);
+
+    if (it != items_.end()) {
+        idToPath_.erase(it->second.id);
+        items_.erase(it);
+        systemUpdateId_++;
+    }
+
+    lock_.releaseWrite();
 }
 
 
@@ -162,9 +264,223 @@ ContentStore::scanDirectory (const string & dir)
         item.mimeType = mimeIt->second;
         item.fileSize = (ulong)fileStat.st_size;
 
-        idIndex_[item.id] = items_.size();
-        items_.push_back(std::move(item));
+        idToPath_[item.id] = fullPath;
+        items_.emplace(fullPath, std::move(item));
     }
 
     closedir(dirp);
+}
+
+
+// ============================================================================
+//  Filesystem watcher
+// ============================================================================
+
+
+void
+ContentStore::startWatcher ()
+{
+    watcherStop_.store(false);
+    watcher_ = new WatcherThread(*this);
+    watcher_->create();
+    watcher_->resume();
+}
+
+
+void
+ContentStore::stopWatcher ()
+{
+    if (!watcher_)
+        return;
+
+    watcherStop_.store(true);
+
+#if defined(ALPINE_PLATFORM_DARWIN)
+    if (kqueueFd_ >= 0)
+        close(kqueueFd_);
+    kqueueFd_ = -1;
+#elif defined(ALPINE_PLATFORM_LINUX)
+    if (inotifyFd_ >= 0)
+        close(inotifyFd_);
+    inotifyFd_ = -1;
+#endif
+
+    watcher_->destroy();
+    delete watcher_;
+    watcher_ = nullptr;
+}
+
+
+void
+ContentStore::WatcherThread::threadMain ()
+{
+#if defined(ALPINE_PLATFORM_DARWIN)
+    store_.watcherLoopKqueue();
+#elif defined(ALPINE_PLATFORM_LINUX)
+    store_.watcherLoopInotify();
+#else
+    store_.watcherLoopFallback();
+#endif
+}
+
+
+#if defined(ALPINE_PLATFORM_DARWIN)
+
+void
+ContentStore::watcherLoopKqueue ()
+{
+    kqueueFd_ = kqueue();
+
+    if (kqueueFd_ < 0) {
+        Log::Error("ContentStore: kqueue() failed, falling back to periodic scan"s);
+        watcherLoopFallback();
+        return;
+    }
+
+    int dirFd = open(mediaDirectory_.c_str(), O_RDONLY | O_EVTONLY);
+
+    if (dirFd < 0) {
+        Log::Error("ContentStore: Cannot open directory for kqueue watch: "s + mediaDirectory_);
+        close(kqueueFd_);
+        kqueueFd_ = -1;
+        watcherLoopFallback();
+        return;
+    }
+
+    struct kevent change;
+    EV_SET(&change, dirFd, EVFILT_VNODE,
+           EV_ADD | EV_ENABLE | EV_CLEAR,
+           NOTE_WRITE | NOTE_DELETE | NOTE_RENAME | NOTE_REVOKE,
+           0, nullptr);
+
+    if (kevent(kqueueFd_, &change, 1, nullptr, 0, nullptr) < 0) {
+        Log::Error("ContentStore: kevent registration failed"s);
+        close(dirFd);
+        close(kqueueFd_);
+        kqueueFd_ = -1;
+        watcherLoopFallback();
+        return;
+    }
+
+    Log::Info("ContentStore: kqueue watcher started for "s + mediaDirectory_);
+
+    auto lastFullScan = std::chrono::steady_clock::now();
+
+    while (!watcherStop_.load())
+    {
+        struct timespec timeout;
+        timeout.tv_sec  = 1;
+        timeout.tv_nsec = 0;
+
+        struct kevent event;
+        int nev = kevent(kqueueFd_, nullptr, 0, &event, 1, &timeout);
+
+        if (watcherStop_.load())
+            break;
+
+        if (nev > 0) {
+            rescan();
+            Log::Debug("ContentStore: kqueue detected change, rescanned"s);
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastFullScan).count();
+
+        if (elapsed >= fullScanIntervalSec_) {
+            rescan();
+            lastFullScan = now;
+        }
+    }
+
+    close(dirFd);
+}
+
+#elif defined(ALPINE_PLATFORM_LINUX)
+
+void
+ContentStore::watcherLoopInotify ()
+{
+    inotifyFd_ = inotify_init1(IN_NONBLOCK);
+
+    if (inotifyFd_ < 0) {
+        Log::Error("ContentStore: inotify_init1() failed, falling back to periodic scan"s);
+        watcherLoopFallback();
+        return;
+    }
+
+    int wd = inotify_add_watch(inotifyFd_, mediaDirectory_.c_str(),
+                                IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO);
+
+    if (wd < 0) {
+        Log::Error("ContentStore: inotify_add_watch failed for: "s + mediaDirectory_);
+        close(inotifyFd_);
+        inotifyFd_ = -1;
+        watcherLoopFallback();
+        return;
+    }
+
+    Log::Info("ContentStore: inotify watcher started for "s + mediaDirectory_);
+
+    auto lastFullScan = std::chrono::steady_clock::now();
+    char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
+
+    while (!watcherStop_.load())
+    {
+        struct pollfd pfd;
+        pfd.fd     = inotifyFd_;
+        pfd.events = POLLIN;
+
+        int ret = poll(&pfd, 1, 1000);
+
+        if (watcherStop_.load())
+            break;
+
+        if (ret > 0 && (pfd.revents & POLLIN)) {
+            ssize_t len = read(inotifyFd_, buf, sizeof(buf));
+
+            if (len > 0) {
+                rescan();
+                Log::Debug("ContentStore: inotify detected change, rescanned"s);
+            }
+        }
+
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastFullScan).count();
+
+        if (elapsed >= fullScanIntervalSec_) {
+            rescan();
+            lastFullScan = now;
+        }
+    }
+
+    inotify_rm_watch(inotifyFd_, wd);
+}
+
+#endif
+
+
+void
+ContentStore::watcherLoopFallback ()
+{
+    Log::Info("ContentStore: Using periodic scan fallback (every "s +
+              std::to_string(fullScanIntervalSec_) + "s)");
+
+    auto lastScan = std::chrono::steady_clock::now();
+
+    while (!watcherStop_.load())
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        if (watcherStop_.load())
+            break;
+
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - lastScan).count();
+
+        if (elapsed >= fullScanIntervalSec_) {
+            rescan();
+            lastScan = now;
+            Log::Debug("ContentStore: Periodic rescan completed"s);
+        }
+    }
 }

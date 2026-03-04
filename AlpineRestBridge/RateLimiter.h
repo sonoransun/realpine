@@ -3,9 +3,11 @@
 
 #pragma once
 #include <Common.h>
+#include <array>
 #include <unordered_map>
-#include <mutex>
+#include <shared_mutex>
 #include <chrono>
+#include <functional>
 
 
 class RateLimiter
@@ -22,19 +24,25 @@ class RateLimiter
 
   private:
 
+    static constexpr size_t SHARD_COUNT   = 16;
+    static constexpr auto   STALE_TIMEOUT = std::chrono::minutes(5);
+
     struct t_TokenBucket {
         double  tokens;
         std::chrono::steady_clock::time_point  lastRefill;
     };
 
-    static void  refillBucket (t_TokenBucket & bucket);
+    struct t_Shard {
+        std::shared_mutex                              mutex;
+        std::unordered_map<string, t_TokenBucket>      buckets;
+    };
 
-    static double                                         rate_s;
-    static uint                                           burst_s;
-    static std::unordered_map<string, t_TokenBucket>      buckets_s;
-    static std::mutex                                     mutex_s;
-    static bool                                           initialized_s;
+    static void    refillBucket (t_TokenBucket & bucket);
+    static size_t  shardIndex   (const string & clientIp);
 
-    static constexpr auto STALE_TIMEOUT = std::chrono::minutes(5);
+    static double                              rate_s;
+    static uint                                burst_s;
+    static std::array<t_Shard, SHARD_COUNT>    shards_s;
+    static bool                                initialized_s;
 
 };

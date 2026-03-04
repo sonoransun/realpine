@@ -2,6 +2,7 @@
 
 
 #include <RestBridgeConfig.h>
+#include <Configuration.h>
 
 
 const string                            RestBridgeConfig::configFile_s ("bridge.cfg");
@@ -340,6 +341,51 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back(currElement);
+
+    // HTTP Min Threads
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Min Threads";
+    currElement->argOptionName = "httpMinThreads";
+    currElement->envOptionName = "HTTP_MIN_THREADS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // HTTP Max Threads
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Max Threads";
+    currElement->argOptionName = "httpMaxThreads";
+    currElement->envOptionName = "HTTP_MAX_THREADS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // HTTP Max Connections
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Max Connections";
+    currElement->argOptionName = "httpMaxConnections";
+    currElement->envOptionName = "HTTP_MAX_CONNECTIONS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // HTTP Max Connections Per IP
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Max Connections Per IP";
+    currElement->argOptionName = "httpMaxConnectionsPerIp";
+    currElement->envOptionName = "HTTP_MAX_CONNECTIONS_PER_IP";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // HTTP Idle Timeout Seconds
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Idle Timeout Seconds";
+    currElement->argOptionName = "httpIdleTimeoutSeconds";
+    currElement->envOptionName = "HTTP_IDLE_TIMEOUT_SECONDS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 
@@ -349,3 +395,23 @@ RestBridgeConfig::getConfigElements (ConfigData::t_ConfigElementList *& configEl
 {
     configElements = configElements_s;
 }
+
+
+int
+RestBridgeConfig::getIntConfig (const string & name, int defaultValue)
+{
+    string value;
+    if (Configuration::getValue(name, value)) {
+        try {
+            return std::stoi(value);
+        } catch (...) {}
+    }
+    return defaultValue;
+}
+
+
+int RestBridgeConfig::getHttpMinThreads ()         { return getIntConfig("HTTP Min Threads"s, 4); }
+int RestBridgeConfig::getHttpMaxThreads ()         { return getIntConfig("HTTP Max Threads"s, 32); }
+int RestBridgeConfig::getHttpMaxConnections ()      { return getIntConfig("HTTP Max Connections"s, 512); }
+int RestBridgeConfig::getHttpMaxConnectionsPerIp () { return getIntConfig("HTTP Max Connections Per IP"s, 16); }
+int RestBridgeConfig::getHttpIdleTimeoutSeconds ()  { return getIntConfig("HTTP Idle Timeout Seconds"s, 60); }

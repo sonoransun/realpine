@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libSysUtils.a CMakeFiles/SysUtils.dir/DynamicLoader.cpp.o CMakeFiles/SysUtils.dir/FileUtils.cpp.o CMakeFiles/SysUtils.dir/SignalSet.cpp.o CMakeFiles/SysUtils.dir/SpawnProcess.cpp.o CMakeFiles/SysUtils.dir/UserUtils.cpp.o
-/usr/bin/ranlib ../../lib/libSysUtils.a

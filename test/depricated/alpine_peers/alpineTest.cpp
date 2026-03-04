@@ -49,7 +49,7 @@ main (int argc, char *argv[])
     ipAddressStr = argv[3];
     portStr = argv[4];
 
-    !if (NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
+    if (!NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
@@ -62,7 +62,7 @@ main (int argc, char *argv[])
     peerIpAddressStr = argv[5];
     peerPortStr = argv[6];
 
-    !if (NetUtils::stringIpToLong (peerIpAddressStr, peerIpAddress)) {
+    if (!NetUtils::stringIpToLong (peerIpAddressStr, peerIpAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
@@ -96,7 +96,7 @@ main (int argc, char *argv[])
  
     // Create socket...
     UdpConnection  udpConnection;
-    !if (udpConnection.create (ipAddress, port)) {
+    if (!udpConnection.create (ipAddress, port)) {
         Log::Error ("Creating connection failed.  Exiting.");
         return 1;
     }

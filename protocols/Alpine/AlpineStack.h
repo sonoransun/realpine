@@ -5,6 +5,9 @@
 #include <Common.h>
 #include <AlpineStackConfig.h>
 #include <ReadWriteSem.h>
+#include <condition_variable>
+#include <mutex>
+#include <functional>
 
 
 class AlpinePacket;
@@ -36,10 +39,31 @@ class AlpineStack
     static DtcpBaseUdpTransport *     rawWifiTransport_s;
     static ReadWriteSem               dataLock_s;
 
+    static std::condition_variable    eventCV_s;
+    static std::mutex                 eventMutex_s;
+    static bool                       eventPending_s;
+
 
     static void  processEvents ();
 
     static void  cleanUp ();
+
+
+  public:
+
+    /// Wake the event loop immediately so it processes pending events
+    /// without waiting for the poll timeout.  Safe to call from any thread.
+    static void  notifyEvent ();
+
+    /// Callback invoked with query IDs that completed during processTimedEvents.
+    /// Set by AlpineStackInterface to bridge async callback notifications.
+    using CompletedQueryCallback = std::function<void(const std::vector<ulong> &)>;
+    static void  setCompletedQueryCallback (CompletedQueryCallback callback);
+
+
+  private:
+
+    static CompletedQueryCallback     completedQueryCallback_s;
 
 
     // The AlpineDtcpConn classes use the AlpineStack to coordinate
@@ -80,5 +104,6 @@ class AlpineStack
     friend class AlpineDtcpConnTransport;
     friend class AlpineServiceThread;
     friend class AlpineQueryMgr;
+    friend class AlpineStackInterface;
 };
 

@@ -34,6 +34,8 @@
 #include <SsdpService.h>
 #include <MdnsService.h>
 #include <WifiDiscovery.h>
+#include <AuthHandler.h>
+#include <ClusterCoordinator.h>
 
 #ifdef ALPINE_FUSE_ENABLED
 #include <AlpineFuse.h>
@@ -149,6 +151,8 @@ main (int argc, char *argv[])
     QueryHandler::registerRoutes(router);
     PeerHandler::registerRoutes(router);
     StatusHandler::registerRoutes(router);
+    AuthHandler::registerRoutes(router);
+    ClusterCoordinator::registerRoutes(router);
 
     // Initialize API key authentication
     string apiKeyConfig;
@@ -240,6 +244,20 @@ main (int argc, char *argv[])
         }
     } else {
         Log::Info("Discovery beacon disabled by configuration.");
+    }
+
+
+    // Initialize cluster coordinator (non-fatal if it fails)
+    //
+    if (beaconEnabled && beacon) {
+        if (ClusterCoordinator::initialize(restPort, beaconPort)) {
+            Log::Info("Cluster coordinator started (nodeId: "s +
+                      ClusterCoordinator::getLocalNodeInfo().nodeId + ")");
+        } else {
+            Log::Error("Cluster coordinator failed to initialize (continuing without cluster).");
+        }
+    } else {
+        Log::Info("Cluster coordinator disabled (beacon not active).");
     }
 
 
@@ -539,6 +557,7 @@ main (int argc, char *argv[])
         if (torTunnel)  { torTunnel->stop(); delete torTunnel; }
         if (torService) { torService->shutdown(); delete torService; }
         UpnpPortMapper::shutdown();
+        ClusterCoordinator::shutdown();
         if (beacon) { beacon->stop(); delete beacon; }
         if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
         return 1;
@@ -558,6 +577,7 @@ main (int argc, char *argv[])
     if (ssdpService)  { ssdpService->stop(); delete ssdpService; }
     if (dlnaServer)   { dlnaServer->stop(); delete dlnaServer; }
     if (contentStore) { delete contentStore; }
+    ClusterCoordinator::shutdown();
     if (beacon) { beacon->stop(); delete beacon; }
     if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
 

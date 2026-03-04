@@ -7,6 +7,8 @@
 #include <HttpResponse.h>
 #include <unordered_map>
 #include <functional>
+#include <memory>
+#include <string_view>
 
 using AuthMiddleware = std::function<bool(const HttpRequest&, HttpResponse&)>;
 
@@ -33,20 +35,28 @@ class HttpRouter
 
   private:
 
-    struct Route {
-        string        method;
-        string        pattern;
-        RouteHandler  handler;
+    enum class HttpMethod : uint8_t {
+        GET,
+        POST,
+        PUT,
+        DELETE_,
+        PATCH,
+        HEAD,
+        OPTIONS,
+        UNKNOWN
     };
 
-    static void  splitPath (const string &     path,
-                            vector<string> &   segments);
+    struct TrieNode {
+        std::unordered_map<string, std::unique_ptr<TrieNode>>  children;
+        std::unique_ptr<TrieNode>                              paramChild;
+        string                                                 paramName;
+        std::unordered_map<HttpMethod, RouteHandler>           handlers;
+        bool                                                   requiresAuth = true;
+    };
 
-    static bool  matchRoute (const vector<string> &                  patternParts,
-                             const vector<string> &                  pathParts,
-                             std::unordered_map<string, string> &    params);
+    static HttpMethod  parseMethod (std::string_view method);
 
-    vector<Route>  routes_;
+    TrieNode root_;
     AuthMiddleware authMiddleware_;
 
 };

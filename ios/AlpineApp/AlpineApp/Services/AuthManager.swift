@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 /// Central authentication orchestrator managing session lifecycle, credential verification, and auto-lock.
 @Observable
@@ -11,6 +12,7 @@ final class AuthManager {
     private let secureStorage: SecureStorage
     private let settingsStore: SettingsStore
     private var backgroundTime: Date?
+    private let enclaveManager = SecureEnclaveManager()
 
     var isLocked: Bool {
         switch authState {
@@ -31,6 +33,20 @@ final class AuthManager {
 
         biometricService.checkAvailability()
 
+        // Check for biometric enrollment changes
+        if settingsStore.authRequired {
+            let storedState = secureStorage.readData(key: "biometric.domainState")
+            if biometricService.hasEnrollmentChanged(storedState: storedState) {
+                // Biometric enrollment changed — clear credentials for security
+                secureStorage.remove(key: "session.accessToken")
+                secureStorage.remove(key: "session.refreshToken")
+                secureStorage.removeBiometricProtected(key: "apiKey")
+                secureStorage.removeBiometricProtected(key: "session.accessToken")
+                secureStorage.removeBiometricProtected(key: "session.refreshToken")
+                // Note: Secure Enclave keys with .biometryCurrentSet are auto-invalidated by iOS
+            }
+        }
+
         // If auth not required, auto-authenticate
         if !settingsStore.authRequired {
             authState = .authenticated(session: SessionToken(
@@ -46,37 +62,159 @@ final class AuthManager {
     func unlockWithBiometric() async throws {
         authState = .authenticating
 
-        let success = try await biometricService.authenticate(reason: "Unlock Alpine")
-        guard success else {
-            authState = .locked
-            throw AuthError.biometricFailed
+        // If Secure Enclave is enabled and device has a key pair, use challenge-response
+        if settingsStore.secureEnclaveEnabled && enclaveManager.hasKeyPair {
+            try await unlockWithSecureEnclave()
+            return
         }
 
-        // Attempt server session auth if configured
+        // Use biometric-protected Keychain: the system biometric prompt is triggered
+        // by the Keychain read itself (hardware-enforced, not app-logic)
         do {
-            let request = AuthRequest(
-                method: AuthMethod.biometric.rawValue,
-                totpCode: nil,
-                yubiKeyOTP: nil,
-                challengeId: nil
-            )
-            let baseURL = buildBaseURL()
-            let session = try await sessionManager.authenticate(request: request, baseURL: baseURL)
-            _ = secureStorage.store(key: "session.accessToken", value: session.accessToken)
-            if let refresh = session.refreshToken {
-                _ = secureStorage.store(key: "session.refreshToken", value: refresh)
+            let apiKey = try await secureStorage.readBiometricProtected(key: "apiKey")
+
+            // Attempt server session auth
+            do {
+                let request = AuthRequest(
+                    method: AuthMethod.biometric.rawValue,
+                    totpCode: nil,
+                    yubiKeyOTP: nil,
+                    challengeId: nil
+                )
+                let baseURL = buildBaseURL()
+                let session = try await sessionManager.authenticate(request: request, baseURL: baseURL)
+                _ = secureStorage.storeBiometricProtected(key: "session.accessToken", value: session.accessToken)
+                if let refresh = session.refreshToken {
+                    _ = secureStorage.storeBiometricProtected(key: "session.refreshToken", value: refresh)
+                }
+                storeBiometricDomainState()
+                authState = .authenticated(session: session)
+            } catch {
+                // Server not available — authenticate locally
+                let localSession = SessionToken(
+                    accessToken: apiKey ?? "",
+                    refreshToken: nil,
+                    expiresAt: Date().addingTimeInterval(3600),
+                    issuedAt: Date()
+                )
+                storeBiometricDomainState()
+                authState = .authenticated(session: localSession)
             }
-            authState = .authenticated(session: session)
-        } catch {
-            // Server not available -- authenticate locally after successful biometric
+        } catch SecureStorageError.biometricAuthFailed {
+            authState = .locked
+            throw AuthError.biometricFailed
+        } catch SecureStorageError.itemNotFound {
+            // No biometric-protected API key yet — fall back to legacy biometric auth
+            // and migrate the key on success
+            let success = try await biometricService.authenticate(reason: "Unlock Alpine")
+            guard success else {
+                authState = .locked
+                throw AuthError.biometricFailed
+            }
+
+            // Migrate API key to biometric-protected storage
+            if let apiKey = secureStorage.read(key: "apiKey"), !apiKey.isEmpty {
+                _ = secureStorage.storeBiometricProtected(key: "apiKey", value: apiKey)
+            }
+
             let localSession = SessionToken(
                 accessToken: secureStorage.read(key: "apiKey") ?? "",
                 refreshToken: nil,
                 expiresAt: Date().addingTimeInterval(3600),
                 issuedAt: Date()
             )
+            storeBiometricDomainState()
             authState = .authenticated(session: localSession)
         }
+    }
+
+    /// Authenticate using Secure Enclave challenge-response (biometric is triggered by the signing operation).
+    private func unlockWithSecureEnclave() async throws {
+        guard SecureEnclaveManager.isAvailable else {
+            authState = .locked
+            throw AuthError.secureEnclaveUnavailable
+        }
+
+        let baseURL = buildBaseURL()
+
+        // 1. Request challenge from server
+        let challenge: AuthChallenge
+        do {
+            challenge = try await sessionManager.requestChallenge(baseURL: baseURL)
+        } catch {
+            authState = .locked
+            throw AuthError.challengeSigningFailed
+        }
+
+        // 2. Sign the challenge nonce with Secure Enclave key (triggers biometric)
+        let nonceData = Data(challenge.nonce.utf8)
+        let signature: Data
+        do {
+            signature = try await enclaveManager.sign(data: nonceData)
+        } catch {
+            authState = .locked
+            throw AuthError.challengeSigningFailed
+        }
+
+        // 3. Get public key for verification
+        let publicKeyData: Data
+        do {
+            publicKeyData = try enclaveManager.publicKeyData()
+        } catch {
+            authState = .locked
+            throw AuthError.challengeSigningFailed
+        }
+
+        // 4. Submit signature to server for verification
+        let verifyRequest = ChallengeSignatureRequest(
+            challengeId: challenge.challengeId,
+            signature: signature.base64EncodedString(),
+            publicKey: publicKeyData.base64EncodedString()
+        )
+
+        do {
+            let session = try await sessionManager.verifyChallenge(request: verifyRequest, baseURL: baseURL)
+            _ = secureStorage.storeBiometricProtected(key: "session.accessToken", value: session.accessToken)
+            if let refresh = session.refreshToken {
+                _ = secureStorage.storeBiometricProtected(key: "session.refreshToken", value: refresh)
+            }
+            storeBiometricDomainState()
+            authState = .authenticated(session: session)
+        } catch {
+            authState = .locked
+            throw AuthError.challengeSigningFailed
+        }
+    }
+
+    /// Enroll the current device's Secure Enclave key pair with the server.
+    func enrollDevice() async throws {
+        guard SecureEnclaveManager.isAvailable else {
+            throw AuthError.secureEnclaveUnavailable
+        }
+
+        // Generate a new key pair (with biometric protection)
+        _ = try enclaveManager.generateKeyPair(biometricProtected: true)
+
+        let publicKeyData = try enclaveManager.publicKeyData()
+
+        let biometricType: String
+        switch biometricService.biometricType {
+        case .faceID: biometricType = "faceID"
+        case .touchID: biometricType = "touchID"
+        case .none: biometricType = "none"
+        }
+
+        let enrollRequest = DeviceEnrollmentRequest(
+            publicKey: publicKeyData.base64EncodedString(),
+            deviceName: UIDevice.current.name,
+            biometricType: biometricType
+        )
+
+        let baseURL = buildBaseURL()
+        try await sessionManager.enrollDevice(request: enrollRequest, baseURL: baseURL)
+
+        // Store enrollment status
+        _ = secureStorage.storeBiometricProtected(key: "device.enrolled", value: "true")
     }
 
     /// Attempt to unlock the app with provided credentials.
@@ -91,13 +229,24 @@ final class AuthManager {
             return
         }
 
+        if method == .secureEnclave {
+            try await unlockWithSecureEnclave()
+            return
+        }
+
         // Validate TOTP locally if required
         if method == .totp || method == .totpAndYubiKey {
             guard let code = totpCode else {
                 authState = .locked
                 throw AuthError.totpCodeRequired
             }
-            guard let secretData = secureStorage.readData(key: "totp.secret") else {
+            let secretData: Data?
+            if settingsStore.requireBiometricForData {
+                secretData = try await secureStorage.readBiometricProtectedData(key: "totp.secret")
+            } else {
+                secretData = secureStorage.readData(key: "totp.secret")
+            }
+            guard let secretData else {
                 authState = .locked
                 throw AuthError.notEnrolled
             }
@@ -138,7 +287,6 @@ final class AuthManager {
             authState = .authenticated(session: session)
         } catch {
             // If server auth fails but local validation passed, still authenticate locally
-            // This supports local-only auth when server has no /auth endpoints
             let localSession = SessionToken(
                 accessToken: secureStorage.read(key: "apiKey") ?? "",
                 refreshToken: nil,
@@ -161,6 +309,12 @@ final class AuthManager {
         }
         secureStorage.remove(key: "session.accessToken")
         secureStorage.remove(key: "session.refreshToken")
+        secureStorage.removeBiometricProtected(key: "session.accessToken")
+        secureStorage.removeBiometricProtected(key: "session.refreshToken")
+        secureStorage.removeBiometricProtected(key: "apiKey")
+        secureStorage.removeBiometricProtected(key: "device.enrolled")
+        secureStorage.remove(key: "biometric.domainState")
+        enclaveManager.deleteKeyPair()
         authState = .locked
     }
 
@@ -196,6 +350,13 @@ final class AuthManager {
         }
     }
 
+    /// Save the current biometric domain state for future enrollment change detection.
+    private func storeBiometricDomainState() {
+        if let state = biometricService.currentBiometricDomainState() {
+            _ = secureStorage.storeData(key: "biometric.domainState", value: state)
+        }
+    }
+
     private func buildBaseURL() -> URL {
         let scheme = settingsStore.tlsEnabled ? "https" : "http"
         return URL(string: "\(scheme)://\(settingsStore.host):\(settingsStore.port)/api/v1")
@@ -211,6 +372,10 @@ enum AuthError: Error, LocalizedError {
     case yubiKeyFailed(Error)
     case sessionExpired
     case biometricFailed
+    case secureEnclaveUnavailable
+    case enrollmentChanged
+    case challengeSigningFailed
+    case deviceNotEnrolled
 
     var errorDescription: String? {
         switch self {
@@ -220,6 +385,10 @@ enum AuthError: Error, LocalizedError {
         case .yubiKeyFailed(let error): "YubiKey error: \(error.localizedDescription)"
         case .sessionExpired: "Session expired, please re-authenticate"
         case .biometricFailed: "Biometric authentication failed"
+        case .secureEnclaveUnavailable: "Secure Enclave is not available on this device"
+        case .enrollmentChanged: "Biometric enrollment changed, please re-authenticate"
+        case .challengeSigningFailed: "Failed to sign authentication challenge"
+        case .deviceNotEnrolled: "Device is not enrolled for Secure Enclave authentication"
         }
     }
 }

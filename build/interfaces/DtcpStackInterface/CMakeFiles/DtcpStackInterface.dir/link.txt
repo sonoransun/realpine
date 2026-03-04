@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libDtcpStackInterface.a CMakeFiles/DtcpStackInterface.dir/DtcpStackInterface.cpp.o
-/usr/bin/ranlib ../../lib/libDtcpStackInterface.a

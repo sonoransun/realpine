@@ -6,11 +6,13 @@
 #include <AlpineQueryResults.h>
 #include <AlpinePeerMgr.h>
 #include <AlpineStack.h>
-#include <AlpineStackInterface.h>
 #include <WriteLock.h>
 #include <ReadLock.h>
 #include <Log.h>
 #include <StringUtils.h>
+
+// Helper: wake the event loop after state changes that need prompt processing.
+static inline void  wakeEventLoop () { AlpineStack::notifyEvent(); }
 
 
 
@@ -21,7 +23,8 @@ std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::active
 std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::pastQueryIndex_s;
 std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::activePeerQueryIndex_s;
 std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::pastPeerQueryIndex_s;
-ReadWriteSem                                              AlpineQueryMgr::dataLock_s;
+ReadWriteSem                                              AlpineQueryMgr::activeQueryLock_s;
+ReadWriteSem                                              AlpineQueryMgr::pastQueryLock_s;
 
 
 
@@ -33,7 +36,8 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
                 std::to_string (maxConcurrent));
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  activeLock(activeQueryLock_s);
+    WriteLock  pastLock(pastQueryLock_s);
 
     if (initialized_s) {
         Log::Error ("Attempt to reinitialize AlpineQueryMgr!");
@@ -62,7 +66,7 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     Log::Debug ("AlpineQueryMgr::createQuery invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::createQuery before initialization!");
@@ -81,8 +85,8 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     auto newState = std::make_unique<t_QueryState>();
 
     newState->queryId = queryId;
-    newState->query   = std::make_unique<AlpineQuery>(options);
-    newState->results = std::make_unique<AlpineQueryResults>(queryId, options);
+    newState->query.reset(new AlpineQuery(options));
+    newState->results.reset(new AlpineQueryResults(queryId, options));
     // pending only allocated if needed
 
 
@@ -130,6 +134,7 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         }
     }
 
+    wakeEventLoop();
 
     return true;
 }
@@ -145,53 +150,56 @@ AlpineQueryMgr::getQueryStatus (ulong                queryId,
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
-
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getQueryStatus before initialization!");
         return false;
     }
-    // Attempt to locate query state for this ID
-    //
-    t_QueryState *  currState;
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    // Check active queries first (hot path)
+    {
+        ReadLock  lock(activeQueryLock_s);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        // This may be an inactive query, so check the inactive index before failing.
-        //
+        auto iter = activeQueryIndex_s->find (queryId);
+
+        if (iter != activeQueryIndex_s->end ()) {
+            auto & currState = iter->second;
+            std::shared_lock qlock(currState->queryMutex);
+
+            if (!currState->query) {
+                double percentage = 100.00;
+                queryStatus.setPercentComplete (percentage);
+                queryStatus.setIsActive (false);
+                return true;
+            }
+            bool status = currState->query->getStatus (queryStatus);
+
+            if (!status) {
+                Log::Error ("AlpineQuery getStatus call failed in call to AlpineQueryMgr::getQueryStatus!");
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // Fallback: check past queries (cold path)
+    {
+        ReadLock  lock(pastQueryLock_s);
+
         auto pastIter = pastQueryIndex_s->find (queryId);
 
         if (pastIter == pastQueryIndex_s->end ()) {
-            // Invalid query ID
             Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::getQueryStatus!");
             return false;
         }
-        currState = pastIter->second.get();
-    }
-    else {
-        currState = iter->second.get();
-    }
+        auto & currState = pastIter->second;
+        std::shared_lock qlock(currState->queryMutex);
 
-    if (!currState->query) {
-        // If the query value is null, this is a completed old query.
-        // We can simply set the completed status to 100% and inactive flag.
-        //
-        double percentage;
-        percentage = 100.00;
+        double percentage = 100.00;
         queryStatus.setPercentComplete (percentage);
         queryStatus.setIsActive (false);
 
         return true;
     }
-    bool status;
-    status = currState->query->getStatus (queryStatus);
-
-    if (!status) {
-        Log::Error ("AlpineQuery getStatus call failed in call to AlpineQueryMgr::getQueryStatus!");
-        return false;
-    }
-    return true;
 }
 
 
@@ -204,14 +212,19 @@ AlpineQueryMgr::exists (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
-
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::exists before initialization!");
         return false;
     }
-    return (activeQueryIndex_s->find (queryId) != activeQueryIndex_s->end ()) ||
-           (pastQueryIndex_s->find (queryId) != pastQueryIndex_s->end ());
+    {
+        ReadLock  lock(activeQueryLock_s);
+        if (activeQueryIndex_s->find (queryId) != activeQueryIndex_s->end ())
+            return true;
+    }
+    {
+        ReadLock  lock(pastQueryLock_s);
+        return pastQueryIndex_s->find (queryId) != pastQueryIndex_s->end ();
+    }
 }
 
 
@@ -224,7 +237,7 @@ AlpineQueryMgr::isActive (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::isActive before initialization!");
@@ -243,7 +256,7 @@ AlpineQueryMgr::inProgress (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::inProgress before initialization!");
@@ -269,7 +282,7 @@ AlpineQueryMgr::pauseQuery (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::pauseQuery before initialization!");
@@ -307,7 +320,7 @@ AlpineQueryMgr::resumeQuery (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::resumeQuery before initialization!");
@@ -345,7 +358,8 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
                 std::to_string (queryId));
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  activeLock(activeQueryLock_s);
+    WriteLock  pastLock(pastQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::cancelQuery before initialization!");
@@ -433,7 +447,7 @@ AlpineQueryMgr::getAllActiveQueryIds (t_QueryIdList  queryIdList)
     Log::Debug ("AlpineQueryMgr::getAllActiveQueryIds invoked.");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getAllActiveQueryIds before initialization!");
@@ -459,10 +473,10 @@ AlpineQueryMgr::getAllPastQueryIds (t_QueryIdList  queryIdList)
     Log::Debug ("AlpineQueryMgr::getAllPastQueryIds invoked.");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(pastQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getQueryResults before initialization!");
+        Log::Error ("Call to AlpineQueryMgr::getAllPastQueryIds before initialization!");
         return false;
     }
     queryIdList.clear ();
@@ -487,7 +501,7 @@ AlpineQueryMgr::getQueryResults (ulong                  queryId,
                 std::to_string (queryId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getQueryResults before initialization!");
@@ -509,6 +523,38 @@ AlpineQueryMgr::getQueryResults (ulong                  queryId,
 
 
 bool
+AlpineQueryMgr::registerResultCallback (ulong                queryId,
+                                        QueryResultCallback  callback)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineQueryMgr::registerResultCallback invoked. Query ID: "s +
+                std::to_string (queryId));
+#endif
+
+    ReadLock  lock(activeQueryLock_s);
+
+    if (!initialized_s) {
+        Log::Error ("Call to AlpineQueryMgr::registerResultCallback before initialization!");
+        return false;
+    }
+
+    auto iter = activeQueryIndex_s->find (queryId);
+
+    if (iter == activeQueryIndex_s->end ()) {
+        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::registerResultCallback!");
+        return false;
+    }
+
+    auto & currState = iter->second;
+    std::unique_lock qlock(currState->queryMutex);
+    currState->onResultCallback = std::move(callback);
+
+    return true;
+}
+
+
+
+bool
 AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
                                         t_QueryIdList &  queryIdList)
 {
@@ -517,7 +563,7 @@ AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
                 std::to_string (peerId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getPeerActiveQueryList before initialization!");
@@ -555,7 +601,7 @@ AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
                 std::to_string (peerId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(pastQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::getPeerPastQueryList before initialization!");
@@ -593,7 +639,7 @@ AlpineQueryMgr::handleQueryDiscover (ulong                peerId,
                 std::to_string (peerId));
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryDiscover before initialization!");
@@ -619,7 +665,7 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     // by the AlpineGroup for that group.
     //
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryOffer before initialization!");
@@ -699,7 +745,7 @@ AlpineQueryMgr::handleQueryRequest (ulong                peerId,
                 std::to_string (peerId));
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryRequest before initialization!");
@@ -719,7 +765,7 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
                 std::to_string (peerId));
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryReply before initialization!");
@@ -797,6 +843,18 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
     //
     currState->pending->emplace (peerId, requestId);
 
+    // Invoke result callback if registered (supports SSE streaming)
+    //
+    QueryResultCallback callback;
+    {
+        std::shared_lock qlock(currState->queryMutex);
+        callback = currState->onResultCallback;
+    }
+    if (callback) {
+        callback(queryId, peerId);
+    }
+
+    wakeEventLoop();
 
     return true;
 }
@@ -814,7 +872,7 @@ AlpineQueryMgr::handleSendReceived (ulong  peerId,
                 "\n");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleSendReceived before initialization!");
@@ -840,7 +898,7 @@ AlpineQueryMgr::handleSendFailure (ulong  peerId,
                 "\n");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleSendFailure before initialization!");
@@ -870,7 +928,7 @@ AlpineQueryMgr::cancelAll (ulong  peerId)
 
     // scope lock
     {
-        ReadLock  lock(dataLock_s);
+        ReadLock  lock(activeQueryLock_s);
 
         if (!initialized_s) {
             Log::Error ("Call to AlpineQueryMgr::cancelAll before initialization!");
@@ -897,18 +955,18 @@ AlpineQueryMgr::cancelAll (ulong  peerId)
 
 
 
-void
+std::vector<ulong>
 AlpineQueryMgr::processTimedEvents ()
 {
 #ifdef _VERY_VERBOSE
     Log::Debug ("AlpineQueryMgr::processTimedEvents invoked.");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::processTimedEvents before initialization!");
-        return;
+        return {};
     }
 
     // Check for completed queries that have async callbacks registered.
@@ -922,9 +980,7 @@ AlpineQueryMgr::processTimedEvents ()
         }
     }
 
-    if (!completedIds.empty()) {
-        AlpineStackInterface::notifyAsyncCallbacks(completedIds);
-    }
+    return completedIds;
 }
 
 
@@ -936,7 +992,8 @@ AlpineQueryMgr::cleanUp ()
     Log::Debug ("AlpineQueryMgr::cleanUp invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock  activeLock(activeQueryLock_s);
+    WriteLock  pastLock(pastQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::cleanUp before initialization!");

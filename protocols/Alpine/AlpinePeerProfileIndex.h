@@ -7,6 +7,7 @@
 #include <OptHash.h>
 #include <list>
 #include <vector>
+#include <random>
 
 
 class AlpinePeerProfile;

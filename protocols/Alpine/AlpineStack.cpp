@@ -22,6 +22,7 @@
 #include <WriteLock.h>
 #include <ReadLock.h>
 #include <Platform.h>
+#include <thread>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <PeerTlsVerifier.h>
@@ -38,8 +39,13 @@ DtcpBaseUdpTransport *            AlpineStack::multicastTransport_s = nullptr;
 DtcpBaseUdpTransport *            AlpineStack::broadcastTransport_s = nullptr;
 DtcpBaseUdpTransport *            AlpineStack::rawWifiTransport_s = nullptr;
 ReadWriteSem                      AlpineStack::dataLock_s;
+std::condition_variable           AlpineStack::eventCV_s;
+std::mutex                        AlpineStack::eventMutex_s;
+bool                              AlpineStack::eventPending_s = false;
+AlpineStack::CompletedQueryCallback  AlpineStack::completedQueryCallback_s;
 
-static const int   eventIterationDelay = 1; // one second delay between interations
+static constexpr int  EVENT_LOOP_MAX_WAIT_MS = 100;  // max idle wait between iterations
+static constexpr int  EVENT_LOOP_MIN_INTERVAL_MS = 10; // minimum time between iterations
 
 
 
@@ -232,14 +238,41 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
 
 
 
-void  
+void
 AlpineStack::processEvents ()
 {
 #ifdef _VERBOSE
     Log::Debug ("AlpineStack::processEvents invoked.");
 #endif
 
+    auto lastRun = std::chrono::steady_clock::now();
+
     while (true) {
+
+        // Wait for an event notification or the max poll timeout, whichever
+        // comes first.  This replaces the old sleep(1) polling loop and
+        // reduces event processing latency from ~1 second to <100ms while
+        // still avoiding busy-spinning.
+        //
+        {
+            std::unique_lock lock(eventMutex_s);
+            eventCV_s.wait_for(lock,
+                               std::chrono::milliseconds(EVENT_LOOP_MAX_WAIT_MS),
+                               [] { return eventPending_s; });
+            eventPending_s = false;
+        }
+
+        // Enforce a minimum interval between iterations to prevent
+        // busy-spinning under sustained burst load.
+        //
+        auto now = std::chrono::steady_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastRun);
+
+        if (elapsed.count() < EVENT_LOOP_MIN_INTERVAL_MS) {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(EVENT_LOOP_MIN_INTERVAL_MS - elapsed.count()));
+        }
+        lastRun = std::chrono::steady_clock::now();
 
         // There are various parts of the Alpine stack which require timed
         // event processing to clean up any timeout conditions and so forth.
@@ -247,19 +280,38 @@ AlpineStack::processEvents ()
         // fast, and high tolerance.
         //
         AlpinePeerMgr::processTimedEvents ();
-    
-        AlpineQueryMgr::processTimedEvents ();
 
+        auto completedIds = AlpineQueryMgr::processTimedEvents ();
 
-        // Delay for the configured period of time before looping through events again...
-        //
-        sleep (eventIterationDelay);
+        if (!completedIds.empty() && completedQueryCallback_s) {
+            completedQueryCallback_s(completedIds);
+        }
     }
 }
 
 
 
-void  
+void
+AlpineStack::notifyEvent ()
+{
+    {
+        std::lock_guard lock(eventMutex_s);
+        eventPending_s = true;
+    }
+    eventCV_s.notify_one();
+}
+
+
+
+void
+AlpineStack::setCompletedQueryCallback (CompletedQueryCallback callback)
+{
+    completedQueryCallback_s = std::move(callback);
+}
+
+
+
+void
 AlpineStack::cleanUp ()
 {
 #ifdef _VERBOSE  
@@ -335,6 +387,8 @@ AlpineStack::registerTransport (ulong                      peerId,
     bool status;
     status = AlpinePeerMgr::registerTransport (peerId, transport);
 
+    if (status)
+        notifyEvent();
 
     return status;
 }

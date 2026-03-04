@@ -7,6 +7,7 @@ enum AuthMethod: String, Codable, Sendable, CaseIterable {
     case yubiKey
     case biometric
     case totpAndYubiKey
+    case secureEnclave
 }
 
 /// Current authentication state of the app.
@@ -60,4 +61,24 @@ struct UserCredential: Codable, Sendable {
     let method: AuthMethod
     let createdAt: Date
     let label: String
+}
+
+/// Request to register a device's Secure Enclave public key with the server.
+struct DeviceEnrollmentRequest: Codable, Sendable {
+    let publicKey: String
+    let deviceName: String
+    let biometricType: String
+}
+
+/// Server response to device enrollment.
+struct DeviceEnrollmentResponse: Codable, Sendable {
+    let deviceId: String
+    let enrolledAt: Date
+}
+
+/// Request to verify a challenge signature for Secure Enclave authentication.
+struct ChallengeSignatureRequest: Codable, Sendable {
+    let challengeId: String
+    let signature: String
+    let publicKey: String
 }

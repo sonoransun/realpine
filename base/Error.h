@@ -13,7 +13,11 @@ enum class AlpineError {
     PermissionDenied,
     AlreadyExists,
     NotSupported,
-    InternalError
+    InternalError,
+    AuthenticationFailed,
+    AuthenticationRequired,
+    DeviceNotEnrolled,
+    ChallengeExpired
 };
 
 constexpr std::string_view errorToString(AlpineError error) {
@@ -26,7 +30,11 @@ constexpr std::string_view errorToString(AlpineError error) {
         case AlpineError::PermissionDenied:  return "Permission denied";
         case AlpineError::AlreadyExists:     return "Already exists";
         case AlpineError::NotSupported:      return "Not supported";
-        case AlpineError::InternalError:     return "Internal error";
+        case AlpineError::InternalError:          return "Internal error";
+        case AlpineError::AuthenticationFailed:   return "Authentication failed";
+        case AlpineError::AuthenticationRequired: return "Authentication required";
+        case AlpineError::DeviceNotEnrolled:      return "Device not enrolled";
+        case AlpineError::ChallengeExpired:       return "Challenge expired";
     }
     return "Unknown error";
 }

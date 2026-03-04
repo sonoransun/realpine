@@ -21,7 +21,11 @@
 #elif defined(__linux__)
     #define ALPINE_PLATFORM_LINUX   1
 #elif defined(__APPLE__) && defined(__MACH__)
+    #include <TargetConditionals.h>
     #define ALPINE_PLATFORM_DARWIN  1
+    #if TARGET_OS_IOS
+        #define ALPINE_PLATFORM_IOS 1
+    #endif
 #endif
 
 #if defined(ALPINE_PLATFORM_LINUX) || defined(ALPINE_PLATFORM_DARWIN)

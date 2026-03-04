@@ -10,6 +10,10 @@ add_executable(AlpineServer
     ../AlpineRestBridge/JsonWriter.cpp
     ../AlpineRestBridge/JsonReader.cpp
     ../AlpineRestBridge/ApiKeyAuth.cpp
+    ../AlpineRestBridge/RateLimiter.cpp
+    ../AlpineRestBridge/RestBridgeConfig.cpp
+    ../AlpineRestBridge/WebSocketSession.cpp
+    ../AlpineRestBridge/ClusterCoordinator.cpp
 )
 target_include_directories(AlpineServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}

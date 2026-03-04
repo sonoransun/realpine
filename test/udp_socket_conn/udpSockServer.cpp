@@ -35,7 +35,7 @@ main (int argc, char *argv[])
     ipAddressStr = argv[2];
     portStr = argv[3];
 
-    !if (NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
+    if (!NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
@@ -72,7 +72,7 @@ main (int argc, char *argv[])
  
     // Create socket...
     UdpConnection  udpConnection;
-    !if (udpConnection.create (ipAddress, port)) {
+    if (!udpConnection.create (ipAddress, port)) {
         Log::Error ("Creating connection failed.  Exiting.");
         return 1;
     }
@@ -116,11 +116,13 @@ main (int argc, char *argv[])
         if (retVal == 0) {
             Log::Debug ("Poll timeout...");
             continue;
+        }
 
         if (retVal < 0) {
             Log::Error ("Poll failed!");
             done = true;
             continue;
+        }
 
 
         // Receive data...
@@ -133,18 +135,19 @@ main (int argc, char *argv[])
         if (!receiveOk) {
             Log::Error ("Receive Data failed!");
             continue;
+        }
 
         // Catch backdoor exit... ;)
         if (receivedLength == 0) {
             Log::Info ("Transfer complete...");
             done = true;
             continue;
+        }
 
         if (first) {
             gettimeofday (&start, 0);
             Log::Info ("Transfer started...");
             first = false;
-            return;
         }
 
 #if 0
@@ -160,7 +163,6 @@ main (int argc, char *argv[])
 
         totalReceived++;
         totalData += receivedLength;
-        return;
     }
 
     gettimeofday (&end, 0);

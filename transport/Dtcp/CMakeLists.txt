@@ -32,6 +32,7 @@ target_link_libraries(Dtcp PUBLIC
     Alpine::NetUtils
     Alpine::ThreadUtils
     Alpine::TransBase
+    Alpine::ConfigUtils
 )
 
 if(ALPINE_ENABLE_TLS)

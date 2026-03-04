@@ -19,6 +19,8 @@
 #include <unistd.h>
 #include <iostream>
 
+using std::cout; using std::cerr; using std::endl;
+
 
 using t_StackList = list<AlpineDtcpUdpTransport *>;
 
@@ -59,7 +61,7 @@ main (int argc, char *argv[])
     if (!status) {
         Log::Error ("Unable to initialize application core.  Exiting.");
         exit (1);
-    
+    }
 
     string  svrIpAddressStr;
     string  myIpAddressStr;
@@ -75,11 +77,11 @@ main (int argc, char *argv[])
     myIpAddressStr   = argv[5];
     startPortStr     = argv[6];
 
-    !if (NetUtils::stringIpToLong (svrIpAddressStr, svrIpAddress)) {
+    if (!NetUtils::stringIpToLong (svrIpAddressStr, svrIpAddress)) {
         cerr << "Invalid Server IP Address.  Exiting." << endl;
         return 1;
     }
-    !if (NetUtils::stringIpToLong (myIpAddressStr, myIpAddress)) {
+    if (!NetUtils::stringIpToLong (myIpAddressStr, myIpAddress)) {
         cerr << "Invalid Client IP Address.  Exiting." << endl;
         return 1;
     }
@@ -155,6 +157,7 @@ main (int argc, char *argv[])
             currPort = htons(currPort);
 
             continue;
+        }
 
         status = transport->activate ();
 
@@ -165,6 +168,7 @@ main (int argc, char *argv[])
             currPort = htons(currPort);
 
             continue;
+        }
 
 
 #if 0 // No raw data
@@ -217,6 +221,7 @@ main (int argc, char *argv[])
             currPort = htons(currPort);
 
             continue;
+        }
 
 
         status = connector->requestConnection (svrIpAddress, svrPort);
@@ -227,6 +232,7 @@ main (int argc, char *argv[])
             currPort = htons(currPort);
 
             continue;
+        }
 
 
         // finished with this create operation

@@ -70,7 +70,7 @@ main (int argc, char *argv[])
         return 1;
     }
 
-    !if (NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
+    if (!NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
         Log::Error ("Invalid IP Address.  Exiting.");
         return 1;
     }
