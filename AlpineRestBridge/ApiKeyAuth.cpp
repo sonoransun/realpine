@@ -62,8 +62,8 @@ ApiKeyAuth::initialize ()
     // Generate a random 32-byte hex key using /dev/urandom
     std::ifstream urandom("/dev/urandom", std::ios::binary);
     if (!urandom.good()) {
-        Log::Error("Failed to open /dev/urandom for API key generation.");
-        apiKey_s = "fallback-key-change-me";
+        Log::Error("CRITICAL: Failed to open /dev/urandom for API key generation. "
+                   "All API requests will be rejected."s);
         initialized_s = true;
         return;
     }
@@ -102,6 +102,14 @@ ApiKeyAuth::validate (const HttpRequest & request, HttpResponse & response)
     // Exempt GET requests to /status paths
     if (request.method == "GET" && request.path.starts_with("/status"))
         return true;
+
+    // If no API key was generated (urandom failure), reject all requests
+    if (apiKey_s.empty())
+    {
+        Log::Error("ApiKeyAuth: rejecting request — no API key available"s);
+        response.setJsonBody("{\"error\":\"Service unavailable — authentication not configured\"}");
+        return false;
+    }
 
     // Look for Authorization header (try both cases)
     string authHeader;

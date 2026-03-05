@@ -8,6 +8,7 @@ target_include_directories(AlpineProtocolHeaders INTERFACE ${CMAKE_CURRENT_SOURC
 add_library(AlpineProtocol
     AlpineBaseOptionData.cpp
     AlpineBroadcast.cpp
+    CircuitBreaker.cpp
     AlpineExtensionIndex.cpp
     AlpineGroup.cpp
     AlpineGroupMgr.cpp

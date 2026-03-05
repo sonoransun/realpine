@@ -12,6 +12,7 @@
 #include <Platform.h>
 #ifndef ALPINE_PLATFORM_WINDOWS
 #include <sys/wait.h>
+#include <unistd.h>
 #endif
 
 
@@ -20,6 +21,8 @@ ApplCore::t_SigHandlerIndex *     ApplCore::sigHandlerIndex_s = nullptr;
 ApplCore::t_MethodIndex *         ApplCore::methodIndex_s = nullptr;
 SignalMonitorThread *             ApplCore::signalMonitor_s = nullptr;
 ReadWriteSem                      ApplCore::dataLock_s;
+std::atomic<int>                  ApplCore::shutdownSignal_s{0};
+std::atomic<bool>                 ApplCore::shutdownRequested_s{false};
 
 
 
@@ -282,67 +285,84 @@ ApplCore::updateLog (int      argc,
 
 
 
-void  
-ApplCore::defaultInterruptHandler ()
-{   
-#ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultInterruptHandler invoked.");
-#endif
-    
-    Log::Info ("Received SIGINT, exiting process.");
-    exit (0);
+bool
+ApplCore::isShutdownRequested ()
+{
+    return shutdownRequested_s.load (std::memory_order_acquire);
 }
 
 
 
-void  
+int
+ApplCore::getShutdownSignal ()
+{
+    return shutdownSignal_s.load (std::memory_order_acquire);
+}
+
+
+
+void
+ApplCore::defaultInterruptHandler ()
+{
+#ifdef _VERBOSE
+    Log::Debug ("ApplCore::defaultInterruptHandler invoked.");
+#endif
+
+    Log::Info ("Received SIGINT, requesting shutdown."s);
+    shutdownSignal_s.store (SIGINT, std::memory_order_release);
+    shutdownRequested_s.store (true, std::memory_order_release);
+}
+
+
+
+void
 ApplCore::defaultQuitHandler ()
 {
 #ifdef _VERBOSE
     Log::Debug ("ApplCore::defaultQuitHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGQUIT, exiting process.");
-    exit (0);
+    Log::Info ("Received SIGQUIT, requesting shutdown."s);
+    shutdownSignal_s.store (SIGQUIT, std::memory_order_release);
+    shutdownRequested_s.store (true, std::memory_order_release);
 }
 
 
 
-void  
+void
 ApplCore::defaultAbortHandler ()
 {
 #ifdef _VERBOSE
     Log::Debug ("ApplCore::defaultAbortHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGABORT, exiting process.");
-    exit (0);
+    Log::Info ("Received SIGABORT, requesting shutdown."s);
+    shutdownSignal_s.store (SIGABRT, std::memory_order_release);
+    shutdownRequested_s.store (true, std::memory_order_release);
 }
 
 
 
-void  
+void
 ApplCore::defaultSegvHandler ()
 {
-#ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultSegvHandler invoked.");
-#endif
-
-    Log::Info ("Received SIGSEGV, exiting process.");
-    exit (1);
+    // SIGSEGV — corrupt state, unsafe to log or allocate.
+    // Use _exit() to terminate immediately.
+    _exit (1);
 }
 
 
 
-void  
+void
 ApplCore::defaultTerminateHandler ()
 {
 #ifdef _VERBOSE
     Log::Debug ("ApplCore::defaultTerminateHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGTERM, exiting process.");
-    exit (0);
+    Log::Info ("Received SIGTERM, requesting shutdown."s);
+    shutdownSignal_s.store (SIGTERM, std::memory_order_release);
+    shutdownRequested_s.store (true, std::memory_order_release);
 }
 
 

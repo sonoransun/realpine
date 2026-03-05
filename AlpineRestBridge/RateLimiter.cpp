@@ -34,21 +34,41 @@ RateLimiter::initialize (double  requestsPerSecond,
 
 
 
+string
+RateLimiter::normalizeIp (const string & ip)
+{
+    // Strip IPv4-mapped IPv6 prefix
+    string normalized = ip;
+    if (normalized.starts_with("::ffff:"s))
+        normalized = normalized.substr(7);
+
+    // Canonicalize through ASIO address parsing
+    asio::error_code ec;
+    auto addr = asio::ip::make_address(normalized, ec);
+    if (!ec)
+        return addr.to_string();
+
+    return normalized;
+}
+
+
+
 bool
 RateLimiter::allowRequest (const string & clientIp)
 {
     if (!initialized_s)
         return true;
 
-    auto & shard = shards_s[shardIndex(clientIp)];
+    auto normalizedIp = normalizeIp(clientIp);
+    auto & shard = shards_s[shardIndex(normalizedIp)];
     auto now = std::chrono::steady_clock::now();
 
     std::unique_lock lock(shard.mutex);
 
-    auto it = shard.buckets.find(clientIp);
+    auto it = shard.buckets.find(normalizedIp);
 
     if (it == shard.buckets.end()) {
-        shard.buckets[clientIp] = t_TokenBucket{
+        shard.buckets[normalizedIp] = t_TokenBucket{
             static_cast<double>(burst_s) - 1.0,
             now
         };

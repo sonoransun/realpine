@@ -8,6 +8,7 @@
 #include <ReadWriteSem.h>
 #include <OptHash.h>
 #include <vector>
+#include <unordered_set>
 
 
 class AlpineResourceDescSet;
@@ -64,6 +65,9 @@ class AlpineQueryResults
     t_ReplyIndex *           replyIndex_;
     AlpineQueryOptions       queryOptions_;
     ReadWriteSem             dataLock_;
+
+    // Cross-peer resource deduplication: hash(primaryLocator + size)
+    std::unordered_set<size_t>  seenResources_;
     
 
     // Only private methods which should be accessed by AlpineQueryMgr

@@ -11,7 +11,12 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
-#include <random>
+
+#ifdef ALPINE_TLS_ENABLED
+#include <openssl/evp.h>
+#include <openssl/ec.h>
+#include <openssl/pem.h>
+#endif
 
 
 std::unordered_map<string, AuthHandler::t_PendingChallenge>  AuthHandler::pendingChallenges_s;
@@ -92,6 +97,16 @@ AuthHandler::getChallenge (const HttpRequest & request,
 {
     evictExpiredChallenges();
 
+    dataLock_s.acquireRead();
+    auto pendingCount = pendingChallenges_s.size();
+    dataLock_s.releaseRead();
+
+    if (pendingCount >= MAX_PENDING_CHALLENGES)
+    {
+        Log::Error("AuthHandler: pending challenge limit reached"s);
+        return HttpResponse::tooManyRequests("Too many pending challenges");
+    }
+
     auto challengeId = generateId();
     auto nonce       = generateNonce();
 
@@ -157,6 +172,9 @@ AuthHandler::verifySignature (const HttpRequest & request,
         return HttpResponse::badRequest("Challenge expired");
     }
 
+    // Save nonce before consuming (needed for signature verification)
+    auto challengeNonce = it->second.nonce;
+
     // Consume the challenge (one-time use)
     pendingChallenges_s.erase(it);
     dataLock_s.releaseWrite();
@@ -181,17 +199,77 @@ AuthHandler::verifySignature (const HttpRequest & request,
         return HttpResponse::badRequest("Device not enrolled");
     }
 
-    // NOTE: Actual ECDSA signature verification would require OpenSSL or
-    // a crypto library.  When ALPINE_ENABLE_TLS is ON, this should use
-    // OpenSSL's EC_KEY_verify.  For now, we trust that the iOS Secure
-    // Enclave produced a valid signature and the matching public key
-    // enrollment serves as the proof of device possession.
-    //
-    // TODO: Add OpenSSL ECDSA verification gated by ALPINE_TLS_ENABLED
+#ifdef ALPINE_TLS_ENABLED
+    // ECDSA signature verification using OpenSSL EVP API
+    {
+        auto * bio = BIO_new_mem_buf(publicKey.data(),
+                                     static_cast<int>(publicKey.size()));
+        if (!bio)
+        {
+            Log::Error("AuthHandler: BIO_new_mem_buf failed"s);
+            return HttpResponse::serverError("Signature verification failed");
+        }
+
+        auto * pkey = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
+        BIO_free(bio);
+
+        if (!pkey)
+        {
+            Log::Error("AuthHandler: failed to parse public key"s);
+            return HttpResponse::badRequest("Invalid public key format");
+        }
+
+        auto * mdCtx = EVP_MD_CTX_new();
+        if (!mdCtx)
+        {
+            EVP_PKEY_free(pkey);
+            Log::Error("AuthHandler: EVP_MD_CTX_new failed"s);
+            return HttpResponse::serverError("Signature verification failed");
+        }
+
+        bool verified = false;
+
+        if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr, pkey) == 1)
+        {
+            if (EVP_DigestVerifyUpdate(mdCtx,
+                                       challengeNonce.data(),
+                                       challengeNonce.size()) == 1)
+            {
+                // Decode hex signature to binary
+                string sigBytes;
+                sigBytes.reserve(signature.size() / 2);
+                for (ulong i = 0; i + 1 < signature.size(); i += 2)
+                {
+                    auto byte_val = static_cast<unsigned char>(
+                        std::stoi(signature.substr(i, 2), nullptr, 16));
+                    sigBytes += static_cast<char>(byte_val);
+                }
+
+                verified = EVP_DigestVerifyFinal(
+                    mdCtx,
+                    reinterpret_cast<const unsigned char *>(sigBytes.data()),
+                    sigBytes.size()) == 1;
+            }
+        }
+
+        EVP_MD_CTX_free(mdCtx);
+        EVP_PKEY_free(pkey);
+
+        if (!verified)
+        {
+            Log::Error("AuthHandler: ECDSA signature verification failed"s);
+            return HttpResponse::badRequest("Signature verification failed");
+        }
+    }
+#else
+    // Without TLS/OpenSSL, signature verification is not available
+    Log::Error("AuthHandler: signature verification requires TLS support"s);
+    return HttpResponse::serverError("Signature verification not available (TLS disabled)");
+#endif
 
     Log::Info("AuthHandler: device verified via challenge-response"s);
 
-    // Issue a session token (reuse the API key mechanism for now)
+    // Issue a session token
     auto accessToken = generateNonce();
 
     JsonWriter writer;
@@ -207,23 +285,50 @@ AuthHandler::verifySignature (const HttpRequest & request,
 
 
 // ---------------------------------------------------------------------------
+// readUrandom — read numBytes from /dev/urandom and return as hex string
+// ---------------------------------------------------------------------------
+
+string
+AuthHandler::readUrandom (ulong numBytes)
+{
+    std::ifstream urandom("/dev/urandom", std::ios::binary);
+    if (!urandom.good())
+    {
+        Log::Error("AuthHandler: failed to open /dev/urandom"s);
+        return {};
+    }
+
+    std::vector<byte> buf(numBytes);
+    urandom.read(reinterpret_cast<char *>(buf.data()),
+                 static_cast<std::streamsize>(numBytes));
+
+    if (!urandom.good())
+    {
+        Log::Error("AuthHandler: failed to read from /dev/urandom"s);
+        return {};
+    }
+
+    static const char hexChars[] = "0123456789abcdef";
+    string result;
+    result.reserve(numBytes * 2);
+    for (auto b : buf)
+    {
+        result += hexChars[(b >> 4) & 0x0F];
+        result += hexChars[b & 0x0F];
+    }
+
+    return result;
+}
+
+
+// ---------------------------------------------------------------------------
 // generateNonce — 32 random bytes as hex
 // ---------------------------------------------------------------------------
 
 string
 AuthHandler::generateNonce ()
 {
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<int> dist(0, 255);
-
-    std::ostringstream oss;
-    oss << std::hex << std::setfill('0');
-
-    for (int i = 0; i < 32; ++i)
-        oss << std::setw(2) << dist(gen);
-
-    return oss.str();
+    return readUrandom(32);
 }
 
 
@@ -234,17 +339,7 @@ AuthHandler::generateNonce ()
 string
 AuthHandler::generateId ()
 {
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<int> dist(0, 255);
-
-    std::ostringstream oss;
-    oss << std::hex << std::setfill('0');
-
-    for (int i = 0; i < 16; ++i)
-        oss << std::setw(2) << dist(gen);
-
-    return oss.str();
+    return readUrandom(16);
 }
 
 

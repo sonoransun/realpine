@@ -10,7 +10,9 @@ class JsonReader
 {
   public:
 
-    static constexpr ulong MAX_STRING_LENGTH = 4096;
+    static constexpr ulong MAX_STRING_LENGTH    = 4096;
+    static constexpr int   MAX_NESTING_DEPTH    = 32;
+    static constexpr int   MAX_KEYS_PER_OBJECT  = 256;
 
     explicit JsonReader (const string & json);
     ~JsonReader () = default;
@@ -23,6 +25,8 @@ class JsonReader
 
 
   private:
+
+    static bool  checkDepthAndKeys (const nlohmann::json & node, int depth);
 
     nlohmann::json  doc_;
     bool  valid_;

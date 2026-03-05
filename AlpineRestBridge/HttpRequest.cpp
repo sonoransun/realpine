@@ -42,8 +42,25 @@ HttpRequest::parse (const byte *  data,
 
     request.path = requestLine.substr(pathStart, pathEnd - pathStart);
 
+    // RFC 7230 tchar set for header field names:
+    //   "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." /
+    //   "^" / "_" / "`" / "|" / "~" / DIGIT / ALPHA
+    static constexpr auto isTchar = [](char c) -> bool {
+        if (std::isalnum(static_cast<unsigned char>(c)))
+            return true;
+        switch (c) {
+            case '!': case '#': case '$': case '%': case '&': case '\'':
+            case '*': case '+': case '-': case '.': case '^': case '_':
+            case '`': case '|': case '~':
+                return true;
+            default:
+                return false;
+        }
+    };
+
     // Parse headers
     ulong pos = lineEnd + 2;  // skip past \r\n of request line
+    int headerCount = 0;
 
     while (pos < raw.length())
     {
@@ -58,6 +75,10 @@ HttpRequest::parse (const byte *  data,
             break;
         }
 
+        // Reject excess headers
+        if (++headerCount > MAX_HEADER_COUNT)
+            return false;
+
         string headerLine = raw.substr(pos, headerEnd - pos);
 
         ulong colonPos = headerLine.find(':');
@@ -65,6 +86,24 @@ HttpRequest::parse (const byte *  data,
         {
             string name = headerLine.substr(0, colonPos);
             string val  = headerLine.substr(colonPos + 1);
+
+            // Reject oversized header names or values
+            if (name.length() > MAX_HEADER_NAME_LENGTH ||
+                val.length() > MAX_HEADER_VALUE_LENGTH)
+                return false;
+
+            // Validate header name characters per RFC 7230
+            bool validName = true;
+            for (char c : name) {
+                if (!isTchar(c)) {
+                    validName = false;
+                    break;
+                }
+            }
+            if (!validName) {
+                pos = headerEnd + 2;
+                continue;
+            }
 
             // Lowercase the header name
             for (ulong i = 0; i < name.length(); ++i)

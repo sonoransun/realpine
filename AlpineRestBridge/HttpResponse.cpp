@@ -2,6 +2,7 @@
 
 
 #include <HttpResponse.h>
+#include <Log.h>
 #include <cstdio>
 
 
@@ -46,6 +47,12 @@ HttpResponse::addCorsHeaders ()
     headers_["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
     headers_["X-Content-Type-Options"]       = "nosniff";
     headers_["X-Frame-Options"]              = "DENY";
+    headers_["Content-Security-Policy"]      = "default-src 'none'";
+    headers_["Referrer-Policy"]              = "no-referrer";
+    headers_["Cache-Control"]                = "no-store";
+#ifdef ALPINE_TLS_ENABLED
+    headers_["Strict-Transport-Security"]    = "max-age=31536000; includeSubDomains";
+#endif
     headers_["Connection"]                   = "close";
 }
 
@@ -53,6 +60,12 @@ HttpResponse::addCorsHeaders ()
 void
 HttpResponse::setCorsOrigin (const string & origin)
 {
+    if (origin != "*"s &&
+        !origin.starts_with("http://"s) &&
+        !origin.starts_with("https://"s)) {
+        Log::Error("HttpResponse: rejecting invalid CORS origin: "s + origin);
+        return;
+    }
     corsOrigin_s = origin;
 }
 
@@ -157,6 +170,15 @@ HttpResponse::methodNotAllowed ()
 {
     HttpResponse resp(405, "Method Not Allowed");
     resp.setJsonBody("{\"error\":\"Method Not Allowed\"}");
+    return resp;
+}
+
+
+HttpResponse
+HttpResponse::tooManyRequests (const string & message)
+{
+    HttpResponse resp(429, "Too Many Requests");
+    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
     return resp;
 }
 

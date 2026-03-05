@@ -3,6 +3,7 @@
 
 #pragma once
 #include <Common.h>
+#include <asio.hpp>
 #include <array>
 #include <unordered_map>
 #include <shared_mutex>
@@ -14,12 +15,14 @@ class RateLimiter
 {
   public:
 
-    static void  initialize (double  requestsPerSecond,
-                             uint    burstSize);
+    static void    initialize (double  requestsPerSecond,
+                               uint    burstSize);
 
-    static bool  allowRequest (const string & clientIp);
+    static bool    allowRequest (const string & clientIp);
 
-    static void  cleanup ();
+    static string  normalizeIp (const string & ip);
+
+    static void    cleanup ();
 
 
   private:

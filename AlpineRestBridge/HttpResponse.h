@@ -36,6 +36,8 @@ class HttpResponse
 
     static HttpResponse  methodNotAllowed ();
 
+    static HttpResponse  tooManyRequests (const string & message);
+
     static HttpResponse  serverError (const string & message);
 
     static void  setCorsOrigin (const string & origin);

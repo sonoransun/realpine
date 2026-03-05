@@ -34,6 +34,8 @@ class WebSocketSession : public std::enable_shared_from_this<WebSocketSession>
     static string  buildHandshakeResponse (const string & secWebSocketKey);
 
 
+    static constexpr uint64_t  MAX_FRAME_SIZE    = 1 * 1024 * 1024;  // 1MB
+
     // --- Shared buffer pool ---
 
     static constexpr size_t  BUFFER_POOL_SIZE   = 32;

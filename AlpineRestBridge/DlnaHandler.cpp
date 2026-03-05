@@ -3,6 +3,7 @@
 
 #include <DlnaHandler.h>
 #include <XmlWriter.h>
+#include <SafeParse.h>
 
 #include <cstdio>
 
@@ -234,8 +235,8 @@ DlnaHandler::actionBrowse (const string & soapBody,
     string startIdxStr = extractXmlValue(soapBody, "StartingIndex");
     string reqCountStr = extractXmlValue(soapBody, "RequestedCount");
 
-    ulong startIdx = startIdxStr.empty() ? 0 : strtoul(startIdxStr.c_str(), nullptr, 10);
-    ulong reqCount = reqCountStr.empty() ? 0 : strtoul(reqCountStr.c_str(), nullptr, 10);
+    ulong startIdx = parseUlong(startIdxStr).value_or(0);
+    ulong reqCount = parseUlong(reqCountStr).value_or(0);
 
     if (browseFlag == "BrowseMetadata" && (objectId == "0" || objectId.empty())) {
         string didl = buildDidlContainer(store.getItemCount());

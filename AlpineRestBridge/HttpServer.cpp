@@ -4,6 +4,7 @@
 #include <HttpServer.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
+#include <SafeParse.h>
 #include <WebSocketSession.h>
 #include <RateLimiter.h>
 #include <RestBridgeConfig.h>
@@ -375,7 +376,7 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
     string clientIp;
     try {
         auto remoteEp = socket.remote_endpoint();
-        clientIp = remoteEp.address().to_string();
+        clientIp = RateLimiter::normalizeIp(remoteEp.address().to_string());
 
         // Per-IP connection limit
         if (!acquireConnectionSlot(clientIp)) {
@@ -476,7 +477,7 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
         }
 
         auto remoteEp = stream.lowest_layer().remote_endpoint();
-        clientIp = remoteEp.address().to_string();
+        clientIp = RateLimiter::normalizeIp(remoteEp.address().to_string());
 
         // Per-IP connection limit
         if (!acquireConnectionSlot(clientIp)) {
@@ -583,7 +584,14 @@ HttpServer::processRequest (Stream & stream)
     // Check for Content-Length and read body if needed
     auto clIt = request.headers.find("content-length");
     if (clIt != request.headers.end()) {
-        ulong contentLength = std::stoul(clIt->second);
+        auto contentLengthOpt = parseUlong(clIt->second);
+        if (!contentLengthOpt) {
+            auto resp = HttpResponse::badRequest("Invalid Content-Length");
+            auto respStr = resp.build();
+            asio::write(stream, asio::buffer(respStr), ec);
+            return;
+        }
+        ulong contentLength = *contentLengthOpt;
         if (contentLength > MAX_BODY_SIZE) {
             auto resp = HttpResponse(413, "Payload Too Large");
             resp.setBody("Request body too large");

@@ -3,8 +3,10 @@
 
 #include <ClusterCoordinator.h>
 #include <AlpineStackInterface.h>
+#include <AlpineRatingEngine.h>
 #include <JsonWriter.h>
 #include <JsonReader.h>
+#include <SafeParse.h>
 #include <Log.h>
 #include <Platform.h>
 #include <ReadLock.h>
@@ -27,8 +29,10 @@
 
 string                                           ClusterCoordinator::nodeId_s;
 string                                           ClusterCoordinator::localHost_s;
+string                                           ClusterCoordinator::localRegion_s;
 ushort                                           ClusterCoordinator::restPort_s{0};
 ushort                                           ClusterCoordinator::beaconPort_s{0};
+std::atomic<bool>                                ClusterCoordinator::isolated_s{false};
 
 std::unordered_map<string, ClusterCoordinator::NodeInfo>  ClusterCoordinator::nodes_s;
 ReadWriteSem                                     ClusterCoordinator::nodesMutex_s;
@@ -62,8 +66,13 @@ ClusterCoordinator::initialize (ushort restPort, ushort beaconPort)
     gethostname(hostname, sizeof(hostname));
     localHost_s = hostname;
 
+    // Read region from environment
+    const char * regionEnv = getenv("ALPINE_REGION");
+    localRegion_s = regionEnv ? string(regionEnv) : "default"s;
+
     Log::Info("ClusterCoordinator: Initializing node "s + nodeId_s +
-              " (host: " + localHost_s + ", REST port: " + std::to_string(restPort_s) + ")");
+              " (host: " + localHost_s + ", region: " + localRegion_s +
+              ", REST port: " + std::to_string(restPort_s) + ")");
 
     // Start heartbeat broadcast thread
     heartbeatThread_s = new HeartbeatThread();
@@ -161,6 +170,7 @@ ClusterCoordinator::getLocalNodeInfo ()
     info.nodeId          = nodeId_s;
     info.host            = localHost_s;
     info.restPort        = restPort_s;
+    info.region          = localRegion_s;
     info.cpuLoadEstimate = estimateCpuLoad();
     info.lastHeartbeat   = std::chrono::steady_clock::now();
 
@@ -252,6 +262,9 @@ ClusterCoordinator::registerActiveQuery (const string & queryHash,
     entry.nodeId       = nodeId_s;
     entry.queryId      = queryId;
     entry.registeredAt = std::chrono::steady_clock::now();
+    entry.wallClockMs  = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count());
 
     dedupIndex_s[queryHash] = entry;
 
@@ -283,7 +296,9 @@ ClusterCoordinator::shouldRedirect (string & redirectUrl)
     if (nodes_s.empty())
         return false;
 
-    // Find least-loaded node
+    int timeoutSec = computeAdaptiveTimeoutSec();
+
+    // Find least-loaded node, with same-region preference
     const NodeInfo * best = nullptr;
     double bestScore = local.cpuLoadEstimate + static_cast<double>(local.activeQueries) * 0.1;
 
@@ -292,10 +307,14 @@ ClusterCoordinator::shouldRedirect (string & redirectUrl)
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::steady_clock::now() - node.lastHeartbeat).count();
 
-        if (elapsed > NODE_TIMEOUT_SEC)
+        if (elapsed > timeoutSec)
             continue;
 
         double score = node.cpuLoadEstimate + static_cast<double>(node.activeQueries) * 0.1;
+
+        // Apply same-region bonus: reduce score by 20% for same-region nodes
+        if (node.region == localRegion_s)
+            score *= 0.8;
 
         if (!best || score < bestScore) {
             best = &node;
@@ -387,6 +406,10 @@ ClusterCoordinator::handleClusterStatus (const HttpRequest & request,
     writer.beginObject();
     writer.key("nodeId");
     writer.value(nodeId_s);
+    writer.key("region");
+    writer.value(localRegion_s);
+    writer.key("isolated");
+    writer.value(isIsolated());
     writer.key("clusterSize");
     writer.value(static_cast<ulong>(nodes.size()));
     writer.key("nodes");
@@ -404,6 +427,8 @@ ClusterCoordinator::handleClusterStatus (const HttpRequest & request,
         writer.value(static_cast<ulong>(node.activeQueries));
         writer.key("connectionCount");
         writer.value(static_cast<ulong>(node.connectionCount));
+        writer.key("region");
+        writer.value(node.region);
         writer.key("cpuLoad");
         writer.value(node.nodeId);  // placeholder — JsonWriter has no double overload
         writer.key("capabilities");
@@ -539,6 +564,9 @@ ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
     reader.getUlong("activeQueries", activeQueries);
     reader.getUlong("connectionCount", connectionCount);
 
+    string peerRegion;
+    reader.getString("region", peerRegion);
+
     // Also ingest any dedup entries the peer is advertising
     // (handled via gossip in the heartbeat payload)
 
@@ -551,7 +579,33 @@ ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
         node.restPort        = static_cast<ushort>(restPort);
         node.activeQueries   = static_cast<uint>(activeQueries);
         node.connectionCount = static_cast<uint>(connectionCount);
+        node.region          = peerRegion;
         node.lastHeartbeat   = std::chrono::steady_clock::now();
+    }
+
+    // Merge remote peer scores from gossip
+    {
+        nlohmann::json doc = nlohmann::json::parse(request.body, nullptr, false);
+        if (!doc.is_discarded() && doc.contains("peerScores") &&
+            doc["peerScores"].is_array()) {
+
+            vector<AlpineRatingEngine::t_ScoreEntry> remoteScores;
+
+            for (const auto & se : doc["peerScores"]) {
+                if (!se.contains("peerId") || !se.contains("score") ||
+                    !se.contains("interactions"))
+                    continue;
+
+                AlpineRatingEngine::t_ScoreEntry entry;
+                entry.peerId       = se["peerId"].get<ulong>();
+                entry.score        = se["score"].get<double>();
+                entry.interactions = se["interactions"].get<ulong>();
+                remoteScores.push_back(entry);
+            }
+
+            if (!remoteScores.empty())
+                AlpineRatingEngine::mergeRemoteScores(remoteScores, 10);
+        }
     }
 
     JsonWriter writer;
@@ -576,7 +630,10 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    ulong queryId = strtoul(it->second.c_str(), nullptr, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid query id");
+    ulong queryId = *parsedId;
 
     // Get local results first
     auto localResultsOpt = AlpineStackInterface::getQueryResults2(queryId);
@@ -646,11 +703,12 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
     if (!queryHash.empty()) {
         ReadLock nodesLock(nodesMutex_s);
 
+        int timeoutSec = computeAdaptiveTimeoutSec();
         for (const auto & [id, node] : nodes_s) {
             // Skip stale nodes
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::steady_clock::now() - node.lastHeartbeat).count();
-            if (elapsed > NODE_TIMEOUT_SEC)
+            if (elapsed > timeoutSec)
                 continue;
 
             // Check if this remote node has the same query hash
@@ -702,6 +760,7 @@ void
 ClusterCoordinator::evictStaleNodes ()
 {
     auto now = std::chrono::steady_clock::now();
+    int timeoutSec = computeAdaptiveTimeoutSec();
 
     WriteLock lock(nodesMutex_s);
 
@@ -709,7 +768,7 @@ ClusterCoordinator::evictStaleNodes ()
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
             now - it->second.lastHeartbeat).count();
 
-        if (elapsed > NODE_TIMEOUT_SEC) {
+        if (elapsed > timeoutSec) {
             Log::Debug("ClusterCoordinator: Evicting stale node "s + it->first);
             it = nodes_s.erase(it);
         } else {
@@ -746,6 +805,7 @@ ClusterCoordinator::broadcastHeartbeat ()
     payload["activeQueries"]   = local.activeQueries;
     payload["connectionCount"] = local.connectionCount;
     payload["cpuLoad"]         = local.cpuLoadEstimate;
+    payload["region"]          = local.region;
 
     // Include capability vector
     payload["capabilities"] = nlohmann::json::array();
@@ -767,12 +827,34 @@ ClusterCoordinator::broadcastHeartbeat ()
         }
     }
 
+    // Include top-50 peer scores for distributed reputation gossip
+    {
+        auto topScores = AlpineRatingEngine::getTopScores(50);
+        payload["peerScores"] = nlohmann::json::array();
+
+        for (const auto & entry : topScores) {
+            nlohmann::json se;
+            se["peerId"]       = entry.peerId;
+            se["score"]        = entry.score;
+            se["interactions"] = entry.interactions;
+            payload["peerScores"].push_back(se);
+        }
+    }
+
     string body = payload.dump();
 
-    // Send to each known node
-    ReadLock lock(nodesMutex_s);
+    // Snapshot nodes for sending (avoid holding lock during network I/O)
+    vector<std::pair<string, NodeInfo>> nodeSnapshot;
+    {
+        ReadLock lock(nodesMutex_s);
+        for (const auto & [id, node] : nodes_s)
+            nodeSnapshot.emplace_back(id, node);
+    }
 
-    for (const auto & [id, node] : nodes_s) {
+    // Send heartbeats and measure RTT
+    std::unordered_map<string, double> rttResults;
+
+    for (const auto & [id, node] : nodeSnapshot) {
         try {
             asio::io_context ioCtx;
             asio::ip::tcp::resolver resolver(ioCtx);
@@ -780,6 +862,9 @@ ClusterCoordinator::broadcastHeartbeat ()
             auto endpoints = resolver.resolve(node.host, std::to_string(node.restPort));
 
             asio::ip::tcp::socket socket(ioCtx);
+
+            auto rttStart = std::chrono::steady_clock::now();
+
             asio::connect(socket, endpoints);
 
             string httpRequest = "POST /cluster/heartbeat HTTP/1.1\r\n"s +
@@ -790,13 +875,26 @@ ClusterCoordinator::broadcastHeartbeat ()
 
             asio::write(socket, asio::buffer(httpRequest));
 
-            // Read response (best-effort, don't block long)
             asio::error_code ec;
             char buf[1024];
             socket.read_some(asio::buffer(buf), ec);
+
+            auto rttEnd = std::chrono::steady_clock::now();
+            double rttMs = std::chrono::duration<double, std::milli>(rttEnd - rttStart).count();
+            rttResults[id] = rttMs;
         }
         catch (const std::exception & e) {
             Log::Debug("ClusterCoordinator: Heartbeat to "s + id + " failed: " + e.what());
+        }
+    }
+
+    // Update RTT measurements
+    if (!rttResults.empty()) {
+        WriteLock lock(nodesMutex_s);
+        for (const auto & [id, rtt] : rttResults) {
+            auto it = nodes_s.find(id);
+            if (it != nodes_s.end())
+                it->second.rttMs = rtt;
         }
     }
 }
@@ -809,6 +907,111 @@ ClusterCoordinator::gossipActiveQueries ()
     // This method handles incoming gossip from peers by updating the dedup index
     // with remote query entries. Called when processing heartbeat payloads
     // from the beacon listener.
+}
+
+
+int
+ClusterCoordinator::computeAdaptiveTimeoutSec ()
+{
+    // Adaptive timeout: max(35, avgRttMs * 10 / 1000) capped at 120s
+    ReadLock lock(nodesMutex_s);
+
+    if (nodes_s.empty())
+        return NODE_TIMEOUT_MIN_SEC;
+
+    double totalRtt = 0.0;
+    int    count    = 0;
+
+    for (const auto & [id, node] : nodes_s) {
+        if (node.rttMs > 0.0) {
+            totalRtt += node.rttMs;
+            ++count;
+        }
+    }
+
+    if (count == 0)
+        return NODE_TIMEOUT_MIN_SEC;
+
+    double avgRttMs = totalRtt / count;
+    int rttBased = static_cast<int>(avgRttMs * 10.0 / 1000.0);
+    int timeout  = std::max(NODE_TIMEOUT_MIN_SEC, rttBased);
+    return std::min(timeout, NODE_TIMEOUT_MAX_SEC);
+}
+
+
+void
+ClusterCoordinator::checkSplitBrain ()
+{
+    auto now = std::chrono::steady_clock::now();
+    int timeoutSec = computeAdaptiveTimeoutSec();
+    int splitBrainWindowSec = timeoutSec * SPLIT_BRAIN_MULTIPLIER;
+
+    ReadLock lock(nodesMutex_s);
+
+    if (nodes_s.empty()) {
+        // No peers known — can't determine split-brain
+        isolated_s.store(false, std::memory_order_release);
+        return;
+    }
+
+    int totalPeers   = static_cast<int>(nodes_s.size());
+    int unreachable  = 0;
+
+    for (const auto & [id, node] : nodes_s) {
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+            now - node.lastHeartbeat).count();
+
+        if (elapsed > splitBrainWindowSec)
+            ++unreachable;
+    }
+
+    double unreachableRatio = static_cast<double>(unreachable) / totalPeers;
+
+    if (unreachableRatio > SPLIT_BRAIN_THRESHOLD) {
+        if (!isolated_s.load(std::memory_order_acquire)) {
+            isolated_s.store(true, std::memory_order_release);
+            Log::Error("ClusterCoordinator: Split-brain detected — "s +
+                       std::to_string(unreachable) + "/" + std::to_string(totalPeers) +
+                       " peers unreachable. Entering isolated mode."s);
+        }
+    } else {
+        if (isolated_s.load(std::memory_order_acquire)) {
+            isolated_s.store(false, std::memory_order_release);
+            Log::Info("ClusterCoordinator: Partition healed — exiting isolated mode."s);
+        }
+    }
+}
+
+
+bool
+ClusterCoordinator::isIsolated ()
+{
+    return isolated_s.load(std::memory_order_acquire);
+}
+
+
+double
+ClusterCoordinator::measureRtt (const string & host, ushort port)
+{
+    try {
+        asio::io_context ioCtx;
+        asio::ip::tcp::resolver resolver(ioCtx);
+        auto endpoints = resolver.resolve(host, std::to_string(port));
+
+        asio::ip::tcp::socket socket(ioCtx);
+
+        auto start = std::chrono::steady_clock::now();
+        asio::connect(socket, endpoints);
+        auto end = std::chrono::steady_clock::now();
+
+        asio::error_code ec;
+        socket.close(ec);
+
+        return std::chrono::duration<double, std::milli>(end - start).count();
+    }
+    catch (const std::exception &) {
+        return -1.0;
+    }
 }
 
 
@@ -845,6 +1048,9 @@ ClusterCoordinator::HeartbeatThread::threadMain ()
     while (isActive()) {
         // Evict stale nodes
         evictStaleNodes();
+
+        // Check for split-brain / isolation
+        checkSplitBrain();
 
         // Broadcast heartbeat to cluster
         broadcastHeartbeat();
@@ -974,6 +1180,9 @@ ClusterCoordinator::ListenerThread::threadMain ()
                 node.host          = peerHost;
                 node.restPort      = peerRestPort;
                 node.lastHeartbeat = std::chrono::steady_clock::now();
+
+                if (doc.contains("region") && doc["region"].is_string())
+                    node.region = doc["region"].get<string>();
 
                 if (doc.contains("capabilities") && doc["capabilities"].is_array()) {
                     node.capabilities.clear();

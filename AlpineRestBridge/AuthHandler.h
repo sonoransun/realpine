@@ -55,8 +55,10 @@ class AuthHandler
     static ReadWriteSem  dataLock_s;
 
     static constexpr ulong  CHALLENGE_TTL_SECONDS = 60;
+    static constexpr ulong  MAX_PENDING_CHALLENGES = 10000;
 
     static string  generateNonce ();
     static string  generateId ();
+    static string  readUrandom (ulong numBytes);
     static void    evictExpiredChallenges ();
 };

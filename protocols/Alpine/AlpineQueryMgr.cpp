@@ -11,6 +11,12 @@
 #include <Log.h>
 #include <StringUtils.h>
 
+#include <chrono>
+
+#ifdef ALPINE_ENABLE_PERSISTENCE
+#include <PersistenceStore.h>
+#endif
+
 // Helper: wake the event loop after state changes that need prompt processing.
 static inline void  wakeEventLoop () { AlpineStack::notifyEvent(); }
 
@@ -51,6 +57,30 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
     pastPeerQueryIndex_s   = std::make_unique<t_PeerQueryIndex>();
 
     initialized_s = true;
+
+#ifdef ALPINE_ENABLE_PERSISTENCE
+    // WAL recovery: scan for stale query entries from a prior crash.
+    // Any wal: prefixed entries indicate queries that were active when
+    // the process terminated abnormally.
+    if (PersistenceStore::isInitialized()) {
+        int staleCount = 0;
+        PersistenceStore::executeWithCallback(
+            "SELECT query_string, timestamp FROM query_results WHERE query_string LIKE 'wal:%'"s,
+            [&staleCount](int, char** values, char**) {
+                if (values && values[0]) {
+                    Log::Info("AlpineQueryMgr: WAL recovery — stale query entry: "s + values[0]);
+                    ++staleCount;
+                }
+            });
+
+        if (staleCount > 0) {
+            Log::Info("AlpineQueryMgr: WAL recovery — clearing "s +
+                      std::to_string(staleCount) + " stale entries."s);
+            PersistenceStore::execute(
+                "DELETE FROM query_results WHERE query_string LIKE 'wal:%'"s);
+        }
+    }
+#endif
 
 
     return true;
@@ -112,6 +142,21 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     // Index state by query ID and member peer ID's
     //
     activeQueryIndex_s->emplace (queryId, std::move(newState));
+
+#ifdef ALPINE_ENABLE_PERSISTENCE
+    // Write WAL entry for crash recovery
+    if (PersistenceStore::isInitialized()) {
+        string queryString;
+        options.getQuery(queryString);
+
+        auto now = static_cast<ulong>(
+            std::chrono::duration_cast<std::chrono::seconds>(
+                std::chrono::system_clock::now().time_since_epoch()).count());
+
+        PersistenceStore::storeQueryResult(
+            "wal:"s + std::to_string(queryId), queryString, now);
+    }
+#endif
 
     ulong  currPeerId;
 
@@ -399,6 +444,14 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
     activeQueryIndex_s->erase (queryIter);
     pastQueryIndex_s->emplace (queryId, std::move(statePtr));
 
+#ifdef ALPINE_ENABLE_PERSISTENCE
+    // Remove WAL entry — query completed or cancelled
+    if (PersistenceStore::isInitialized()) {
+        PersistenceStore::execute(
+            "DELETE FROM query_results WHERE query_string = 'wal:"s +
+            std::to_string(queryId) + "'"s);
+    }
+#endif
 
     // Remove peer ID indexes for this query from the active index, and
     // move them to the past index.

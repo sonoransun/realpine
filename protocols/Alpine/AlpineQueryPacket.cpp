@@ -834,6 +834,10 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
         curr        += queryString_.size () + 1;
         readLength  += queryString_.size () + 1;
 
+        if (readLength + sizeof(long) > bufferSize) {
+            Log::Error ("AlpineQueryPacket: buffer too small for option ID in queryDiscover"s);
+            return false;
+        }
         optionId_   = static_cast<ulong>(ntohl(*(reinterpret_cast<ulong *>(curr))));
         curr       += sizeof(long);
         readLength += sizeof(long);
@@ -922,6 +926,12 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
         curr           += sizeof(short);
         readLength     += sizeof(short);
 
+        static constexpr ushort MAX_REPLY_SET_SIZE = 10000;
+        if (replySetSize_ > MAX_REPLY_SET_SIZE) {
+            Log::Error ("AlpineQueryPacket: reply set size exceeds maximum"s);
+            return false;
+        }
+
         status = verifyStringData (curr, (bufferSize - readLength));
 
         if (!status) {
@@ -935,6 +945,10 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
         curr        += queryString_.size () + 1;
         readLength  += queryString_.size () + 1;
 
+        if (readLength + sizeof(long) > bufferSize) {
+            Log::Error ("AlpineQueryPacket: buffer too small for option ID in queryRequest"s);
+            return false;
+        }
         optionId_   = static_cast<ulong>(ntohl(*(reinterpret_cast<ulong *>(curr))));
         curr       += sizeof(long);
         readLength += sizeof(long);
@@ -975,11 +989,16 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
         curr           += sizeof(short);
         readLength     += sizeof(short);
 
+        static constexpr ushort MAX_REPLY_SET_SIZE = 10000;
+        if (replySetSize_ > MAX_REPLY_SET_SIZE) {
+            Log::Error ("AlpineQueryPacket: reply set size exceeds maximum"s);
+            return false;
+        }
+
         linkBuffer->addReadBytes (readLength);
 
         if (!resourceList_) {
             resourceList_ = new t_ResourceDescList;
-            return false;
         }
 
         status = readResourceListData (linkBuffer);

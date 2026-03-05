@@ -77,6 +77,22 @@ class AlpineRatingEngine
     static double  getScore (ulong peerId);
 
 
+    // Distributed score gossip
+    //
+    struct t_ScoreEntry {
+        ulong   peerId;
+        double  score;
+        ulong   interactions;  // successCount + failureCount
+    };
+
+    static vector<t_ScoreEntry>  getTopScores (size_t maxEntries = 50);
+
+    // Merge remote scores using weighted average.
+    // Only applies if remote has >= minInteractions.
+    static void  mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores,
+                                    ulong minInteractions = 10);
+
+
     // Persistence
     //
     static bool  persist ();

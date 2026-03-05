@@ -1,0 +1,261 @@
+# Alpine P2P Multi-Region Cluster
+#
+# Simulates a WAN-distributed cluster with 3 regions:
+#   US (172.30.x.x), EU (172.31.x.x), AP (172.32.x.x)
+#
+# Gateway containers add 100ms inter-region latency via tc netem.
+# Nodes within the same region communicate with no added delay.
+#
+# Usage:
+#   docker compose -f docker/docker-compose.multiregion.yml up
+#
+# Verify the cluster formed:
+#   curl -s http://localhost:8081/cluster/status | jq .
+#
+# Exposed ports:
+#   US:  us-node1 → 8081, us-node2 → 8082
+#   EU:  eu-node1 → 8083, eu-node2 → 8084
+#   AP:  ap-node1 → 8085, ap-node2 → 8086
+
+networks:
+  region-us:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+  region-eu:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/16
+  region-ap:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.32.0.0/16
+  wan-bridge:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.33.0.0/16
+
+
+# --- Common definitions ---
+
+x-alpine-common: &alpine-common
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  cap_add:
+    - NET_ADMIN
+  environment: &alpine-env
+    PORT: "9000"
+    REST_PORT: "8080"
+    REST_BIND_ADDRESS: "0"
+    BEACON_PORT: "8089"
+    BEACON_ENABLED: "true"
+    BROADCAST_ENABLED: "true"
+    BROADCAST_PORT: "8090"
+    WIFI_DISCOVERY_ENABLED: "true"
+    WIFI_MULTICAST_GROUP: "224.0.1.75"
+    WIFI_MULTICAST_PORT: "41750"
+    LOG_LEVEL: "${LOG_LEVEL:-Info}"
+    TOR_ENABLED: "false"
+    DLNA_ENABLED: "false"
+  healthcheck:
+    test: ["CMD", "curl", "-sf", "http://localhost:8080/status"]
+    interval: 5s
+    timeout: 3s
+    start_period: 15s
+    retries: 5
+  restart: unless-stopped
+
+x-gateway-common: &gateway-common
+  image: alpine:3.19
+  cap_add:
+    - NET_ADMIN
+  command: >
+    sh -c "
+      apk add --no-cache iproute2 iptables &&
+      sysctl -w net.ipv4.ip_forward=1 &&
+      tc qdisc add dev eth1 root netem delay 50ms 10ms &&
+      tc qdisc add dev eth2 root netem delay 50ms 10ms &&
+      echo 'Gateway ready — 100ms round-trip inter-region latency' &&
+      tail -f /dev/null
+    "
+  healthcheck:
+    test: ["CMD", "sh", "-c", "tc qdisc show | grep -q netem"]
+    interval: 5s
+    timeout: 2s
+    start_period: 10s
+    retries: 3
+  restart: unless-stopped
+
+
+services:
+
+  # ====================================================================
+  #  Gateway containers — bridge regions with simulated WAN latency
+  # ====================================================================
+
+  gw-us-eu:
+    <<: *gateway-common
+    container_name: alpine-gw-us-eu
+    hostname: gw-us-eu
+    networks:
+      wan-bridge:
+        ipv4_address: 172.33.0.10
+      region-us:
+        ipv4_address: 172.30.0.254
+      region-eu:
+        ipv4_address: 172.31.0.254
+
+  gw-us-ap:
+    <<: *gateway-common
+    container_name: alpine-gw-us-ap
+    hostname: gw-us-ap
+    networks:
+      wan-bridge:
+        ipv4_address: 172.33.0.11
+      region-us:
+        ipv4_address: 172.30.0.253
+      region-ap:
+        ipv4_address: 172.32.0.254
+
+  gw-eu-ap:
+    <<: *gateway-common
+    container_name: alpine-gw-eu-ap
+    hostname: gw-eu-ap
+    networks:
+      wan-bridge:
+        ipv4_address: 172.33.0.12
+      region-eu:
+        ipv4_address: 172.31.0.253
+      region-ap:
+        ipv4_address: 172.32.0.253
+
+
+  # ====================================================================
+  #  US Region (region-us + wan-bridge)
+  # ====================================================================
+
+  us-node1:
+    <<: *alpine-common
+    container_name: alpine-us-node1
+    hostname: us-node1
+    networks:
+      region-us:
+        ipv4_address: 172.30.1.1
+      wan-bridge:
+        ipv4_address: 172.33.1.1
+    ports:
+      - "8081:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "us-node1"
+      ALPINE_REGION: "us"
+
+  us-node2:
+    <<: *alpine-common
+    container_name: alpine-us-node2
+    hostname: us-node2
+    networks:
+      region-us:
+        ipv4_address: 172.30.1.2
+      wan-bridge:
+        ipv4_address: 172.33.1.2
+    ports:
+      - "8082:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "us-node2"
+      ALPINE_REGION: "us"
+    depends_on:
+      us-node1:
+        condition: service_healthy
+
+
+  # ====================================================================
+  #  EU Region (region-eu + wan-bridge)
+  # ====================================================================
+
+  eu-node1:
+    <<: *alpine-common
+    container_name: alpine-eu-node1
+    hostname: eu-node1
+    networks:
+      region-eu:
+        ipv4_address: 172.31.1.1
+      wan-bridge:
+        ipv4_address: 172.33.2.1
+    ports:
+      - "8083:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "eu-node1"
+      ALPINE_REGION: "eu"
+    depends_on:
+      gw-us-eu:
+        condition: service_healthy
+
+  eu-node2:
+    <<: *alpine-common
+    container_name: alpine-eu-node2
+    hostname: eu-node2
+    networks:
+      region-eu:
+        ipv4_address: 172.31.1.2
+      wan-bridge:
+        ipv4_address: 172.33.2.2
+    ports:
+      - "8084:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "eu-node2"
+      ALPINE_REGION: "eu"
+    depends_on:
+      eu-node1:
+        condition: service_healthy
+
+
+  # ====================================================================
+  #  AP Region (region-ap + wan-bridge)
+  # ====================================================================
+
+  ap-node1:
+    <<: *alpine-common
+    container_name: alpine-ap-node1
+    hostname: ap-node1
+    networks:
+      region-ap:
+        ipv4_address: 172.32.1.1
+      wan-bridge:
+        ipv4_address: 172.33.3.1
+    ports:
+      - "8085:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "ap-node1"
+      ALPINE_REGION: "ap"
+    depends_on:
+      gw-us-ap:
+        condition: service_healthy
+
+  ap-node2:
+    <<: *alpine-common
+    container_name: alpine-ap-node2
+    hostname: ap-node2
+    networks:
+      region-ap:
+        ipv4_address: 172.32.1.2
+      wan-bridge:
+        ipv4_address: 172.33.3.2
+    ports:
+      - "8086:8080"
+    environment:
+      <<: *alpine-env
+      NODE_NAME: "ap-node2"
+      ALPINE_REGION: "ap"
+    depends_on:
+      ap-node1:
+        condition: service_healthy

@@ -15,6 +15,7 @@
 #include <AlpineMulticastUdpTransport.h>
 #include <AlpineBroadcastUdpTransport.h>
 #include <AlpineRawWifiUdpTransport.h>
+#include <AlpineRatingEngine.h>
 #include <DtcpStack.h>
 #include <DataBuffer.h>
 #include <Log.h>
@@ -23,6 +24,7 @@
 #include <ReadLock.h>
 #include <Platform.h>
 #include <thread>
+#include <memory>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <PeerTlsVerifier.h>
@@ -43,6 +45,7 @@ std::condition_variable           AlpineStack::eventCV_s;
 std::mutex                        AlpineStack::eventMutex_s;
 bool                              AlpineStack::eventPending_s = false;
 AlpineStack::CompletedQueryCallback  AlpineStack::completedQueryCallback_s;
+std::atomic<bool>                    AlpineStack::shutdownRequested_s{false};
 
 static constexpr int  EVENT_LOOP_MAX_WAIT_MS = 100;  // max idle wait between iterations
 static constexpr int  EVENT_LOOP_MIN_INTERVAL_MS = 10; // minimum time between iterations
@@ -247,7 +250,7 @@ AlpineStack::processEvents ()
 
     auto lastRun = std::chrono::steady_clock::now();
 
-    while (true) {
+    while (!shutdownRequested_s.load(std::memory_order_acquire)) {
 
         // Wait for an event notification or the max poll timeout, whichever
         // comes first.  This replaces the old sleep(1) polling loop and
@@ -312,16 +315,30 @@ AlpineStack::setCompletedQueryCallback (CompletedQueryCallback callback)
 
 
 void
+AlpineStack::requestShutdown ()
+{
+    shutdownRequested_s.store(true, std::memory_order_release);
+    notifyEvent();
+}
+
+
+
+void
 AlpineStack::cleanUp ()
 {
 #ifdef _VERBOSE  
     Log::Debug ("AlpineStack::cleanUp invoked.");
 #endif
 
+    // Cancel all in-flight queries
+    AlpineQueryMgr::cancelAll(0);
+
+    // Persist peer rating data before shutdown
+    AlpineRatingEngine::persist();
+
     if (serviceThread_s) {
         serviceThread_s->stop ();
         serviceThread_s = nullptr;  // thread will delete itself when finished.
-        return;
     }
 
     if (configuration_s) {
@@ -519,10 +536,10 @@ AlpineStack::sendReliablePacket (ulong           peerId,
     // Write packet data and send to transport
     //
     // MRP_TEMP implement constants!
-    DataBuffer * buffer = new DataBuffer (1024*34);
+    auto buffer = std::make_unique<DataBuffer>(1024*34);
     buffer->writeReset ();
 
-    status = packet->writeData (buffer);
+    status = packet->writeData (buffer.get());
 
     if (!status) {
         Log::Error ("Could not write packet data in call to "

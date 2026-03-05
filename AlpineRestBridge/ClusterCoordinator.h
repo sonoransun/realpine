@@ -38,6 +38,8 @@ class ClusterCoordinator
         uint     activeQueries{0};
         uint     connectionCount{0};
         double   cpuLoadEstimate{0.0};
+        string   region;
+        double   rttMs{0.0};         // measured round-trip time in milliseconds
         vector<string>  capabilities;
         std::chrono::steady_clock::time_point  lastHeartbeat;
     };
@@ -72,6 +74,12 @@ class ClusterCoordinator
     // Returns true if this node should redirect to a less-loaded node.
     // Sets redirectUrl to the target if so.
     static bool  shouldRedirect (string & redirectUrl);
+
+
+    // --- Cluster health ---
+
+    /// Returns true if this node is in isolated/split-brain mode.
+    static bool  isIsolated ();
 
 
     // --- Federated result aggregation ---
@@ -129,14 +137,22 @@ class ClusterCoordinator
     static void    broadcastHeartbeat ();
     static void    gossipActiveQueries ();
     static double  estimateCpuLoad ();
+    static double  measureRtt (const string & host, ushort port);
+    static void    checkSplitBrain ();
+    static int     computeAdaptiveTimeoutSec ();
 
 
     // --- Node identity ---
 
     static string   nodeId_s;
     static string   localHost_s;
+    static string   localRegion_s;
     static ushort   restPort_s;
     static ushort   beaconPort_s;
+
+    // --- Split-brain / isolation ---
+
+    static std::atomic<bool>  isolated_s;
 
 
     // --- Cluster membership (nodeId -> NodeInfo) ---
@@ -151,6 +167,7 @@ class ClusterCoordinator
         string   nodeId;
         ulong    queryId{0};
         std::chrono::steady_clock::time_point  registeredAt;
+        uint64_t wallClockMs{0};  // wall-clock timestamp for last-writer-wins merge
     };
 
     static std::unordered_map<string, DedupEntry>  dedupIndex_s;
@@ -161,9 +178,12 @@ class ClusterCoordinator
 
     // --- Heartbeat configuration ---
 
-    static constexpr int  HEARTBEAT_INTERVAL_SEC = 10;
-    static constexpr int  NODE_TIMEOUT_SEC       = 35;
-    static constexpr int  SLEEP_INCREMENT_MS     = 1000;
+    static constexpr int  HEARTBEAT_INTERVAL_SEC     = 10;
+    static constexpr int  NODE_TIMEOUT_MIN_SEC       = 35;
+    static constexpr int  NODE_TIMEOUT_MAX_SEC       = 120;
+    static constexpr int  SLEEP_INCREMENT_MS         = 1000;
+    static constexpr double SPLIT_BRAIN_THRESHOLD    = 0.5;  // >50% unreachable
+    static constexpr int  SPLIT_BRAIN_MULTIPLIER     = 2;    // 2x timeout before isolated
 
 
     // --- Threads ---

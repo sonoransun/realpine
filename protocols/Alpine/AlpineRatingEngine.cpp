@@ -305,6 +305,95 @@ AlpineRatingEngine::getScore (ulong peerId)
 
 
 // ---------------------------------------------------------------------------
+//  getTopScores — return top N peer scores sorted by interaction count
+// ---------------------------------------------------------------------------
+
+vector<AlpineRatingEngine::t_ScoreEntry>
+AlpineRatingEngine::getTopScores (size_t maxEntries)
+{
+    ReadLock lock(lock_s);
+
+    vector<t_ScoreEntry> entries;
+    entries.reserve(ratings_s.size());
+
+    for (const auto & [peerId, rating] : ratings_s) {
+        ulong interactions = rating.successCount + rating.failureCount;
+        if (interactions == 0)
+            continue;
+
+        t_ScoreEntry entry;
+        entry.peerId       = peerId;
+        entry.score        = rating.score;
+        entry.interactions = interactions;
+        entries.push_back(entry);
+    }
+
+    // Sort by interaction count descending, take top N
+    std::partial_sort(entries.begin(),
+                      entries.begin() + std::min(maxEntries, entries.size()),
+                      entries.end(),
+                      [](const t_ScoreEntry & a, const t_ScoreEntry & b) {
+                          return a.interactions > b.interactions;
+                      });
+
+    if (entries.size() > maxEntries)
+        entries.resize(maxEntries);
+
+    return entries;
+}
+
+
+
+// ---------------------------------------------------------------------------
+//  mergeRemoteScores — weighted average merge from gossip
+// ---------------------------------------------------------------------------
+
+void
+AlpineRatingEngine::mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores,
+                                       ulong minInteractions)
+{
+    WriteLock lock(lock_s);
+
+    for (const auto & remote : remoteScores) {
+        if (remote.interactions < minInteractions)
+            continue;
+
+        auto it = ratings_s.find(remote.peerId);
+        if (it == ratings_s.end()) {
+            // No local data — adopt remote score directly
+            t_PeerRating rating;
+            rating.score        = clampScore(remote.score);
+            rating.successCount = 0;
+            rating.failureCount = 0;
+            rating.lastUpdate   = std::chrono::steady_clock::now();
+            ratings_s[remote.peerId] = rating;
+        } else {
+            // Weighted average: local weight = local interactions,
+            // remote weight = remote interactions
+            auto & local = it->second;
+            ulong localInteractions = local.successCount + local.failureCount;
+
+            if (localInteractions < minInteractions) {
+                // Not enough local data — adopt remote with 50% weight
+                local.score = clampScore(
+                    local.score * 0.5 + remote.score * 0.5);
+            } else {
+                // Weighted average based on interaction counts
+                double totalWeight = static_cast<double>(localInteractions + remote.interactions);
+                double localWeight = static_cast<double>(localInteractions) / totalWeight;
+                double remoteWeight = static_cast<double>(remote.interactions) / totalWeight;
+
+                local.score = clampScore(
+                    local.score * localWeight + remote.score * remoteWeight);
+            }
+            local.lastUpdate = std::chrono::steady_clock::now();
+        }
+    }
+}
+
+
+
+// ---------------------------------------------------------------------------
 //  persist — save ratings to Configuration
 // ---------------------------------------------------------------------------
 

@@ -17,7 +17,39 @@ JsonReader::JsonReader (const string & json)
         valid_ = doc_.is_object();
     } catch (const nlohmann::json::parse_error & e) {
         Log::Error("JsonReader: parse error: "s + e.what());
+        return;
     }
+
+    if (valid_ && !checkDepthAndKeys(doc_, 0)) {
+        Log::Error("JsonReader: document exceeds nesting depth or key count limits");
+        doc_ = nlohmann::json();
+        valid_ = false;
+    }
+}
+
+
+bool
+JsonReader::checkDepthAndKeys (const nlohmann::json & node, int depth)
+{
+    if (depth > MAX_NESTING_DEPTH)
+        return false;
+
+    if (node.is_object()) {
+        if (static_cast<int>(node.size()) > MAX_KEYS_PER_OBJECT)
+            return false;
+        for (const auto & [key, val] : node.items()) {
+            if (!checkDepthAndKeys(val, depth + 1))
+                return false;
+        }
+    }
+    else if (node.is_array()) {
+        for (const auto & elem : node) {
+            if (!checkDepthAndKeys(elem, depth + 1))
+                return false;
+        }
+    }
+
+    return true;
 }
 
 

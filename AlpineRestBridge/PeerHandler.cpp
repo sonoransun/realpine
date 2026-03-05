@@ -5,7 +5,7 @@
 #include <DtcpStackInterface.h>
 #include <JsonWriter.h>
 #include <Log.h>
-#include <cstdlib>
+#include <SafeParse.h>
 
 
 void
@@ -69,7 +69,10 @@ PeerHandler::getPeer (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing peer id");
 
-    ulong peerId = strtoul(it->second.c_str(), 0, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid peer id");
+    ulong peerId = *parsedId;
 
     DtcpStackInterface::t_DtcpPeerStatus status;
     if (!DtcpStackInterface::getDtcpPeerStatus(peerId, status))

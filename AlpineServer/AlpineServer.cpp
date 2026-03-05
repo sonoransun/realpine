@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <Platform.h>
 
+#include <SafeParse.h>
 #include <Log.h>
 #include <StringUtils.h>
 #include <NetUtils.h>
@@ -31,6 +32,8 @@
 #include <TorService.h>
 
 #include <ServerSigMethods.h>
+#include <thread>
+#include <chrono>
 
 #ifdef ALPINE_FUSE_ENABLED
 #include <AlpineFuse.h>
@@ -98,8 +101,12 @@ main (int argc, char *argv[])
         return 1;
     }
 
-    port = atoi (portStr.c_str());
-    port = htons(port);
+    auto parsedPort = parseInt(portStr);
+    if (!parsedPort) {
+        Log::Error("Invalid Port value.  Exiting.");
+        return 1;
+    }
+    port = htons(*parsedPort);
 
 
     // VPN interface detection and binding (non-fatal)
@@ -186,15 +193,15 @@ main (int argc, char *argv[])
 
         status = Configuration::getValue ("WiFi Multicast Port", wifiMulticastPortStr);
         if (status && !wifiMulticastPortStr.empty())
-            WifiDiscovery::setMulticastPort (static_cast<ushort>(atoi(wifiMulticastPortStr.c_str())));
+            WifiDiscovery::setMulticastPort(parseUshort(wifiMulticastPortStr).value_or(0));
 
         status = Configuration::getValue ("WiFi Announce Interval", wifiAnnounceIntervalStr);
         if (status && !wifiAnnounceIntervalStr.empty())
-            WifiDiscovery::setAnnounceInterval (atoi(wifiAnnounceIntervalStr.c_str()));
+            WifiDiscovery::setAnnounceInterval(parseInt(wifiAnnounceIntervalStr).value_or(0));
 
         status = Configuration::getValue ("WiFi Peer Timeout", wifiPeerTimeoutStr);
         if (status && !wifiPeerTimeoutStr.empty())
-            WifiDiscovery::setPeerTimeout (atoi(wifiPeerTimeoutStr.c_str()));
+            WifiDiscovery::setPeerTimeout(parseInt(wifiPeerTimeoutStr).value_or(0));
 
         status = Configuration::getValue ("WiFi Interface", wifiInterfaceStr);
         if (status && !wifiInterfaceStr.empty())
@@ -202,7 +209,7 @@ main (int argc, char *argv[])
 
         status = Configuration::getValue ("WiFi Beacon Interval", wifiBeaconIntervalStr);
         if (status && !wifiBeaconIntervalStr.empty())
-            WifiDiscovery::setBeaconInterval (atoi(wifiBeaconIntervalStr.c_str()));
+            WifiDiscovery::setBeaconInterval(parseInt(wifiBeaconIntervalStr).value_or(0));
 
         char hostname[256];
         gethostname (hostname, sizeof(hostname));
@@ -286,7 +293,7 @@ main (int argc, char *argv[])
     if (torEnabled) {
         status = Configuration::getValue ("Tor Control Port", torControlPortStr);
         if (status && !torControlPortStr.empty())
-            torControlPort = static_cast<ushort>(atoi(torControlPortStr.c_str()));
+            torControlPort = parseUshort(torControlPortStr).value_or(torControlPort);
 
         Configuration::getValue ("Tor Control Auth", torControlAuthStr);
 
@@ -328,11 +335,11 @@ main (int argc, char *argv[])
 
         if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) &&
             !fuseCacheTtlStr.empty())
-            fuseCacheTtl = static_cast<ulong>(atoi(fuseCacheTtlStr.c_str()));
+            fuseCacheTtl = parseUlong(fuseCacheTtlStr).value_or(fuseCacheTtl);
 
         if (Configuration::getValue("FUSE Feedback Threshold", fuseFeedbackThresholdStr) &&
             !fuseFeedbackThresholdStr.empty())
-            fuseFeedbackThreshold = static_cast<ulong>(atoi(fuseFeedbackThresholdStr.c_str()));
+            fuseFeedbackThreshold = parseUlong(fuseFeedbackThresholdStr).value_or(fuseFeedbackThreshold);
 
         if (AlpineFuse::initialize(fuseMountPoint, fuseCacheTtl, fuseFeedbackThreshold)) {
             if (AlpineFuse::run())
@@ -380,7 +387,7 @@ main (int argc, char *argv[])
     ulong   rpcBindAddress = 0;  // all interfaces
 
     if (Configuration::getValue ("RPC Port", rpcPortStr))
-        rpcPort = static_cast<ushort>(atoi(rpcPortStr.c_str()));
+        rpcPort = parseUshort(rpcPortStr).value_or(rpcPort);
 
     if (Configuration::getValue ("RPC Bind Address", rpcBindAddressStr)) {
         if (!NetUtils::stringIpToLong(rpcBindAddressStr, rpcBindAddress)) {
@@ -428,7 +435,31 @@ main (int argc, char *argv[])
     rpcServer.start(rpcBindAddress, rpcPort);
 
 
-    // Shutdown services
+    // Wait for shutdown signal
+    //
+    Log::Info ("Server running.  Waiting for shutdown signal..."s);
+
+    while (!ApplCore::isShutdownRequested()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+
+    Log::Info ("Shutdown requested (signal "s +
+               std::to_string(ApplCore::getShutdownSignal()) +
+               "), beginning graceful shutdown..."s);
+
+
+    // Stop accepting new HTTP connections
+    rpcServer.stop();
+
+    // Brief drain period for in-flight requests
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+
+    // Shutdown Alpine stack (stops event loop, cancels queries, persists ratings, shuts down transports)
+    AlpineStack::requestShutdown();
+    AlpineStack::cleanUp();
+
+    // Shutdown optional services in reverse initialization order
 #ifdef ALPINE_FUSE_ENABLED
     if (AlpineFuse::isRunning())
         AlpineFuse::shutdown();

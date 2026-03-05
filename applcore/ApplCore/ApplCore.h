@@ -7,6 +7,7 @@
 #include <OptHash.h>
 #include <vector>
 #include <list>
+#include <atomic>
 
 
 class SignalMonitorThread;
@@ -33,6 +34,9 @@ class ApplCore
 
     static bool removeDefaultHandler (int signal);
 
+    static bool isShutdownRequested ();
+
+    static int  getShutdownSignal ();
 
 
     using t_SigHandlerList = list<t_SigHandler>;
@@ -56,6 +60,9 @@ class ApplCore
     static t_MethodIndex *        methodIndex_s;
     static SignalMonitorThread *  signalMonitor_s;
     static ReadWriteSem           dataLock_s;
+
+    static std::atomic<int>       shutdownSignal_s;
+    static std::atomic<bool>      shutdownRequested_s;
 
 
     static void  updateLog (int      argc,

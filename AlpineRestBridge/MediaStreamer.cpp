@@ -2,6 +2,7 @@
 
 
 #include <MediaStreamer.h>
+#include <SafeParse.h>
 #include <Log.h>
 
 #include <Platform.h>
@@ -194,7 +195,10 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
     string endStr   = range.substr(dashPos + 1);
 
     if (startStr.empty() && !endStr.empty()) {
-        ulong suffix = strtoul(endStr.c_str(), nullptr, 10);
+        auto suffixOpt = parseUlong(endStr);
+        if (!suffixOpt)
+            return false;
+        ulong suffix = *suffixOpt;
 
         if (suffix > fileSize)
             suffix = fileSize;
@@ -203,12 +207,19 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
         end   = fileSize - 1;
     }
     else if (!startStr.empty()) {
-        start = strtoul(startStr.c_str(), nullptr, 10);
+        auto startOpt = parseUlong(startStr);
+        if (!startOpt)
+            return false;
+        start = *startOpt;
 
-        if (!endStr.empty())
-            end = strtoul(endStr.c_str(), nullptr, 10);
-        else
+        if (!endStr.empty()) {
+            auto endOpt = parseUlong(endStr);
+            if (!endOpt)
+                return false;
+            end = *endOpt;
+        } else {
             end = fileSize - 1;
+        }
 
         if (start >= fileSize)
             return false;

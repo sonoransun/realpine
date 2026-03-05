@@ -7,6 +7,7 @@
 #include <AlpinePeerProfileIndex.h>
 #include <AlpineGroup.h>
 #include <AlpineGroupMgr.h>
+#include <CircuitBreaker.h>
 #include <DtcpStack.h>
 #include <AlpineDtcpConnTransport.h>
 #include <Log.h>
@@ -244,7 +245,7 @@ AlpinePeerMgr::getTransport (ulong                       peerId,
 
 
 
-bool  
+bool
 AlpinePeerMgr::querySent (ulong  peerId)
 {
 #ifdef _VERBOSE
@@ -258,14 +259,22 @@ AlpinePeerMgr::querySent (ulong  peerId)
         Log::Error ("Call to AlpinePeerMgr::querySent before initialization!");
         return false;
     }
-    
+
+    // Check circuit breaker before sending query to this peer
+    //
+    if (!CircuitBreaker::allowRequest(peerId)) {
+        Log::Info ("AlpinePeerMgr::querySent: circuit open for peer "s +
+                   std::to_string(peerId) + ", skipping query"s);
+        return false;
+    }
+
     // Update the base profile for this peer
     //
     bool  status;
     status = baseProfileIndex_s->querySent (peerId);
 
     if (!status) {
-        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::responseReceived!");
+        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::querySent!");
         return false;
     }
 
@@ -275,7 +284,7 @@ AlpinePeerMgr::querySent (ulong  peerId)
 
 
 
-bool  
+bool
 AlpinePeerMgr::responseReceived (ulong  peerId)
 {
 #ifdef _VERBOSE
@@ -289,6 +298,10 @@ AlpinePeerMgr::responseReceived (ulong  peerId)
         Log::Error ("Call to AlpinePeerMgr::responseReceived before initialization!");
         return false;
     }
+
+    // Record success with circuit breaker
+    //
+    CircuitBreaker::recordSuccess(peerId);
 
     // Update the base profile for this peer
     //
@@ -442,6 +455,10 @@ AlpinePeerMgr::badPacketReceived (ulong  peerId)
         return false;
     }
 
+    // Record failure with circuit breaker
+    //
+    CircuitBreaker::recordFailure(peerId);
+
     // Update the base profile for this peer.  Bad packets are ONLY tracked here, and not per group
     // like most other affinity/quality stats.
     //
@@ -459,7 +476,7 @@ AlpinePeerMgr::badPacketReceived (ulong  peerId)
 
 
 
-bool  
+bool
 AlpinePeerMgr::reliableTransferFailed (ulong  peerId)
 {
 #ifdef _VERBOSE
@@ -473,6 +490,10 @@ AlpinePeerMgr::reliableTransferFailed (ulong  peerId)
         Log::Error ("Call to AlpinePeerMgr::reliableTransferFailed before initialization!");
         return false;
     }
+
+    // Record failure with circuit breaker
+    //
+    CircuitBreaker::recordFailure(peerId);
 
     // Update the base profile for this peer.  Transfer failures only tracked at global level.
     //

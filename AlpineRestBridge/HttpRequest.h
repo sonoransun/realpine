@@ -10,6 +10,10 @@ class HttpRequest
 {
   public:
 
+    static constexpr int   MAX_HEADER_COUNT        = 100;
+    static constexpr ulong MAX_HEADER_NAME_LENGTH  = 256;
+    static constexpr ulong MAX_HEADER_VALUE_LENGTH = 8192;
+
     HttpRequest () = default;
     ~HttpRequest () = default;
 

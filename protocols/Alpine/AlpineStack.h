@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <functional>
+#include <atomic>
 
 
 class AlpinePacket;
@@ -27,6 +28,11 @@ class AlpineStack
 
     static bool  initialize (AlpineStackConfig &  configuration);
 
+    static void  cleanUp ();
+
+    /// Request the event processing loop to stop.
+    static void  requestShutdown ();
+
 
   private:
 
@@ -42,11 +48,10 @@ class AlpineStack
     static std::condition_variable    eventCV_s;
     static std::mutex                 eventMutex_s;
     static bool                       eventPending_s;
+    static std::atomic<bool>          shutdownRequested_s;
 
 
     static void  processEvents ();
-
-    static void  cleanUp ();
 
 
   public:

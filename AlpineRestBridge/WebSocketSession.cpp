@@ -290,12 +290,25 @@ WebSocketSession::onHeaderRead (const asio::error_code & ec, size_t bytesRead)
     currentFrame_.opcode = static_cast<t_Opcode>(headerBuf_[0] & 0x0F);
     currentFrame_.masked = (headerBuf_[1] & 0x80) != 0;
 
+    if (!currentFrame_.masked) {
+        Log::Error("WebSocketSession: unmasked client frame (RFC 6455 violation)"s);
+        doClose();
+        return;
+    }
+
     uint64_t initialLen = headerBuf_[1] & 0x7F;
 
     if (initialLen == 126 || initialLen == 127) {
         asyncReadExtendedLength(initialLen);
     } else {
         currentFrame_.payloadLength = initialLen;
+        if (currentFrame_.payloadLength > MAX_FRAME_SIZE) {
+            Log::Error("WebSocketSession: frame exceeds maximum size ("s +
+                        std::to_string(currentFrame_.payloadLength) + " > "s +
+                        std::to_string(MAX_FRAME_SIZE) + ")"s);
+            doClose();
+            return;
+        }
         asyncReadMaskAndPayload();
     }
 }
@@ -333,6 +346,14 @@ WebSocketSession::asyncReadExtendedLength (uint64_t initialLen)
                         self->currentFrame_.payloadLength =
                             (self->currentFrame_.payloadLength << 8) |
                              uint64_t(self->extLenBuf_[i]);
+                }
+
+                if (self->currentFrame_.payloadLength > MAX_FRAME_SIZE) {
+                    Log::Error("WebSocketSession: frame exceeds maximum size ("s +
+                                std::to_string(self->currentFrame_.payloadLength) + " > "s +
+                                std::to_string(MAX_FRAME_SIZE) + ")"s);
+                    self->doClose();
+                    return;
                 }
 
                 self->asyncReadMaskAndPayload();

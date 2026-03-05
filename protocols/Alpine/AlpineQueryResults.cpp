@@ -3,6 +3,7 @@
 
 #include <AlpineQueryResults.h>
 #include <AlpineResourceDescSet.h>
+#include <AlpineResourceDesc.h>
 #include <AlpineProtocol.h>
 #include <AlpinePeerMgr.h>
 #include <ReadLock.h>
@@ -10,6 +11,7 @@
 #include <Log.h>
 #include <StringUtils.h>
 #include <limits.h>
+#include <functional>
 
 
 
@@ -270,10 +272,31 @@ AlpineQueryResults::processQueryReply (ulong                peerId,
                              "AlpineQueryResults::processQueryReply!");
         return false;
     }
+    // Cross-peer dedup: count only resources not seen from other peers.
+    // Hash by (primary locator + size).  Resources are still stored per-peer
+    // for completeness, but currResourceTotal_ reflects unique count.
     ushort  replySetSize;
     reply->getReplySetSize (replySetSize);
 
-    currResourceTotal_ += replySetSize;
+    AlpineQueryPacket::t_ResourceDescList  replyResources;
+    reply->getResourceDescList(replyResources);
+
+    ushort uniqueCount = 0;
+    for (auto & desc : replyResources) {
+        AlpineResourceDesc::t_LocatorList locators;
+        desc.getLocatorList(locators);
+
+        string primaryLocator = locators.empty() ? ""s : locators[0];
+        ulong resourceSize = desc.getSize();
+
+        size_t h = std::hash<string>{}(primaryLocator) ^
+                   (std::hash<ulong>{}(resourceSize) << 1);
+
+        if (seenResources_.insert(h).second)
+            ++uniqueCount;
+    }
+
+    currResourceTotal_ += uniqueCount;
 
 
     // Prepare reply packet

@@ -6,7 +6,7 @@
 #include <JsonReader.h>
 #include <JsonWriter.h>
 #include <Log.h>
-#include <cstdlib>
+#include <SafeParse.h>
 
 
 void
@@ -75,7 +75,10 @@ QueryHandler::getQuery (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    ulong queryId = strtoul(it->second.c_str(), 0, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid query id");
+    ulong queryId = *parsedId;
 
     bool inProgress = AlpineStackInterface::queryInProgress(queryId);
 
@@ -111,7 +114,10 @@ QueryHandler::getQueryResults (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    ulong queryId = strtoul(it->second.c_str(), 0, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid query id");
+    ulong queryId = *parsedId;
 
     AlpineStackInterface::t_PeerResourcesIndex results;
     if (!AlpineStackInterface::getQueryResults(queryId, results))
@@ -172,7 +178,10 @@ QueryHandler::cancelQuery (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    ulong queryId = strtoul(it->second.c_str(), 0, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid query id");
+    ulong queryId = *parsedId;
 
     if (!AlpineStackInterface::cancelQuery(queryId))
         return HttpResponse::notFound();
@@ -198,7 +207,10 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    ulong queryId = strtoul(it->second.c_str(), nullptr, 10);
+    auto parsedId = parseUlong(it->second);
+    if (!parsedId)
+        return HttpResponse::badRequest("Invalid query id");
+    ulong queryId = *parsedId;
 
     bool inProgress = AlpineStackInterface::queryInProgress(queryId);
 
