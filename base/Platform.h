@@ -28,7 +28,11 @@
     #endif
 #endif
 
-#if defined(ALPINE_PLATFORM_LINUX) || defined(ALPINE_PLATFORM_DARWIN)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+    #define ALPINE_PLATFORM_BSD 1
+#endif
+
+#if defined(ALPINE_PLATFORM_LINUX) || defined(ALPINE_PLATFORM_DARWIN) || defined(ALPINE_PLATFORM_BSD)
     #define ALPINE_PLATFORM_POSIX   1
 #endif
 
@@ -145,7 +149,7 @@
 
 #else  // POSIX
 
-    #include <sys/poll.h>
+    #include <poll.h>
 
     inline int alpine_poll(struct pollfd* fds, unsigned long nfds, int timeout) {
         return ::poll(fds, static_cast<nfds_t>(nfds), timeout);
@@ -306,6 +310,15 @@
     #ifndef SIGUSR2
     #define SIGUSR2  12
     #endif
+    #ifndef SIGCHLD
+    #define SIGCHLD  17
+    #endif
+
+    #ifndef WNOHANG
+    #define WNOHANG  1
+    #endif
+
+    inline int waitpid(int /*pid*/, int* /*status*/, int /*options*/) { return 0; }
 
     // Stub sigset_t for Alpine's SignalSet class
     using sigset_t = unsigned long;
@@ -320,6 +333,12 @@
     #define SIG_SETMASK 2
     inline int pthread_sigmask(int /*how*/, const sigset_t* /*set*/, sigset_t* /*old*/) {
         return 0;
+    }
+
+    // sigwait stub — Windows uses SetConsoleCtrlHandler instead
+    inline int sigwait(const sigset_t* /*set*/, int* /*sig*/) {
+        Sleep(1000);
+        return -1;
     }
 
 #else  // POSIX
@@ -383,6 +402,122 @@
 
     inline void alpine_usleep(unsigned int usec) {
         usleep(usec);
+    }
+
+#endif
+
+
+// ============================================================================
+//  Cryptographic random bytes
+// ============================================================================
+
+#ifdef ALPINE_PLATFORM_WINDOWS
+
+    #include <bcrypt.h>
+
+    inline bool alpine_random_bytes(void* buf, unsigned long len) {
+        return BCryptGenRandom(nullptr, static_cast<PUCHAR>(buf), len,
+                               BCRYPT_USE_SYSTEM_PREFERRED_RNG) == 0;
+    }
+
+#else  // POSIX
+
+    #include <fstream>
+
+    inline bool alpine_random_bytes(void* buf, unsigned long len) {
+        std::ifstream urandom("/dev/urandom", std::ios::binary);
+        if (!urandom.good())
+            return false;
+        urandom.read(static_cast<char*>(buf), static_cast<std::streamsize>(len));
+        return urandom.good();
+    }
+
+#endif
+
+
+// ============================================================================
+//  Temp directory
+// ============================================================================
+
+#include <string>
+
+#ifdef ALPINE_PLATFORM_WINDOWS
+
+    inline std::string alpine_temp_dir() {
+        char buf[MAX_PATH + 1];
+        DWORD len = GetTempPathA(sizeof(buf), buf);
+        if (len == 0 || len > MAX_PATH)
+            return "C:\\Temp";
+        // Remove trailing backslash
+        std::string result(buf, len);
+        if (!result.empty() && result.back() == '\\')
+            result.pop_back();
+        return result;
+    }
+
+#else  // POSIX
+
+    inline std::string alpine_temp_dir() {
+        const char* tmp = getenv("TMPDIR");
+        if (tmp && tmp[0] != '\0')
+            return tmp;
+        return "/tmp";
+    }
+
+#endif
+
+
+// ============================================================================
+//  Home directory
+// ============================================================================
+
+#ifdef ALPINE_PLATFORM_WINDOWS
+
+    inline std::string alpine_home_dir() {
+        const char* profile = getenv("USERPROFILE");
+        if (profile && profile[0] != '\0')
+            return profile;
+        const char* drive = getenv("HOMEDRIVE");
+        const char* path  = getenv("HOMEPATH");
+        if (drive && path)
+            return std::string(drive) + path;
+        return alpine_temp_dir();
+    }
+
+#else  // POSIX
+
+    inline std::string alpine_home_dir() {
+        const char* home = getenv("HOME");
+        if (home && home[0] != '\0')
+            return home;
+        return "/tmp";
+    }
+
+#endif
+
+
+// ============================================================================
+//  mkdir / chmod
+// ============================================================================
+
+#ifdef ALPINE_PLATFORM_WINDOWS
+
+    inline int alpine_mkdir(const char* path, unsigned int /*mode*/) {
+        return _mkdir(path);
+    }
+
+    inline int alpine_chmod(const char* path, unsigned int mode) {
+        return _chmod(path, static_cast<int>(mode));
+    }
+
+#else  // POSIX
+
+    inline int alpine_mkdir(const char* path, unsigned int mode) {
+        return mkdir(path, static_cast<mode_t>(mode));
+    }
+
+    inline int alpine_chmod(const char* path, unsigned int mode) {
+        return chmod(path, static_cast<mode_t>(mode));
     }
 
 #endif

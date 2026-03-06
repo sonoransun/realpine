@@ -26,8 +26,18 @@ DiscoveryBeacon::~DiscoveryBeacon ()
 bool
 DiscoveryBeacon::initialize (ushort restPort, ushort beaconPort)
 {
-    restPort_   = restPort;
-    beaconPort_ = beaconPort;
+    return initialize(restPort, beaconPort, ""s);
+}
+
+
+
+bool
+DiscoveryBeacon::initialize (ushort restPort, ushort beaconPort,
+                              const string & multicastGroup)
+{
+    restPort_       = restPort;
+    beaconPort_     = beaconPort;
+    multicastGroup_ = multicastGroup;
 
     if (!udpSocket_.create()) {
         Log::Error("DiscoveryBeacon: Failed to create UDP socket.");
@@ -41,6 +51,28 @@ DiscoveryBeacon::initialize (ushort restPort, ushort beaconPort)
         udpSocket_.close();
         return false;
     }
+
+    // If an IPv6 multicast group is configured, join it
+    if (!multicastGroup_.empty() && multicastGroup_.contains(':')) {
+        struct sockaddr_in6 mcastAddr;
+        memset(&mcastAddr, 0, sizeof(mcastAddr));
+        if (inet_pton(AF_INET6, multicastGroup_.c_str(),
+                      &mcastAddr.sin6_addr) == 1) {
+            struct ipv6_mreq mreq6;
+            mreq6.ipv6mr_multiaddr = mcastAddr.sin6_addr;
+            mreq6.ipv6mr_interface = 0;
+
+            if (setsockopt(udpSocket_.getFd(), IPPROTO_IPV6, IPV6_JOIN_GROUP,
+                           &mreq6, sizeof(mreq6)) < 0) {
+                Log::Info("DiscoveryBeacon: IPv6 multicast join failed, "
+                          "using IPv4 broadcast only.");
+            } else {
+                Log::Info("DiscoveryBeacon: Joined IPv6 multicast group "s +
+                          multicastGroup_);
+            }
+        }
+    }
+
     Log::Info("DiscoveryBeacon: Initialized on beacon port "s +
               std::to_string(beaconPort_));
 

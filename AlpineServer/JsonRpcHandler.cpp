@@ -19,11 +19,11 @@
 // ---------------------------------------------------------------------------
 
 static string
-jsonRpcError (int code, const string & message, const string & id)
+escapeJsonRpc (const string & s)
 {
     string escaped;
-    escaped.reserve(message.length());
-    for (char c : message) {
+    escaped.reserve(s.length());
+    for (char c : s) {
         switch (c) {
             case '"':  escaped += "\\\""; break;
             case '\\': escaped += "\\\\"; break;
@@ -33,10 +33,38 @@ jsonRpcError (int code, const string & message, const string & id)
             default:   escaped += c;      break;
         }
     }
-    string codeStr = std::to_string(code);
-    return "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":"s + codeStr +
-           ",\"message\":\""s + escaped + "\"},\"id\":"s + id + "}";
+    return escaped;
 }
+
+
+static string
+jsonRpcError (int code, const string & message, const string & id,
+              const string & data = {})
+{
+    string codeStr = std::to_string(code);
+    string result = "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":"s + codeStr +
+                    ",\"message\":\""s + escapeJsonRpc(message) + "\""s;
+    if (!data.empty())
+        result += ",\"data\":\""s + escapeJsonRpc(data) + "\""s;
+    result += "},\"id\":"s + id + "}"s;
+    return result;
+}
+
+
+// JSON-RPC 2.0 standard codes
+static constexpr int JSONRPC_PARSE_ERROR      = -32700;
+static constexpr int JSONRPC_INVALID_REQUEST   = -32600;
+static constexpr int JSONRPC_METHOD_NOT_FOUND  = -32601;
+static constexpr int JSONRPC_INVALID_PARAMS    = -32602;
+static constexpr int JSONRPC_INTERNAL_ERROR    = -32603;
+
+// Application-specific codes (-32000 to -32099 reserved)
+[[maybe_unused]] static constexpr int JSONRPC_APP_NOT_FOUND     = -32000;
+[[maybe_unused]] static constexpr int JSONRPC_APP_INVALID_PARAM = -32001;
+[[maybe_unused]] static constexpr int JSONRPC_APP_UNAUTHORIZED  = -32002;
+[[maybe_unused]] static constexpr int JSONRPC_APP_RATE_LIMITED   = -32003;
+[[maybe_unused]] static constexpr int JSONRPC_APP_UNAVAILABLE   = -32004;
+[[maybe_unused]] static constexpr int JSONRPC_APP_CONFLICT      = -32005;
 
 
 static string
@@ -1184,7 +1212,7 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
 {
     if (request.body.empty())
     {
-        string err = jsonRpcError(-32700, "Parse error", "null");
+        string err = jsonRpcError(JSONRPC_PARSE_ERROR, "Parse error", "null");
         return HttpResponse::ok(err);
     }
 
@@ -1195,7 +1223,7 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
     reader.getString("jsonrpc", version);
     if (version != "2.0")
     {
-        string err = jsonRpcError(-32600, "Invalid Request", "null");
+        string err = jsonRpcError(JSONRPC_INVALID_REQUEST, "Invalid Request", "null");
         return HttpResponse::ok(err);
     }
 
@@ -1203,7 +1231,8 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
     string method;
     if (!reader.getString("method", method))
     {
-        string err = jsonRpcError(-32600, "Invalid Request", "null");
+        string err = jsonRpcError(JSONRPC_INVALID_REQUEST, "Invalid Request", "null",
+                                  "Missing 'method' field"s);
         return HttpResponse::ok(err);
     }
 
@@ -1221,7 +1250,8 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
     auto iter = methodTable_s.find(method);
     if (iter == methodTable_s.end())
     {
-        string err = jsonRpcError(-32601, "Method not found", idStr);
+        string err = jsonRpcError(JSONRPC_METHOD_NOT_FOUND, "Method not found", idStr,
+                                  method);
         return HttpResponse::ok(err);
     }
 
@@ -1229,7 +1259,8 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
     string result;
     if (!iter->second(request.body, result))
     {
-        string err = jsonRpcError(-32603, "Internal error", idStr);
+        string err = jsonRpcError(JSONRPC_INTERNAL_ERROR, "Internal error", idStr,
+                                  "Method '"s + method + "' execution failed"s);
         return HttpResponse::ok(err);
     }
 

@@ -5,14 +5,152 @@
 #include <Log.h>
 #include <StringUtils.h>
 #include <Platform.h>
-#ifndef ALPINE_PLATFORM_WINDOWS
+
+#ifdef ALPINE_PLATFORM_WINDOWS
+#include <windows.h>
+#else
 #include <grp.h>
 #include <pwd.h>
 #endif
 
 
 
-bool  
+#ifdef ALPINE_PLATFORM_WINDOWS
+
+// ---------------------------------------------------------------------------
+// Windows stubs
+// ---------------------------------------------------------------------------
+
+bool
+UserUtils::userExists (t_Id  /*userId*/)
+{
+    return false;
+}
+
+
+bool
+UserUtils::userExists (const string &  /*userName*/)
+{
+    return false;
+}
+
+
+bool
+UserUtils::getUserName (t_Id      /*userId*/,
+                        string &  userName)
+{
+    char buf[256];
+    DWORD len = sizeof(buf);
+    if (GetUserNameA(buf, &len)) {
+        userName = buf;
+        return true;
+    }
+    return false;
+}
+
+
+bool
+UserUtils::getUserId (const string &  /*userName*/,
+                      t_Id &          /*userId*/)
+{
+    return false;
+}
+
+
+UserUtils::t_Id
+UserUtils::getMyRealUserId ()
+{
+    return 0;
+}
+
+
+string
+UserUtils::getMyRealUserName ()
+{
+    string result;
+    getUserName(0, result);
+    return result;
+}
+
+
+UserUtils::t_Id
+UserUtils::getMyEffectiveUserId ()
+{
+    return 0;
+}
+
+
+string
+UserUtils::getMyEffectiveUserName ()
+{
+    string result;
+    getUserName(0, result);
+    return result;
+}
+
+
+bool
+UserUtils::groupExists (t_Id  /*groupId*/)
+{
+    return false;
+}
+
+
+bool
+UserUtils::groupExists (const string &  /*groupName*/)
+{
+    return false;
+}
+
+
+bool
+UserUtils::getGroupName (t_Id      /*groupId*/,
+                         string &  /*groupName*/)
+{
+    return false;
+}
+
+
+bool
+UserUtils::getGroupId (const string &  /*groupName*/,
+                       t_Id &          /*groupId*/)
+{
+    return false;
+}
+
+
+UserUtils::t_Id
+UserUtils::getMyRealGroupId ()
+{
+    return 0;
+}
+
+
+string
+UserUtils::getMyRealGroupName ()
+{
+    return {};
+}
+
+
+UserUtils::t_Id
+UserUtils::getMyEffectiveGroupId ()
+{
+    return 0;
+}
+
+
+string
+UserUtils::getMyEffectiveGroupName ()
+{
+    return {};
+}
+
+
+#else  // POSIX
+
+
+bool
 UserUtils::userExists (t_Id  userId)
 {
     struct passwd * passwdInfo;
@@ -36,7 +174,7 @@ UserUtils::userExists (const string &  userName)
 
 
 
-bool  
+bool
 UserUtils::getUserName (t_Id      userId,
                         string &  userName)
 {
@@ -57,7 +195,7 @@ UserUtils::getUserName (t_Id      userId,
 
 
 
-bool  
+bool
 UserUtils::getUserId (const string &  userName,
                       t_Id &          userId)
 {
@@ -78,7 +216,7 @@ UserUtils::getUserId (const string &  userName,
 
 
 
-UserUtils::t_Id  
+UserUtils::t_Id
 UserUtils::getMyRealUserId ()
 {
     return (getuid());
@@ -86,7 +224,7 @@ UserUtils::getMyRealUserId ()
 
 
 
-string  
+string
 UserUtils::getMyRealUserName ()
 {
     string  result;
@@ -97,7 +235,7 @@ UserUtils::getMyRealUserName ()
 
 
 
-UserUtils::t_Id  
+UserUtils::t_Id
 UserUtils::getMyEffectiveUserId ()
 {
     return (geteuid());
@@ -105,7 +243,7 @@ UserUtils::getMyEffectiveUserId ()
 
 
 
-string  
+string
 UserUtils::getMyEffectiveUserName ()
 {
     string  result;
@@ -116,7 +254,7 @@ UserUtils::getMyEffectiveUserName ()
 
 
 
-bool  
+bool
 UserUtils::groupExists (t_Id  groupId)
 {
     struct group * groupInfo;
@@ -140,7 +278,7 @@ UserUtils::groupExists (const string &  groupName)
 
 
 
-bool  
+bool
 UserUtils::getGroupName (t_Id      groupId,
                          string &  groupName)
 {
@@ -161,7 +299,7 @@ UserUtils::getGroupName (t_Id      groupId,
 
 
 
-bool  
+bool
 UserUtils::getGroupId (const string &  groupName,
                        t_Id &          groupId)
 {
@@ -182,7 +320,7 @@ UserUtils::getGroupId (const string &  groupName,
 
 
 
-UserUtils::t_Id  
+UserUtils::t_Id
 UserUtils::getMyRealGroupId ()
 {
     return (getgid());
@@ -190,7 +328,7 @@ UserUtils::getMyRealGroupId ()
 
 
 
-string  
+string
 UserUtils::getMyRealGroupName ()
 {
     string  result;
@@ -201,7 +339,7 @@ UserUtils::getMyRealGroupName ()
 
 
 
-UserUtils::t_Id  
+UserUtils::t_Id
 UserUtils::getMyEffectiveGroupId ()
 {
     return (getegid());
@@ -209,7 +347,7 @@ UserUtils::getMyEffectiveGroupId ()
 
 
 
-string  
+string
 UserUtils::getMyEffectiveGroupName ()
 {
     string  result;
@@ -219,4 +357,5 @@ UserUtils::getMyEffectiveGroupName ()
 }
 
 
+#endif
 

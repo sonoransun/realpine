@@ -386,6 +386,24 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back(currElement);
+
+    // Tracing Enabled
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Tracing Enabled";
+    currElement->argOptionName = "tracingEnabled";
+    currElement->envOptionName = "TRACING_ENABLED";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // OTLP Endpoint
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "OTLP Endpoint";
+    currElement->argOptionName = "otlpEndpoint";
+    currElement->envOptionName = "OTLP_ENDPOINT";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 

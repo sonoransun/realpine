@@ -36,3 +36,18 @@ inline std::optional<int> parseInt (const string & s)
         return std::nullopt;
     return value;
 }
+
+
+inline std::optional<double> parseDouble (const string & s)
+{
+    if (s.empty()) return std::nullopt;
+    try {
+        size_t pos = 0;
+        double value = std::stod(s, &pos);
+        if (pos != s.size())
+            return std::nullopt;
+        return value;
+    } catch (...) {
+        return std::nullopt;
+    }
+}

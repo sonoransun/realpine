@@ -3,7 +3,9 @@
 
 #pragma once
 #include <Common.h>
+#ifndef ALPINE_PLATFORM_WINDOWS
 #include <sys/types.h>
+#endif
 
 
 class UserUtils

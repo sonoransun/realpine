@@ -10,16 +10,23 @@ Alpine enables autonomous nodes to discover each other, share resource metadata,
 
 - [How It Works](#how-it-works)
 - [Use Cases](#use-cases)
+- [Quick Start](#quick-start)
 - [Architecture](#architecture)
 - [Protocol Stack](#protocol-stack)
+- [CLI Reference](#cli-reference)
 - [REST API Reference](#rest-api-reference)
+- [JSON-RPC Interface](#json-rpc-interface)
 - [C++ API Reference](#c-api-reference)
 - [FUSE Virtual Filesystem](#fuse-virtual-filesystem)
 - [Module Plugin System](#module-plugin-system)
 - [Service Discovery](#service-discovery)
 - [Configuration](#configuration)
 - [Building](#building)
+- [Testing](#testing)
+- [Platform Support](#platform-support)
 - [Deployment](#deployment)
+- [Feature Guides](#feature-guides)
+- [Monitoring & Metrics](#monitoring--metrics)
 - [Security](#security)
 - [License](#license)
 
@@ -156,6 +163,69 @@ flowchart LR
 ### Narrative: Media Streaming Cluster
 
 A home media network runs Alpine on each device — NAS, media player, laptop. The DLNA integration allows media renderers to discover and play content from any node. The FUSE virtual filesystem provides a unified view: browsing `/alpine/queries/movies/` triggers a live network query and presents results as files that stream on open. Repeated access to high-quality sources automatically increases their peer ranking, while unreachable or slow peers are deprioritized.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **CMake** 3.28+
+- **C++23 compiler**: GCC 14+, Clang 17+, or MSVC 2022
+- **POSIX environment** (Linux, macOS, FreeBSD) or Windows with Winsock
+
+### Build and Run
+
+```sh
+# Build
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+
+# Start the server
+./build/bin/AlpineServer
+
+# In another terminal, verify it's running
+curl http://localhost:8080/status
+```
+
+### Your First Query
+
+```sh
+# Start a query
+curl -X POST http://localhost:8080/query \
+  -H "Content-Type: application/json" \
+  -d '{"queryString": "music", "autoHaltLimit": 50}'
+
+# Check results (replace 1 with your query ID)
+curl http://localhost:8080/query/1/results
+```
+
+### Docker Quick Start
+
+```sh
+# Start a 3-node cluster
+docker-compose -f docker/docker-compose.yml up
+
+# Query node1
+curl -X POST http://localhost:8081/query \
+  -H "Content-Type: application/json" \
+  -d '{"queryString": "test"}'
+
+# Check cluster status
+curl http://localhost:8081/cluster/status
+```
+
+### CLI Quick Start
+
+```sh
+# Query via CLI
+./build/bin/AlpineCmdIf --serverAddress 127.0.0.1 --serverPort 9000 \
+  --command beginQuery --queryString "music"
+
+# Get server status
+./build/bin/AlpineCmdIf --serverAddress 127.0.0.1 --serverPort 9000 \
+  --command getStatus --json
+```
 
 ---
 
@@ -367,9 +437,179 @@ Maximum packet size: 5,120 bytes.
 
 ---
 
+## CLI Reference
+
+`AlpineCmdIf` is a command-line client that communicates with `AlpineServer` via JSON-RPC.
+
+### Usage
+
+```
+AlpineCmdIf --serverAddress <addr> --serverPort <port> --command <cmd> [options]
+```
+
+### Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `-h`, `--help` | Show usage information |
+| `-v`, `--version` | Show version |
+| `--verbose` | Enable verbose output |
+| `--json` | Output results as JSON |
+| `--quiet` | Suppress non-essential output |
+
+### Peer Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `addDtcpPeer` | Add a DTCP peer by IP and port | `--ipAddress <ip> --port <port>` |
+| `getDtcpPeerId` | Get the peer ID for a given address | `--ipAddress <ip> --port <port>` |
+| `getDtcpPeerStatus` | Get status details for a peer | `--peerId <id>` |
+| `activateDtcpPeer` | Activate a peer connection | `--peerId <id>` |
+| `deactivateDtcpPeer` | Deactivate a peer connection | `--peerId <id>` |
+| `pingDtcpPeer` | Ping a peer to check connectivity | `--peerId <id>` |
+| `getExtendedPeerList` | Get extended list of all peers | _(none)_ |
+
+### Network Filter Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `excludeHost` | Exclude a host by IP address | `--ipAddress <ip>` |
+| `excludeSubnet` | Exclude a subnet | `--subnetIpAddress <ip> --subnetMask <mask>` |
+| `allowHost` | Allow a previously excluded host | `--ipAddress <ip>` |
+| `allowSubnet` | Allow a previously excluded subnet | `--subnetIpAddress <ip>` |
+| `listExcludedHosts` | List all excluded hosts | _(none)_ |
+| `listExcludedSubnets` | List all excluded subnets | _(none)_ |
+
+### Query Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `beginQuery` | Start a new resource query | `--queryString <query> [--groupName <group>] [--autoHaltLimit <n>] [--peerDescriptionLimit <n>]` |
+| `getQueryStatus` | Get status of a running query | `--queryId <id>` |
+| `pauseQuery` | Pause a running query | `--queryId <id>` |
+| `resumeQuery` | Resume a paused query | `--queryId <id>` |
+| `cancelQuery` | Cancel a query | `--queryId <id>` |
+| `getQueryResults` | Get results of a query | `--queryId <id>` |
+
+### Group Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `getUserGroupList` | List all user groups | _(none)_ |
+| `createUserGroup` | Create a new user group | `--groupName <name> [--description <desc>]` |
+| `destroyUserGroup` | Delete a user group | `--groupId <id>` |
+| `getPeerUserGroupList` | List peers in a group | `--groupId <id>` |
+| `addPeerToGroup` | Add a peer to a group | `--groupId <id> --peerId <id>` |
+| `removePeerFromGroup` | Remove a peer from a group | `--groupId <id> --peerId <id>` |
+
+### Module Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `registerModule` | Register a new module | `--moduleLibPath <path> --moduleSymbol <sym>` |
+| `unregisterModule` | Unregister a module | `--moduleId <id>` |
+| `loadModule` | Load a registered module | `--moduleId <id>` |
+| `unloadModule` | Unload an active module | `--moduleId <id>` |
+| `listActiveModules` | List currently loaded modules | _(none)_ |
+| `listAllModules` | List all registered modules | _(none)_ |
+| `getModuleInfo` | Get detailed module information | `--moduleId <id>` |
+
+### Status Commands
+
+| Command | Description | Key Arguments |
+|---------|-------------|---------------|
+| `getStatus` | Get server status and version | _(none)_ |
+
+### CLI Examples
+
+```sh
+# Add a peer and check its status
+./build/bin/AlpineCmdIf --serverAddress 127.0.0.1 --serverPort 9000 \
+  --command addDtcpPeer --ipAddress 192.168.1.10 --port 9000
+
+# Run a query with JSON output
+./build/bin/AlpineCmdIf --serverAddress 127.0.0.1 --serverPort 9000 \
+  --command beginQuery --queryString "documents" --json
+
+# Ban a misbehaving host
+./build/bin/AlpineCmdIf --serverAddress 127.0.0.1 --serverPort 9000 \
+  --command excludeHost --ipAddress 10.0.0.5
+
+# Get per-command help
+./build/bin/AlpineCmdIf --command help --queryString beginQuery
+```
+
+---
+
 ## REST API Reference
 
 The REST bridge runs a multi-threaded HTTP server (ASIO-based) with structured routing and optional API key authentication.
+
+### Common Features
+
+#### Pagination
+
+The `/query/:id/results` and `/peers` endpoints support pagination via query parameters:
+
+| Parameter | Default | Max | Description |
+|-----------|---------|-----|-------------|
+| `limit` | 100 | 1000 | Number of items to return |
+| `offset` | 0 | — | Number of items to skip |
+
+Paginated responses include metadata:
+
+```json
+{
+  "data": [...],
+  "total": 250,
+  "limit": 100,
+  "offset": 0,
+  "hasMore": true
+}
+```
+
+#### Peer Filtering
+
+`GET /peers` supports filtering via query parameters:
+
+| Parameter | Values | Description |
+|-----------|--------|-------------|
+| `status` | `active`, `inactive` | Filter by peer connection status |
+| `minScore` | float | Minimum peer quality score |
+
+```sh
+# Get only active peers with score above 50
+curl "http://localhost:8080/peers?status=active&minScore=50"
+```
+
+#### Request Correlation
+
+All responses support the `X-Request-ID` header for request tracing. Pass an `X-Request-ID` header in your request and it will be echoed in the response.
+
+#### Error Format
+
+Error responses follow a structured JSON format:
+
+```json
+{
+  "error": {
+    "code": "INVALID_PARAMETER",
+    "message": "Missing queryString"
+  }
+}
+```
+
+Error codes:
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `INVALID_PARAMETER` | 400 | Invalid or missing request parameter |
+| `NOT_FOUND` | 404 | Resource not found |
+| `RATE_LIMITED` | 429 | Too many requests |
+| `UNAUTHORIZED` | 401 | Authentication required |
+| `INTERNAL_ERROR` | 500 | Server-side failure |
+| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+| `CONFLICT` | 409 | Conflicting operation |
 
 ### Query Endpoints
 
@@ -377,30 +617,43 @@ The REST bridge runs a multi-threaded HTTP server (ASIO-based) with structured r
 |--------|------|-------------|
 | `POST` | `/query` | Start a distributed query |
 | `GET` | `/query/:id` | Get query status |
-| `GET` | `/query/:id/results` | Get aggregated results |
-| `GET` | `/query/:id/stream` | Stream results (long-poll) |
+| `GET` | `/query/:id/results` | Get aggregated results (paginated) |
+| `GET` | `/query/:id/stream` | Stream results via SSE |
 | `DELETE` | `/query/:id` | Cancel an active query |
 
 #### Start Query
 
+```sh
+curl -X POST http://localhost:8080/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "queryString": "music",
+    "groupName": "",
+    "autoHaltLimit": 100,
+    "peerDescMax": 50
+  }'
 ```
-POST /query
-Content-Type: application/json
 
+Response (202 Accepted):
+
+```json
 {
-  "queryString": "music",
-  "groupName": "",
-  "autoHaltLimit": 100,
-  "autoDownload": false,
-  "peerDescMax": 50
+  "queryId": 42
 }
 ```
 
-#### Query Status Response
+The `Location` header contains the status URL: `/query/42`.
+
+#### Query Status
+
+```sh
+curl http://localhost:8080/query/42
+```
 
 ```json
 {
   "queryId": 42,
+  "inProgress": true,
   "totalPeers": 15,
   "peersQueried": 12,
   "numPeerResponses": 8,
@@ -408,51 +661,257 @@ Content-Type: application/json
 }
 ```
 
-#### Query Results Response
+#### Query Results (Paginated)
+
+```sh
+curl "http://localhost:8080/query/42/results?limit=10&offset=0"
+```
 
 ```json
 {
   "queryId": 42,
-  "results": {
-    "1001": {
+  "data": [
+    {
       "peerId": 1001,
-      "resources": [
-        {
-          "resourceId": 5001,
-          "size": 4194304,
-          "description": "Song.mp3",
-          "locators": ["http://172.28.1.2:9000/content/5001"],
-          "optionId": 0,
-          "optionData": ""
-        }
-      ]
+      "resourceId": 5001,
+      "size": 4194304,
+      "description": "Song.mp3",
+      "locators": ["http://172.28.1.2:9000/content/5001"]
     }
-  }
+  ],
+  "total": 156,
+  "limit": 10,
+  "offset": 0,
+  "hasMore": true
 }
+```
+
+#### Stream Results (SSE)
+
+```sh
+curl http://localhost:8080/query/42/stream
+```
+
+Returns Server-Sent Events with `Content-Type: text/event-stream`:
+
+```
+event: result
+data: {"queryId":42,"peerId":1001,"resources":[...]}
+
+event: progress
+data: {"queryId":42,"totalPeers":15,"peersQueried":12,"totalHits":156}
+
+event: complete
+data: {"queryId":42,"totalPeers":8}
+```
+
+#### Cancel Query
+
+```sh
+curl -X DELETE http://localhost:8080/query/42
 ```
 
 ### Peer Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/peers` | List all discovered peers |
+| `GET` | `/peers` | List all discovered peers (paginated, filterable) |
 | `GET` | `/peers/:id` | Get specific peer details |
 
-#### Peer Details Response
+#### List Peers
+
+```sh
+curl "http://localhost:8080/peers?limit=50&status=active"
+```
+
+#### Peer Details
+
+```sh
+curl http://localhost:8080/peers/1001
+```
 
 ```json
 {
   "peerId": 1001,
   "ipAddress": "172.28.1.2",
   "port": 9000,
-  "relativeQuality": 42,
-  "totalQueries": 350,
-  "totalResponses": 290,
+  "lastRecvTime": 1709712000,
+  "lastSendTime": 1709711990,
   "avgBandwidth": 1048576,
-  "peakBandwidth": 5242880,
-  "active": true
+  "peakBandwidth": 5242880
 }
 ```
+
+### Admin Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/admin/peers/:id/ban` | Ban a peer by ID |
+| `DELETE` | `/admin/peers/:id/ban` | Unban a peer |
+| `GET` | `/admin/peers/banned` | List all banned peers |
+| `POST` | `/admin/config/reload` | Hot-reload configuration |
+| `GET` | `/admin/logs/level` | Get current log level |
+| `PUT` | `/admin/logs/level` | Set log level |
+
+#### Ban a Peer
+
+```sh
+curl -X POST http://localhost:8080/admin/peers/1001/ban
+```
+
+```json
+{
+  "banned": true,
+  "peerId": 1001,
+  "ipAddress": "172.28.1.2"
+}
+```
+
+#### Unban a Peer
+
+```sh
+curl -X DELETE http://localhost:8080/admin/peers/1001/ban
+```
+
+#### List Banned Peers
+
+```sh
+curl http://localhost:8080/admin/peers/banned
+```
+
+```json
+{
+  "banned": ["172.28.1.2", "10.0.0.5"],
+  "total": 2
+}
+```
+
+#### Reload Configuration
+
+```sh
+curl -X POST http://localhost:8080/admin/config/reload
+```
+
+#### Set Log Level
+
+```sh
+curl -X PUT http://localhost:8080/admin/logs/level \
+  -H "Content-Type: application/json" \
+  -d '{"level": "Debug"}'
+```
+
+Valid levels: `Silent`, `Error`, `Info`, `Debug`.
+
+### Auth Endpoints
+
+Device-based challenge-response authentication (requires `ALPINE_ENABLE_TLS` for signature verification):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/auth/enroll-device` | Enroll a device with its public key |
+| `GET` | `/auth/challenge` | Get a challenge nonce |
+| `POST` | `/auth/verify` | Verify a signed challenge |
+
+#### Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant D as Device
+    participant S as Alpine Server
+
+    D->>S: POST /auth/enroll-device {publicKey, deviceName}
+    S-->>D: {deviceId, enrolled: true}
+
+    D->>S: GET /auth/challenge
+    S-->>D: {challengeId, nonce}
+
+    D->>D: Sign nonce with private key
+
+    D->>S: POST /auth/verify {challengeId, signature, publicKey}
+    S-->>D: {accessToken, expiresIn: 3600}
+```
+
+#### Enroll Device
+
+```sh
+curl -X POST http://localhost:8080/auth/enroll-device \
+  -H "Content-Type: application/json" \
+  -d '{"publicKey": "-----BEGIN PUBLIC KEY-----\n...", "deviceName": "laptop", "biometricType": "fingerprint"}'
+```
+
+#### Get Challenge
+
+```sh
+curl http://localhost:8080/auth/challenge
+```
+
+```json
+{
+  "challengeId": "a1b2c3d4...",
+  "nonce": "e5f6a7b8..."
+}
+```
+
+#### Verify Signature
+
+```sh
+curl -X POST http://localhost:8080/auth/verify \
+  -H "Content-Type: application/json" \
+  -d '{"challengeId": "a1b2c3d4...", "signature": "deadbeef...", "publicKey": "-----BEGIN PUBLIC KEY-----\n..."}'
+```
+
+### Cluster Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/cluster/status` | Cluster membership and node status |
+| `POST` | `/cluster/query` | Submit a cluster-aware query (with dedup and load balancing) |
+| `POST` | `/cluster/heartbeat` | Receive heartbeat from a peer node |
+| `GET` | `/cluster/results/:id` | Get federated results across cluster nodes |
+
+#### Cluster Status
+
+```sh
+curl http://localhost:8080/cluster/status
+```
+
+```json
+{
+  "nodeId": "node-a1b2c3d4",
+  "region": "us",
+  "isolated": false,
+  "clusterSize": 3,
+  "nodes": [
+    {
+      "nodeId": "node-a1b2c3d4",
+      "host": "us-node1",
+      "restPort": 8080,
+      "activeQueries": 2,
+      "connectionCount": 5,
+      "region": "us",
+      "capabilities": ["query", "transfer", "stream"]
+    }
+  ]
+}
+```
+
+#### Cluster Query (with Deduplication)
+
+```sh
+curl -X POST http://localhost:8080/cluster/query \
+  -H "Content-Type: application/json" \
+  -d '{"queryString": "music", "groupName": "", "autoHaltLimit": 100}'
+```
+
+The cluster coordinator checks for duplicate queries and load-balances across nodes. If another node is already processing the same query, you receive a 307 redirect. If the local node is overloaded, the request is redirected to a less-loaded node.
+
+#### Federated Results
+
+```sh
+curl http://localhost:8080/cluster/results/42
+```
+
+Returns local results plus aggregated results from other cluster nodes processing the same query hash.
 
 ### Status Endpoint
 
@@ -466,6 +925,16 @@ Content-Type: application/json
 |--------|------|-------------|
 | `GET` | `/metrics` | Prometheus-format metrics |
 
+See [Monitoring & Metrics](#monitoring--metrics) for details.
+
+### API Documentation Endpoint
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api` | Auto-generated route listing |
+
+Returns all registered routes with their HTTP methods, URL patterns, and descriptions.
+
 ### VFS Statistics Endpoints (requires `ALPINE_ENABLE_FUSE`)
 
 | Method | Path | Description |
@@ -475,6 +944,143 @@ Content-Type: application/json
 | `GET` | `/vfs/stats/recent` | Most recently accessed resources |
 | `GET` | `/vfs/stats/peer/:id` | Per-peer access statistics |
 | `GET` | `/vfs/status` | FUSE mount status |
+
+### API Key Authentication
+
+Set the `ALPINE_API_KEY` environment variable or `apiKey` config to require authentication. When set, all requests must include the key:
+
+```sh
+curl -H "X-Api-Key: your-secret-key" http://localhost:8080/status
+```
+
+---
+
+## JSON-RPC Interface
+
+`AlpineServer` exposes a JSON-RPC 2.0 endpoint for programmatic control. The `AlpineCmdIf` CLI uses this interface.
+
+### Endpoint
+
+```
+POST /rpc
+Content-Type: application/json
+```
+
+### Request Format
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "startQuery",
+  "params": {"queryString": "music", "autoHaltLimit": 100},
+  "id": 1
+}
+```
+
+Note: Params are embedded in the top-level request body (not nested under a `params` key) for direct JsonReader access.
+
+### Available Methods
+
+#### Query Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `startQuery` | `queryString`, `groupName?`, `autoHaltLimit?`, `peerDescMax?` | Start a distributed query |
+| `queryInProgress` | `queryId` | Check if a query is still running |
+| `getQueryStatus` | `queryId` | Get query progress |
+| `pauseQuery` | `queryId` | Pause a running query |
+| `resumeQuery` | `queryId` | Resume a paused query |
+| `cancelQuery` | `queryId` | Cancel a query |
+| `getQueryResults` | `queryId` | Get all query results |
+
+#### Peer Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `getAllPeers` | _(none)_ | List all known peer IDs |
+| `getPeer` | `peerId` | Get peer status details |
+| `addPeer` | `ipAddress`, `port` | Add a new peer |
+| `getPeerId` | `ipAddress`, `port` | Look up peer ID by address |
+| `activatePeer` | `peerId` | Activate a peer connection |
+| `deactivatePeer` | `peerId` | Deactivate a peer connection |
+| `pingPeer` | `peerId` | Ping a peer |
+
+#### Network Filter Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `excludeHost` | `ipAddress` | Block a host |
+| `excludeSubnet` | `subnetIpAddress`, `subnetMask` | Block a subnet |
+| `allowHost` | `ipAddress` | Unblock a host |
+| `allowSubnet` | `subnetIpAddress` | Unblock a subnet |
+| `listExcludedHosts` | _(none)_ | List blocked hosts |
+| `listExcludedSubnets` | _(none)_ | List blocked subnets |
+
+#### Group Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `createGroup` | `name`, `description?` | Create a peer group |
+| `deleteGroup` | `groupId` | Delete a peer group |
+| `listGroups` | _(none)_ | List all group IDs |
+| `getGroupInfo` | `groupId` | Get group details |
+| `getDefaultGroupInfo` | _(none)_ | Get default group details |
+| `getGroupPeerList` | `groupId` | List peers in a group |
+| `addPeerToGroup` | `groupId`, `peerId` | Add peer to group |
+| `removePeerFromGroup` | `groupId`, `peerId` | Remove peer from group |
+
+#### Module Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `registerModule` | `libraryPath`, `bootstrapSymbol` | Register a plugin (config-gated) |
+| `unregisterModule` | `moduleId` | Unregister a plugin |
+| `loadModule` | `moduleId` | Load a registered plugin |
+| `unloadModule` | `moduleId` | Unload an active plugin |
+| `listActiveModules` | _(none)_ | List loaded plugins |
+| `listAllModules` | _(none)_ | List all registered plugins |
+| `getModuleInfo` | `moduleId` | Get plugin details |
+
+#### Status Methods
+
+| Method | Parameters | Description |
+|--------|-----------|-------------|
+| `getStatus` | _(none)_ | Get server status and version |
+
+### Error Codes
+
+| Code | Meaning |
+|------|---------|
+| `-32700` | Parse error |
+| `-32600` | Invalid request |
+| `-32601` | Method not found |
+| `-32602` | Invalid params |
+| `-32603` | Internal error |
+| `-32000` | Application: not found |
+| `-32001` | Application: invalid parameter |
+| `-32002` | Application: unauthorized |
+| `-32003` | Application: rate limited |
+| `-32004` | Application: unavailable |
+| `-32005` | Application: conflict |
+
+### JSON-RPC Examples
+
+```sh
+# Start a query
+curl -X POST http://localhost:8080/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"startQuery","queryString":"music","id":1}'
+
+# Get all peers
+curl -X POST http://localhost:8080/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"getAllPeers","id":2}'
+
+# Get server status
+curl -X POST http://localhost:8080/rpc \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"getStatus","id":3}'
+```
 
 ---
 
@@ -669,12 +1275,12 @@ flowchart TB
     Fail --> EIO
 ```
 
-### Platform Support
+### FUSE Platform Support
 
-| Platform | FUSE Version | Library |
-|----------|-------------|---------|
-| macOS | FUSE 2 (`FUSE_USE_VERSION=26`) | macFUSE |
-| Linux | FUSE 3 (`FUSE_USE_VERSION=35`) | libfuse3 |
+| Platform | FUSE Version | Library | Install |
+|----------|-------------|---------|---------|
+| macOS | FUSE 2 (`FUSE_USE_VERSION=26`) | macFUSE | `brew install macfuse` |
+| Linux | FUSE 3 (`FUSE_USE_VERSION=35`) | libfuse3 | `apt install libfuse3-dev` or `dnf install fuse3-devel` |
 
 ---
 
@@ -788,6 +1394,57 @@ Configuration values are resolved in order of precedence: **config file** > **co
 | Tor Enabled | `torEnabled` | `TOR_ENABLED` | false | Enable Tor integration |
 | DLNA Enabled | `dlnaEnabled` | `DLNA_ENABLED` | false | Enable DLNA media server |
 
+### REST Bridge Configuration
+
+| Name | CLI Flag | Environment Variable | Default | Description |
+|------|----------|---------------------|---------|-------------|
+| API Key | `apiKey` | `ALPINE_API_KEY` | — | API key for REST authentication |
+| CORS Origin | `corsOrigin` | `CORS_ORIGIN` | — | Allowed CORS origin |
+| HTTP Min Threads | `httpMinThreads` | `HTTP_MIN_THREADS` | 4 | Minimum HTTP worker threads |
+| HTTP Max Threads | `httpMaxThreads` | `HTTP_MAX_THREADS` | 32 | Maximum HTTP worker threads |
+| HTTP Max Connections | `httpMaxConnections` | `HTTP_MAX_CONNECTIONS` | 512 | Maximum concurrent connections |
+| HTTP Max Conn/IP | `httpMaxConnectionsPerIp` | `HTTP_MAX_CONNECTIONS_PER_IP` | 16 | Per-IP connection limit |
+| HTTP Idle Timeout | `httpIdleTimeoutSeconds` | `HTTP_IDLE_TIMEOUT_SECONDS` | 60 | Idle connection timeout (seconds) |
+| Module Registration | `moduleRegistration` | `MODULE_REGISTRATION` | — | Enable module registration via RPC |
+| Module Directory | `moduleDirectory` | `MODULE_DIRECTORY` | — | Allowed directory for module libraries |
+
+### DLNA Configuration
+
+| Name | CLI Flag | Environment Variable | Default | Description |
+|------|----------|---------------------|---------|-------------|
+| DLNA Port | `dlnaPort` | `DLNA_PORT` | — | DLNA media server port |
+| Media Directory | `mediaDirectory` | `MEDIA_DIRECTORY` | — | Path to local media files |
+| DLNA Server Name | `dlnaServerName` | `DLNA_SERVER_NAME` | — | UPnP friendly name |
+| Transcode Enabled | `transcodeEnabled` | `TRANSCODE_ENABLED` | — | Enable media transcoding |
+| DLNA Host Address | `dlnaHostAddress` | `DLNA_HOST_ADDRESS` | — | DLNA bind address |
+
+### Tor Configuration
+
+| Name | CLI Flag | Environment Variable | Default | Description |
+|------|----------|---------------------|---------|-------------|
+| Tor Control Port | `torControlPort` | `TOR_CONTROL_PORT` | — | Tor control port |
+| Tor SOCKS Port | `torSocksPort` | `TOR_SOCKS_PORT` | — | Tor SOCKS proxy port |
+| Tor Control Auth | `torControlAuth` | `TOR_CONTROL_AUTH` | — | Tor control auth cookie/password |
+| Tor Listen Port | `torListenPort` | `TOR_LISTEN_PORT` | — | Hidden service listen port |
+| Tor Peers | `torPeers` | `TOR_PEERS` | — | Comma-separated .onion peer addresses |
+
+### WiFi Discovery Configuration
+
+| Name | CLI Flag | Environment Variable | Default | Description |
+|------|----------|---------------------|---------|-------------|
+| WiFi Discovery Enabled | `wifiDiscoveryEnabled` | `WIFI_DISCOVERY_ENABLED` | — | Enable WiFi multicast discovery |
+| WiFi Announce Interval | `wifiAnnounceInterval` | `WIFI_ANNOUNCE_INTERVAL` | — | Announce interval (seconds) |
+| WiFi Peer Timeout | `wifiPeerTimeout` | `WIFI_PEER_TIMEOUT` | — | Peer timeout (seconds) |
+| WiFi Interface | `wifiInterface` | `WIFI_INTERFACE` | — | Network interface for multicast |
+| WiFi Beacon Interval | `wifiBeaconInterval` | `WIFI_BEACON_INTERVAL` | — | Beacon interval (seconds) |
+
+### Tracing Configuration (requires `ALPINE_ENABLE_TRACING`)
+
+| Name | CLI Flag | Environment Variable | Default | Description |
+|------|----------|---------------------|---------|-------------|
+| Tracing Enabled | `tracingEnabled` | `TRACING_ENABLED` | — | Enable OpenTelemetry tracing |
+| OTLP Endpoint | `otlpEndpoint` | `OTLP_ENDPOINT` | — | OpenTelemetry collector endpoint |
+
 ### FUSE Configuration (requires `ALPINE_ENABLE_FUSE`)
 
 | Name | CLI Flag | Environment Variable | Default | Description |
@@ -855,6 +1512,114 @@ Fetched automatically via CMake FetchContent unless `ALPINE_USE_SYSTEM_DEPS=ON`:
 
 ---
 
+## Testing
+
+### Building Tests
+
+Tests are built by default (`ALPINE_BUILD_TESTS=ON`). To skip them:
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DALPINE_BUILD_TESTS=OFF
+cmake --build build
+```
+
+### Running Tests
+
+There is no unified test runner. Individual test programs are built into `build/bin/` and run directly:
+
+```sh
+# Unit tests (Catch2-based)
+./build/bin/test_datablock
+./build/bin/test_http_request
+./build/bin/test_http_response
+./build/bin/test_http_router
+./build/bin/test_api_key_auth
+./build/bin/test_readwritesem
+./build/bin/test_configuration
+
+# Integration tests
+./build/bin/test_rest_query_lifecycle
+./build/bin/test_rest_peer_endpoints
+./build/bin/test_rest_auth_flow
+./build/bin/test_rest_rate_limiting
+
+# System tests
+./build/bin/auto_thread_test
+./build/bin/sys_thread_test
+./build/bin/dtcp_stack_test_server    # run in one terminal
+./build/bin/dtcp_stack_test_client    # run in another
+```
+
+### Sanitizer Builds
+
+```sh
+# Address + undefined behavior sanitizer
+cmake -B build -DALPINE_SANITIZER=address,undefined
+cmake --build build
+
+# Thread sanitizer (detects data races)
+cmake -B build -DALPINE_SANITIZER=thread
+cmake --build build
+
+# Memory sanitizer (requires Clang, detects uninitialized reads)
+cmake -B build -DALPINE_SANITIZER=memory
+cmake --build build
+```
+
+### Fuzz Testing
+
+Requires Clang with libFuzzer support:
+
+```sh
+cmake -B build -DALPINE_BUILD_FUZZERS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+cmake --build build
+
+# Run a fuzzer (example)
+./build/bin/fuzz_http_request
+```
+
+### Benchmarks
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DALPINE_BUILD_BENCHMARKS=ON
+cmake --build build
+./build/bin/bench_*
+```
+
+---
+
+## Platform Support
+
+### Feature Support Matrix
+
+| Feature | Linux | macOS | Windows | FreeBSD |
+|---------|-------|-------|---------|---------|
+| Core protocol | Yes | Yes | Yes | Yes |
+| UDP broadcast discovery | Yes | Yes | Yes | Yes |
+| WiFi multicast | Yes | Yes | — | Yes |
+| REST API | Yes | Yes | Yes | Yes |
+| JSON-RPC | Yes | Yes | Yes | Yes |
+| mDNS / DNS-SD | Yes | Yes | — | Yes |
+| SSDP / UPnP | Yes | Yes | Yes | Yes |
+| DLNA | Yes | Yes | — | Yes |
+| Tor integration | Yes | Yes | — | Yes |
+| FUSE filesystem | Yes (fuse3) | Yes (macFUSE) | — | Yes (fuse) |
+| TLS/DTLS | Yes | Yes | Yes | Yes |
+| SQLite persistence | Yes | Yes | Yes | Yes |
+| OpenTelemetry tracing | Yes | Yes | Yes | Yes |
+| UPnP IGD port mapping | Yes | Yes | Yes | Yes |
+| CORBA management | Yes | Yes | — | Yes |
+
+### Compiler Requirements
+
+| Compiler | Minimum Version |
+|----------|----------------|
+| GCC | 14+ |
+| Clang | 17+ |
+| MSVC | 2022 (17.x) |
+
+---
+
 ## Deployment
 
 ### Standalone Server
@@ -875,11 +1640,15 @@ Full-featured HTTP API server with DLNA, mDNS, SSDP, Tor, and FUSE integration.
 
 ### Docker
 
-```sh
-# 3-node cluster
-docker-compose -f docker/docker-compose.yml up
+#### Standard Cluster (3 nodes)
 
-# 5-node cluster with benchmark nodes
+```sh
+docker-compose -f docker/docker-compose.yml up
+```
+
+#### With Benchmark Nodes (5 nodes)
+
+```sh
 docker-compose -f docker/docker-compose.yml --profile bench up
 ```
 
@@ -910,18 +1679,285 @@ graph TB
 
 Health checks: `curl -sf http://localhost:{port}/status` every 5 seconds.
 
+#### Multi-Region Cluster
+
+Simulates a WAN-distributed cluster with 3 regions and gateway containers that add ~100ms round-trip inter-region latency via `tc netem`:
+
+```sh
+docker compose -f docker/docker-compose.multiregion.yml up
+```
+
+```mermaid
+graph LR
+    subgraph "US Region (172.30.x.x)"
+        US1["us-node1<br/>:8081"]
+        US2["us-node2<br/>:8082"]
+    end
+
+    subgraph "EU Region (172.31.x.x)"
+        EU1["eu-node1<br/>:8083"]
+        EU2["eu-node2<br/>:8084"]
+    end
+
+    subgraph "AP Region (172.32.x.x)"
+        AP1["ap-node1<br/>:8085"]
+        AP2["ap-node2<br/>:8086"]
+    end
+
+    US1 <-->|LAN| US2
+    EU1 <-->|LAN| EU2
+    AP1 <-->|LAN| AP2
+
+    US1 <-->|"WAN ~100ms"| EU1
+    US1 <-->|"WAN ~100ms"| AP1
+    EU1 <-->|"WAN ~100ms"| AP1
+```
+
+| Node | Region | Subnet | REST Port |
+|------|--------|--------|-----------|
+| us-node1 | US | 172.30.1.1 | 8081 |
+| us-node2 | US | 172.30.1.2 | 8082 |
+| eu-node1 | EU | 172.31.1.1 | 8083 |
+| eu-node2 | EU | 172.31.1.2 | 8084 |
+| ap-node1 | AP | 172.32.1.1 | 8085 |
+| ap-node2 | AP | 172.32.1.2 | 8086 |
+
+Set the region via the `ALPINE_REGION` environment variable. The cluster coordinator uses region-aware routing, preferring same-region nodes for query processing.
+
+Verify the cluster formed:
+
+```sh
+curl -s http://localhost:8081/cluster/status | jq .
+```
+
+### systemd Service
+
+Create `/etc/systemd/system/alpine.service`:
+
+```ini
+[Unit]
+Description=Alpine P2P Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/AlpineRestBridge
+Restart=on-failure
+RestartSec=5
+User=alpine
+Group=alpine
+LimitNOFILE=65536
+Environment=PORT=9000
+Environment=REST_PORT=8080
+Environment=LOG_LEVEL=Info
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable alpine
+sudo systemctl start alpine
+```
+
+### Production Hardening
+
+- Set `ALPINE_API_KEY` to require authentication on all REST endpoints
+- Configure `CORS_ORIGIN` to restrict cross-origin access
+- Use `HTTP_MAX_CONNECTIONS_PER_IP=16` to limit per-client connections
+- Set `HTTP_IDLE_TIMEOUT_SECONDS=30` to reclaim idle connections
+- Run behind a reverse proxy (nginx, Caddy) for TLS termination
+- Set `LOG_LEVEL=Error` in production to reduce I/O
+- Use `HTTP_MAX_CONNECTIONS=512` to cap total connections
+- Enable `ALPINE_ENABLE_TLS` for encrypted peer-to-peer communication
+- Restrict module registration with `MODULE_REGISTRATION=false` or limit to `MODULE_DIRECTORY`
+
+---
+
+## Feature Guides
+
+### DLNA Media Server
+
+Enable DLNA to expose Alpine content to UPnP/DLNA media renderers on the local network:
+
+```sh
+./build/bin/AlpineRestBridge --dlnaEnabled true --dlnaPort 8200 \
+  --mediaDirectory /path/to/media --dlnaServerName "Alpine Media"
+```
+
+Or via environment variables:
+
+```sh
+DLNA_ENABLED=true DLNA_PORT=8200 MEDIA_DIRECTORY=/media ./build/bin/AlpineRestBridge
+```
+
+The DLNA server advertises itself via SSDP and responds to UPnP ContentDirectory browse requests. Media renderers (TVs, speakers, Sonos, etc.) discover and play content from any Alpine node.
+
+### Tor Integration
+
+Route peer-to-peer traffic through Tor hidden services for anonymized networking:
+
+```sh
+./build/bin/AlpineRestBridge --torEnabled true \
+  --torControlPort 9051 --torSocksPort 9050 \
+  --torListenPort 9001 --torPeers "peer1.onion:9001,peer2.onion:9001"
+```
+
+The node creates a Tor hidden service and connects to specified .onion peers via the SOCKS proxy. All P2P protocol traffic is routed through Tor.
+
+### TLS/DTLS Encryption
+
+Build with TLS support for encrypted connections:
+
+```sh
+cmake -B build -DALPINE_ENABLE_TLS=ON
+cmake --build build
+```
+
+Enables DTLS encryption for peer-to-peer transport and ECDSA-based device authentication via the `/auth/*` endpoints.
+
+### FUSE Virtual Filesystem
+
+Build and mount:
+
+```sh
+# macOS
+brew install macfuse
+cmake -B build -DALPINE_ENABLE_FUSE=ON
+cmake --build build
+
+# Linux
+sudo apt install libfuse3-dev  # Debian/Ubuntu
+sudo dnf install fuse3-devel   # Fedora/RHEL
+cmake -B build -DALPINE_ENABLE_FUSE=ON
+cmake --build build
+```
+
+Run with FUSE enabled:
+
+```sh
+./build/bin/AlpineRestBridge --fuseEnabled true --fuseMountPoint /tmp/alpine
+
+# Browse queries as files
+ls /tmp/alpine/queries/
+ls /tmp/alpine/queries/music/
+cat /tmp/alpine/queries/music/Song.mp3  # triggers retrieval from peer
+```
+
+### OpenTelemetry Tracing
+
+Build with tracing and configure the OTLP exporter:
+
+```sh
+cmake -B build -DALPINE_ENABLE_TRACING=ON
+cmake --build build
+
+TRACING_ENABLED=true OTLP_ENDPOINT=http://localhost:4317 ./build/bin/AlpineRestBridge
+```
+
+Traces are emitted for query, peer, and cluster operations. Use Jaeger, Zipkin, or any OpenTelemetry-compatible collector.
+
+### UPnP Port Mapping
+
+Automatically open ports on the NAT gateway:
+
+```sh
+cmake -B build -DALPINE_ENABLE_UPNP=ON
+cmake --build build
+```
+
+The node uses miniupnpc to request port mappings for the protocol port and REST port through the local router's UPnP IGD.
+
+### SQLite Persistence
+
+Persist peer profiles, group definitions, and query history across restarts:
+
+```sh
+cmake -B build -DALPINE_ENABLE_PERSISTENCE=ON
+cmake --build build
+```
+
+### Clustering
+
+Alpine REST Bridge nodes form clusters via UDP beacon discovery and HTTP heartbeats. The cluster coordinator provides:
+
+- **Query deduplication** — Identical queries across nodes are detected and deduplicated using gossip-based hash sharing
+- **Load-aware routing** — Queries are redirected to less-loaded nodes (CPU load + active query count)
+- **Federated results** — `/cluster/results/:id` aggregates results from all cluster nodes
+- **Region-aware routing** — Same-region nodes are preferred (20% score bonus)
+- **Split-brain detection** — Nodes enter isolated mode when >50% of peers are unreachable
+- **Distributed reputation** — Peer quality scores are gossiped via heartbeats and merged across nodes
+- **Adaptive timeouts** — Node staleness timeouts adjust based on measured RTT
+
+Set `ALPINE_REGION` to enable region-aware routing in multi-region deployments.
+
+---
+
+## Monitoring & Metrics
+
+### Prometheus Metrics
+
+`GET /metrics` returns Prometheus-format metrics:
+
+```sh
+curl http://localhost:8080/metrics
+```
+
+#### Available Metrics
+
+**Counters** (monotonically increasing):
+
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `http_requests_total` | `method={GET,POST,PUT,DELETE,OTHER}` | Total HTTP requests by method |
+| `queries_total` | `status={started,completed,failed}` | Total queries by outcome |
+| `peers_total` | `event={connected,disconnected}` | Peer connection events |
+| `rate_limited_total` | — | Requests rejected by rate limiter |
+| `websocket_sessions_total` | `event={opened,closed}` | WebSocket session events |
+
+**Gauges** (current value):
+
+Custom gauges can be registered dynamically by the application.
+
+#### Prometheus Configuration
+
+```yaml
+scrape_configs:
+  - job_name: 'alpine'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:8080']
+    metrics_path: '/metrics'
+```
+
+### Health Check
+
+```sh
+curl http://localhost:8080/status
+```
+
+Returns server status and version. Used by Docker health checks and load balancers.
+
 ---
 
 ## Security
 
 - **Duplicate packet detection** with configurable thresholds
 - **Packet size limits** for queries, resource descriptions, and peer lists
-- **Peer banning** for misbehaving nodes
+- **Peer banning** for misbehaving nodes (`POST /admin/peers/:id/ban`)
 - **Bad packet tracking** with per-peer counters and quality impact
 - **Reliable transfer failure monitoring** with automatic quality adjustment
 - **Host/subnet exclusion** lists for network-level blocking
-- **API key authentication** middleware for REST endpoints
+- **API key authentication** middleware for REST endpoints (`ALPINE_API_KEY`)
+- **CORS configuration** for browser-based clients (`CORS_ORIGIN`)
+- **Per-IP connection limits** to prevent resource exhaustion (`HTTP_MAX_CONNECTIONS_PER_IP`)
+- **Rate limiting** with 429 responses and metrics tracking
+- **Challenge-response device authentication** via `/auth/*` endpoints (ECDSA with TLS)
+- **Module path restriction** — module registration can be restricted to a specific directory
 - **NAT traversal** discovery for secure peer-to-peer connections
+- **TLS/DTLS encryption** for peer-to-peer transport (optional)
+- **Tor hidden services** for anonymized networking (optional)
 
 ---
 

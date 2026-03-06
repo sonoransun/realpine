@@ -93,6 +93,14 @@ HttpResponse::setJsonBody (const string & json)
 }
 
 
+void
+HttpResponse::setRequestId (const string & requestId)
+{
+    requestId_ = requestId;
+    headers_["X-Request-ID"] = requestId;
+}
+
+
 string
 HttpResponse::build ()
 {
@@ -147,20 +155,35 @@ HttpResponse::accepted (const string & json)
 }
 
 
+string
+HttpResponse::buildErrorJson (const string & code,
+                              const string & message,
+                              const string & requestId)
+{
+    string json = "{\"error\":{\"code\":\""s + escapeJson(code) +
+                  "\",\"message\":\""s + escapeJson(message) + "\""s;
+    if (!requestId.empty())
+        json += ",\"requestId\":\""s + escapeJson(requestId) + "\""s;
+    json += "}}"s;
+    return json;
+}
+
+
 HttpResponse
-HttpResponse::notFound ()
+HttpResponse::notFound (const string & errorCode)
 {
     HttpResponse resp(404, "Not Found");
-    resp.setJsonBody("{\"error\":\"Not Found\"}");
+    resp.setJsonBody(buildErrorJson(errorCode, "Not Found"));
     return resp;
 }
 
 
 HttpResponse
-HttpResponse::badRequest (const string & message)
+HttpResponse::badRequest (const string & message,
+                          const string & errorCode)
 {
     HttpResponse resp(400, "Bad Request");
-    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
+    resp.setJsonBody(buildErrorJson(errorCode, message));
     return resp;
 }
 
@@ -169,24 +192,57 @@ HttpResponse
 HttpResponse::methodNotAllowed ()
 {
     HttpResponse resp(405, "Method Not Allowed");
-    resp.setJsonBody("{\"error\":\"Method Not Allowed\"}");
+    resp.setJsonBody(buildErrorJson("METHOD_NOT_ALLOWED"s, "Method Not Allowed"s));
     return resp;
 }
 
 
 HttpResponse
-HttpResponse::tooManyRequests (const string & message)
+HttpResponse::tooManyRequests (const string & message,
+                               const string & errorCode)
 {
     HttpResponse resp(429, "Too Many Requests");
-    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
+    resp.setJsonBody(buildErrorJson(errorCode, message));
     return resp;
 }
 
 
 HttpResponse
-HttpResponse::serverError (const string & message)
+HttpResponse::unauthorized (const string & message,
+                            const string & errorCode)
+{
+    HttpResponse resp(401, "Unauthorized");
+    resp.setJsonBody(buildErrorJson(errorCode, message));
+    return resp;
+}
+
+
+HttpResponse
+HttpResponse::serverError (const string & message,
+                           const string & errorCode)
 {
     HttpResponse resp(500, "Internal Server Error");
-    resp.setJsonBody("{\"error\":\"" + escapeJson(message) + "\"}");
+    resp.setJsonBody(buildErrorJson(errorCode, message));
+    return resp;
+}
+
+
+HttpResponse
+HttpResponse::serviceUnavailable (const string & message,
+                                  const string & errorCode)
+{
+    HttpResponse resp(503, "Service Unavailable");
+    resp.setHeader("Retry-After"s, "5"s);
+    resp.setJsonBody(buildErrorJson(errorCode, message));
+    return resp;
+}
+
+
+HttpResponse
+HttpResponse::conflict (const string & message,
+                        const string & errorCode)
+{
+    HttpResponse resp(409, "Conflict");
+    resp.setJsonBody(buildErrorJson(errorCode, message));
     return resp;
 }

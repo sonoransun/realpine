@@ -8,6 +8,10 @@
 #include <Log.h>
 #include <SafeParse.h>
 
+#ifdef ALPINE_TRACING_ENABLED
+#include <Tracing.h>
+#endif
+
 
 void
 QueryHandler::registerRoutes (HttpRouter & router)
@@ -24,6 +28,10 @@ HttpResponse
 QueryHandler::startQuery (const HttpRequest & request,
                           const std::unordered_map<string, string> & params)
 {
+#ifdef ALPINE_TRACING_ENABLED
+    ScopedSpan span("query.start"s);
+#endif
+
     JsonReader reader(request.body);
 
     string queryString;
@@ -71,6 +79,10 @@ HttpResponse
 QueryHandler::getQuery (const HttpRequest & request,
                         const std::unordered_map<string, string> & params)
 {
+#ifdef ALPINE_TRACING_ENABLED
+    ScopedSpan span("query.get"s);
+#endif
+
     std::unordered_map<string, string>::const_iterator it = params.find("id");
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
@@ -110,6 +122,10 @@ HttpResponse
 QueryHandler::getQueryResults (const HttpRequest & request,
                                const std::unordered_map<string, string> & params)
 {
+#ifdef ALPINE_TRACING_ENABLED
+    ScopedSpan span("query.getResults"s);
+#endif
+
     std::unordered_map<string, string>::const_iterator it = params.find("id");
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
@@ -119,51 +135,83 @@ QueryHandler::getQueryResults (const HttpRequest & request,
         return HttpResponse::badRequest("Invalid query id");
     ulong queryId = *parsedId;
 
+    // Parse pagination parameters
+    ulong limit  = 100;
+    ulong offset = 0;
+
+    auto limitIt = request.queryParams.find("limit");
+    if (limitIt != request.queryParams.end()) {
+        auto parsed = parseUlong(limitIt->second);
+        if (parsed)
+            limit = std::min(*parsed, 1000UL);
+    }
+
+    auto offsetIt = request.queryParams.find("offset");
+    if (offsetIt != request.queryParams.end()) {
+        auto parsed = parseUlong(offsetIt->second);
+        if (parsed)
+            offset = *parsed;
+    }
+
     AlpineStackInterface::t_PeerResourcesIndex results;
     if (!AlpineStackInterface::getQueryResults(queryId, results))
         return HttpResponse::notFound();
+
+    // Flatten all resources across peers for pagination
+    struct FlatResult {
+        ulong   peerId;
+        const AlpineStackInterface::t_ResourceDesc * res;
+    };
+
+    vector<FlatResult> allResults;
+    for (const auto& result : results)
+        for (const auto& res : result.second.resourceDescList)
+            allResults.push_back({result.first, &res});
+
+    ulong total = allResults.size();
+    ulong startIdx = std::min(offset, total);
+    ulong endIdx   = std::min(startIdx + limit, total);
+    bool  hasMore  = endIdx < total;
 
     JsonWriter writer;
     writer.beginObject();
     writer.key("queryId");
     writer.value(queryId);
-    writer.key("peers");
+    writer.key("data");
     writer.beginArray();
 
-    for (const auto& result : results)
+    for (ulong i = startIdx; i < endIdx; ++i)
     {
+        const auto& entry = allResults[i];
+
         writer.beginObject();
         writer.key("peerId");
-        writer.value(result.first);
-        writer.key("resources");
+        writer.value(entry.peerId);
+        writer.key("resourceId");
+        writer.value(entry.res->resourceId);
+        writer.key("size");
+        writer.value(entry.res->size);
+        writer.key("description");
+        writer.value(entry.res->description);
+        writer.key("locators");
         writer.beginArray();
 
-        for (const auto& res : result.second.resourceDescList)
-        {
-            writer.beginObject();
-            writer.key("resourceId");
-            writer.value(res.resourceId);
-            writer.key("size");
-            writer.value(res.size);
-            writer.key("description");
-            writer.value(res.description);
-            writer.key("locators");
-            writer.beginArray();
-
-            for (const auto& loc : res.locators)
-            {
-                writer.value(loc);
-            }
-
-            writer.endArray();
-            writer.endObject();
-        }
+        for (const auto& loc : entry.res->locators)
+            writer.value(loc);
 
         writer.endArray();
         writer.endObject();
     }
 
     writer.endArray();
+    writer.key("total");
+    writer.value(total);
+    writer.key("limit");
+    writer.value(limit);
+    writer.key("offset");
+    writer.value(offset);
+    writer.key("hasMore");
+    writer.value(hasMore);
     writer.endObject();
 
     return HttpResponse::ok(writer.result());
@@ -174,6 +222,10 @@ HttpResponse
 QueryHandler::cancelQuery (const HttpRequest & request,
                            const std::unordered_map<string, string> & params)
 {
+#ifdef ALPINE_TRACING_ENABLED
+    ScopedSpan span("query.cancel"s);
+#endif
+
     std::unordered_map<string, string>::const_iterator it = params.find("id");
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");

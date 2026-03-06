@@ -320,7 +320,7 @@ main (int argc, char *argv[])
     string fuseCacheTtlStr;
     string fuseFeedbackThresholdStr;
     bool   fuseEnabled = false;
-    string fuseMountPoint = "/tmp/alpine"s;
+    string fuseMountPoint = alpine_temp_dir() + "/alpine"s;
     ulong  fuseCacheTtl = 60;
     ulong  fuseFeedbackThreshold = 5;
 

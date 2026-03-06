@@ -40,7 +40,36 @@ HttpRequest::parse (const byte *  data,
     if (pathEnd == string::npos)
         return false;
 
-    request.path = requestLine.substr(pathStart, pathEnd - pathStart);
+    string fullPath = requestLine.substr(pathStart, pathEnd - pathStart);
+
+    // Split path from query string
+    ulong queryPos = fullPath.find('?');
+    if (queryPos != string::npos)
+    {
+        request.path = fullPath.substr(0, queryPos);
+
+        // Parse query parameters
+        string queryString = fullPath.substr(queryPos + 1);
+        while (!queryString.empty())
+        {
+            ulong ampPos = queryString.find('&');
+            string param = queryString.substr(0, ampPos);
+
+            ulong eqPos = param.find('=');
+            if (eqPos != string::npos)
+                request.queryParams[param.substr(0, eqPos)] = param.substr(eqPos + 1);
+            else if (!param.empty())
+                request.queryParams[param] = ""s;
+
+            if (ampPos == string::npos)
+                break;
+            queryString = queryString.substr(ampPos + 1);
+        }
+    }
+    else
+    {
+        request.path = fullPath;
+    }
 
     // RFC 7230 tchar set for header field names:
     //   "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" / "-" / "." /

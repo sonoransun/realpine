@@ -24,6 +24,24 @@ HttpRouter::parseMethod (std::string_view method)
 void
 HttpRouter::addRoute (const string &  method,
                       const string &  pattern,
+                      RouteHandler    handler,
+                      const string &  description)
+{
+    routes_.push_back({method, pattern, description});
+    addRoute(method, pattern, handler);
+}
+
+
+const vector<RouteInfo> &
+HttpRouter::getRoutes () const
+{
+    return routes_;
+}
+
+
+void
+HttpRouter::addRoute (const string &  method,
+                      const string &  pattern,
                       RouteHandler    handler)
 {
     auto httpMethod = parseMethod(method);

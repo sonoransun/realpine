@@ -9,13 +9,36 @@
 #include <RateLimiter.h>
 #include <RestBridgeConfig.h>
 #include <Log.h>
+#include <Platform.h>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <TlsContext.h>
 #include <openssl/ssl.h>
 #endif
 
+#ifdef ALPINE_TRACING_ENABLED
+#include <Tracing.h>
+#endif
+
 static constexpr ulong MAX_BODY_SIZE = 65536;
+
+
+static string
+generateRequestId ()
+{
+    byte buf[8];
+    if (!alpine_random_bytes(buf, sizeof(buf)))
+        return "00000000"s;
+
+    static const char hexChars[] = "0123456789abcdef";
+    string result;
+    result.reserve(16);
+    for (auto b : buf) {
+        result += hexChars[(b >> 4) & 0x0F];
+        result += hexChars[b & 0x0F];
+    }
+    return result;
+}
 
 
 HttpServer::HttpServer (HttpRouter & router)
@@ -445,13 +468,50 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             return;
         }
 
+        // Generate correlation ID
+        auto requestId = generateRequestId();
+        Log::setCorrelationId(requestId);
+
+        auto startTime = std::chrono::steady_clock::now();
+
+#ifdef ALPINE_TRACING_ENABLED
+        ScopedSpan rootSpan("http.request"s);
+        rootSpan.addAttribute("http.method"s, request.method);
+        rootSpan.addAttribute("http.path"s, request.path);
+        rootSpan.addAttribute("net.peer.ip"s, clientIp);
+        rootSpan.addAttribute("http.request_id"s, requestId);
+#endif
+
         // Normal HTTP: dispatch
         auto response = router_.dispatch(request);
+        response.setRequestId(requestId);
         auto responseStr = response.build();
         asio::write(socket, asio::buffer(responseStr), ec);
 
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - startTime).count();
+
+#ifdef ALPINE_TRACING_ENABLED
+        rootSpan.addAttribute("http.status_code"s, std::to_string(response.statusCode()));
+        rootSpan.addAttribute("http.latency_ms"s, std::to_string(elapsed));
+        rootSpan.setStatus(response.statusCode() < 400);
+#endif
+
+        Log::Info("request"s, {
+            {"method"s,     request.method},
+            {"path"s,       request.path},
+            {"client_ip"s,  clientIp},
+            {"status"s,     std::to_string(response.statusCode())},
+            {"latency_ms"s, std::to_string(elapsed)},
+            {"size"s,       std::to_string(responseStr.size())},
+            {"request_id"s, requestId}
+        });
+
+        Log::clearCorrelationId();
+
     } catch (const std::exception & e) {
         Log::Error("HttpServer::handleConnection exception: "s + e.what());
+        Log::clearCorrelationId();
     }
 
     --busyWorkers_;

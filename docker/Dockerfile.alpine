@@ -1,0 +1,59 @@
+# Lightweight Alpine Linux build (~50MB image)
+#
+# Uses musl libc and static linking to minimize runtime image size.
+#
+# Build:
+#   docker buildx build -f docker/Dockerfile.alpine --platform linux/amd64,linux/arm64 .
+
+# ---------------------------------------------------------------------------
+# Builder stage
+# ---------------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM alpine:3.20 AS builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETARCH
+
+RUN apk add --no-cache \
+    g++ \
+    cmake \
+    make \
+    linux-headers \
+    musl-dev
+
+WORKDIR /src
+COPY . .
+
+RUN cmake -B _build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DALPINE_ENABLE_CORBA=OFF \
+        -DALPINE_BUILD_TESTS=OFF \
+        -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++" \
+    && cmake --build _build --parallel "$(nproc)"
+
+RUN strip _build/bin/AlpineRestBridge
+
+# ---------------------------------------------------------------------------
+# Runtime stage — minimal Alpine
+# ---------------------------------------------------------------------------
+FROM alpine:3.20 AS runtime
+
+RUN apk add --no-cache \
+    libstdc++ \
+    curl
+
+# Copy built binary and shared libraries
+COPY --from=builder /src/_build/bin/AlpineRestBridge /usr/local/bin/
+COPY --from=builder /src/_build/lib/*.so* /usr/local/lib/
+
+RUN ldconfig /usr/local/lib 2>/dev/null || true
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8080 8089 8090 9000
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -sf http://localhost:${REST_PORT:-8080}/status || exit 1
+
+ENTRYPOINT ["/entrypoint.sh"]

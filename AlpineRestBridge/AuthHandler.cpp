@@ -7,8 +7,8 @@
 #include <JsonWriter.h>
 #include <Log.h>
 #include <Error.h>
+#include <Platform.h>
 
-#include <fstream>
 #include <iomanip>
 #include <sstream>
 
@@ -291,20 +291,10 @@ AuthHandler::verifySignature (const HttpRequest & request,
 string
 AuthHandler::readUrandom (ulong numBytes)
 {
-    std::ifstream urandom("/dev/urandom", std::ios::binary);
-    if (!urandom.good())
-    {
-        Log::Error("AuthHandler: failed to open /dev/urandom"s);
-        return {};
-    }
-
     std::vector<byte> buf(numBytes);
-    urandom.read(reinterpret_cast<char *>(buf.data()),
-                 static_cast<std::streamsize>(numBytes));
-
-    if (!urandom.good())
+    if (!alpine_random_bytes(buf.data(), static_cast<unsigned long>(numBytes)))
     {
-        Log::Error("AuthHandler: failed to read from /dev/urandom"s);
+        Log::Error("AuthHandler: failed to generate random bytes"s);
         return {};
     }
 

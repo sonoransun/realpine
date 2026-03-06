@@ -50,6 +50,26 @@ Log::setLogLevel (t_LogLevel logLevel)
 }
 
 
+Log::t_LogLevel
+Log::getLogLevel ()
+{
+    return logLevel_s;
+}
+
+
+std::string_view
+Log::logLevelToString (t_LogLevel logLevel)
+{
+    switch (logLevel) {
+        case t_LogLevel::Silent: return "Silent";
+        case t_LogLevel::Error:  return "Error";
+        case t_LogLevel::Info:   return "Info";
+        case t_LogLevel::Debug:  return "Debug";
+    }
+    return "Unknown";
+}
+
+
 bool
 Log::stringToLogLevel (std::string_view  logLevelStr,
                        t_LogLevel &      logLevel)

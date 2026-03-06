@@ -5,8 +5,9 @@
 #include <time.h>
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
-using std::cout; using std::endl;
+using std::cout; using std::endl; using std::cerr;
 
 #include <Log.h>
 #include <StringUtils.h>
@@ -23,23 +24,31 @@ using std::cout; using std::endl;
 #include <AlpineConfig.h>
 
 
+static constexpr const char * ALPINE_CLI_VERSION = "devel-00019";
+
 
 // Types for command dispatch table
 //
 using t_Handler = bool(*)();
 
+struct t_CommandEntry {
+    t_Handler    handler;
+    string       description;
+    string       detailedHelp;
+};
+
 using t_DispatchTable = std::unordered_map<string,
-                 t_Handler,
+                 t_CommandEntry,
                  OptHash<string>,
                  equal_to<string> >;
-
-using t_DispatchTablePair = std::pair<string, t_Handler>;
 
 
 // Global members
 //
 static t_DispatchTable *  dispatchTable_s = nullptr;
 static bool  verbose_s = false;
+static bool  jsonOutput_s = false;
+static bool  quietOutput_s = false;
 
 
 bool buildDispatchTable ();
@@ -47,6 +56,14 @@ bool buildDispatchTable ();
 bool commandExists (const string &  command);
 
 bool handleCommand (const string &  command);
+
+void printUsage ();
+
+void printCommandList ();
+
+void printCommandHelp (const string &  command);
+
+void printVersion ();
 
 
 
@@ -70,6 +87,20 @@ main (int argc, char *argv[])
     if (!status) {
         Log::Error ("Building dispatch table failed!  Exiting.");
         return 1;
+    }
+
+    // Check for --help / -h and --version / -v before configuration init
+    //
+    for (int i = 1; i < argc; ++i) {
+        string arg(argv[i]);
+        if (arg == "--help" || arg == "-h") {
+            printUsage();
+            return 0;
+        }
+        if (arg == "--version" || arg == "-v") {
+            printVersion();
+            return 0;
+        }
     }
 
 
@@ -100,13 +131,28 @@ main (int argc, char *argv[])
     }
 
 
+    // Check for --json and --quiet flags
+    //
+    for (int i = 1; i < argc; ++i) {
+        string arg(argv[i]);
+        if (arg == "--json")
+            jsonOutput_s = true;
+        if (arg == "--quiet")
+            quietOutput_s = true;
+    }
+
+
     // Load configuration settings
     //
     string  serverAddress;
     status = Configuration::getValue ("Server Address", serverAddress);
 
     if (!status) {
-        Log::Error ("No Server Address value!  Exiting.");
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"No Server Address value\",\"code\":1}" << endl;
+        } else {
+            cerr << "Error: No Server Address value.  Exiting." << endl;
+        }
         return 1;
     }
 
@@ -114,7 +160,11 @@ main (int argc, char *argv[])
     status = Configuration::getValue ("Server Port", serverPortStr);
 
     if (!status) {
-        Log::Error ("No Server Port value!  Exiting.");
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"No Server Port value\",\"code\":1}" << endl;
+        } else {
+            cerr << "Error: No Server Port value.  Exiting." << endl;
+        }
         return 1;
     }
 
@@ -124,15 +174,18 @@ main (int argc, char *argv[])
     status = Configuration::getValue ("Command", command);
 
     if (!status) {
-        Log::Error ("No command value!  Exiting.");
-        return 1;
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"No command value\",\"code\":2}" << endl;
+        } else {
+            cerr << "Error: No command value.  Exiting." << endl;
+        }
+        return 2;
     }
 
     string verboseValue;
     status = Configuration::getValue ("Verbose", verboseValue);
 
     if (status) {
-        // User specified verbose mode
         verbose_s = true;
         verboseValue = "Verbose mode ON";
     }
@@ -140,14 +193,27 @@ main (int argc, char *argv[])
         verboseValue = "Verbose mode OFF";
     }
 
+    // Handle "help" command
+    //
+    if (command == "help") {
+        // Check if there's additional arg for per-command help
+        string helpArg;
+        if (Configuration::getValue ("Query String", helpArg) && !helpArg.empty()) {
+            printCommandHelp(helpArg);
+        } else {
+            printCommandList();
+        }
+        return 0;
+    }
 
 
-    Log::Info ("Starting ALPINE Command Interface-"s +
-               "\nServer: "s + serverAddress + ":" + serverPortStr +
-               "\nCommand: "s +  command +
-               "\n"s + verboseValue +
-               "\n");
-
+    if (!quietOutput_s) {
+        Log::Info ("Starting ALPINE Command Interface-"s +
+                   "\nServer: "s + serverAddress + ":" + serverPortStr +
+                   "\nCommand: "s +  command +
+                   "\n"s + verboseValue +
+                   "\n");
+    }
 
 
     // Initialize JSON-RPC client
@@ -155,13 +221,12 @@ main (int argc, char *argv[])
     status = JsonRpcClient::initialize (serverAddress, serverPort);
 
     if (!status) {
-        string msg("Initializing JsonRpcClient failed.  Exiting.");
-        Log::Error (msg);
-
-        if (verbose_s) {
-            cout << msg << endl;
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"Initializing JsonRpcClient failed\",\"code\":1}" << endl;
+        } else {
+            cerr << "Error: Initializing JsonRpcClient failed.  Exiting." << endl;
         }
-
+        Log::Error ("Initializing JsonRpcClient failed.  Exiting.");
         return 1;
     }
 
@@ -170,13 +235,12 @@ main (int argc, char *argv[])
     status = commandExists (command);
 
     if (!status) {
-        string  msg("Invalid command!  Exiting.");
-        Log::Error (msg);
-
-        if (verbose_s) {
-            cout << msg << endl;
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"Invalid command: "s + command + "\",\"code\":2}" << endl;
+        } else {
+            cerr << "Error: Invalid command '"s + command + "'.  Exiting." << endl;
         }
-
+        Log::Error ("Invalid command!  Exiting.");
         return 2;
     }
 
@@ -238,39 +302,150 @@ buildDispatchTable ()
 {
     dispatchTable_s = new t_DispatchTable;
 
-    dispatchTable_s->emplace ("addDtcpPeer", &performAddDtcpPeer);
-    dispatchTable_s->emplace ("getDtcpPeerId", &performGetDtcpPeerId);
-    dispatchTable_s->emplace ("getDtcpPeerStatus", &performGetDtcpPeerStatus);
-    dispatchTable_s->emplace ("activateDtcpPeer", &performActivateDtcpPeer);
-    dispatchTable_s->emplace ("deactivateDtcpPeer", &performDeactivateDtcpPeer);
-    dispatchTable_s->emplace ("pingDtcpPeer", &performPingDtcpPeer);
-    dispatchTable_s->emplace ("excludeHost", &performExcludeHost);
-    dispatchTable_s->emplace ("excludeSubnet", &performExcludeSubnet);
-    dispatchTable_s->emplace ("allowHost", &performAllowHost);
-    dispatchTable_s->emplace ("allowSubnet", &performAllowSubnet);
-    dispatchTable_s->emplace ("listExcludedHosts", &performListExcludedHosts);
-    dispatchTable_s->emplace ("listExcludedSubnets", &performListExcludedSubnets);
-    dispatchTable_s->emplace ("getUserGroupList", &performGetUserGroupList);
-    dispatchTable_s->emplace ("createUserGroup", &performCreateUserGroup);
-    dispatchTable_s->emplace ("destroyUserGroup", &performDestroyUserGroup);
-    dispatchTable_s->emplace ("getPeerUserGroupList", &performGetPeerUserGroupList);
-    dispatchTable_s->emplace ("addPeerToGroup", &performAddPeerToGroup);
-    dispatchTable_s->emplace ("removePeerFromGroup", &performRemovePeerFromGroup);
-    dispatchTable_s->emplace ("getExtendedPeerList", &performGetExtendedPeerList);
-    dispatchTable_s->emplace ("beginQuery", &performStartQuery);
-    dispatchTable_s->emplace ("getQueryStatus", &performGetQueryStatus);
-    dispatchTable_s->emplace ("pauseQuery", &performPauseQuery);
-    dispatchTable_s->emplace ("resumeQuery", &performResumeQuery);
-    dispatchTable_s->emplace ("cancelQuery", &performCancelQuery);
-    dispatchTable_s->emplace ("getQueryResults", &performGetQueryResults);
-    dispatchTable_s->emplace ("registerModule", &performRegisterModule);
-    dispatchTable_s->emplace ("unregisterModule", &performUnregisterModule);
-    dispatchTable_s->emplace ("loadModule", &performLoadModule);
-    dispatchTable_s->emplace ("unloadModule", &performUnloadModule);
-    dispatchTable_s->emplace ("listActiveModules", &performListActiveModules);
-    dispatchTable_s->emplace ("listAllModules", &performListAllModules);
-    dispatchTable_s->emplace ("getModuleInfo", &performGetModuleInfo);
-    dispatchTable_s->emplace ("getStatus", &performGetStatus);
+    // Peer commands
+    dispatchTable_s->emplace ("addDtcpPeer", t_CommandEntry{&performAddDtcpPeer,
+        "Add a DTCP peer by IP and port"s,
+        "Usage: --command addDtcpPeer --ipAddress <ip> --port <port>\n"
+        "Registers a new peer at the given address."s});
+    dispatchTable_s->emplace ("getDtcpPeerId", t_CommandEntry{&performGetDtcpPeerId,
+        "Get the peer ID for a given address"s,
+        "Usage: --command getDtcpPeerId --ipAddress <ip> --port <port>\n"
+        "Returns the numeric peer ID."s});
+    dispatchTable_s->emplace ("getDtcpPeerStatus", t_CommandEntry{&performGetDtcpPeerStatus,
+        "Get status details for a peer"s,
+        "Usage: --command getDtcpPeerStatus --peerId <id>\n"
+        "Returns IP, port, bandwidth, and timing information."s});
+    dispatchTable_s->emplace ("activateDtcpPeer", t_CommandEntry{&performActivateDtcpPeer,
+        "Activate a peer connection"s,
+        "Usage: --command activateDtcpPeer --peerId <id>\n"
+        "Enables communication with the specified peer."s});
+    dispatchTable_s->emplace ("deactivateDtcpPeer", t_CommandEntry{&performDeactivateDtcpPeer,
+        "Deactivate a peer connection"s,
+        "Usage: --command deactivateDtcpPeer --peerId <id>\n"
+        "Disables communication with the specified peer."s});
+    dispatchTable_s->emplace ("pingDtcpPeer", t_CommandEntry{&performPingDtcpPeer,
+        "Ping a peer to check connectivity"s,
+        "Usage: --command pingDtcpPeer --peerId <id>\n"
+        "Sends a ping request to the specified peer."s});
+
+    // Network filter commands
+    dispatchTable_s->emplace ("excludeHost", t_CommandEntry{&performExcludeHost,
+        "Exclude a host by IP address"s,
+        "Usage: --command excludeHost --ipAddress <ip>\n"
+        "Blocks a host from peer communication."s});
+    dispatchTable_s->emplace ("excludeSubnet", t_CommandEntry{&performExcludeSubnet,
+        "Exclude a subnet"s,
+        "Usage: --command excludeSubnet --subnetIpAddress <ip> --subnetMask <mask>\n"
+        "Blocks an entire subnet from peer communication."s});
+    dispatchTable_s->emplace ("allowHost", t_CommandEntry{&performAllowHost,
+        "Allow a previously excluded host"s,
+        "Usage: --command allowHost --ipAddress <ip>\n"
+        "Removes a host from the exclusion list."s});
+    dispatchTable_s->emplace ("allowSubnet", t_CommandEntry{&performAllowSubnet,
+        "Allow a previously excluded subnet"s,
+        "Usage: --command allowSubnet --subnetIpAddress <ip>\n"
+        "Removes a subnet from the exclusion list."s});
+    dispatchTable_s->emplace ("listExcludedHosts", t_CommandEntry{&performListExcludedHosts,
+        "List all excluded hosts"s,
+        "Usage: --command listExcludedHosts\n"
+        "Displays all currently excluded host IP addresses."s});
+    dispatchTable_s->emplace ("listExcludedSubnets", t_CommandEntry{&performListExcludedSubnets,
+        "List all excluded subnets"s,
+        "Usage: --command listExcludedSubnets\n"
+        "Displays all currently excluded subnets."s});
+
+    // Group commands
+    dispatchTable_s->emplace ("getUserGroupList", t_CommandEntry{&performGetUserGroupList,
+        "List all user groups"s,
+        "Usage: --command getUserGroupList\n"
+        "Returns the list of all defined user groups."s});
+    dispatchTable_s->emplace ("createUserGroup", t_CommandEntry{&performCreateUserGroup,
+        "Create a new user group"s,
+        "Usage: --command createUserGroup --groupName <name> [--description <desc>]\n"
+        "Creates a group and returns its ID."s});
+    dispatchTable_s->emplace ("destroyUserGroup", t_CommandEntry{&performDestroyUserGroup,
+        "Delete a user group"s,
+        "Usage: --command destroyUserGroup --groupId <id>\n"
+        "Permanently removes the specified group."s});
+    dispatchTable_s->emplace ("getPeerUserGroupList", t_CommandEntry{&performGetPeerUserGroupList,
+        "List peers in a group"s,
+        "Usage: --command getPeerUserGroupList --groupId <id>\n"
+        "Returns peers belonging to the specified group."s});
+    dispatchTable_s->emplace ("addPeerToGroup", t_CommandEntry{&performAddPeerToGroup,
+        "Add a peer to a group"s,
+        "Usage: --command addPeerToGroup --groupId <id> --peerId <id>\n"
+        "Adds the specified peer to the group."s});
+    dispatchTable_s->emplace ("removePeerFromGroup", t_CommandEntry{&performRemovePeerFromGroup,
+        "Remove a peer from a group"s,
+        "Usage: --command removePeerFromGroup --groupId <id> --peerId <id>\n"
+        "Removes the specified peer from the group."s});
+    dispatchTable_s->emplace ("getExtendedPeerList", t_CommandEntry{&performGetExtendedPeerList,
+        "Get extended list of all peers"s,
+        "Usage: --command getExtendedPeerList\n"
+        "Returns detailed information for all known peers."s});
+
+    // Query commands
+    dispatchTable_s->emplace ("beginQuery", t_CommandEntry{&performStartQuery,
+        "Start a new resource query"s,
+        "Usage: --command beginQuery --queryString <query> [--groupName <group>]\n"
+        "       [--autoHaltLimit <n>] [--peerDescriptionLimit <n>]\n"
+        "Starts a distributed query and returns the query ID."s});
+    dispatchTable_s->emplace ("getQueryStatus", t_CommandEntry{&performGetQueryStatus,
+        "Get status of a running query"s,
+        "Usage: --command getQueryStatus --queryId <id>\n"
+        "Returns peer counts and hit totals."s});
+    dispatchTable_s->emplace ("pauseQuery", t_CommandEntry{&performPauseQuery,
+        "Pause a running query"s,
+        "Usage: --command pauseQuery --queryId <id>\n"
+        "Temporarily halts query propagation."s});
+    dispatchTable_s->emplace ("resumeQuery", t_CommandEntry{&performResumeQuery,
+        "Resume a paused query"s,
+        "Usage: --command resumeQuery --queryId <id>\n"
+        "Resumes a previously paused query."s});
+    dispatchTable_s->emplace ("cancelQuery", t_CommandEntry{&performCancelQuery,
+        "Cancel a query"s,
+        "Usage: --command cancelQuery --queryId <id>\n"
+        "Permanently stops the query."s});
+    dispatchTable_s->emplace ("getQueryResults", t_CommandEntry{&performGetQueryResults,
+        "Get results of a query"s,
+        "Usage: --command getQueryResults --queryId <id>\n"
+        "Returns discovered resources from all responding peers."s});
+
+    // Module commands
+    dispatchTable_s->emplace ("registerModule", t_CommandEntry{&performRegisterModule,
+        "Register a new module"s,
+        "Usage: --command registerModule --moduleLibPath <path> --moduleSymbol <sym>\n"
+        "Registers a shared library module and returns its ID."s});
+    dispatchTable_s->emplace ("unregisterModule", t_CommandEntry{&performUnregisterModule,
+        "Unregister a module"s,
+        "Usage: --command unregisterModule --moduleId <id>\n"
+        "Removes the module registration."s});
+    dispatchTable_s->emplace ("loadModule", t_CommandEntry{&performLoadModule,
+        "Load a registered module"s,
+        "Usage: --command loadModule --moduleId <id>\n"
+        "Loads the module into the running server."s});
+    dispatchTable_s->emplace ("unloadModule", t_CommandEntry{&performUnloadModule,
+        "Unload an active module"s,
+        "Usage: --command unloadModule --moduleId <id>\n"
+        "Unloads the module from the running server."s});
+    dispatchTable_s->emplace ("listActiveModules", t_CommandEntry{&performListActiveModules,
+        "List currently loaded modules"s,
+        "Usage: --command listActiveModules\n"
+        "Returns all modules that are currently active."s});
+    dispatchTable_s->emplace ("listAllModules", t_CommandEntry{&performListAllModules,
+        "List all registered modules"s,
+        "Usage: --command listAllModules\n"
+        "Returns all registered modules (active and inactive)."s});
+    dispatchTable_s->emplace ("getModuleInfo", t_CommandEntry{&performGetModuleInfo,
+        "Get detailed module information"s,
+        "Usage: --command getModuleInfo --moduleId <id>\n"
+        "Returns name, version, library path, and active time."s});
+
+    // Status commands
+    dispatchTable_s->emplace ("getStatus", t_CommandEntry{&performGetStatus,
+        "Get server status and version"s,
+        "Usage: --command getStatus\n"
+        "Returns the server running status and version string."s});
 
 
     return true;
@@ -281,7 +456,7 @@ buildDispatchTable ()
 bool
 commandExists (const string &  command)
 {
-    return dispatchTable_s->find (command) != dispatchTable_s->end ();
+    return dispatchTable_s->contains(command);
 }
 
 
@@ -291,27 +466,135 @@ commandExists (const string &  command)
 bool
 handleCommand (const string &  command)
 {
-    t_Handler  handler;
-
     auto iter = dispatchTable_s->find (command);
 
     if (iter == dispatchTable_s->end ()) {
         Log::Error ("Invalid command option: "s + command + " provided!");
         return false;
     }
-    handler = (*iter).second;
+    auto handler = iter->second.handler;
 
-    bool status;
-    status = (*handler)();
+    bool status = (*handler)();
 
     if (!status) {
-        if (verbose_s) {
-            cout << "Request failed!  Check application log file.\n";
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"Command '"s + command + "' failed\",\"code\":3}" << endl;
+        } else if (!quietOutput_s) {
+            cerr << "Error: Command '"s + command + "' failed.  Check application log file." << endl;
         }
-
         return false;
     }
     return true;
+}
+
+
+
+void
+printVersion ()
+{
+    cout << "AlpineCmdIf version "s << ALPINE_CLI_VERSION << endl;
+}
+
+
+
+void
+printUsage ()
+{
+    cout << "AlpineCmdIf - Alpine P2P Command Line Interface\n"
+         << "Version: "s << ALPINE_CLI_VERSION << "\n\n"
+         << "Usage:\n"
+         << "  AlpineCmdIf --serverAddress <addr> --serverPort <port> --command <cmd> [options]\n\n"
+         << "Flags:\n"
+         << "  -h, --help       Show this help message\n"
+         << "  -v, --version    Show version\n"
+         << "  --verbose        Enable verbose output\n"
+         << "  --json           Output results as JSON\n"
+         << "  --quiet          Suppress non-essential output\n\n"
+         << "Use '--command help' to list all available commands.\n"
+         << "Use '--command help --queryString <command>' for detailed help on a command.\n";
+}
+
+
+
+void
+printCommandList ()
+{
+    // Collect and sort command names for stable output
+    vector<string> names;
+    names.reserve(dispatchTable_s->size());
+    for (const auto & [name, entry] : *dispatchTable_s)
+        names.push_back(name);
+    std::sort(names.begin(), names.end());
+
+    if (jsonOutput_s) {
+        JsonWriter writer;
+        writer.beginObject();
+        writer.key("commands");
+        writer.beginArray();
+        for (const auto & name : names) {
+            writer.beginObject();
+            writer.key("name");
+            writer.value(name);
+            writer.key("description");
+            writer.value(dispatchTable_s->at(name).description);
+            writer.endObject();
+        }
+        writer.endArray();
+        writer.endObject();
+        cout << writer.result() << endl;
+        return;
+    }
+
+    cout << "Available commands:\n\n";
+
+    // Find longest command name for alignment
+    ulong maxLen = 0;
+    for (const auto & name : names) {
+        if (name.length() > maxLen)
+            maxLen = name.length();
+    }
+
+    for (const auto & name : names) {
+        cout << "  " << name;
+        for (ulong i = name.length(); i < maxLen + 2; ++i)
+            cout << ' ';
+        cout << dispatchTable_s->at(name).description << "\n";
+    }
+
+    cout << "\nUse '--command help --queryString <command>' for detailed help.\n";
+}
+
+
+
+void
+printCommandHelp (const string &  command)
+{
+    auto iter = dispatchTable_s->find(command);
+    if (iter == dispatchTable_s->end()) {
+        if (jsonOutput_s) {
+            cerr << "{\"error\":\"Unknown command: "s + command + "\",\"code\":2}" << endl;
+        } else {
+            cerr << "Error: Unknown command '"s + command + "'." << endl;
+        }
+        return;
+    }
+
+    if (jsonOutput_s) {
+        JsonWriter writer;
+        writer.beginObject();
+        writer.key("command");
+        writer.value(command);
+        writer.key("description");
+        writer.value(iter->second.description);
+        writer.key("help");
+        writer.value(iter->second.detailedHelp);
+        writer.endObject();
+        cout << writer.result() << endl;
+        return;
+    }
+
+    cout << command << " - " << iter->second.description << "\n\n"
+         << iter->second.detailedHelp << endl;
 }
 
 

@@ -3,6 +3,7 @@
 
 
 #include <stdlib.h>
+#include <Platform.h>
 
 #include <SafeParse.h>
 #include <Log.h>
@@ -36,6 +37,9 @@
 #include <MdnsService.h>
 #include <WifiDiscovery.h>
 #include <AuthHandler.h>
+#include <MetricsHandler.h>
+#include <ApiDocsHandler.h>
+#include <AdminHandler.h>
 #include <ClusterCoordinator.h>
 #include <thread>
 #include <chrono>
@@ -43,6 +47,10 @@
 #ifdef ALPINE_FUSE_ENABLED
 #include <AlpineFuse.h>
 #include <VfsStatsHandler.h>
+#endif
+
+#ifdef ALPINE_TRACING_ENABLED
+#include <Tracing.h>
 #endif
 
 
@@ -155,11 +163,16 @@ main (int argc, char *argv[])
     //
     HttpRouter router;
 
+    StatusHandler::recordStartTime();
+
     QueryHandler::registerRoutes(router);
     PeerHandler::registerRoutes(router);
     StatusHandler::registerRoutes(router);
     AuthHandler::registerRoutes(router);
+    MetricsHandler::registerRoutes(router);
+    AdminHandler::registerRoutes(router);
     ClusterCoordinator::registerRoutes(router);
+    ApiDocsHandler::registerRoutes(router);
 
     // Initialize API key authentication
     string apiKeyConfig;
@@ -175,6 +188,33 @@ main (int argc, char *argv[])
         HttpResponse::setCorsOrigin(corsOrigin);
 
 
+    // Initialize OpenTelemetry tracing (non-fatal)
+    //
+#ifdef ALPINE_TRACING_ENABLED
+    string tracingEnabledStr;
+    string otlpEndpoint;
+    bool   tracingEnabled = false;
+
+    status = Configuration::getValue("Tracing Enabled", tracingEnabledStr);
+    if (status && (tracingEnabledStr == "true" || tracingEnabledStr == "1"))
+        tracingEnabled = true;
+
+    if (tracingEnabled) {
+        status = Configuration::getValue("OTLP Endpoint", otlpEndpoint);
+        if (!status || otlpEndpoint.empty())
+            otlpEndpoint = "http://localhost:4318/v1/traces"s;
+
+        if (Tracing::initialize("alpine-rest-bridge"s, otlpEndpoint)) {
+            Log::Info("OpenTelemetry tracing initialized (endpoint: "s + otlpEndpoint + ")");
+        } else {
+            Log::Error("OpenTelemetry tracing failed to initialize (continuing without tracing).");
+        }
+    } else {
+        Log::Info("OpenTelemetry tracing disabled by configuration.");
+    }
+#endif
+
+
     // Initialize FUSE virtual filesystem (non-fatal)
     //
 #ifdef ALPINE_FUSE_ENABLED
@@ -183,7 +223,7 @@ main (int argc, char *argv[])
     string fuseCacheTtlStr;
     string fuseFeedbackThresholdStr;
     bool   fuseEnabled = false;
-    string fuseMountPoint = "/tmp/alpine"s;
+    string fuseMountPoint = alpine_temp_dir() + "/alpine"s;
     ulong  fuseCacheTtl = 60;
     ulong  fuseFeedbackThreshold = 5;
 
@@ -614,6 +654,10 @@ main (int argc, char *argv[])
     if (contentStore) { delete contentStore; }
     if (beacon) { beacon->stop(); delete beacon; }
     if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
+
+#ifdef ALPINE_TRACING_ENABLED
+    Tracing::shutdown();
+#endif
 
 
     Log::Info(string("REST Bridge finished.  Exiting."));

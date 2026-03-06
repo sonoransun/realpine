@@ -91,8 +91,10 @@ ApplCore::initialize (int      argc,
     if (status)
         status = addSignalHandler (&defaultTerminateHandler, SIGTERM);
 
+#ifndef ALPINE_PLATFORM_WINDOWS
     if (status)
         status = addSignalHandler (&defaultChildHandler, SIGCHLD);
+#endif
 
 
     if (!status) {
@@ -109,6 +111,24 @@ ApplCore::initialize (int      argc,
         signalMonitor_s->run ();
     }
 
+#ifdef ALPINE_PLATFORM_WINDOWS
+    // Windows console control handler for graceful shutdown
+    SetConsoleCtrlHandler([](DWORD ctrlType) -> BOOL {
+        switch (ctrlType) {
+            case CTRL_C_EVENT:
+                handleSignal(SIGINT);
+                return TRUE;
+            case CTRL_BREAK_EVENT:
+                handleSignal(SIGTERM);
+                return TRUE;
+            case CTRL_CLOSE_EVENT:
+                handleSignal(SIGTERM);
+                return TRUE;
+            default:
+                return FALSE;
+        }
+    }, TRUE);
+#endif
 
     return true;
 }
@@ -367,7 +387,7 @@ ApplCore::defaultTerminateHandler ()
 
 
 
-void  
+void
 ApplCore::defaultChildHandler ()
 {
 #ifdef _VERBOSE
@@ -376,6 +396,7 @@ ApplCore::defaultChildHandler ()
 
     Log::Info ("Received SIGCHLD, checking child PIDs...");
 
+#ifndef ALPINE_PLATFORM_WINDOWS
     int childStatus;
     int result;
 
@@ -388,6 +409,7 @@ ApplCore::defaultChildHandler ()
 
     Log::Info ("Child process: "s + std::to_string (result) +
                " exited.");
+#endif
 }
 
 

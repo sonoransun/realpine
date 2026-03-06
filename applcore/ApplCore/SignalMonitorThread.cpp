@@ -18,7 +18,7 @@ SignalMonitorThread::~SignalMonitorThread () = default;
 
 
   
-void 
+void
 SignalMonitorThread::threadMain ()
 {
     // All we do here is endlessly wait for signals, then dispatch
@@ -29,7 +29,13 @@ SignalMonitorThread::threadMain ()
     threadPid = getpid ();
     Log::Info ("Signal monitor thread is process ID: "s + std::to_string (threadPid));
 
-
+#ifdef ALPINE_PLATFORM_WINDOWS
+    // Windows: signals are handled via SetConsoleCtrlHandler in ApplCore.
+    // This thread just sleeps to keep the AutoThread lifecycle alive.
+    while (true) {
+        alpine_usleep(1000000);
+    }
+#else
     int result;
     int sigNumber;
     sigset_t  sysSigSet;
@@ -68,6 +74,7 @@ SignalMonitorThread::threadMain ()
                                  std::to_string (result) + " .");
         }
     }
+#endif
 
     // should never get here...
 }

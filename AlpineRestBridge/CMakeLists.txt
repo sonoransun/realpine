@@ -23,6 +23,8 @@ add_executable(AlpineRestBridge
     StatusHandler.cpp
     AuthHandler.cpp
     MetricsHandler.cpp
+    ApiDocsHandler.cpp
+    AdminHandler.cpp
     WebSocketSession.cpp
     ClusterCoordinator.cpp
     AlpineRestBridge.cpp

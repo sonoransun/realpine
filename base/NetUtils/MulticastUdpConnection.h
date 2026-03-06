@@ -21,8 +21,14 @@ class MulticastUdpConnection : public UdpConnection
 
   private:
 
+    bool isIPv6Group () const;
+    bool createIPv4 (int fd);
+    bool createIPv6 (int fd);
+
     string              multicastGroup_;
     ushort              multicastPort_;
+    bool                isIPv6_;
     struct sockaddr_in  groupAddr_;
+    struct sockaddr_in6 groupAddr6_;
 
 };

@@ -26,5 +26,6 @@ class HttpRequest
     string  body;
 
     std::unordered_map<string, string>  headers;
+    std::unordered_map<string, string>  queryParams;
 
 };

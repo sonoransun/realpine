@@ -3,9 +3,9 @@
 
 #include <ApiKeyAuth.h>
 #include <Log.h>
+#include <Platform.h>
 #include <fstream>
 #include <cstdlib>
-#include <sys/stat.h>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <jwt-cpp/jwt.h>
@@ -39,12 +39,7 @@ ApiKeyAuth::initialize ()
     }
 
     // Try to read from file
-    string homeDir;
-    const char * home = getenv("HOME");
-    if (home)
-        homeDir = home;
-    else
-        homeDir = "/tmp";
+    string homeDir = alpine_home_dir();
 
     string keyDir  = homeDir + "/.alpine";
     string keyFile = keyDir + "/api.key";
@@ -59,17 +54,14 @@ ApiKeyAuth::initialize ()
         }
     }
 
-    // Generate a random 32-byte hex key using /dev/urandom
-    std::ifstream urandom("/dev/urandom", std::ios::binary);
-    if (!urandom.good()) {
-        Log::Error("CRITICAL: Failed to open /dev/urandom for API key generation. "
+    // Generate a random 32-byte hex key
+    byte randomBytes[32];
+    if (!alpine_random_bytes(randomBytes, sizeof(randomBytes))) {
+        Log::Error("CRITICAL: Failed to generate random bytes for API key. "
                    "All API requests will be rejected."s);
         initialized_s = true;
         return;
     }
-
-    byte randomBytes[32];
-    urandom.read(reinterpret_cast<char *>(randomBytes), sizeof(randomBytes));
 
     apiKey_s.clear();
     apiKey_s.reserve(64);
@@ -80,13 +72,13 @@ ApiKeyAuth::initialize ()
     }
 
     // Create directory if needed
-    mkdir(keyDir.c_str(), 0700);
+    alpine_mkdir(keyDir.c_str(), 0700);
 
     // Write key to file
     std::ofstream ofs(keyFile);
     if (ofs.good()) {
         ofs << apiKey_s;
-        chmod(keyFile.c_str(), 0600);
+        alpine_chmod(keyFile.c_str(), 0600);
         Log::Info("API key generated and saved to file.");
     } else {
         Log::Error("Failed to write API key to file.");

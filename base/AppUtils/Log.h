@@ -22,6 +22,10 @@ class Log
 
     static void setLogLevel (t_LogLevel logLevel);
 
+    static t_LogLevel getLogLevel ();
+
+    static std::string_view logLevelToString (t_LogLevel logLevel);
+
     static bool stringToLogLevel (std::string_view  logLevelStr,
                                   t_LogLevel &      logLevel);
 

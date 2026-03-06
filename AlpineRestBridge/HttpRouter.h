@@ -17,6 +17,13 @@ using RouteHandler = HttpResponse (*)(const HttpRequest & request,
                                       const std::unordered_map<string, string> & params);
 
 
+struct RouteInfo {
+    string  method;
+    string  pattern;
+    string  description;
+};
+
+
 class HttpRouter
 {
   public:
@@ -28,9 +35,16 @@ class HttpRouter
                     const string &  pattern,
                     RouteHandler    handler);
 
+    void  addRoute (const string &  method,
+                    const string &  pattern,
+                    RouteHandler    handler,
+                    const string &  description);
+
     HttpResponse  dispatch (const HttpRequest & request);
 
     void  setAuthMiddleware (AuthMiddleware middleware);
+
+    const vector<RouteInfo> &  getRoutes () const;
 
 
   private:
@@ -58,5 +72,6 @@ class HttpRouter
 
     TrieNode root_;
     AuthMiddleware authMiddleware_;
+    vector<RouteInfo> routes_;
 
 };

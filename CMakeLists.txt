@@ -136,10 +136,12 @@ else()
 endif()
 
 if(WIN32)
-    target_link_libraries(AlpineFlags INTERFACE ws2_32 iphlpapi)
+    target_link_libraries(AlpineFlags INTERFACE ws2_32 iphlpapi bcrypt)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(AlpineFlags INTERFACE rt dl)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_link_libraries(AlpineFlags INTERFACE dl)
+elseif(CMAKE_SYSTEM_NAME MATCHES ".*BSD|DragonFly")
     target_link_libraries(AlpineFlags INTERFACE dl)
 endif()
 
@@ -278,6 +280,7 @@ if(ALPINE_BUILD_TESTS)
     endif()
 
     add_subdirectory(test/unit)
+    add_subdirectory(test/integration)
 endif()
 
 # Fuzzing targets (requires Clang with libFuzzer)
