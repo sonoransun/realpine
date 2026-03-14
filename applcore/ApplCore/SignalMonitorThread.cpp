@@ -8,16 +8,43 @@
 #include <StringUtils.h>
 #include <Platform.h>
 
+#ifndef ALPINE_PLATFORM_WINDOWS
+#include <signal.h>
+#include <pthread.h>
+#include <cerrno>
+#endif
+
 
 
 // Ctor defaulted in header
 
 
 
-SignalMonitorThread::~SignalMonitorThread () = default;
+SignalMonitorThread::~SignalMonitorThread ()
+{
+    // Wake the thread from sigwait() so it can observe the
+    // running flag and exit, allowing join in the base destructor.
+    //
+    wakeForShutdown ();
+}
 
 
-  
+
+void
+SignalMonitorThread::wakeForShutdown ()
+{
+#ifndef ALPINE_PLATFORM_WINDOWS
+    // Send SIGUSR1 to the monitor thread to unblock sigwait().
+    //
+    if (nativeThreadValid_.load ()) {
+        pthread_t tid = nativeThread_.load ();
+        pthread_kill (tid, SIGUSR1);
+    }
+#endif
+}
+
+
+
 void
 SignalMonitorThread::threadMain ()
 {
@@ -31,52 +58,62 @@ SignalMonitorThread::threadMain ()
 
 #ifdef ALPINE_PLATFORM_WINDOWS
     // Windows: signals are handled via SetConsoleCtrlHandler in ApplCore.
-    // This thread just sleeps to keep the AutoThread lifecycle alive.
-    while (true) {
-        alpine_usleep(1000000);
+    // This thread just sleeps to keep the SysThread lifecycle alive.
+    while (shouldContinue ()) {
+        alpine_usleep(500000);
     }
 #else
+    // Store the native thread handle so wakeForShutdown() can
+    // send SIGUSR1 to unblock sigwait().
+    //
+    nativeThread_.store (pthread_self ());
+    nativeThreadValid_.store (true);
+
     int result;
     int sigNumber;
     sigset_t  sysSigSet;
     SignalSet sigSet;
     sigSet.fill ();
 
-// TEMP
+    // Add SIGUSR1 to the set so sigwait() will return when we
+    // send it during shutdown.
+    //
+    sigSet.add (SIGUSR1);
+
     ThreadSigMask::setSigMask (sigSet);
 
 
-    while (true) {
+    while (shouldContinue ()) {
 
         // Clear our signal set and wait for a signal
         //
-        //ThreadSigMask::setSigMask (sigSet);
         sigSet.getSignalSet (sysSigSet);
 
         result = sigwait (&sysSigSet, &sigNumber);
 
-        if (result == 0) {
-
-            // received a signal, mask all signals and dispatch...
-            //
-            //ThreadSigMask::setSigMask (sigSet);
-
-            string signalName;
-            SignalSet::signalAsString (sigNumber, signalName);
-
-            Log::Debug ("Received signal '"s + signalName + "' (" +
-                        std::to_string (sigNumber) + ")");
-
-            ApplCore::handleSignal (sigNumber);
-        }
-        else {
+        if (result != 0) {
             Log::Error ("Call to sigwait failed with value: "s +
                                  std::to_string (result) + " .");
+            continue;
         }
+
+        // SIGUSR1 is our shutdown wakeup signal — exit the loop.
+        //
+        if (sigNumber == SIGUSR1) {
+            break;
+        }
+
+        // Received a real signal, dispatch...
+        //
+        string signalName;
+        SignalSet::signalAsString (sigNumber, signalName);
+
+        Log::Debug ("Received signal '"s + signalName + "' (" +
+                    std::to_string (sigNumber) + ")");
+
+        ApplCore::handleSignal (sigNumber);
     }
 #endif
-
-    // should never get here...
 }
 
 

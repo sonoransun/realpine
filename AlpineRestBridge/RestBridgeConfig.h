@@ -27,11 +27,18 @@ class RestBridgeConfig
     static int   getHttpMaxConnectionsPerIp ();
     static int   getHttpIdleTimeoutSeconds ();
 
+    // Keep-alive and write timeout
+    static int   getHttpKeepAliveMaxRequests ();
+    static int   getHttpWriteTimeoutSeconds ();
+
+    // Shutdown drain
+    static int   getShutdownDrainSeconds ();
+
 
   private:
 
     static ConfigData::t_ConfigElementList *  configElements_s;
 
-    static int  getIntConfig (const string & name, int defaultValue);
+    static int  getIntConfig (const string & name, int defaultValue, int minValue, int maxValue);
 
 };

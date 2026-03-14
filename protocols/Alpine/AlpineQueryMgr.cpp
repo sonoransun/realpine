@@ -24,7 +24,7 @@ static inline void  wakeEventLoop () { AlpineStack::notifyEvent(); }
 
 bool                                                      AlpineQueryMgr::initialized_s = false;
 ulong                                                     AlpineQueryMgr::maxConncurent_s = 0;
-ulong                                                     AlpineQueryMgr::currQueryId_s = 0;
+std::atomic<ulong>                                        AlpineQueryMgr::currQueryId_s = 0;
 std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::activeQueryIndex_s;
 std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::pastQueryIndex_s;
 std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::activePeerQueryIndex_s;
@@ -96,12 +96,16 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     Log::Debug ("AlpineQueryMgr::createQuery invoked.");
 #endif
 
-    WriteLock  lock(activeQueryLock_s);
+    // Early initialization check under ReadLock
+    {
+        ReadLock  lock(activeQueryLock_s);
 
-    if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::createQuery before initialization!");
-        return false;
+        if (!initialized_s) {
+            Log::Error ("Call to AlpineQueryMgr::createQuery before initialization!");
+            return false;
+        }
     }
+
     /////
     // The steps required to create query are:
     //
@@ -110,8 +114,10 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     // - Kick off the query broadcast...
     /////
 
-    queryId = currQueryId_s++;
+    // Atomic increment — no lock required.
+    queryId = currQueryId_s.fetch_add(1, std::memory_order_relaxed);
 
+    // Build the query state object outside the lock.
     auto newState = std::make_unique<t_QueryState>();
 
     newState->queryId = queryId;
@@ -130,7 +136,7 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         Log::Error ("getPeerIdList for query failed in call to AlpineQueryMgr::createQuery!");
         return false;
     }
-    // Activate query
+    // Activate query — operates on the local newState, not yet in the index.
     status = newState->query->startQuery ();
 
     if (!status) {
@@ -139,12 +145,39 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         Log::Error ("startQuery failed in call to AlpineQueryMgr::createQuery!");
         return false;
     }
-    // Index state by query ID and member peer ID's
-    //
-    activeQueryIndex_s->emplace (queryId, std::move(newState));
+
+    // Acquire WriteLock only for index mutations.
+    {
+        WriteLock  lock(activeQueryLock_s);
+
+        // Index state by query ID and member peer ID's
+        //
+        activeQueryIndex_s->emplace (queryId, std::move(newState));
+
+        ulong  currPeerId;
+
+        for (auto& item : peerIdList) {
+
+            currPeerId = item;
+
+            // If there is an existing queryIdList, we simply add this query ID to the list.
+            // Otherwise allocate a new list with this query ID as the sole member.
+            //
+            auto peerIter = activePeerQueryIndex_s->find (currPeerId);
+
+            if (peerIter == activePeerQueryIndex_s->end ()) {
+                auto idList = std::make_unique<t_QueryIdList>();
+                idList->push_back (queryId);
+                activePeerQueryIndex_s->emplace (currPeerId, std::move(idList));
+            }
+            else {
+                peerIter->second->push_back (queryId);
+            }
+        }
+    }
 
 #ifdef ALPINE_ENABLE_PERSISTENCE
-    // Write WAL entry for crash recovery
+    // Write WAL entry for crash recovery (outside the lock)
     if (PersistenceStore::isInitialized()) {
         string queryString;
         options.getQuery(queryString);
@@ -157,27 +190,6 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
             "wal:"s + std::to_string(queryId), queryString, now);
     }
 #endif
-
-    ulong  currPeerId;
-
-    for (auto& item : peerIdList) {
-
-        currPeerId = item;
-
-        // If there is an existing queryIdList, we simply add this query ID to the list.
-        // Otherwise allocate a new list with this query ID as the sole member.
-        //
-        auto peerIter = activePeerQueryIndex_s->find (currPeerId);
-
-        if (peerIter == activePeerQueryIndex_s->end ()) {
-            auto idList = std::make_unique<t_QueryIdList>();
-            idList->push_back (queryId);
-            activePeerQueryIndex_s->emplace (currPeerId, std::move(idList));
-        }
-        else {
-            peerIter->second->push_back (queryId);
-        }
-    }
 
     wakeEventLoop();
 
@@ -692,7 +704,7 @@ AlpineQueryMgr::handleQueryDiscover (ulong                peerId,
                 std::to_string (peerId));
 #endif
 
-    WriteLock  lock(activeQueryLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryDiscover before initialization!");
@@ -718,7 +730,7 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     // by the AlpineGroup for that group.
     //
 
-    WriteLock  lock(activeQueryLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryOffer before initialization!");
@@ -741,6 +753,8 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     }
     auto & currState = iter->second;
 
+    // Acquire per-query mutex for mutation of per-query state.
+    std::unique_lock qlock(currState->queryMutex);
 
     // Process this offer packet.  If correct, a response packet will be populated for transfer
     // back to peer.  This starts the actual transfer of resource locators.
@@ -798,7 +812,7 @@ AlpineQueryMgr::handleQueryRequest (ulong                peerId,
                 std::to_string (peerId));
 #endif
 
-    WriteLock  lock(activeQueryLock_s);
+    ReadLock  lock(activeQueryLock_s);
 
     if (!initialized_s) {
         Log::Error ("Call to AlpineQueryMgr::handleQueryRequest before initialization!");

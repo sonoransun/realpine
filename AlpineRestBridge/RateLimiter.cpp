@@ -56,10 +56,16 @@ RateLimiter::normalizeIp (const string & ip)
 bool
 RateLimiter::allowRequest (const string & clientIp)
 {
+    return allowRequestNormalized(normalizeIp(clientIp));
+}
+
+
+bool
+RateLimiter::allowRequestNormalized (const string & normalizedIp)
+{
     if (!initialized_s)
         return true;
 
-    auto normalizedIp = normalizeIp(clientIp);
     auto & shard = shards_s[shardIndex(normalizedIp)];
     auto now = std::chrono::steady_clock::now();
 

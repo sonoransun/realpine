@@ -4,6 +4,11 @@
 #include <ConfigFile.h>
 #include <Log.h>
 #include <StringUtils.h>
+#include <Platform.h>
+
+#ifdef ALPINE_PLATFORM_POSIX
+#include <sys/stat.h>
+#endif
 
 
 
@@ -30,6 +35,15 @@ ConfigFile::initialize (const string & fileName)
 #endif
 
     fileName_ = fileName;
+
+#ifdef ALPINE_PLATFORM_POSIX
+    struct stat fileStat;
+    if (stat(fileName_.c_str(), &fileStat) == 0) {
+        if (fileStat.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
+            Log::Error("WARNING: Config file '"s + fileName_ + "' has insecure permissions. Recommend chmod 600."s);
+        }
+    }
+#endif
 
     return true;
 }

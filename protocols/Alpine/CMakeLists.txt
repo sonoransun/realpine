@@ -14,6 +14,7 @@ add_library(AlpineProtocol
     AlpineGroupMgr.cpp
     AlpineModuleMgr.cpp
     AlpinePacket.cpp
+    PacketAuth.cpp
     AlpinePeerLocation.cpp
     AlpinePeerMgr.cpp
     AlpinePeerOptionData.cpp
@@ -51,3 +52,8 @@ target_link_libraries(AlpineProtocol PUBLIC
     Alpine::TransBase
     AlpineTransportHeaders
 )
+
+if(ALPINE_ENABLE_TLS)
+    target_link_libraries(AlpineProtocol PRIVATE OpenSSL::Crypto)
+    target_compile_definitions(AlpineProtocol PRIVATE ALPINE_TLS_ENABLED)
+endif()

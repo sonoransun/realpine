@@ -12,6 +12,7 @@
 #include <thread>
 #include <mutex>
 #include <queue>
+#include <array>
 #include <unordered_map>
 #include <chrono>
 #include <condition_variable>
@@ -41,8 +42,33 @@ class HttpServer
 
     void  stop ();
 
+    [[nodiscard]] int  getActiveConnections () const;
+
 
   private:
+
+    // --- RAII guard for connection resource cleanup ---
+    class ConnectionGuard
+    {
+      public:
+
+        ConnectionGuard (HttpServer & server, string clientIp);
+        ~ConnectionGuard ();
+
+        ConnectionGuard (const ConnectionGuard &)             = delete;
+        ConnectionGuard & operator= (const ConnectionGuard &) = delete;
+
+        void  setBusy ();
+        void  clearBusy ();
+        void  setSlotAcquired ();
+
+      private:
+
+        HttpServer &  server_;
+        string        clientIp_;
+        bool          busy_{false};
+        bool          slotAcquired_{false};
+    };
 
     void  doAccept ();
     void  handleConnection (asio::ip::tcp::socket socket);
@@ -53,7 +79,9 @@ class HttpServer
 #endif
 
     template <typename Stream>
-    void  processRequest (Stream & stream);
+    void  processRequest (Stream &          stream,
+                          const string &    clientIp,
+                          ConnectionGuard & guard);
 
     void  upgradeToWebSocket (asio::ip::tcp::socket  socket,
                               const HttpRequest &    request);
@@ -63,7 +91,7 @@ class HttpServer
     void  monitorPool ();
     void  sendServiceUnavailable (asio::ip::tcp::socket & socket);
 
-    // --- Per-IP tracking ---
+    // --- Per-IP tracking (sharded) ---
     bool  acquireConnectionSlot (const string & ip);
     void  releaseConnectionSlot (const string & ip);
 
@@ -91,9 +119,17 @@ class HttpServer
     // Connection tracking
     std::atomic<int>  activeConnections_{0};
 
-    // Per-IP connection counts
-    std::unordered_map<string, int>  ipConnectionCounts_;
-    std::mutex                       ipCountMutex_;
+    // Per-IP connection counts — sharded to reduce lock contention
+    static constexpr size_t IP_SHARD_COUNT = 16;
+
+    struct t_IpShard {
+        std::mutex                           mutex;
+        std::unordered_map<string, int>      counts;
+    };
+
+    std::array<t_IpShard, IP_SHARD_COUNT>    ipShards_;
+
+    [[nodiscard]] size_t  ipShardIndex (const string & ip) const;
 
     // Connection queue for overflow
     std::queue<asio::ip::tcp::socket>  connectionQueue_;
@@ -106,5 +142,7 @@ class HttpServer
     int  maxConnections_{512};
     int  maxConnectionsPerIp_{16};
     int  idleTimeoutSeconds_{60};
+    int  keepAliveMaxRequests_{100};
+    int  writeTimeoutSeconds_{10};
 
 };

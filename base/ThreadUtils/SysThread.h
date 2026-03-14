@@ -38,6 +38,15 @@ class SysThread
 
 
 
+  protected:
+
+    /// Returns true while the thread should keep running.
+    /// Subclasses should check this in their thread loop to
+    /// support clean join-on-destroy shutdown.
+    ///
+    [[nodiscard]] bool shouldContinue () const;
+
+
   private:
 
     std::thread     thread_;

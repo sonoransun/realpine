@@ -178,12 +178,14 @@ UdpConnection::sendData (const ulong    destIpAddress,
     }
 
     int result;
-    result = sendto(connectionFd_,
-                    sendBuffer,
-                    dataLength,
-                    0,  // No options
-                    reinterpret_cast<const struct sockaddr *>(&connectionAddress_),
-                    addressSize_);
+    do {
+        result = sendto(connectionFd_,
+                        sendBuffer,
+                        dataLength,
+                        0,  // No options
+                        reinterpret_cast<const struct sockaddr *>(&connectionAddress_),
+                        addressSize_);
+    } while (result < 0 && alpine_socket_errno() == EINTR);
 
     if (result < 0) {
         if (alpine_socket_errno() == EAGAIN) {
@@ -230,12 +232,14 @@ UdpConnection::receiveData (byte *     dataBuffer,
     socklen_t incomingAddrSize = sizeof(connectionAddress_);
 
     int result;
-    result = recvfrom (connectionFd_,
-                       dataBuffer,
-                       bufferLength,
-                       0,  // No options
-                       reinterpret_cast<struct sockaddr *>(&connectionAddress_),
-                       &incomingAddrSize);
+    do {
+        result = recvfrom (connectionFd_,
+                           dataBuffer,
+                           bufferLength,
+                           0,  // No options
+                           reinterpret_cast<struct sockaddr *>(&connectionAddress_),
+                           &incomingAddrSize);
+    } while (result < 0 && alpine_socket_errno() == EINTR);
 
     if (result < 0) {
         if (alpine_socket_errno() == EAGAIN) {

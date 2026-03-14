@@ -4,12 +4,13 @@
 #pragma once
 #include <Common.h>
 #include <string>
+#include <string_view>
 
 
 class StringUtils
 {
   public:
-
+    static string sanitizeForLog(std::string_view input);
 };
 
 

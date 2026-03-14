@@ -17,7 +17,13 @@ enum class AlpineError {
     AuthenticationFailed,
     AuthenticationRequired,
     DeviceNotEnrolled,
-    ChallengeExpired
+    ChallengeExpired,
+    ResourceExhausted,
+    NetworkError,
+    SerializationError,
+    ConfigurationError,
+    RateLimited,
+    ShutdownInProgress
 };
 
 constexpr std::string_view errorToString(AlpineError error) {
@@ -35,6 +41,12 @@ constexpr std::string_view errorToString(AlpineError error) {
         case AlpineError::AuthenticationRequired: return "Authentication required";
         case AlpineError::DeviceNotEnrolled:      return "Device not enrolled";
         case AlpineError::ChallengeExpired:       return "Challenge expired";
+        case AlpineError::ResourceExhausted:     return "Resource exhausted";
+        case AlpineError::NetworkError:          return "Network error";
+        case AlpineError::SerializationError:    return "Serialization error";
+        case AlpineError::ConfigurationError:    return "Configuration error";
+        case AlpineError::RateLimited:           return "Rate limited";
+        case AlpineError::ShutdownInProgress:    return "Shutdown in progress";
     }
     return "Unknown error";
 }

@@ -8,6 +8,7 @@
 #include <WebSocketSession.h>
 #include <RateLimiter.h>
 #include <RestBridgeConfig.h>
+#include <StringUtils.h>
 #include <Log.h>
 #include <Platform.h>
 
@@ -21,6 +22,7 @@
 #endif
 
 static constexpr ulong MAX_BODY_SIZE = 65536;
+static constexpr ulong READ_BUFFER_SIZE = 65536;
 
 
 static string
@@ -58,11 +60,18 @@ HttpServer::start (ulong   ipAddress,
                    ushort  port)
 {
     // Load configurable limits
-    minThreads_          = RestBridgeConfig::getHttpMinThreads();
-    maxThreads_          = RestBridgeConfig::getHttpMaxThreads();
-    maxConnections_      = RestBridgeConfig::getHttpMaxConnections();
-    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
-    idleTimeoutSeconds_  = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    minThreads_            = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_            = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_        = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_   = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_    = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    keepAliveMaxRequests_  = RestBridgeConfig::getHttpKeepAliveMaxRequests();
+    writeTimeoutSeconds_   = RestBridgeConfig::getHttpWriteTimeoutSeconds();
+
+    if (minThreads_ > maxThreads_) {
+        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s + std::to_string(maxThreads_) + "). Adjusting max to match min."s);
+        maxThreads_ = minThreads_;
+    }
 
     try {
         asio::ip::address addr;
@@ -113,11 +122,18 @@ HttpServer::startTls (ulong         ipAddress,
     }
 
     // Load configurable limits
-    minThreads_          = RestBridgeConfig::getHttpMinThreads();
-    maxThreads_          = RestBridgeConfig::getHttpMaxThreads();
-    maxConnections_      = RestBridgeConfig::getHttpMaxConnections();
-    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
-    idleTimeoutSeconds_  = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    minThreads_            = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_            = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_        = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_   = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_    = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    keepAliveMaxRequests_  = RestBridgeConfig::getHttpKeepAliveMaxRequests();
+    writeTimeoutSeconds_   = RestBridgeConfig::getHttpWriteTimeoutSeconds();
+
+    if (minThreads_ > maxThreads_) {
+        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s + std::to_string(maxThreads_) + "). Adjusting max to match min."s);
+        maxThreads_ = minThreads_;
+    }
 
     try {
         tlsContext_ = &tlsCtx;
@@ -138,6 +154,13 @@ HttpServer::startTls (ulong         ipAddress,
         sslContext_->set_options(asio::ssl::context::default_workarounds |
                                 asio::ssl::context::no_sslv2 |
                                 asio::ssl::context::no_sslv3);
+
+        // Harden cipher suites: modern AEAD ciphers only
+        SSL_CTX_set_ciphersuites(nativeCtx,
+            "TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256");
+        SSL_CTX_set_cipher_list(nativeCtx,
+            "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
+        SSL_CTX_set_options(nativeCtx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 
         asio::ip::address addr;
         if (ipAddress == 0) {
@@ -282,13 +305,29 @@ HttpServer::sendServiceUnavailable (asio::ip::tcp::socket & socket)
 }
 
 
+int
+HttpServer::getActiveConnections () const
+{
+    return activeConnections_.load();
+}
+
+
+size_t
+HttpServer::ipShardIndex (const string & ip) const
+{
+    return std::hash<string>{}(ip) % IP_SHARD_COUNT;
+}
+
+
 bool
 HttpServer::acquireConnectionSlot (const string & ip)
 {
-    std::lock_guard lock(ipCountMutex_);
-    auto & count = ipConnectionCounts_[ip];
-    if (count >= maxConnectionsPerIp_)
+    auto & shard = ipShards_[ipShardIndex(ip)];
+    std::lock_guard lock(shard.mutex);
+    auto & count = shard.counts[ip];
+    if (count >= maxConnectionsPerIp_) {
         return false;
+    }
     ++count;
     return true;
 }
@@ -297,13 +336,63 @@ HttpServer::acquireConnectionSlot (const string & ip)
 void
 HttpServer::releaseConnectionSlot (const string & ip)
 {
-    std::lock_guard lock(ipCountMutex_);
-    auto it = ipConnectionCounts_.find(ip);
-    if (it != ipConnectionCounts_.end()) {
+    auto & shard = ipShards_[ipShardIndex(ip)];
+    std::lock_guard lock(shard.mutex);
+    auto it = shard.counts.find(ip);
+    if (it != shard.counts.end()) {
         --it->second;
-        if (it->second <= 0)
-            ipConnectionCounts_.erase(it);
+        if (it->second <= 0) {
+            shard.counts.erase(it);
+        }
     }
+}
+
+
+// --- ConnectionGuard RAII ---
+
+HttpServer::ConnectionGuard::ConnectionGuard (HttpServer & server, string clientIp)
+    : server_(server),
+      clientIp_(std::move(clientIp))
+{
+}
+
+
+HttpServer::ConnectionGuard::~ConnectionGuard ()
+{
+    if (busy_) {
+        --server_.busyWorkers_;
+    }
+    if (slotAcquired_ && !clientIp_.empty()) {
+        server_.releaseConnectionSlot(clientIp_);
+    }
+    --server_.activeConnections_;
+}
+
+
+void
+HttpServer::ConnectionGuard::setBusy ()
+{
+    if (!busy_) {
+        ++server_.busyWorkers_;
+        busy_ = true;
+    }
+}
+
+
+void
+HttpServer::ConnectionGuard::clearBusy ()
+{
+    if (busy_) {
+        --server_.busyWorkers_;
+        busy_ = false;
+    }
+}
+
+
+void
+HttpServer::ConnectionGuard::setSlotAcquired ()
+{
+    slotAcquired_ = true;
 }
 
 
@@ -400,38 +489,46 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
     try {
         auto remoteEp = socket.remote_endpoint();
         clientIp = RateLimiter::normalizeIp(remoteEp.address().to_string());
+    } catch (const std::exception & e) {
+        Log::Error("HttpServer: failed to get remote endpoint: "s + e.what());
+        --activeConnections_;
+        return;
+    }
+
+    ConnectionGuard guard(*this, clientIp);
+
+    try {
+        // Enable TCP_NODELAY to avoid Nagle delays on small responses
+        asio::error_code noDelayEc;
+        socket.set_option(asio::ip::tcp::no_delay(true), noDelayEc);
 
         // Per-IP connection limit
         if (!acquireConnectionSlot(clientIp)) {
             auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setConnectionClose();
             resp.setJsonBody("{\"error\":\"Per-IP connection limit exceeded\"}"s);
             auto respStr = resp.build();
             asio::error_code ec;
             asio::write(socket, asio::buffer(respStr), ec);
-            --activeConnections_;
             return;
         }
+        guard.setSlotAcquired();
 
-        ++busyWorkers_;
-
-        // Rate limiting check
-        if (!RateLimiter::allowRequest(clientIp)) {
-            asio::error_code ec;
+        // Rate limiting check (use pre-normalized IP)
+        if (!RateLimiter::allowRequestNormalized(clientIp)) {
             auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setConnectionClose();
             resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}"s);
             auto respStr = resp.build();
+            asio::error_code ec;
             asio::write(socket, asio::buffer(respStr), ec);
-            --busyWorkers_;
-            releaseConnectionSlot(clientIp);
-            --activeConnections_;
             return;
         }
 
-        // Set idle timeout on the socket
+        // Set idle timeout (receive) on the socket
         if (idleTimeoutSeconds_ > 0) {
             asio::socket_base::linger lingerOpt(true, idleTimeoutSeconds_);
             socket.set_option(lingerOpt);
-            // Use SO_RCVTIMEO for read idle timeout
             struct timeval tv;
             tv.tv_sec  = idleTimeoutSeconds_;
             tv.tv_usec = 0;
@@ -439,85 +536,110 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
                        reinterpret_cast<const char *>(&tv), sizeof(tv));
         }
 
-        // Peek at the request to check for WebSocket upgrade
-        asio::error_code ec;
-        std::vector<byte> buffer(65536);
-        auto bytesRead = socket.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
-        if (ec || bytesRead == 0) {
-            --busyWorkers_;
-            releaseConnectionSlot(clientIp);
-            --activeConnections_;
-            return;
+        // Set write timeout on the socket
+        if (writeTimeoutSeconds_ > 0) {
+            struct timeval sendTv;
+            sendTv.tv_sec  = writeTimeoutSeconds_;
+            sendTv.tv_usec = 0;
+            setsockopt(socket.native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                       reinterpret_cast<const char *>(&sendTv), sizeof(sendTv));
         }
 
-        HttpRequest request;
-        if (!HttpRequest::parse(buffer.data(), bytesRead, request)) {
-            auto resp = HttpResponse::badRequest("Malformed HTTP request");
-            auto respStr = resp.build();
-            asio::write(socket, asio::buffer(respStr), ec);
-            --busyWorkers_;
-            releaseConnectionSlot(clientIp);
-            --activeConnections_;
-            return;
-        }
+        // Keep-alive loop: process multiple requests on the same connection
+        thread_local std::vector<byte> readBuffer(READ_BUFFER_SIZE);
+        int requestCount = 0;
 
-        if (WebSocketSession::isWebSocketUpgrade(request.headers)) {
-            --busyWorkers_;
-            upgradeToWebSocket(std::move(socket), request);
-            releaseConnectionSlot(clientIp);
-            return;
-        }
+        while (running_) {
+            // Read request using thread-local buffer to avoid per-connection allocation
+            asio::error_code ec;
+            auto bytesRead = socket.read_some(asio::buffer(readBuffer.data(), readBuffer.size()), ec);
+            if (ec || bytesRead == 0)
+                break;
 
-        // Generate correlation ID
-        auto requestId = generateRequestId();
-        Log::setCorrelationId(requestId);
+            HttpRequest request;
+            if (!HttpRequest::parse(readBuffer.data(), bytesRead, request)) {
+                auto resp = HttpResponse::badRequest("Malformed HTTP request");
+                resp.setConnectionClose();
+                auto respStr = resp.build();
+                asio::write(socket, asio::buffer(respStr), ec);
+                break;
+            }
 
-        auto startTime = std::chrono::steady_clock::now();
+            // WebSocket upgrade ends the keep-alive loop
+            if (WebSocketSession::isWebSocketUpgrade(request.headers)) {
+                upgradeToWebSocket(std::move(socket), request);
+                return;
+            }
+
+            guard.setBusy();
+
+            // Generate correlation ID
+            auto requestId = generateRequestId();
+            Log::setCorrelationId(requestId);
+
+            auto startTime = std::chrono::steady_clock::now();
 
 #ifdef ALPINE_TRACING_ENABLED
-        ScopedSpan rootSpan("http.request"s);
-        rootSpan.addAttribute("http.method"s, request.method);
-        rootSpan.addAttribute("http.path"s, request.path);
-        rootSpan.addAttribute("net.peer.ip"s, clientIp);
-        rootSpan.addAttribute("http.request_id"s, requestId);
+            ScopedSpan rootSpan("http.request"s);
+            rootSpan.addAttribute("http.method"s, request.method);
+            rootSpan.addAttribute("http.path"s, request.path);
+            rootSpan.addAttribute("net.peer.ip"s, clientIp);
+            rootSpan.addAttribute("http.request_id"s, requestId);
 #endif
 
-        // Normal HTTP: dispatch
-        auto response = router_.dispatch(request);
-        response.setRequestId(requestId);
-        auto responseStr = response.build();
-        asio::write(socket, asio::buffer(responseStr), ec);
+            // Dispatch the request
+            auto response = router_.dispatch(request);
+            response.setRequestId(requestId);
 
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - startTime).count();
+            // Determine whether to close after this response
+            ++requestCount;
+            auto connIt = request.headers.find("connection"s);
+            bool clientRequestedClose = (connIt != request.headers.end() &&
+                                         connIt->second.contains("close"s));
+            bool lastRequest = clientRequestedClose ||
+                               requestCount >= keepAliveMaxRequests_;
+
+            if (lastRequest) {
+                response.setConnectionClose();
+            } else {
+                response.setKeepAliveParams(idleTimeoutSeconds_,
+                                            keepAliveMaxRequests_ - requestCount);
+            }
+
+            auto responseStr = response.build();
+            asio::write(socket, asio::buffer(responseStr), ec);
+
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - startTime).count();
 
 #ifdef ALPINE_TRACING_ENABLED
-        rootSpan.addAttribute("http.status_code"s, std::to_string(response.statusCode()));
-        rootSpan.addAttribute("http.latency_ms"s, std::to_string(elapsed));
-        rootSpan.setStatus(response.statusCode() < 400);
+            rootSpan.addAttribute("http.status_code"s, std::to_string(response.statusCode()));
+            rootSpan.addAttribute("http.latency_ms"s, std::to_string(elapsed));
+            rootSpan.setStatus(response.statusCode() < 400);
 #endif
 
-        Log::Info("request"s, {
-            {"method"s,     request.method},
-            {"path"s,       request.path},
-            {"client_ip"s,  clientIp},
-            {"status"s,     std::to_string(response.statusCode())},
-            {"latency_ms"s, std::to_string(elapsed)},
-            {"size"s,       std::to_string(responseStr.size())},
-            {"request_id"s, requestId}
-        });
+            Log::Info("request"s, {
+                {"method"s,     StringUtils::sanitizeForLog(request.method)},
+                {"path"s,       StringUtils::sanitizeForLog(request.path)},
+                {"client_ip"s,  clientIp},
+                {"status"s,     std::to_string(response.statusCode())},
+                {"latency_ms"s, std::to_string(elapsed)},
+                {"size"s,       std::to_string(responseStr.size())},
+                {"request_id"s, requestId}
+            });
 
-        Log::clearCorrelationId();
+            Log::clearCorrelationId();
+
+            guard.clearBusy();
+
+            if (ec || lastRequest)
+                break;
+        }
 
     } catch (const std::exception & e) {
         Log::Error("HttpServer::handleConnection exception: "s + e.what());
         Log::clearCorrelationId();
     }
-
-    --busyWorkers_;
-    if (!clientIp.empty())
-        releaseConnectionSlot(clientIp);
-    --activeConnections_;
 }
 
 
@@ -526,8 +648,9 @@ void
 HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream)
 {
     string clientIp;
+
+    // Perform TLS handshake before creating guard (can't get IP until handshake)
     try {
-        // Perform TLS handshake
         asio::error_code hsEc;
         stream.handshake(asio::ssl::stream_base::server, hsEc);
         if (hsEc) {
@@ -538,34 +661,52 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
 
         auto remoteEp = stream.lowest_layer().remote_endpoint();
         clientIp = RateLimiter::normalizeIp(remoteEp.address().to_string());
+    } catch (const std::exception & e) {
+        Log::Error("HttpServer: TLS connection setup failed: "s + e.what());
+        --activeConnections_;
+        return;
+    }
+
+    ConnectionGuard guard(*this, clientIp);
+
+    try {
+        // Enable TCP_NODELAY on the underlying socket
+        asio::error_code noDelayEc;
+        stream.lowest_layer().set_option(asio::ip::tcp::no_delay(true), noDelayEc);
 
         // Per-IP connection limit
         if (!acquireConnectionSlot(clientIp)) {
             auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setConnectionClose();
             resp.setJsonBody("{\"error\":\"Per-IP connection limit exceeded\"}"s);
             auto respStr = resp.build();
             asio::error_code ec;
             asio::write(stream, asio::buffer(respStr), ec);
-            --activeConnections_;
             return;
         }
+        guard.setSlotAcquired();
 
-        ++busyWorkers_;
-
-        // Rate limiting check
-        if (!RateLimiter::allowRequest(clientIp)) {
-            asio::error_code ec;
+        // Rate limiting check (use pre-normalized IP)
+        if (!RateLimiter::allowRequestNormalized(clientIp)) {
             auto resp = HttpResponse(429, "Too Many Requests");
+            resp.setConnectionClose();
             resp.setJsonBody("{\"error\":\"Rate limit exceeded\"}"s);
             auto respStr = resp.build();
+            asio::error_code ec;
             asio::write(stream, asio::buffer(respStr), ec);
-            --busyWorkers_;
-            releaseConnectionSlot(clientIp);
-            --activeConnections_;
             return;
         }
 
-        processRequest(stream);
+        // Set write timeout on the underlying socket
+        if (writeTimeoutSeconds_ > 0) {
+            struct timeval sendTv;
+            sendTv.tv_sec  = writeTimeoutSeconds_;
+            sendTv.tv_usec = 0;
+            setsockopt(stream.lowest_layer().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                       reinterpret_cast<const char *>(&sendTv), sizeof(sendTv));
+        }
+
+        processRequest(stream, clientIp, guard);
 
         // Graceful TLS shutdown
         asio::error_code shutdownEc;
@@ -574,11 +715,6 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
     } catch (const std::exception & e) {
         Log::Error("HttpServer::handleTlsConnection exception: "s + e.what());
     }
-
-    --busyWorkers_;
-    if (!clientIp.empty())
-        releaseConnectionSlot(clientIp);
-    --activeConnections_;
 }
 #endif
 
@@ -593,8 +729,7 @@ HttpServer::upgradeToWebSocket (asio::ip::tcp::socket  socket,
         auto resp = HttpResponse::badRequest("Missing Sec-WebSocket-Key header");
         auto respStr = resp.build();
         asio::write(socket, asio::buffer(respStr), ec);
-        --activeConnections_;
-        return;
+        return;  // ConnectionGuard in caller handles cleanup
     }
 
     // Send handshake response
@@ -603,8 +738,7 @@ HttpServer::upgradeToWebSocket (asio::ip::tcp::socket  socket,
     asio::write(socket, asio::buffer(handshake), ec);
     if (ec) {
         Log::Error("WebSocket handshake write failed: "s + ec.message());
-        --activeConnections_;
-        return;
+        return;  // ConnectionGuard in caller handles cleanup
     }
 
     Log::Info("WebSocket connection established"s);
@@ -612,64 +746,117 @@ HttpServer::upgradeToWebSocket (asio::ip::tcp::socket  socket,
     // Create session and run it (blocking on this thread until close)
     auto session = std::make_shared<WebSocketSession>(std::move(socket));
     session->start();
-
-    --activeConnections_;
+    // ConnectionGuard in caller handles activeConnections_ cleanup
 }
 
 
 template <typename Stream>
 void
-HttpServer::processRequest (Stream & stream)
+HttpServer::processRequest (Stream &          stream,
+                            const string &    clientIp,
+                            ConnectionGuard & guard)
 {
-    asio::error_code ec;
+    // Reuse thread-local buffer to avoid per-connection allocation
+    thread_local std::vector<byte> buffer(READ_BUFFER_SIZE);
+    int requestCount = 0;
 
-    std::vector<byte> buffer(65536);
-    ulong totalRead = 0;
+    while (running_) {
+        asio::error_code ec;
 
-    // Read headers first
-    auto bytesRead = stream.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
-    if (ec || bytesRead == 0)
-        return;
-    totalRead = bytesRead;
+        // Read headers first
+        auto bytesRead = stream.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
+        if (ec || bytesRead == 0)
+            break;
 
-    // Parse the request
-    HttpRequest request;
-    if (!HttpRequest::parse(buffer.data(), totalRead, request)) {
-        auto resp = HttpResponse::badRequest("Malformed HTTP request");
-        auto respStr = resp.build();
-        asio::write(stream, asio::buffer(respStr), ec);
-        return;
-    }
+        ulong totalRead = bytesRead;
 
-    // Check for Content-Length and read body if needed
-    auto clIt = request.headers.find("content-length");
-    if (clIt != request.headers.end()) {
-        auto contentLengthOpt = parseUlong(clIt->second);
-        if (!contentLengthOpt) {
-            auto resp = HttpResponse::badRequest("Invalid Content-Length");
+        // Parse the request
+        HttpRequest request;
+        if (!HttpRequest::parse(buffer.data(), totalRead, request)) {
+            auto resp = HttpResponse::badRequest("Malformed HTTP request");
+            resp.setConnectionClose();
             auto respStr = resp.build();
             asio::write(stream, asio::buffer(respStr), ec);
-            return;
-        }
-        ulong contentLength = *contentLengthOpt;
-        if (contentLength > MAX_BODY_SIZE) {
-            auto resp = HttpResponse(413, "Payload Too Large");
-            resp.setBody("Request body too large");
-            auto respStr = resp.build();
-            asio::write(stream, asio::buffer(respStr), ec);
-            return;
+            break;
         }
 
-        while (request.body.length() < contentLength) {
-            bytesRead = stream.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
-            if (ec || bytesRead == 0)
+        // Check for Content-Length and read body if needed
+        auto clIt = request.headers.find("content-length"s);
+        if (clIt != request.headers.end()) {
+            auto contentLengthOpt = parseUlong(clIt->second);
+            if (!contentLengthOpt) {
+                auto resp = HttpResponse::badRequest("Invalid Content-Length");
+                resp.setConnectionClose();
+                auto respStr = resp.build();
+                asio::write(stream, asio::buffer(respStr), ec);
                 break;
-            request.body.append(reinterpret_cast<const char *>(buffer.data()), bytesRead);
-        }
-    }
+            }
+            ulong contentLength = *contentLengthOpt;
+            if (contentLength > MAX_BODY_SIZE) {
+                auto resp = HttpResponse(413, "Payload Too Large");
+                resp.setConnectionClose();
+                resp.setBody("Request body too large"s);
+                auto respStr = resp.build();
+                asio::write(stream, asio::buffer(respStr), ec);
+                break;
+            }
 
-    // Dispatch
-    auto response = router_.dispatch(request);
-    auto responseStr = response.build();
-    asio::write(stream, asio::buffer(responseStr), ec);
+            while (request.body.length() < contentLength) {
+                bytesRead = stream.read_some(asio::buffer(buffer.data(), buffer.size()), ec);
+                if (ec || bytesRead == 0)
+                    break;
+                request.body.append(reinterpret_cast<const char *>(buffer.data()), bytesRead);
+            }
+        }
+
+        guard.setBusy();
+
+        // Generate correlation ID
+        auto requestId = generateRequestId();
+        Log::setCorrelationId(requestId);
+
+        auto startTime = std::chrono::steady_clock::now();
+
+        // Dispatch
+        auto response = router_.dispatch(request);
+        response.setRequestId(requestId);
+
+        // Determine whether to close after this response
+        ++requestCount;
+        auto connIt = request.headers.find("connection"s);
+        bool clientRequestedClose = (connIt != request.headers.end() &&
+                                     connIt->second.contains("close"s));
+        bool lastRequest = clientRequestedClose ||
+                           requestCount >= keepAliveMaxRequests_;
+
+        if (lastRequest) {
+            response.setConnectionClose();
+        } else {
+            response.setKeepAliveParams(idleTimeoutSeconds_,
+                                        keepAliveMaxRequests_ - requestCount);
+        }
+
+        auto responseStr = response.build();
+        asio::write(stream, asio::buffer(responseStr), ec);
+
+        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - startTime).count();
+
+        Log::Info("request"s, {
+            {"method"s,     StringUtils::sanitizeForLog(request.method)},
+            {"path"s,       StringUtils::sanitizeForLog(request.path)},
+            {"client_ip"s,  clientIp},
+            {"status"s,     std::to_string(response.statusCode())},
+            {"latency_ms"s, std::to_string(elapsed)},
+            {"size"s,       std::to_string(responseStr.size())},
+            {"request_id"s, requestId}
+        });
+
+        Log::clearCorrelationId();
+
+        guard.clearBusy();
+
+        if (ec || lastRequest)
+            break;
+    }
 }

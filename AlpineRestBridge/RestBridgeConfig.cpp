@@ -3,6 +3,8 @@
 
 #include <RestBridgeConfig.h>
 #include <Configuration.h>
+#include <SafeParse.h>
+#include <Log.h>
 
 
 const string                            RestBridgeConfig::configFile_s ("bridge.cfg");
@@ -387,6 +389,24 @@ RestBridgeConfig::createConfigElements ()
     currElement->required      = false;
     configElements_s->push_back(currElement);
 
+    // HTTP Keep-Alive Max Requests
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Keep-Alive Max Requests";
+    currElement->argOptionName = "httpKeepAliveMaxRequests";
+    currElement->envOptionName = "HTTP_KEEPALIVE_MAX_REQUESTS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // HTTP Write Timeout Seconds
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "HTTP Write Timeout Seconds";
+    currElement->argOptionName = "httpWriteTimeoutSeconds";
+    currElement->envOptionName = "HTTP_WRITE_TIMEOUT_SECONDS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
     // Tracing Enabled
     currElement = new ConfigData::t_ConfigElement;
     currElement->elementName   = "Tracing Enabled";
@@ -404,6 +424,15 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back(currElement);
+
+    // Shutdown Drain Seconds
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Shutdown Drain Seconds";
+    currElement->argOptionName = "shutdownDrainSeconds";
+    currElement->envOptionName = "SHUTDOWN_DRAIN_SECONDS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 
@@ -416,20 +445,30 @@ RestBridgeConfig::getConfigElements (ConfigData::t_ConfigElementList *& configEl
 
 
 int
-RestBridgeConfig::getIntConfig (const string & name, int defaultValue)
+RestBridgeConfig::getIntConfig (const string & name, int defaultValue, int minValue, int maxValue)
 {
     string value;
     if (Configuration::getValue(name, value)) {
-        try {
-            return std::stoi(value);
-        } catch (...) {}
+        auto parsed = parseInt(value);
+        if (!parsed) {
+            Log::Error("Config '"s + name + "' has invalid value '"s + value + "', using default "s + std::to_string(defaultValue));
+            return defaultValue;
+        }
+        if (*parsed < minValue || *parsed > maxValue) {
+            Log::Error("Config '"s + name + "' value "s + std::to_string(*parsed) + " outside range ["s + std::to_string(minValue) + ", "s + std::to_string(maxValue) + "], using default "s + std::to_string(defaultValue));
+            return defaultValue;
+        }
+        return *parsed;
     }
     return defaultValue;
 }
 
 
-int RestBridgeConfig::getHttpMinThreads ()         { return getIntConfig("HTTP Min Threads"s, 4); }
-int RestBridgeConfig::getHttpMaxThreads ()         { return getIntConfig("HTTP Max Threads"s, 32); }
-int RestBridgeConfig::getHttpMaxConnections ()      { return getIntConfig("HTTP Max Connections"s, 512); }
-int RestBridgeConfig::getHttpMaxConnectionsPerIp () { return getIntConfig("HTTP Max Connections Per IP"s, 16); }
-int RestBridgeConfig::getHttpIdleTimeoutSeconds ()  { return getIntConfig("HTTP Idle Timeout Seconds"s, 60); }
+int RestBridgeConfig::getHttpMinThreads ()         { return getIntConfig("HTTP Min Threads"s, 4, 1, 256); }
+int RestBridgeConfig::getHttpMaxThreads ()         { return getIntConfig("HTTP Max Threads"s, 32, 1, 1024); }
+int RestBridgeConfig::getHttpMaxConnections ()      { return getIntConfig("HTTP Max Connections"s, 512, 1, 65535); }
+int RestBridgeConfig::getHttpMaxConnectionsPerIp () { return getIntConfig("HTTP Max Connections Per IP"s, 16, 1, 1024); }
+int RestBridgeConfig::getHttpIdleTimeoutSeconds ()    { return getIntConfig("HTTP Idle Timeout Seconds"s, 60, 1, 3600); }
+int RestBridgeConfig::getHttpKeepAliveMaxRequests () { return getIntConfig("HTTP Keep-Alive Max Requests"s, 100, 1, 10000); }
+int RestBridgeConfig::getHttpWriteTimeoutSeconds ()  { return getIntConfig("HTTP Write Timeout Seconds"s, 10, 1, 300); }
+int RestBridgeConfig::getShutdownDrainSeconds ()     { return getIntConfig("Shutdown Drain Seconds"s, 5, 1, 60); }

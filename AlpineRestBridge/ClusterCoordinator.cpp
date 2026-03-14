@@ -15,6 +15,7 @@
 
 #include <asio.hpp>
 #include <functional>
+#include <memory>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -37,8 +38,7 @@ std::atomic<bool>                                ClusterCoordinator::isolated_s{
 std::unordered_map<string, ClusterCoordinator::NodeInfo>  ClusterCoordinator::nodes_s;
 ReadWriteSem                                     ClusterCoordinator::nodesMutex_s;
 
-std::unordered_map<string, ClusterCoordinator::DedupEntry>  ClusterCoordinator::dedupIndex_s;
-ReadWriteSem                                     ClusterCoordinator::dedupMutex_s;
+std::array<ClusterCoordinator::t_DedupShard, ClusterCoordinator::DEDUP_SHARD_COUNT>  ClusterCoordinator::dedupShards_s;
 
 ClusterCoordinator::HeartbeatThread *            ClusterCoordinator::heartbeatThread_s{nullptr};
 ClusterCoordinator::ListenerThread *             ClusterCoordinator::listenerThread_s{nullptr};
@@ -121,9 +121,9 @@ ClusterCoordinator::shutdown ()
         nodes_s.clear();
     }
 
-    {
-        WriteLock lock(dedupMutex_s);
-        dedupIndex_s.clear();
+    for (auto & shard : dedupShards_s) {
+        WriteLock lock(shard.mutex);
+        shard.entries.clear();
     }
 
     Log::Info("ClusterCoordinator: Shutdown complete.");
@@ -133,10 +133,10 @@ ClusterCoordinator::shutdown ()
 void
 ClusterCoordinator::registerRoutes (HttpRouter & router)
 {
-    router.addRoute("GET",  "/cluster/status",    handleClusterStatus);
-    router.addRoute("POST", "/cluster/query",     handleClusterQuery);
-    router.addRoute("POST", "/cluster/heartbeat", handleClusterHeartbeat);
-    router.addRoute("GET",  "/cluster/results/:id", handleClusterResults);
+    router.addRoute("GET",  "/cluster/status",      handleClusterStatus,    "Cluster status"s,    false);
+    router.addRoute("POST", "/cluster/query",       handleClusterQuery,     "Cluster query"s,     true);
+    router.addRoute("POST", "/cluster/heartbeat",   handleClusterHeartbeat, "Cluster heartbeat"s, true);
+    router.addRoute("GET",  "/cluster/results/:id", handleClusterResults,   "Cluster results"s,   true);
 }
 
 
@@ -174,13 +174,15 @@ ClusterCoordinator::getLocalNodeInfo ()
     info.cpuLoadEstimate = estimateCpuLoad();
     info.lastHeartbeat   = std::chrono::steady_clock::now();
 
-    // Count active queries via dedup index
+    // Count active queries via sharded dedup index
     {
-        ReadLock lock(dedupMutex_s);
         uint count = 0;
-        for (const auto& [hash, entry] : dedupIndex_s) {
-            if (entry.nodeId == nodeId_s)
-                ++count;
+        for (auto & shard : dedupShards_s) {
+            ReadLock lock(shard.mutex);
+            for (const auto & [hash, entry] : shard.entries) {
+                if (entry.nodeId == nodeId_s)
+                    ++count;
+            }
         }
         info.activeQueries = count;
     }
@@ -220,10 +222,11 @@ ClusterCoordinator::isDuplicateQuery (const string & queryHash,
 {
     auto now = std::chrono::steady_clock::now();
 
-    ReadLock lock(dedupMutex_s);
+    auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
+    ReadLock lock(shard.mutex);
 
-    auto it = dedupIndex_s.find(queryHash);
-    if (it == dedupIndex_s.end())
+    auto it = shard.entries.find(queryHash);
+    if (it == shard.entries.end())
         return false;
 
     const auto & entry = it->second;
@@ -256,7 +259,8 @@ void
 ClusterCoordinator::registerActiveQuery (const string & queryHash,
                                          ulong          queryId)
 {
-    WriteLock lock(dedupMutex_s);
+    auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
+    WriteLock lock(shard.mutex);
 
     DedupEntry entry;
     entry.nodeId       = nodeId_s;
@@ -266,7 +270,7 @@ ClusterCoordinator::registerActiveQuery (const string & queryHash,
         std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now().time_since_epoch()).count());
 
-    dedupIndex_s[queryHash] = entry;
+    shard.entries[queryHash] = entry;
 
     Log::Debug("ClusterCoordinator: Registered query hash "s + queryHash +
                " (queryId: " + std::to_string(queryId) + ")");
@@ -276,8 +280,9 @@ ClusterCoordinator::registerActiveQuery (const string & queryHash,
 void
 ClusterCoordinator::unregisterActiveQuery (const string & queryHash)
 {
-    WriteLock lock(dedupMutex_s);
-    dedupIndex_s.erase(queryHash);
+    auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
+    WriteLock lock(shard.mutex);
+    shard.entries.erase(queryHash);
 }
 
 
@@ -642,15 +647,19 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
 
     auto & localResults = *localResultsOpt;
 
-    // Find the query hash for this queryId
+    // Find the query hash for this queryId across all shards
     string queryHash;
     {
-        ReadLock lock(dedupMutex_s);
-        for (const auto & [hash, entry] : dedupIndex_s) {
-            if (entry.nodeId == nodeId_s && entry.queryId == queryId) {
-                queryHash = hash;
-                break;
+        for (auto & shard : dedupShards_s) {
+            ReadLock lock(shard.mutex);
+            for (const auto & [hash, entry] : shard.entries) {
+                if (entry.nodeId == nodeId_s && entry.queryId == queryId) {
+                    queryHash = hash;
+                    break;
+                }
             }
+            if (!queryHash.empty())
+                break;
         }
     }
 
@@ -712,9 +721,10 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
                 continue;
 
             // Check if this remote node has the same query hash
-            ReadLock dedupLock(dedupMutex_s);
-            auto dedupIt = dedupIndex_s.find(queryHash);
-            if (dedupIt != dedupIndex_s.end() && dedupIt->second.nodeId == id) {
+            auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
+            ReadLock dedupLock(shard.mutex);
+            auto dedupIt = shard.entries.find(queryHash);
+            if (dedupIt != shard.entries.end() && dedupIt->second.nodeId == id) {
                 string remoteJson = fetchRemoteResults(node.host, node.restPort,
                                                        dedupIt->second.queryId);
                 if (!remoteJson.empty()) {
@@ -740,6 +750,13 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
 // ============================================================================
 //  Internal helpers
 // ============================================================================
+
+size_t
+ClusterCoordinator::dedupShardIndex (const string & key)
+{
+    return std::hash<string>{}(key) % DEDUP_SHARD_COUNT;
+}
+
 
 string
 ClusterCoordinator::generateNodeId ()
@@ -776,17 +793,19 @@ ClusterCoordinator::evictStaleNodes ()
         }
     }
 
-    // Also clean expired dedup entries
-    WriteLock dedupLock(dedupMutex_s);
+    // Also clean expired dedup entries across all shards
+    for (auto & shard : dedupShards_s) {
+        WriteLock dedupLock(shard.mutex);
 
-    for (auto it = dedupIndex_s.begin(); it != dedupIndex_s.end(); ) {
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-            now - it->second.registeredAt).count();
+        for (auto it = shard.entries.begin(); it != shard.entries.end(); ) {
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+                now - it->second.registeredAt).count();
 
-        if (elapsed > DEDUP_WINDOW_SEC) {
-            it = dedupIndex_s.erase(it);
-        } else {
-            ++it;
+            if (elapsed > DEDUP_WINDOW_SEC) {
+                it = shard.entries.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
 }
@@ -814,15 +833,17 @@ ClusterCoordinator::broadcastHeartbeat ()
 
     // Include active query hashes for gossip-based dedup
     {
-        ReadLock lock(dedupMutex_s);
         payload["activeQueryHashes"] = nlohmann::json::array();
 
-        for (const auto & [hash, entry] : dedupIndex_s) {
-            if (entry.nodeId == nodeId_s) {
-                nlohmann::json qe;
-                qe["hash"]    = hash;
-                qe["queryId"] = entry.queryId;
-                payload["activeQueryHashes"].push_back(qe);
+        for (auto & shard : dedupShards_s) {
+            ReadLock lock(shard.mutex);
+            for (const auto & [hash, entry] : shard.entries) {
+                if (entry.nodeId == nodeId_s) {
+                    nlohmann::json qe;
+                    qe["hash"]    = hash;
+                    qe["queryId"] = entry.queryId;
+                    payload["activeQueryHashes"].push_back(qe);
+                }
             }
         }
     }
@@ -851,42 +872,59 @@ ClusterCoordinator::broadcastHeartbeat ()
             nodeSnapshot.emplace_back(id, node);
     }
 
-    // Send heartbeats and measure RTT
+    if (nodeSnapshot.empty())
+        return;
+
+    // Send heartbeats concurrently and measure RTT via a single io_context
+    asio::io_context ioCtx;
     std::unordered_map<string, double> rttResults;
+    std::mutex rttMutex;
 
     for (const auto & [id, node] : nodeSnapshot) {
-        try {
-            asio::io_context ioCtx;
-            asio::ip::tcp::resolver resolver(ioCtx);
+        auto resolver = std::make_shared<asio::ip::tcp::resolver>(ioCtx);
+        auto sock     = std::make_shared<asio::ip::tcp::socket>(ioCtx);
+        auto rttStart = std::make_shared<std::chrono::steady_clock::time_point>(
+            std::chrono::steady_clock::now());
+        auto nodeId   = std::make_shared<string>(id);
+        auto nodeHost = node.host;
+        auto nodePort = std::to_string(node.restPort);
 
-            auto endpoints = resolver.resolve(node.host, std::to_string(node.restPort));
+        // Build the HTTP request string
+        auto httpReq = std::make_shared<string>(
+            "POST /cluster/heartbeat HTTP/1.1\r\n"s +
+            "Host: " + nodeHost + ":" + nodePort + "\r\n" +
+            "Content-Type: application/json\r\n" +
+            "Content-Length: " + std::to_string(body.length()) + "\r\n" +
+            "Connection: close\r\n\r\n" + body);
 
-            asio::ip::tcp::socket socket(ioCtx);
-
-            auto rttStart = std::chrono::steady_clock::now();
-
-            asio::connect(socket, endpoints);
-
-            string httpRequest = "POST /cluster/heartbeat HTTP/1.1\r\n"s +
-                "Host: " + node.host + ":" + std::to_string(node.restPort) + "\r\n" +
-                "Content-Type: application/json\r\n" +
-                "Content-Length: " + std::to_string(body.length()) + "\r\n" +
-                "Connection: close\r\n\r\n" + body;
-
-            asio::write(socket, asio::buffer(httpRequest));
-
-            asio::error_code ec;
-            char buf[1024];
-            socket.read_some(asio::buffer(buf), ec);
-
-            auto rttEnd = std::chrono::steady_clock::now();
-            double rttMs = std::chrono::duration<double, std::milli>(rttEnd - rttStart).count();
-            rttResults[id] = rttMs;
-        }
-        catch (const std::exception & e) {
-            Log::Debug("ClusterCoordinator: Heartbeat to "s + id + " failed: " + e.what());
-        }
+        resolver->async_resolve(nodeHost, nodePort,
+            [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex]
+            (asio::error_code ec, asio::ip::tcp::resolver::results_type endpoints) {
+                if (ec) return;
+                asio::async_connect(*sock, endpoints,
+                    [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex]
+                    (asio::error_code ec, const asio::ip::tcp::endpoint &) {
+                        if (ec) return;
+                        asio::async_write(*sock, asio::buffer(*httpReq),
+                            [sock, rttStart, nodeId, &rttResults, &rttMutex]
+                            (asio::error_code ec, size_t) {
+                                if (ec) return;
+                                auto buf = std::make_shared<std::array<char, 1024>>();
+                                sock->async_read_some(asio::buffer(*buf),
+                                    [rttStart, nodeId, &rttResults, &rttMutex]
+                                    (asio::error_code, size_t) {
+                                        auto rttMs = std::chrono::duration<double, std::milli>(
+                                            std::chrono::steady_clock::now() - *rttStart).count();
+                                        std::lock_guard lock(rttMutex);
+                                        rttResults[*nodeId] = rttMs;
+                                    });
+                            });
+                    });
+            });
     }
+
+    // Run all async operations concurrently with a bounded timeout
+    ioCtx.run_for(std::chrono::seconds(5));
 
     // Update RTT measurements
     if (!rttResults.empty()) {
@@ -1055,12 +1093,23 @@ ClusterCoordinator::HeartbeatThread::threadMain ()
         // Broadcast heartbeat to cluster
         broadcastHeartbeat();
 
-        // Sleep in 1-second increments for responsive shutdown
-        for (int i = 0; i < HEARTBEAT_INTERVAL_SEC && isActive(); i++)
-            usleep(SLEEP_INCREMENT_MS * 1000);
+        // Wait for the next heartbeat interval, waking immediately on stop()
+        {
+            std::unique_lock lock(cvMutex_);
+            cv_.wait_for(lock, std::chrono::seconds(HEARTBEAT_INTERVAL_SEC),
+                         [this] { return !isActive(); });
+        }
     }
 
     Log::Info("ClusterCoordinator: Heartbeat thread exiting.");
+}
+
+
+bool
+ClusterCoordinator::HeartbeatThread::stop ()
+{
+    cv_.notify_all();
+    return SysThread::stop();
 }
 
 

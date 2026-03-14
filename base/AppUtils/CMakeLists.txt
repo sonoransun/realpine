@@ -4,6 +4,7 @@ add_library(AppUtils
     Log.cpp
     OptHash.cpp
     PollSet.cpp
+    SecureString.cpp
     StringUtils.cpp
 )
 add_library(Alpine::AppUtils ALIAS AppUtils)

@@ -14,6 +14,9 @@
 #include <chrono>
 #include <atomic>
 #include <functional>
+#include <mutex>
+#include <condition_variable>
+#include <array>
 
 
 class ClusterCoordinator
@@ -99,6 +102,11 @@ class ClusterCoordinator
     {
       public:
         void threadMain () override;
+        bool stop ();
+
+      private:
+        std::mutex              cvMutex_;
+        std::condition_variable cv_;
     };
 
     // --- Beacon listener thread ---
@@ -170,8 +178,16 @@ class ClusterCoordinator
         uint64_t wallClockMs{0};  // wall-clock timestamp for last-writer-wins merge
     };
 
-    static std::unordered_map<string, DedupEntry>  dedupIndex_s;
-    static ReadWriteSem                             dedupMutex_s;
+    static constexpr size_t DEDUP_SHARD_COUNT = 8;
+
+    struct t_DedupShard {
+        ReadWriteSem                              mutex;
+        std::unordered_map<string, DedupEntry>    entries;
+    };
+
+    static std::array<t_DedupShard, DEDUP_SHARD_COUNT>  dedupShards_s;
+
+    static size_t  dedupShardIndex (const string & key);
 
     static constexpr int  DEDUP_WINDOW_SEC = 30;
 
@@ -181,7 +197,6 @@ class ClusterCoordinator
     static constexpr int  HEARTBEAT_INTERVAL_SEC     = 10;
     static constexpr int  NODE_TIMEOUT_MIN_SEC       = 35;
     static constexpr int  NODE_TIMEOUT_MAX_SEC       = 120;
-    static constexpr int  SLEEP_INCREMENT_MS         = 1000;
     static constexpr double SPLIT_BRAIN_THRESHOLD    = 0.5;  // >50% unreachable
     static constexpr int  SPLIT_BRAIN_MULTIPLIER     = 2;    // 2x timeout before isolated
 

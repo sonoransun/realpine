@@ -40,6 +40,18 @@ TlsContext::initialize (t_Mode mode)
     SSL_CTX_set_options(ctx_, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
     SSL_CTX_set_min_proto_version(ctx_, TLS1_2_VERSION);
 
+    // Harden cipher suites: modern AEAD ciphers only
+    SSL_CTX_set_ciphersuites(ctx_,
+        "TLS_AES_256_GCM_SHA384:"
+        "TLS_AES_128_GCM_SHA256:"
+        "TLS_CHACHA20_POLY1305_SHA256");
+
+    SSL_CTX_set_cipher_list(ctx_,
+        "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:"
+        "!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
+
+    SSL_CTX_set_options(ctx_, SSL_OP_CIPHER_SERVER_PREFERENCE);
+
     initialized_ = true;
     return true;
 }
@@ -137,6 +149,33 @@ SSL_CTX *
 TlsContext::context ()
 {
     return ctx_;
+}
+
+
+bool
+TlsContext::setCipherSuites (const string & tls13Ciphers,
+                              const string & tls12Ciphers)
+{
+    if (!ctx_) {
+        Log::Error("TlsContext: not initialized");
+        return false;
+    }
+
+    if (!tls13Ciphers.empty()) {
+        if (SSL_CTX_set_ciphersuites(ctx_, tls13Ciphers.c_str()) != 1) {
+            Log::Error("TlsContext: failed to set TLS 1.3 cipher suites");
+            return false;
+        }
+    }
+
+    if (!tls12Ciphers.empty()) {
+        if (SSL_CTX_set_cipher_list(ctx_, tls12Ciphers.c_str()) != 1) {
+            Log::Error("TlsContext: failed to set TLS 1.2 cipher list");
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

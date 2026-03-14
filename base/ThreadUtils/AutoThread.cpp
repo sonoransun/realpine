@@ -24,7 +24,7 @@ AutoThread::~AutoThread ()
 #endif
 
     // Signal the thread to exit if it is still running, then
-    // detach so the jthread destructor does not block.
+    // join so the thread completes cleanly before destruction.
     //
     destroyed_ = true;
 
@@ -35,7 +35,7 @@ AutoThread::~AutoThread ()
     cv_.notify_one ();
 
     if (thread_.joinable ()) {
-        thread_.detach ();
+        thread_.join ();
     }
 }
 
@@ -60,11 +60,6 @@ AutoThread::create ()
     thread_ = std::thread ([this] { threadEntry (this); });
 
     threadId_ = thread_.get_id ();
-
-    // Detach so the thread runs independently, matching original
-    // pthread_detach behavior.
-    //
-    thread_.detach ();
 
     created_ = true;
     running_ = false;
@@ -97,6 +92,12 @@ AutoThread::destroy ()
         resumed_ = true;
     }
     cv_.notify_one ();
+
+    // Join the thread so it completes cleanly before we return.
+    //
+    if (thread_.joinable ()) {
+        thread_.join ();
+    }
 
     created_ = false;
     running_ = false;

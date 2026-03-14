@@ -15,7 +15,10 @@ class AgedQueue
     using t_Size = int;
 
     AgedQueue (t_Size reserve = 1024);
-    ~AgedQueue ();
+    ~AgedQueue () = default;
+
+    AgedQueue (const AgedQueue &) = delete;
+    AgedQueue & operator= (const AgedQueue &) = delete;
 
 
     bool  clear ();
@@ -67,9 +70,9 @@ class AgedQueue
 
     t_Size             size_;
     t_Size             numRecords_;
-    t_AgeRecordList *  recordList_;
-    t_FreeIndexList *  freeIndexList_;
-    t_AgeIndex *       ageIndex_;
+    t_AgeRecordList    recordList_;
+    t_FreeIndexList    freeIndexList_;
+    t_AgeIndex         ageIndex_;
     t_Size             newestIndex_;
     t_Size             oldestIndex_;
 

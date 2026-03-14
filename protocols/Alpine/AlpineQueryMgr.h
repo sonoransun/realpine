@@ -7,6 +7,7 @@
 #include <AlpineQueryStatus.h>
 #include <ReadWriteSem.h>
 #include <OptHash.h>
+#include <atomic>
 #include <vector>
 #include <memory>
 #include <shared_mutex>
@@ -110,12 +111,16 @@ class AlpineQueryMgr
 
     static bool                                    initialized_s;
     static ulong                                   maxConncurent_s;
-    static ulong                                   currQueryId_s;
+    static std::atomic<ulong>                      currQueryId_s;
     static std::unique_ptr<t_QueryStateIndex>      activeQueryIndex_s;
     static std::unique_ptr<t_QueryStateIndex>      pastQueryIndex_s;
     static std::unique_ptr<t_PeerQueryIndex>       activePeerQueryIndex_s;
     static std::unique_ptr<t_PeerQueryIndex>       pastPeerQueryIndex_s;
 
+    // Lock ordering (to prevent deadlocks):
+    //   activeQueryLock_s > pastQueryLock_s > queryMutex (per-query)
+    // Never acquire a lock that precedes one you already hold.
+    //
     // Split locks: active queries (hot path) vs past queries (cold, read-mostly)
     static ReadWriteSem                            activeQueryLock_s;
     static ReadWriteSem                            pastQueryLock_s;

@@ -3,9 +3,7 @@
 
 #pragma once
 #include <Common.h>
-#include <nlohmann/json.hpp>
-#include <stack>
-#include <variant>
+#include <string_view>
 
 
 class JsonWriter
@@ -29,13 +27,22 @@ class JsonWriter
     void  value (ulong v);
     void  value (bool v);
 
-    void  separator ();  // no-op with nlohmann
+    void  separator ();  // no-op — commas are handled automatically
 
 
   private:
 
-    nlohmann::json  root_;
-    std::stack<nlohmann::json *>  stack_;
-    string  currentKey_;
+    struct ContainerState
+    {
+        bool  isArray;       // true = array, false = object
+        bool  needsComma;    // true if next key (object) or value (array) needs a leading comma
+    };
+
+    void    appendCommaIfNeeded ();
+    string  escapeJsonString (std::string_view sv);
+
+    string                   buffer_;
+    vector<ContainerState>   stack_;
+    bool                     afterKey_;   // true immediately after key() — suppresses comma for the value
 
 };

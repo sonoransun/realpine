@@ -16,11 +16,11 @@
 void
 QueryHandler::registerRoutes (HttpRouter & router)
 {
-    router.addRoute("POST",   "/query",              startQuery);
-    router.addRoute("GET",    "/query/:id",          getQuery);
-    router.addRoute("GET",    "/query/:id/results",  getQueryResults);
-    router.addRoute("GET",    "/query/:id/stream",   streamQueryResults);
-    router.addRoute("DELETE", "/query/:id",          cancelQuery);
+    router.addRoute("POST",   "/query",              startQuery,         "Start query"s,          true);
+    router.addRoute("GET",    "/query/:id",          getQuery,           "Get query status"s,     false);
+    router.addRoute("GET",    "/query/:id/results",  getQueryResults,    "Get query results"s,    true);
+    router.addRoute("GET",    "/query/:id/stream",   streamQueryResults, "Stream query results"s, true);
+    router.addRoute("DELETE", "/query/:id",          cancelQuery,        "Cancel query"s,         false);
 }
 
 

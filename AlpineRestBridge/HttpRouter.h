@@ -40,7 +40,15 @@ class HttpRouter
                     RouteHandler    handler,
                     const string &  description);
 
+    void  addRoute (const string &  method,
+                    const string &  pattern,
+                    RouteHandler    handler,
+                    const string &  description,
+                    bool            slow);
+
     HttpResponse  dispatch (const HttpRequest & request);
+
+    [[nodiscard]] bool  isSlowRoute (const HttpRequest & request) const;
 
     void  setAuthMiddleware (AuthMiddleware middleware);
 
@@ -60,11 +68,16 @@ class HttpRouter
         UNKNOWN
     };
 
+    struct t_HandlerEntry {
+        RouteHandler  handler;
+        bool          slow{false};
+    };
+
     struct TrieNode {
         std::unordered_map<string, std::unique_ptr<TrieNode>>  children;
         std::unique_ptr<TrieNode>                              paramChild;
         string                                                 paramName;
-        std::unordered_map<HttpMethod, RouteHandler>           handlers;
+        std::unordered_map<HttpMethod, t_HandlerEntry>         handlers;
         bool                                                   requiresAuth = true;
     };
 

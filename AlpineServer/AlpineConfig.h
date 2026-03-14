@@ -20,10 +20,15 @@ class AlpineConfig
 
     static void  getConfigElements (ConfigData::t_ConfigElementList *& configElements);
 
+    // Shutdown drain
+    static int   getShutdownDrainSeconds ();
+
 
   private:
 
     static ConfigData::t_ConfigElementList *  configElements_s;
+
+    static int  getIntConfig (const string & name, int defaultValue, int minValue, int maxValue);
 
 };
 

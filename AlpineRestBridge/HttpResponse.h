@@ -35,6 +35,10 @@ class HttpResponse
 
     void  setRequestId (const string & requestId);
 
+    void  setConnectionClose ();
+
+    void  setKeepAliveParams (int timeout, int maxRequests);
+
     int  statusCode () const  { return statusCode_; }
 
     string  build ();

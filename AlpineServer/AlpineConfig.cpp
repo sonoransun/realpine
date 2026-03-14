@@ -2,6 +2,9 @@
 
 
 #include <AlpineConfig.h>
+#include <Configuration.h>
+#include <SafeParse.h>
+#include <Log.h>
 
 
 const string                            AlpineConfig::configFile_s ("test.cfg");
@@ -271,14 +274,46 @@ AlpineConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back (currElement);
+
+    // Shutdown Drain Seconds
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Shutdown Drain Seconds";
+    currElement->argOptionName = "shutdownDrainSeconds";
+    currElement->envOptionName = "SHUTDOWN_DRAIN_SECONDS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back (currElement);
 }
 
 
 
-void  
+void
 AlpineConfig::getConfigElements (ConfigData::t_ConfigElementList *& configElements)
 {
     configElements = configElements_s;
 }
+
+
+int
+AlpineConfig::getIntConfig (const string & name, int defaultValue, int minValue, int maxValue)
+{
+    string value;
+    if (Configuration::getValue(name, value)) {
+        auto parsed = parseInt(value);
+        if (!parsed) {
+            Log::Error("Config '"s + name + "' has invalid value '"s + value + "', using default "s + std::to_string(defaultValue));
+            return defaultValue;
+        }
+        if (*parsed < minValue || *parsed > maxValue) {
+            Log::Error("Config '"s + name + "' value "s + std::to_string(*parsed) + " outside range ["s + std::to_string(minValue) + ", "s + std::to_string(maxValue) + "], using default "s + std::to_string(defaultValue));
+            return defaultValue;
+        }
+        return *parsed;
+    }
+    return defaultValue;
+}
+
+
+int AlpineConfig::getShutdownDrainSeconds ()  { return getIntConfig("Shutdown Drain Seconds"s, 5, 1, 60); }
 
 

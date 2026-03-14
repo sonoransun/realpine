@@ -32,6 +32,56 @@ HttpRouter::addRoute (const string &  method,
 }
 
 
+void
+HttpRouter::addRoute (const string &  method,
+                      const string &  pattern,
+                      RouteHandler    handler,
+                      const string &  description,
+                      bool            slow)
+{
+    routes_.push_back({method, pattern, description});
+
+    auto httpMethod = parseMethod(method);
+
+    TrieNode * node = &root_;
+
+    std::string_view sv(pattern);
+    if (!sv.empty() && sv.front() == '/') {
+        sv.remove_prefix(1);
+    }
+
+    while (!sv.empty()) {
+        auto slash = sv.find('/');
+        auto segment = sv.substr(0, slash);
+
+        if (!segment.empty() && segment.front() == ':') {
+            if (!node->paramChild) {
+                node->paramChild = std::make_unique<TrieNode>();
+                node->paramChild->paramName = string(segment.substr(1));
+            }
+            node = node->paramChild.get();
+        } else {
+            auto key = string(segment);
+            auto it = node->children.find(key);
+            if (it == node->children.end()) {
+                auto [inserted, _] = node->children.emplace(std::move(key),
+                                                             std::make_unique<TrieNode>());
+                node = inserted->second.get();
+            } else {
+                node = it->second.get();
+            }
+        }
+
+        if (slash == std::string_view::npos) {
+            break;
+        }
+        sv.remove_prefix(slash + 1);
+    }
+
+    node->handlers[httpMethod] = t_HandlerEntry{handler, slow};
+}
+
+
 const vector<RouteInfo> &
 HttpRouter::getRoutes () const
 {
@@ -93,7 +143,7 @@ HttpRouter::addRoute (const string &  method,
         sv.remove_prefix(slash + 1);
     }
 
-    node->handlers[httpMethod] = handler;
+    node->handlers[httpMethod] = t_HandlerEntry{handler, false};
 }
 
 
@@ -186,5 +236,57 @@ HttpRouter::dispatch (const HttpRequest & request)
             return authResp;
     }
 
-    return handlerIt->second(request, params);
+    return handlerIt->second.handler(request, params);
+}
+
+
+bool
+HttpRouter::isSlowRoute (const HttpRequest & request) const
+{
+    auto httpMethod = parseMethod(request.method);
+
+    std::string_view path(request.path);
+    if (!path.empty() && path.front() == '/') {
+        path.remove_prefix(1);
+    }
+    if (!path.empty() && path.back() == '/') {
+        path.remove_suffix(1);
+    }
+
+    const TrieNode * node = &root_;
+
+    while (true) {
+        if (path.empty()) {
+            break;
+        }
+
+        auto slash = path.find('/');
+        auto segment = path.substr(0, slash);
+
+        const TrieNode * next = nullptr;
+        auto it = node->children.find(string(segment));
+        if (it != node->children.end()) {
+            next = it->second.get();
+        } else if (node->paramChild) {
+            next = node->paramChild.get();
+        }
+
+        if (!next) {
+            return false;
+        }
+
+        node = next;
+
+        if (slash == std::string_view::npos) {
+            break;
+        }
+        path.remove_prefix(slash + 1);
+    }
+
+    auto handlerIt = node->handlers.find(httpMethod);
+    if (handlerIt == node->handlers.end()) {
+        return false;
+    }
+
+    return handlerIt->second.slow;
 }

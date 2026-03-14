@@ -451,8 +451,15 @@ main (int argc, char *argv[])
     // Stop accepting new HTTP connections
     rpcServer.stop();
 
-    // Brief drain period for in-flight requests
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    // Configurable drain period for in-flight requests
+    int drainSeconds = AlpineConfig::getShutdownDrainSeconds();
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(drainSeconds);
+    while (rpcServer.getActiveConnections() > 0 && std::chrono::steady_clock::now() < deadline) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+    if (rpcServer.getActiveConnections() > 0) {
+        Log::Info("Drain timeout reached with "s + std::to_string(rpcServer.getActiveConnections()) + " connections still active"s);
+    }
 
 
     // Shutdown Alpine stack (stops event loop, cancels queries, persists ratings, shuts down transports)

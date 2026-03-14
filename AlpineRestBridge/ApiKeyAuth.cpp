@@ -2,24 +2,29 @@
 
 
 #include <ApiKeyAuth.h>
+#include <MutexLock.h>
 #include <Log.h>
 #include <Platform.h>
+#include <StringUtils.h>
 #include <fstream>
 #include <cstdlib>
+#include <cstring>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <jwt-cpp/jwt.h>
 #endif
 
 
-string ApiKeyAuth::apiKey_s;
-bool   ApiKeyAuth::initialized_s = false;
+SecureString             ApiKeyAuth::apiKey_s;
+bool                     ApiKeyAuth::initialized_s = false;
+vector<ApiKeyAuth::t_ApiKeyEntry>  ApiKeyAuth::keys_s;
+Mutex                    ApiKeyAuth::keysMutex_s;
 
 #ifdef ALPINE_TLS_ENABLED
-string ApiKeyAuth::jwtSecret_s;
-string ApiKeyAuth::jwtIssuer_s;
-string ApiKeyAuth::jwtAudience_s;
-bool   ApiKeyAuth::jwtConfigured_s = false;
+SecureString ApiKeyAuth::jwtSecret_s;
+string       ApiKeyAuth::jwtIssuer_s;
+string       ApiKeyAuth::jwtAudience_s;
+bool         ApiKeyAuth::jwtConfigured_s = false;
 #endif
 
 
@@ -32,8 +37,17 @@ ApiKeyAuth::initialize ()
     // First check environment variable
     const char * envKey = getenv("ALPINE_API_KEY");
     if (envKey && strlen(envKey) > 0) {
-        apiKey_s = envKey;
+        apiKey_s.assign(string(envKey));
         initialized_s = true;
+
+        // Add initial key to rotation list (non-deprecated, no expiry)
+        MutexLock lock(keysMutex_s);
+        t_ApiKeyEntry entry;
+        entry.key.assign(apiKey_s.value());
+        entry.expiresAt = std::chrono::steady_clock::time_point::max();
+        entry.deprecated = false;
+        keys_s.push_back(std::move(entry));
+
         Log::Info("API key loaded from environment variable.");
         return;
     }
@@ -46,9 +60,20 @@ ApiKeyAuth::initialize ()
 
     std::ifstream ifs(keyFile);
     if (ifs.good()) {
-        std::getline(ifs, apiKey_s);
-        if (!apiKey_s.empty()) {
+        string fileKey;
+        std::getline(ifs, fileKey);
+        if (!fileKey.empty()) {
+            apiKey_s.assign(std::move(fileKey));
             initialized_s = true;
+
+            // Add initial key to rotation list
+            MutexLock lock(keysMutex_s);
+            t_ApiKeyEntry entry;
+            entry.key.assign(apiKey_s.value());
+            entry.expiresAt = std::chrono::steady_clock::time_point::max();
+            entry.deprecated = false;
+            keys_s.push_back(std::move(entry));
+
             Log::Info("API key loaded from file.");
             return;
         }
@@ -63,13 +88,19 @@ ApiKeyAuth::initialize ()
         return;
     }
 
-    apiKey_s.clear();
-    apiKey_s.reserve(64);
+    string hexKey;
+    hexKey.reserve(64);
     static const char hexChars[] = "0123456789abcdef";
     for (ulong i = 0; i < sizeof(randomBytes); ++i) {
-        apiKey_s += hexChars[(randomBytes[i] >> 4) & 0x0F];
-        apiKey_s += hexChars[randomBytes[i] & 0x0F];
+        hexKey += hexChars[(randomBytes[i] >> 4) & 0x0F];
+        hexKey += hexChars[randomBytes[i] & 0x0F];
     }
+
+    // Zero the random bytes buffer
+    volatile auto * p = randomBytes;
+    memset(const_cast<byte *>(p), 0, sizeof(randomBytes));
+
+    apiKey_s.assign(hexKey);
 
     // Create directory if needed
     alpine_mkdir(keyDir.c_str(), 0700);
@@ -77,11 +108,21 @@ ApiKeyAuth::initialize ()
     // Write key to file
     std::ofstream ofs(keyFile);
     if (ofs.good()) {
-        ofs << apiKey_s;
+        ofs << apiKey_s.value();
         alpine_chmod(keyFile.c_str(), 0600);
         Log::Info("API key generated and saved to file.");
     } else {
         Log::Error("Failed to write API key to file.");
+    }
+
+    // Add initial key to rotation list
+    {
+        MutexLock lock(keysMutex_s);
+        t_ApiKeyEntry entry;
+        entry.key.assign(apiKey_s.value());
+        entry.expiresAt = std::chrono::steady_clock::time_point::max();
+        entry.deprecated = false;
+        keys_s.push_back(std::move(entry));
     }
 
     initialized_s = true;
@@ -119,9 +160,19 @@ ApiKeyAuth::validate (const HttpRequest & request, HttpResponse & response)
     if (authHeader.starts_with(prefix)) {
         string token = authHeader.substr(prefix.length());
 
-        // Try API key first
-        if (constantTimeCompare(token, apiKey_s))
+        // Try primary API key first
+        if (apiKey_s.equals(token))
             return true;
+
+        // Check rotated keys (deprecated but not yet expired)
+        {
+            MutexLock lock(keysMutex_s);
+            auto now = std::chrono::steady_clock::now();
+            for (const auto & entry : keys_s) {
+                if (entry.expiresAt > now && entry.key.equals(token))
+                    return true;
+            }
+        }
 
 #ifdef ALPINE_TLS_ENABLED
         // Try JWT validation if API key didn't match
@@ -135,24 +186,87 @@ ApiKeyAuth::validate (const HttpRequest & request, HttpResponse & response)
 }
 
 
-bool
-ApiKeyAuth::constantTimeCompare (const string & a, const string & b)
+string
+ApiKeyAuth::getKey ()
 {
-    if (a.length() != b.length())
-        return false;
-
-    volatile byte result = 0;
-    for (ulong i = 0; i < a.length(); ++i)
-        result |= static_cast<byte>(a[i]) ^ static_cast<byte>(b[i]);
-
-    return result == 0;
+    return apiKey_s.value();
 }
 
 
-const string &
-ApiKeyAuth::getKey ()
+string
+ApiKeyAuth::rotateKey (std::chrono::seconds gracePeriod)
 {
-    return apiKey_s;
+    // Generate new 32-byte random key
+    byte randomBytes[32];
+    if (!alpine_random_bytes(randomBytes, sizeof(randomBytes))) {
+        Log::Error("rotateKey: failed to generate random bytes"s);
+        return {};
+    }
+
+    string hexKey;
+    hexKey.reserve(64);
+    static const char hexChars[] = "0123456789abcdef";
+    for (ulong i = 0; i < sizeof(randomBytes); ++i) {
+        hexKey += hexChars[(randomBytes[i] >> 4) & 0x0F];
+        hexKey += hexChars[randomBytes[i] & 0x0F];
+    }
+
+    // Zero the random bytes buffer
+    volatile auto * p = randomBytes;
+    memset(const_cast<byte *>(p), 0, sizeof(randomBytes));
+
+    auto now = std::chrono::steady_clock::now();
+
+    MutexLock lock(keysMutex_s);
+
+    // Mark all current keys as deprecated with expiry
+    for (auto & entry : keys_s) {
+        if (!entry.deprecated) {
+            entry.deprecated = true;
+            entry.expiresAt = now + gracePeriod;
+        }
+    }
+
+    // Create new key entry (non-deprecated, no expiry)
+    t_ApiKeyEntry newEntry;
+    newEntry.key.assign(hexKey);
+    newEntry.expiresAt = std::chrono::steady_clock::time_point::max();
+    newEntry.deprecated = false;
+    keys_s.insert(keys_s.begin(), std::move(newEntry));
+
+    // Update primary key
+    apiKey_s.assign(hexKey);
+
+    // Purge any already-expired keys
+    purgeExpiredKeys();
+
+    Log::Info("API key rotated successfully."s);
+
+    return hexKey;
+}
+
+
+void
+ApiKeyAuth::purgeExpiredKeys ()
+{
+    auto now = std::chrono::steady_clock::now();
+    std::erase_if(keys_s, [&now](const t_ApiKeyEntry & entry) {
+        return entry.deprecated && entry.expiresAt <= now;
+    });
+}
+
+
+ulong
+ApiKeyAuth::activeKeyCount ()
+{
+    MutexLock lock(keysMutex_s);
+    auto now = std::chrono::steady_clock::now();
+    ulong count = 0;
+    for (const auto & entry : keys_s) {
+        if (entry.expiresAt > now)
+            ++count;
+    }
+    return count;
 }
 
 
@@ -163,7 +277,7 @@ ApiKeyAuth::configureJwt (const string & secret,
                           const string & issuer,
                           const string & audience)
 {
-    jwtSecret_s = secret;
+    jwtSecret_s.assign(secret);
     jwtIssuer_s = issuer;
     jwtAudience_s = audience;
     jwtConfigured_s = true;
@@ -178,7 +292,7 @@ ApiKeyAuth::validateJwt (const string & token)
         auto decoded = jwt::decode(token);
 
         auto verifier = jwt::verify()
-            .allow_algorithm(jwt::algorithm::hs256{jwtSecret_s})
+            .allow_algorithm(jwt::algorithm::hs256{jwtSecret_s.value()})
             .with_issuer(jwtIssuer_s);
 
         if (!jwtAudience_s.empty())
@@ -188,7 +302,10 @@ ApiKeyAuth::validateJwt (const string & token)
         return true;
 
     } catch (const std::exception & e) {
-        Log::Debug("JWT validation failed: "s + e.what());
+        Log::Debug("JWT validation failed"s);
+#ifdef _VERBOSE
+        Log::Debug("JWT detail: "s + StringUtils::sanitizeForLog(e.what()));
+#endif
         return false;
     }
 }
@@ -250,7 +367,7 @@ ApiKeyAuth::hasScope (const HttpRequest & request, const string & scope)
     string token = authHeader.substr(prefix.length());
 
     // API key has all scopes
-    if (constantTimeCompare(token, apiKey_s))
+    if (apiKey_s.equals(token))
         return true;
 
     std::vector<string> scopes;

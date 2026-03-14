@@ -7,6 +7,7 @@
 #include <OptHash.h>
 #include <vector>
 #include <list>
+#include <memory>
 #include <atomic>
 
 
@@ -41,24 +42,22 @@ class ApplCore
 
     using t_SigHandlerList = list<t_SigHandler>;
 
-    using t_SigHandlerIndex = vector<t_SigHandlerList *>;
+    using t_SigHandlerIndex = vector<std::unique_ptr<t_SigHandlerList>>;
 
 
     using t_MethodMemberList = list<t_SigHandlerList *>;
 
     using t_MethodIndex = std::unordered_map <ulong,
-                      t_MethodMemberList *,
+                      std::unique_ptr<t_MethodMemberList>,
                       OptHash<ulong>,
                       equal_to<ulong> >;
 
-    using t_MethodIndexPair = std::pair <ulong, t_MethodMemberList *>;
-                      
 
   private:
 
-    static t_SigHandlerIndex *    sigHandlerIndex_s;
-    static t_MethodIndex *        methodIndex_s;
-    static SignalMonitorThread *  signalMonitor_s;
+    static std::unique_ptr<t_SigHandlerIndex>     sigHandlerIndex_s;
+    static std::unique_ptr<t_MethodIndex>          methodIndex_s;
+    static std::unique_ptr<SignalMonitorThread>     signalMonitor_s;
     static ReadWriteSem           dataLock_s;
 
     static std::atomic<int>       shutdownSignal_s;

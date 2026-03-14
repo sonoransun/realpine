@@ -78,3 +78,54 @@ target_link_libraries(test_configuration PRIVATE
     Alpine::ConfigUtils
 )
 catch_discover_tests(test_configuration)
+
+# --- StringUtils tests ---
+add_executable(test_string_utils test_string_utils.cpp)
+target_link_libraries(test_string_utils PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_string_utils)
+
+# --- SecureString tests ---
+add_executable(test_secure_string test_secure_string.cpp)
+target_link_libraries(test_secure_string PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_secure_string)
+
+# --- Error tests ---
+add_executable(test_error test_error.cpp)
+target_link_libraries(test_error PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_error)
+
+# --- JsonWriter tests ---
+add_executable(test_json_writer
+    test_json_writer.cpp
+    ${REST_SRC_DIR}/JsonWriter.cpp
+)
+target_include_directories(test_json_writer PRIVATE ${REST_SRC_DIR})
+target_link_libraries(test_json_writer PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    nlohmann_json::nlohmann_json
+)
+catch_discover_tests(test_json_writer)
+
+# --- PacketAuth tests ---
+add_executable(test_packet_auth test_packet_auth.cpp)
+target_link_libraries(test_packet_auth PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AlpineProtocol
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+)
+if(ALPINE_ENABLE_TLS)
+    target_link_libraries(test_packet_auth PRIVATE OpenSSL::Crypto)
+    target_compile_definitions(test_packet_auth PRIVATE ALPINE_TLS_ENABLED)
+endif()
+catch_discover_tests(test_packet_auth)

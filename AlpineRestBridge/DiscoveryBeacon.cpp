@@ -17,7 +17,7 @@ DiscoveryBeacon::DiscoveryBeacon ()
 
 DiscoveryBeacon::~DiscoveryBeacon ()
 {
-    stop();
+    DiscoveryBeacon::stop();
     udpSocket_.close();
 }
 
@@ -112,12 +112,23 @@ DiscoveryBeacon::threadMain ()
             continue;
         }
 
-        // Sleep in 1-second increments so stop() is responsive
+        // Wait for the next beacon interval, waking immediately on stop()
         //
-        for (int i = 0; i < BEACON_INTERVAL_SEC && isActive(); i++) {
-            usleep(SLEEP_INCREMENT_MS * 1000);
+        {
+            std::unique_lock lock(cvMutex_);
+            cv_.wait_for(lock, std::chrono::seconds(BEACON_INTERVAL_SEC),
+                         [this] { return !isActive(); });
         }
     }
 
     Log::Info("DiscoveryBeacon: Thread exiting.");
+}
+
+
+
+bool
+DiscoveryBeacon::stop ()
+{
+    cv_.notify_all();
+    return SysThread::stop();
 }

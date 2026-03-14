@@ -2,8 +2,10 @@
 
 
 #include <AdminHandler.h>
+#include <ApiKeyAuth.h>
 #include <DtcpStackInterface.h>
 #include <Configuration.h>
+#include <StringUtils.h>
 #include <Log.h>
 #include <JsonWriter.h>
 #include <JsonReader.h>
@@ -20,6 +22,7 @@ AdminHandler::registerRoutes (HttpRouter & router)
     router.addRoute("POST",   "/admin/config/reload",  reloadConfig);
     router.addRoute("GET",    "/admin/logs/level",     getLogLevel);
     router.addRoute("PUT",    "/admin/logs/level",     setLogLevel);
+    router.addRoute("POST",   "/admin/keys/rotate",    rotateApiKey);
 }
 
 
@@ -43,7 +46,7 @@ AdminHandler::banPeer (const HttpRequest & request,
     if (!DtcpStackInterface::excludeHost(status.ipAddress))
         return HttpResponse::serverError("Failed to ban peer");
 
-    Log::Info("Admin: banned peer "s + it->second + " (IP: "s + status.ipAddress + ")"s);
+    Log::Info("Admin: banned peer "s + StringUtils::sanitizeForLog(it->second) + " (IP: "s + status.ipAddress + ")"s);
 
     JsonWriter writer;
     writer.beginObject();
@@ -78,7 +81,7 @@ AdminHandler::unbanPeer (const HttpRequest & request,
     if (!DtcpStackInterface::allowHost(status.ipAddress))
         return HttpResponse::serverError("Failed to unban peer");
 
-    Log::Info("Admin: unbanned peer "s + it->second + " (IP: "s + status.ipAddress + ")"s);
+    Log::Info("Admin: unbanned peer "s + StringUtils::sanitizeForLog(it->second) + " (IP: "s + status.ipAddress + ")"s);
 
     JsonWriter writer;
     writer.beginObject();
@@ -187,12 +190,48 @@ AdminHandler::setLogLevel (const HttpRequest & request,
         return HttpResponse::badRequest("Invalid log level (Silent/Error/Info/Debug)");
 
     Log::setLogLevel(level);
-    Log::Info("Admin: log level set to "s + levelStr);
+    Log::Info("Admin: log level set to "s + StringUtils::sanitizeForLog(levelStr));
 
     JsonWriter writer;
     writer.beginObject();
     writer.key("level");
     writer.value(string(Log::logLevelToString(level)));
+    writer.endObject();
+
+    return HttpResponse::ok(writer.result());
+}
+
+
+HttpResponse
+AdminHandler::rotateApiKey (const HttpRequest & request,
+                            const std::unordered_map<string, string> & params)
+{
+    // Parse optional grace_period_seconds from JSON body
+    ulong gracePeriodSec = 3600;
+    if (!request.body.empty()) {
+        JsonReader reader(request.body);
+        ulong parsedGrace = 0;
+        if (reader.getUlong("grace_period_seconds", parsedGrace))
+            gracePeriodSec = parsedGrace;
+    }
+
+    auto newKey = ApiKeyAuth::rotateKey(std::chrono::seconds(gracePeriodSec));
+    if (newKey.empty())
+        return HttpResponse::serverError("Failed to rotate API key");
+
+    Log::Info("Admin: API key rotated with grace period "s
+              + std::to_string(gracePeriodSec) + "s"s);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("rotated");
+    writer.value(true);
+    writer.key("new_key");
+    writer.value(newKey);
+    writer.key("grace_period_seconds");
+    writer.value(gracePeriodSec);
+    writer.key("active_keys");
+    writer.value(ApiKeyAuth::activeKeyCount());
     writer.endObject();
 
     return HttpResponse::ok(writer.result());

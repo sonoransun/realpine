@@ -38,4 +38,7 @@ class AdminHandler
     static HttpResponse  setLogLevel (const HttpRequest & request,
                                       const std::unordered_map<string, string> & params);
 
+    static HttpResponse  rotateApiKey (const HttpRequest & request,
+                                       const std::unordered_map<string, string> & params);
+
 };

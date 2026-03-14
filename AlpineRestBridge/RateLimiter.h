@@ -20,6 +20,8 @@ class RateLimiter
 
     static bool    allowRequest (const string & clientIp);
 
+    static bool    allowRequestNormalized (const string & normalizedIp);
+
     static string  normalizeIp (const string & ip);
 
     static void    cleanup ();

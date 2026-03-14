@@ -17,9 +17,9 @@
 
 
 
-ApplCore::t_SigHandlerIndex *     ApplCore::sigHandlerIndex_s = nullptr;
-ApplCore::t_MethodIndex *         ApplCore::methodIndex_s = nullptr;
-SignalMonitorThread *             ApplCore::signalMonitor_s = nullptr;
+std::unique_ptr<ApplCore::t_SigHandlerIndex>  ApplCore::sigHandlerIndex_s;
+std::unique_ptr<ApplCore::t_MethodIndex>      ApplCore::methodIndex_s;
+std::unique_ptr<SignalMonitorThread>           ApplCore::signalMonitor_s;
 ReadWriteSem                      ApplCore::dataLock_s;
 std::atomic<int>                  ApplCore::shutdownSignal_s{0};
 std::atomic<bool>                 ApplCore::shutdownRequested_s{false};
@@ -58,17 +58,11 @@ ApplCore::initialize (int      argc,
 
         // initialize signal handler indexes
         //
-        signalMonitor_s   = new SignalMonitorThread;
-        sigHandlerIndex_s = new t_SigHandlerIndex;
-        methodIndex_s     = new t_MethodIndex;
+        signalMonitor_s   = std::make_unique<SignalMonitorThread>();
+        sigHandlerIndex_s = std::make_unique<t_SigHandlerIndex>();
+        methodIndex_s     = std::make_unique<t_MethodIndex>();
 
-        sigHandlerIndex_s->resize (SignalMax +1);
-
-        // initialize all list pointers to null to indicate no handlers present.
-        //
-        for (auto& sigItem : *sigHandlerIndex_s) {
-            sigItem = nullptr;
-        }
+        sigHandlerIndex_s->resize(SignalMax + 1);
     }
 
 
@@ -162,42 +156,39 @@ ApplCore::addSignalHandler (t_SigHandler  method,
         return false;
     }
 
-    t_SigHandlerList *  sigList;
-    sigList = (*sigHandlerIndex_s)[signal];
+    auto & sigListPtr = (*sigHandlerIndex_s)[signal];
 
-    if (!sigList) {
+    if (!sigListPtr) {
         // no signal handlers defined for this signal yet, allocate list.
-        //
-        sigList = new t_SigHandlerList;
-        (*sigHandlerIndex_s)[signal] = sigList;
+        sigListPtr = std::make_unique<t_SigHandlerList>();
     }
 
     // Add handler to end of signal handler list.
     // Handlers will be invoked in the order in which they were added.
     //
-    sigList->push_back (method);
+    sigListPtr->push_back(method);
 
 
     // See if this method was previously added to method index
     //
-    ulong methodAddress = reinterpret_cast<ulong>(method); // method is reference bu ulong address
+    auto methodAddress = reinterpret_cast<ulong>(method);
+
+    auto methodIter = methodIndex_s->find(methodAddress);
     t_MethodMemberList * memberList = nullptr;
 
-    auto methodIter = methodIndex_s->find (methodAddress);
-
-    if (methodIter != methodIndex_s->end ()) {
+    if (methodIter != methodIndex_s->end()) {
         // this method is already indexed, add this list to handlers.
-        memberList = (*methodIter).second;
-    }
-    else {
+        memberList = methodIter->second.get();
+    } else {
         // not indexed, create new member list and index.
-        memberList = new t_MethodMemberList;
-        methodIndex_s->emplace (methodAddress, memberList);
+        auto newList = std::make_unique<t_MethodMemberList>();
+        memberList = newList.get();
+        methodIndex_s->emplace(methodAddress, std::move(newList));
     }
-         
+
     // Add signal list to member list (used for cleanup if handler is removed)
     //
-    memberList->push_back (sigList);
+    memberList->push_back(sigListPtr.get());
 
 
     return true;
@@ -205,26 +196,79 @@ ApplCore::addSignalHandler (t_SigHandler  method,
 
 
 
-bool 
+bool
 ApplCore::removeSignalHandler (t_SigHandler  method)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::removeSignalHandler invoked.");
+    Log::Debug("ApplCore::removeSignalHandler invoked.");
 #endif
 
+    WriteLock lock(dataLock_s);
+
+    if (!methodIndex_s || !sigHandlerIndex_s) {
+        return false;
+    }
+
+    auto methodAddress = reinterpret_cast<ulong>(method);
+    auto methodIter = methodIndex_s->find(methodAddress);
+
+    if (methodIter == methodIndex_s->end()) {
+        return false;
+    }
+
+    // Remove this method from every signal handler list it belongs to
+    auto * memberList = methodIter->second.get();
+    for (auto * sigList : *memberList) {
+        sigList->remove(method);
+    }
+
+    // Remove from method index
+    methodIndex_s->erase(methodIter);
 
     return true;
 }
 
 
 
-bool 
+bool
 ApplCore::removeDefaultHandler (int signal)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::removeDefaultHandler invoked.");
+    Log::Debug("ApplCore::removeDefaultHandler invoked.");
 #endif
 
+    if (signal < 1 || signal > SignalMax) {
+        return false;
+    }
+
+    WriteLock lock(dataLock_s);
+
+    if (!sigHandlerIndex_s) {
+        return false;
+    }
+
+    auto & sigListPtr = (*sigHandlerIndex_s)[signal];
+    if (!sigListPtr) {
+        return false;
+    }
+
+    // Remove each handler in this signal's list from the method index
+    for (const auto & handler : *sigListPtr) {
+        auto methodAddress = reinterpret_cast<ulong>(handler);
+        auto methodIter = methodIndex_s->find(methodAddress);
+        if (methodIter != methodIndex_s->end()) {
+            // Remove this signal list from the method's member list
+            auto * memberList = methodIter->second.get();
+            memberList->remove(sigListPtr.get());
+            // If method has no more signal lists, remove from index
+            if (memberList->empty()) {
+                methodIndex_s->erase(methodIter);
+            }
+        }
+    }
+
+    // Clear the signal handler list
+    sigListPtr.reset();
 
     return true;
 }
@@ -321,6 +365,9 @@ ApplCore::getShutdownSignal ()
 
 
 
+// NOTE: These handlers are invoked from SignalMonitorThread via sigwait(),
+// not from async signal context. Log calls are safe here.
+
 void
 ApplCore::defaultInterruptHandler ()
 {
@@ -368,6 +415,7 @@ ApplCore::defaultSegvHandler ()
 {
     // SIGSEGV — corrupt state, unsafe to log or allocate.
     // Use _exit() to terminate immediately.
+    ::write(STDERR_FILENO, "FATAL: SIGSEGV received, terminating.\n", 38);
     _exit (1);
 }
 
@@ -432,23 +480,17 @@ ApplCore::handleSignal (int signal)
 
     ReadLock  lock(dataLock_s);
 
-    t_SigHandlerList *  handlerList;
-    handlerList = (*sigHandlerIndex_s)[signal];
+    const auto & handlerListPtr = (*sigHandlerIndex_s)[signal];
 
-    if (!handlerList) {
+    if (!handlerListPtr) {
         // no handlers registered.
         return;
     }
 
-
     // iterate through each handler in list and invoke.
     //
-    t_SigHandler  sigHandler;
-
-    for (const auto& handler : *handlerList) {
-
-        sigHandler = handler;
-        sigHandler();
+    for (const auto & handler : *handlerListPtr) {
+        handler();
     }
 }
 

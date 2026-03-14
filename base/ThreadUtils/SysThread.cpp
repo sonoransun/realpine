@@ -27,12 +27,15 @@ SysThread::~SysThread ()
     Log::Debug ("SysThread destructor invoked.");
 #endif
 
-    // If the thread is still joinable, detach it to avoid
-    // std::jthread destructor calling request_stop + join
-    // on a potentially blocked thread during destruction.
+    // If deleteOnExit_ is true, the thread will delete itself,
+    // so we must detach.  Otherwise join for a clean shutdown.
     //
-    if (thread_.joinable ()) {
+    running_ = false;
+
+    if (deleteOnExit_ && thread_.joinable ()) {
         thread_.detach ();
+    } else if (thread_.joinable ()) {
+        thread_.join ();
     }
 }
 
@@ -69,10 +72,13 @@ SysThread::run ()
 
     threadId_ = thread_.get_id ();
 
-    // Detach so the thread runs independently, matching original
-    // pthread_detach behavior.
+    // Only detach when deleteOnExit_ is set, because the thread
+    // will delete the object itself and cannot be joined.
+    // Otherwise keep the thread joinable for clean shutdown.
     //
-    thread_.detach ();
+    if (deleteOnExit_) {
+        thread_.detach ();
+    }
 
     created_ = true;
 
@@ -98,6 +104,13 @@ SysThread::stop ()
     // This replaces the previous pthread_cancel approach.
     //
     running_ = false;
+
+    // Join the thread so it completes cleanly before we return.
+    //
+    if (thread_.joinable ()) {
+        thread_.join ();
+    }
+
     created_ = false;
 
     ThreadUtils::deleteThread (threadId_);
@@ -127,6 +140,14 @@ SysThread::getThreadId ()
 #endif
 
     return threadId_;
+}
+
+
+
+bool
+SysThread::shouldContinue () const
+{
+    return running_.load ();
 }
 
 

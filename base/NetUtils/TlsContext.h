@@ -26,6 +26,7 @@ class TlsContext
 
     bool  setVerifyPeer (bool require);
     bool  setMinVersion (int version);  // TLS1_2_VERSION, TLS1_3_VERSION
+    bool  setCipherSuites (const string & tls13Ciphers, const string & tls12Ciphers);
 
     SSL_CTX *  context ();
 

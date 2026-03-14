@@ -2,6 +2,7 @@
 
 
 #include <HttpResponse.h>
+#include <StringUtils.h>
 #include <Log.h>
 #include <cstdio>
 
@@ -43,7 +44,16 @@ HttpResponse::addCorsHeaders ()
 {
     if (!corsOrigin_s.empty())
         headers_["Access-Control-Allow-Origin"] = corsOrigin_s;
-    headers_["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS";
+
+    if (!corsOrigin_s.empty() && corsOrigin_s != "*"s) {
+        // Specific domain: allow DELETE and enable credentials
+        headers_["Access-Control-Allow-Methods"]     = "GET, POST, DELETE, OPTIONS";
+        headers_["Access-Control-Allow-Credentials"] = "true";
+    } else {
+        // Wildcard or empty origin: restrict to safe methods, no DELETE
+        headers_["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
+    }
+
     headers_["Access-Control-Allow-Headers"] = "Content-Type, Authorization";
     headers_["X-Content-Type-Options"]       = "nosniff";
     headers_["X-Frame-Options"]              = "DENY";
@@ -53,7 +63,7 @@ HttpResponse::addCorsHeaders ()
 #ifdef ALPINE_TLS_ENABLED
     headers_["Strict-Transport-Security"]    = "max-age=31536000; includeSubDomains";
 #endif
-    headers_["Connection"]                   = "close";
+    headers_["Connection"]                   = "keep-alive";
 }
 
 
@@ -63,7 +73,7 @@ HttpResponse::setCorsOrigin (const string & origin)
     if (origin != "*"s &&
         !origin.starts_with("http://"s) &&
         !origin.starts_with("https://"s)) {
-        Log::Error("HttpResponse: rejecting invalid CORS origin: "s + origin);
+        Log::Error("HttpResponse: rejecting invalid CORS origin: "s + StringUtils::sanitizeForLog(origin));
         return;
     }
     corsOrigin_s = origin;
@@ -101,10 +111,41 @@ HttpResponse::setRequestId (const string & requestId)
 }
 
 
+void
+HttpResponse::setConnectionClose ()
+{
+    headers_["Connection"] = "close";
+    headers_.erase("Keep-Alive");
+}
+
+
+void
+HttpResponse::setKeepAliveParams (int timeout, int maxRequests)
+{
+    headers_["Keep-Alive"] = "timeout="s + std::to_string(timeout)
+                             + ", max="s + std::to_string(maxRequests);
+}
+
+
 string
 HttpResponse::build ()
 {
+    // Content-Length header (compute before size estimation)
+    char contentLength[64];
+    snprintf(contentLength, sizeof(contentLength), "%lu", (ulong)body_.length());
+    headers_["Content-Length"] = contentLength;
+
+    // Pre-calculate total size to avoid reallocations
+    // Status line: "HTTP/1.1 " + code(3) + " " + statusText + "\r\n"
+    size_t totalSize = 9 + 3 + 1 + statusText_.size() + 2;
+    for (const auto & header : headers_) {
+        totalSize += header.first.size() + 2 + header.second.size() + 2;
+    }
+    totalSize += 2;  // blank line
+    totalSize += body_.size();
+
     string result;
+    result.reserve(totalSize + 32);
 
     // Status line
     char statusLine[64];
@@ -113,24 +154,16 @@ HttpResponse::build ()
     result += statusText_;
     result += "\r\n";
 
-    // Content-Length header
-    char contentLength[64];
-    snprintf(contentLength, sizeof(contentLength), "%lu", (ulong)body_.length());
-    headers_["Content-Length"] = contentLength;
-
     // Headers
-    for (const auto& header : headers_)
-    {
+    for (const auto & header : headers_) {
         result += header.first;
         result += ": ";
         result += header.second;
         result += "\r\n";
     }
 
-    // Blank line
+    // Blank line + body
     result += "\r\n";
-
-    // Body
     result += body_;
 
     return result;
