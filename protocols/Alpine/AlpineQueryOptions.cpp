@@ -26,6 +26,7 @@ AlpineQueryOptions::AlpineQueryOptions ()
     query_           = "";
     optionId_        = 0;
     optionData_      = nullptr;
+    priority_        = 128;
 }
 
 
@@ -41,6 +42,7 @@ AlpineQueryOptions::AlpineQueryOptions (const AlpineQueryOptions & copy)
     maxDescPerPeer_  = copy.maxDescPerPeer_;
     query_           = copy.query_;
     optionId_        = copy.optionId_;
+    priority_        = copy.priority_;
 
     if ( (optionId_ != 0) && (copy.optionData_) ) {
         optionData_ = copy.optionData_->duplicate ();
@@ -79,6 +81,7 @@ AlpineQueryOptions::operator = (const AlpineQueryOptions & copy)
     maxDescPerPeer_  = copy.maxDescPerPeer_;
     query_           = copy.query_;
     optionId_        = copy.optionId_;
+    priority_        = copy.priority_;
 
     if ( (optionId_ != 0) && (copy.optionData_) ) {
         if (optionData_) {
@@ -273,6 +276,31 @@ AlpineQueryOptions::getOptionData (AlpineQueryOptionData *&  optionData)
         return false;
     }
     optionData = optionData_->duplicate ();
+
+    return true;
+}
+
+
+
+bool
+AlpineQueryOptions::setPriority (uint8_t  priority)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineQueryOptions::setPriority invoked.  Priority: "s +
+                std::to_string (priority));
+#endif
+
+    priority_ = priority;
+
+    return true;
+}
+
+
+
+bool
+AlpineQueryOptions::getPriority (uint8_t &  priority)
+{
+    priority = priority_;
 
     return true;
 }

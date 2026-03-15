@@ -39,6 +39,7 @@ add_library(AlpineProtocol
     AlpineServiceThread.cpp
     AlpineStack.cpp
     AlpineStackConfig.cpp
+    IpFilter.cpp
     QueryCache.cpp
 )
 add_library(Alpine::AlpineProtocol ALIAS AlpineProtocol)

@@ -21,6 +21,10 @@ struct RouteInfo {
     string  method;
     string  pattern;
     string  description;
+    string  tag;              // OpenAPI tag (e.g., "Query", "Peer", "Admin")
+    string  requestSchema;    // JSON Schema for request body (empty if none)
+    string  responseSchema;   // JSON Schema for 200 response body
+    string  permission;       // Required RBAC permission (e.g., "query:start")
 };
 
 

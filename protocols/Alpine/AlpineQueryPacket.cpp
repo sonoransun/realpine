@@ -28,6 +28,7 @@ AlpineQueryPacket::AlpineQueryPacket ()
     uploadSlots_    = 0;
     offset_         = 0;
     replySetSize_   = 0;
+    priority_       = 128;
     resourceList_   = nullptr;
 }
 
@@ -49,6 +50,7 @@ AlpineQueryPacket::AlpineQueryPacket (StackLinkInterface * parent)
     uploadSlots_    = 0;
     offset_         = 0;
     replySetSize_   = 0;
+    priority_       = 128;
     resourceList_   = nullptr;
 }
 
@@ -74,6 +76,7 @@ AlpineQueryPacket::AlpineQueryPacket (const AlpineQueryPacket & copy)
     uploadSlots_    = copy.uploadSlots_;
     offset_         = copy.offset_;
     replySetSize_   = copy.replySetSize_;
+    priority_       = copy.priority_;
 
     if (copy.resourceList_) {
         resourceList_ = new t_ResourceDescList;
@@ -130,6 +133,7 @@ AlpineQueryPacket::operator = (const AlpineQueryPacket & copy)
     uploadSlots_    = copy.uploadSlots_;
     offset_         = copy.offset_;
     replySetSize_   = copy.replySetSize_;
+    priority_       = copy.priority_;
 
     if (copy.resourceList_) {
         resourceList_ = new t_ResourceDescList;
@@ -142,7 +146,7 @@ AlpineQueryPacket::operator = (const AlpineQueryPacket & copy)
 
 
 
-AlpinePacket::t_PacketType  
+AlpinePacket::t_PacketType
 AlpineQueryPacket::getPacketType ()
 {
 #ifdef _VERBOSE
@@ -412,7 +416,7 @@ AlpineQueryPacket::setReplySetSize (ushort  setSize)
 
 
 
-bool  
+bool
 AlpineQueryPacket::getReplySetSize (ushort &  setSize)
 {
 #ifdef _VERBOSE
@@ -426,7 +430,62 @@ AlpineQueryPacket::getReplySetSize (ushort &  setSize)
 
 
 
-bool  
+bool
+AlpineQueryPacket::setPriority (uint8_t  priority)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineQueryPacket::setPriority invoked.  Priority: "s +
+                std::to_string (priority));
+#endif
+
+    priority_ = priority;
+
+    return true;
+}
+
+
+
+bool
+AlpineQueryPacket::getPriority (uint8_t &  priority)
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpineQueryPacket::getPriority invoked.");
+#endif
+
+    priority = priority_;
+
+    return true;
+}
+
+
+
+bool
+AlpineQueryPacket::setTraceContext (const string &  traceContext)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpineQueryPacket::setTraceContext invoked.");
+#endif
+
+    traceContext_ = traceContext;
+    return true;
+}
+
+
+
+bool
+AlpineQueryPacket::getTraceContext (string &  traceContext)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpineQueryPacket::getTraceContext invoked.");
+#endif
+
+    traceContext = traceContext_;
+    return true;
+}
+
+
+
+bool
 AlpineQueryPacket::setResourceDescList (t_ResourceDescList &  resourceList)
 {
 #ifdef _VERBOSE
@@ -694,8 +753,8 @@ AlpineQueryPacket::writeData (DataBuffer * linkBuffer)
     }
     else if (packetType_ == AlpinePacket::t_PacketType::queryReply) {
         *(reinterpret_cast<ushort *>(curr)) = htons(replySetSize_);
-        curr        += sizeof(short);      
-        writeLength += sizeof(short);      
+        curr        += sizeof(short);
+        writeLength += sizeof(short);
 
         linkBuffer->addWriteBytes (writeLength);
 
@@ -704,6 +763,21 @@ AlpineQueryPacket::writeData (DataBuffer * linkBuffer)
         if (!status) {
             return false;
         }
+    }
+
+    // Write priority field (protocol version >= 1)
+    //
+    {
+        byte * priBuf;
+        uint   priBufSize;
+        status = linkBuffer->getWriteBuffer (priBuf, priBufSize);
+
+        if (!status || priBufSize < sizeof(uint8_t)) {
+            Log::Debug ("Insufficient space for priority in AlpineQueryPacket::writeData.");
+            return false;
+        }
+        *priBuf = priority_;
+        linkBuffer->addWriteBytes (sizeof(uint8_t));
     }
 
 
@@ -1009,6 +1083,24 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
                                  "AlpineQueryPacket::readData.");
 #endif
             return false;
+        }
+    }
+
+    // Read priority field if present (protocol version >= 1).
+    // If the remaining buffer has at least one byte, treat it as priority;
+    // otherwise default to 128 (normal) for legacy packets.
+    //
+    {
+        byte * priBuf;
+        uint   priBufSize;
+        status = linkBuffer->getReadBuffer (priBuf, priBufSize);
+
+        if (status && priBufSize >= sizeof(uint8_t)) {
+            priority_ = *priBuf;
+            linkBuffer->addReadBytes (sizeof(uint8_t));
+        }
+        else {
+            priority_ = 128;
         }
     }
 

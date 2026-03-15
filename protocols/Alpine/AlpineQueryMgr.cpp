@@ -11,6 +11,7 @@
 #include <Log.h>
 #include <StringUtils.h>
 
+#include <algorithm>
 #include <chrono>
 
 #ifdef ALPINE_ENABLE_PERSISTENCE
@@ -121,6 +122,11 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     auto newState = std::make_unique<t_QueryState>();
 
     newState->queryId = queryId;
+
+    uint8_t priority = 128;
+    options.getPriority (priority);
+    newState->priority = priority;
+
     newState->query.reset(new AlpineQuery(options));
     newState->results.reset(new AlpineQueryResults(queryId, options));
     // pending only allocated if needed
@@ -1036,14 +1042,41 @@ AlpineQueryMgr::processTimedEvents ()
         return {};
     }
 
+    // Build a priority-sorted snapshot of active query IDs so that
+    // higher-priority queries are processed first each cycle.
+    //
+    struct PrioritizedQuery {
+        ulong    queryId;
+        uint8_t  priority;
+    };
+
+    std::vector<PrioritizedQuery> sortedQueries;
+    sortedQueries.reserve (activeQueryIndex_s->size ());
+
+    for (const auto& [id, state] : *activeQueryIndex_s) {
+        sortedQueries.push_back ({id, state->priority});
+    }
+
+    // Sort descending by priority (255 = highest, processed first)
+    std::sort (sortedQueries.begin (), sortedQueries.end (),
+               [](const PrioritizedQuery & a, const PrioritizedQuery & b) {
+                   return a.priority > b.priority;
+               });
+
     // Check for completed queries that have async callbacks registered.
     // A query is considered complete when it is no longer in progress.
     //
     std::vector<ulong> completedIds;
 
-    for (const auto& [id, state] : *activeQueryIndex_s) {
+    for (const auto& pq : sortedQueries) {
+        auto it = activeQueryIndex_s->find (pq.queryId);
+
+        if (it == activeQueryIndex_s->end ())
+            continue;
+
+        const auto& state = it->second;
         if (state->query && !state->query->inProgress()) {
-            completedIds.push_back(id);
+            completedIds.push_back(pq.queryId);
         }
     }
 

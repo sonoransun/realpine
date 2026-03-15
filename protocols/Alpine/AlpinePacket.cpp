@@ -18,8 +18,9 @@ AlpinePacket::AlpinePacket ()
     Log::Debug ("AlpinePacket constructor invoked.");
 #endif
 
-    parent_     = nullptr;
-    packetType_ = t_PacketType::none;
+    parent_          = nullptr;
+    packetType_      = t_PacketType::none;
+    protocolVersion_ = PROTOCOL_VERSION;
 }
 
 
@@ -30,8 +31,9 @@ AlpinePacket::AlpinePacket (const AlpinePacket & copy)
     Log::Debug ("AlpinePacket copy constructor invoked.");
 #endif
 
-    parent_     = copy.parent_;
-    packetType_ = copy.packetType_;
+    parent_          = copy.parent_;
+    packetType_      = copy.packetType_;
+    protocolVersion_ = copy.protocolVersion_;
 }
 
 
@@ -58,8 +60,9 @@ AlpinePacket::operator = (const AlpinePacket & copy)
         return *this;
     }
 
-    parent_     = copy.parent_;
-    packetType_ = copy.packetType_;
+    parent_          = copy.parent_;
+    packetType_      = copy.packetType_;
+    protocolVersion_ = copy.protocolVersion_;
 
 
     return *this;
@@ -156,11 +159,25 @@ AlpinePacket::writeData (DataBuffer * linkBuffer)
     }
 
 
-    writeLength = sizeof(short);
+    // Versioned wire format:
+    //   uint16 (0x0000)           -- version marker (t_PacketType::none, never sent by legacy nodes)
+    //   uint16                    -- protocol version
+    //   uint16                    -- packet type
+    //
+    writeLength = sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short);
     if (bufferSize < writeLength) {
         return false;
     }
     curr = buffer;
+
+    // Write version marker (0) to signal versioned packet
+    *(reinterpret_cast<uint16_t *>(curr)) = htons(static_cast<uint16_t>(0));
+    curr += sizeof(uint16_t);
+
+    // Write protocol version
+    *(reinterpret_cast<uint16_t *>(curr)) = htons(protocolVersion_);
+    curr += sizeof(uint16_t);
+
     *(reinterpret_cast<ushort *>(curr)) = htons(static_cast<ushort>(packetType_));
     curr += sizeof(short);
 
@@ -221,7 +238,38 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
         return false;
     }
     curr = buffer;
-    packetType_ = static_cast<t_PacketType>(ntohs(*(reinterpret_cast<ushort *>(curr))));
+
+    // Backward-compatible version detection.
+    //
+    // Versioned packets:  [uint16 marker=0] [uint16 version] [uint16 packetType]
+    // Legacy packets:     [uint16 packetType (1..14)]
+    //
+    // The marker value 0 corresponds to t_PacketType::none, which legacy nodes
+    // never transmit. If the first uint16 is 0, this is a versioned packet.
+    // Otherwise, it is a legacy packet and the first uint16 is the packet type.
+    //
+    auto firstWord = static_cast<uint16_t>(ntohs(*(reinterpret_cast<ushort *>(curr))));
+
+    if (firstWord != 0) {
+        // Legacy packet — no version field present
+        protocolVersion_ = 0;
+        packetType_      = static_cast<t_PacketType>(firstWord);
+        readLength       = sizeof(short);
+    }
+    else {
+        // Versioned packet — first word is zero marker, then version, then type
+        if (bufferSize < sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short)) {
+#ifdef _VERBOSE
+            Log::Debug ("Packet size too small for versioned header in AlpinePacket::readData.");
+#endif
+            return false;
+        }
+        curr += sizeof(uint16_t);  // skip marker
+        protocolVersion_ = static_cast<uint16_t>(ntohs(*(reinterpret_cast<ushort *>(curr))));
+        curr += sizeof(uint16_t);
+        packetType_      = static_cast<t_PacketType>(ntohs(*(reinterpret_cast<ushort *>(curr))));
+        readLength       = sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short);
+    }
 
     linkBuffer->addReadBytes (readLength);
 
@@ -380,11 +428,35 @@ AlpinePacket::packetTypeAsString (t_PacketType  type,
           typeString = "proxy halt/denied";
           break;
 
+        case t_PacketType::versionHandshake :
+          typeString = "version handshake";
+          break;
+
+        case t_PacketType::versionAccept :
+          typeString = "version accept";
+          break;
+
+        case t_PacketType::queryCancellation :
+          typeString = "query cancellation";
+          break;
+
       default:
         Log::Debug ("Invalid packet type passed to AlpinePacket::packetTypeAsString!");
         return false;
     }
     return true;
+}
+
+
+
+uint16_t
+AlpinePacket::getProtocolVersion ()
+{
+#ifdef _VERBOSE
+    Log::Debug ("AlpinePacket::getProtocolVersion invoked.");
+#endif
+
+    return protocolVersion_;
 }
 
 

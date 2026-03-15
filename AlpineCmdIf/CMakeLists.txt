@@ -1,6 +1,8 @@
 add_executable(AlpineCmdIf
     AlpineConfig.cpp
     AlpineCmdIf.cpp
+    OutputFormatter.cpp
+    ShellCompletion.cpp
     JsonRpcClient.cpp
     ../AlpineRestBridge/JsonWriter.cpp
     ../AlpineRestBridge/JsonReader.cpp
@@ -15,4 +17,5 @@ target_link_libraries(AlpineCmdIf PRIVATE
     Alpine::NetUtils
     Alpine::ConfigUtils
     nlohmann_json::nlohmann_json
+    linenoise
 )

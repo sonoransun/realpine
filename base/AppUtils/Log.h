@@ -4,6 +4,7 @@
 #pragma once
 #include <string>
 #include <string_view>
+#include <format>
 #include <initializer_list>
 #include <utility>
 
@@ -40,6 +41,25 @@ class Log
     static void Info (std::string_view logMsg, t_KvPairs kvPairs);
 
     static void Debug (std::string_view logMsg, t_KvPairs kvPairs);
+
+    // std::format-based overloads — prefer these over string concatenation
+    template <typename... Args>
+    static void Error (std::format_string<Args...> fmt, Args &&... args)
+    {
+        Error(std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    static void Info (std::format_string<Args...> fmt, Args &&... args)
+    {
+        Info(std::format(fmt, std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    static void Debug (std::format_string<Args...> fmt, Args &&... args)
+    {
+        Debug(std::format(fmt, std::forward<Args>(args)...));
+    }
 
     static void setCorrelationId (const std::string & id);
 

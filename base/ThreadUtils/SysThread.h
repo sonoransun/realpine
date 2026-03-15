@@ -7,6 +7,7 @@
 #include <Mutex.h>
 #include <thread>
 #include <atomic>
+#include <stop_token>
 
 
 class SysThread
@@ -19,9 +20,15 @@ class SysThread
 
 
 
-    // Derived threadMain ()
+    // Derived threadMain — legacy overload (no stop_token).
     //
     virtual void threadMain () = 0;
+
+    // Derived threadMain — cooperative-cancellation overload.
+    // Default implementation delegates to the legacy threadMain()
+    // so existing subclasses keep working without changes.
+    //
+    virtual void threadMain (std::stop_token stopToken);
 
 
     // Thread operations
@@ -41,15 +48,14 @@ class SysThread
   protected:
 
     /// Returns true while the thread should keep running.
-    /// Subclasses should check this in their thread loop to
-    /// support clean join-on-destroy shutdown.
+    /// Checks both the running_ flag and the jthread stop token.
     ///
     [[nodiscard]] bool shouldContinue () const;
 
 
   private:
 
-    std::thread     thread_;
+    std::jthread    thread_;
     t_ThreadId      threadId_;
 
     bool            deleteOnExit_;
@@ -57,8 +63,11 @@ class SysThread
     std::atomic<bool> created_{false};
     Mutex           waitLock_;
 
+    // Cached stop_token from the jthread, used by shouldContinue().
+    std::stop_token stopToken_;
 
-    static void threadEntry (SysThread * self);
+
+    static void threadEntry (std::stop_token stopToken, SysThread * self);
 
 };
 

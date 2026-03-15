@@ -5,6 +5,9 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
+#include <format>
+#include <ranges>
 #include <list>
 #include <vector>
 #include <utility>

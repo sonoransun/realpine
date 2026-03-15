@@ -46,6 +46,10 @@ class AlpineQueryOptions
 
     bool  getOptionData (AlpineQueryOptionData *&  optionData);
 
+    bool  setPriority (uint8_t  priority);
+
+    bool  getPriority (uint8_t &  priority);
+
 
 
   private:
@@ -56,6 +60,7 @@ class AlpineQueryOptions
     string                    query_;
     ulong                     optionId_;
     AlpineQueryOptionData *   optionData_;
+    uint8_t                   priority_{128};
    
 };
 

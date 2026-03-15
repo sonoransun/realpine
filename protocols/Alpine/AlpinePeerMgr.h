@@ -55,6 +55,7 @@ class AlpinePeerMgr
         AlpineDtcpConnTransport *        transport;
         std::optional<string>            alias;
         std::unique_ptr<t_GroupIdList>   groupList;
+        uint16_t                         negotiatedVersion{0};
     };
 
     using t_PeerInfoIndex = std::unordered_map< ulong,

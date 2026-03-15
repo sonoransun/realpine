@@ -22,6 +22,11 @@ using std::cout; using std::endl; using std::cerr;
 #include <JsonWriter.h>
 
 #include <AlpineConfig.h>
+#include <OutputFormatter.h>
+#include <ShellCompletion.h>
+#include <TermColor.h>
+
+#include <linenoise.h>
 
 
 static constexpr const char * ALPINE_CLI_VERSION = "devel-00019";
@@ -46,9 +51,11 @@ using t_DispatchTable = std::unordered_map<string,
 // Global members
 //
 static t_DispatchTable *  dispatchTable_s = nullptr;
-static bool  verbose_s = false;
-static bool  jsonOutput_s = false;
-static bool  quietOutput_s = false;
+static bool    verbose_s     = false;
+static bool    jsonOutput_s  = false;
+static bool    quietOutput_s = false;
+static string  formatMode_s  = "json"s;
+static bool    colorEnabled_s = false;
 
 
 bool buildDispatchTable ();
@@ -64,6 +71,14 @@ void printCommandList ();
 void printCommandHelp (const string &  command);
 
 void printVersion ();
+
+vector<pair<string, string>>  getDispatchEntries ();
+
+int  runInteractive (const string & serverAddress, ushort serverPort);
+
+void linenoiseCompletionCallback (const char * buf, linenoiseCompletions * lc);
+
+static string  historyFilePath ();
 
 
 
@@ -89,7 +104,8 @@ main (int argc, char *argv[])
         return 1;
     }
 
-    // Check for --help / -h and --version / -v before configuration init
+    // Check for --help / -h, --version / -v, and --completions before
+    // configuration init
     //
     for (int i = 1; i < argc; ++i) {
         string arg(argv[i]);
@@ -99,6 +115,19 @@ main (int argc, char *argv[])
         }
         if (arg == "--version" || arg == "-v") {
             printVersion();
+            return 0;
+        }
+        if (arg == "--completions" && i + 1 < argc) {
+            string shell(argv[i + 1]);
+            auto entries = getDispatchEntries();
+            if (shell == "bash") {
+                cout << ShellCompletion::generateBash(entries);
+            } else if (shell == "zsh") {
+                cout << ShellCompletion::generateZsh(entries);
+            } else {
+                cerr << "Error: Unknown shell '"s + shell + "'. Use 'bash' or 'zsh'." << endl;
+                return 2;
+            }
             return 0;
         }
     }
@@ -131,7 +160,7 @@ main (int argc, char *argv[])
     }
 
 
-    // Check for --json and --quiet flags
+    // Check for --json, --quiet, --format, and --color flags
     //
     for (int i = 1; i < argc; ++i) {
         string arg(argv[i]);
@@ -139,7 +168,19 @@ main (int argc, char *argv[])
             jsonOutput_s = true;
         if (arg == "--quiet")
             quietOutput_s = true;
+        if (arg == "--format" && i + 1 < argc) {
+            formatMode_s = string(argv[i + 1]);
+            if (formatMode_s == "json"s)
+                jsonOutput_s = true;
+            ++i;
+        }
+        if (arg == "--color")
+            colorEnabled_s = true;
     }
+
+    // Auto-detect color when not explicitly set
+    if (!colorEnabled_s)
+        colorEnabled_s = TermColor::isTerminal();
 
 
     // Load configuration settings
@@ -229,6 +270,14 @@ main (int argc, char *argv[])
         Log::Error ("Initializing JsonRpcClient failed.  Exiting.");
         return 1;
     }
+
+
+    // Interactive REPL mode
+    //
+    if (command == "interactive"s) {
+        return runInteractive (serverAddress, serverPort);
+    }
+
 
     // Perform requested command...
     //
@@ -447,6 +496,14 @@ buildDispatchTable ()
         "Usage: --command getStatus\n"
         "Returns the server running status and version string."s});
 
+    // Interactive mode (handled specially in main, not via handler)
+    dispatchTable_s->emplace ("interactive", t_CommandEntry{nullptr,
+        "Enter interactive REPL with readline and history"s,
+        "Usage: --command interactive\n"
+        "Opens an interactive shell with tab completion, command\n"
+        "history, and line editing.  History is saved to\n"
+        "~/.alpine_history between sessions."s});
+
 
     return true;
 }
@@ -473,6 +530,11 @@ handleCommand (const string &  command)
         return false;
     }
     auto handler = iter->second.handler;
+
+    if (!handler) {
+        Log::Error ("Command '"s + command + "' is not dispatchable.");
+        return false;
+    }
 
     bool status = (*handler)();
 
@@ -505,13 +567,17 @@ printUsage ()
          << "Usage:\n"
          << "  AlpineCmdIf --serverAddress <addr> --serverPort <port> --command <cmd> [options]\n\n"
          << "Flags:\n"
-         << "  -h, --help       Show this help message\n"
-         << "  -v, --version    Show version\n"
-         << "  --verbose        Enable verbose output\n"
-         << "  --json           Output results as JSON\n"
-         << "  --quiet          Suppress non-essential output\n\n"
+         << "  -h, --help              Show this help message\n"
+         << "  -v, --version           Show version\n"
+         << "  --verbose               Enable verbose output\n"
+         << "  --json                  Output results as JSON\n"
+         << "  --quiet                 Suppress non-essential output\n"
+         << "  --format <fmt>          Output format: json (default), table, csv, yaml\n"
+         << "  --color                 Enable colored output (auto-detected for terminals)\n"
+         << "  --completions <shell>   Generate shell completions (bash or zsh)\n\n"
          << "Use '--command help' to list all available commands.\n"
-         << "Use '--command help --queryString <command>' for detailed help on a command.\n";
+         << "Use '--command help --queryString <command>' for detailed help on a command.\n"
+         << "Use '--command interactive' for an interactive shell with tab completion and history.\n";
 }
 
 
@@ -595,6 +661,22 @@ printCommandHelp (const string &  command)
 
     cout << command << " - " << iter->second.description << "\n\n"
          << iter->second.detailedHelp << endl;
+}
+
+
+
+vector<pair<string, string>>
+getDispatchEntries ()
+{
+    vector<pair<string, string>> entries;
+    if (!dispatchTable_s)
+        return entries;
+
+    entries.reserve(dispatchTable_s->size());
+    for (const auto & [name, entry] : *dispatchTable_s)
+        entries.emplace_back(name, entry.description);
+
+    return entries;
 }
 
 
@@ -2020,6 +2102,143 @@ performGetStatus ()
     }
 
     return true;
+}
+
+
+
+// ---------------------------------------------------------------------------
+//  Interactive REPL mode
+// ---------------------------------------------------------------------------
+
+
+/// Resolve the history file path (~/.alpine_history).
+///
+static string
+historyFilePath ()
+{
+    string path;
+
+    const char * home = getenv ("HOME");
+    if (home) {
+        path = string (home) + "/.alpine_history"s;
+    } else {
+        path = ".alpine_history"s;
+    }
+    return path;
+}
+
+
+
+/// Linenoise tab-completion callback.
+/// Matches partially-typed input against the dispatch table keys.
+///
+void
+linenoiseCompletionCallback (const char * buf, linenoiseCompletions * lc)
+{
+    if (!dispatchTable_s || !buf)
+        return;
+
+    string prefix (buf);
+
+    for (const auto & [name, entry] : *dispatchTable_s) {
+        if (name.starts_with (prefix)) {
+            linenoiseAddCompletion (lc, name.c_str ());
+        }
+    }
+
+    // REPL built-in commands
+    static const char * builtins[] = { "help", "exit", "quit", nullptr };
+    for (const char ** cmd = builtins; *cmd; ++cmd) {
+        if (string (*cmd).starts_with (prefix)) {
+            linenoiseAddCompletion (lc, *cmd);
+        }
+    }
+}
+
+
+
+/// Enter the interactive REPL loop.
+///
+/// Returns the process exit code (0 on clean exit).
+///
+int
+runInteractive (const string & serverAddress, ushort serverPort)
+{
+    string histFile = historyFilePath ();
+
+    // Configure linenoise
+    linenoiseSetMultiLine (0);
+    linenoiseHistorySetMaxLen (500);
+    linenoiseHistoryLoad (histFile.c_str ());
+    linenoiseSetCompletionCallback (linenoiseCompletionCallback);
+
+    if (!quietOutput_s) {
+        cout << "Alpine interactive shell (server "s
+             << serverAddress << ":"s << serverPort << ")\n"s
+             << "Type a command name, 'help' for a list, or Ctrl-D to exit.\n"s;
+    }
+
+    while (true) {
+        char * line = linenoise ("alpine> ");
+
+        if (!line) {
+            // EOF / Ctrl-D
+            break;
+        }
+
+        string input (line);
+        linenoiseFree (line);
+
+        // Trim leading/trailing whitespace
+        while (!input.empty () && input.front () == ' ')
+            input.erase (input.begin ());
+        while (!input.empty () && input.back () == ' ')
+            input.pop_back ();
+
+        if (input.empty ())
+            continue;
+
+        // Add to history and persist
+        linenoiseHistoryAdd (input.c_str ());
+        linenoiseHistorySave (histFile.c_str ());
+
+        // Built-in REPL commands
+        if (input == "exit"s || input == "quit"s) {
+            break;
+        }
+
+        if (input == "help"s) {
+            printCommandList ();
+            continue;
+        }
+
+        if (input.starts_with ("help "s)) {
+            string helpCmd = input.substr (5);
+            while (!helpCmd.empty () && helpCmd.front () == ' ')
+                helpCmd.erase (helpCmd.begin ());
+            if (!helpCmd.empty ()) {
+                printCommandHelp (helpCmd);
+            } else {
+                printCommandList ();
+            }
+            continue;
+        }
+
+        // Dispatch the command
+        if (!commandExists (input)) {
+            cerr << "Unknown command: "s << input
+                 << ".  Type 'help' for a list." << endl;
+            continue;
+        }
+
+        handleCommand (input);
+    }
+
+    if (!quietOutput_s) {
+        cout << "\nExiting interactive shell." << endl;
+    }
+
+    return 0;
 }
 
 

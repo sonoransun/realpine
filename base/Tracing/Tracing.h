@@ -46,6 +46,14 @@ class Tracing
 
     static void  setTraceContext (const string & context);
 
+    // W3C Trace Context propagation for cross-node tracing.
+    // Inject current span context into a carrier map for transmission.
+    static void  injectContext (std::unordered_map<string, string> & carrier);
+
+    // Extract span context from a carrier map received from a remote node.
+    // Returns the traceparent header value, or empty string if not present.
+    static string  extractTraceparent (const std::unordered_map<string, string> & carrier);
+
 #endif
 
 

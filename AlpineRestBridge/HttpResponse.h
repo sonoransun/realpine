@@ -3,6 +3,7 @@
 
 #pragma once
 #include <Common.h>
+#include <string_view>
 #include <unordered_map>
 
 
@@ -40,6 +41,10 @@ class HttpResponse
     void  setKeepAliveParams (int timeout, int maxRequests);
 
     int  statusCode () const  { return statusCode_; }
+
+    ulong  bodySize () const  { return body_.size(); }
+
+    void  compressBody (const string & encoding);
 
     string  build ();
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(Alpine VERSION 0.0.19 LANGUAGES CXX)
+project(Alpine VERSION 0.0.19 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,6 +22,7 @@ option(ALPINE_ENABLE_PERSISTENCE "Enable SQLite persistence layer" OFF)
 option(ALPINE_ENABLE_TRACING "Enable OpenTelemetry distributed tracing" OFF)
 option(ALPINE_ENABLE_UPNP "Enable UPnP IGD port mapping" OFF)
 option(ALPINE_ENABLE_FUSE "Enable FUSE virtual filesystem" OFF)
+option(ALPINE_ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
 option(ALPINE_USE_SYSTEM_DEPS "Use system-installed dependencies via find_package instead of FetchContent" OFF)
 set(ALPINE_SANITIZER "" CACHE STRING
     "Enable sanitizer instrumentation (address, undefined, thread, memory, or comma-separated combo)")
@@ -67,7 +68,14 @@ if(ALPINE_SANITIZER)
     message(STATUS "Sanitizer enabled: ${ALPINE_SANITIZER}")
 endif()
 
+if(ALPINE_ENABLE_COVERAGE)
+    target_compile_options(AlpineFlags INTERFACE --coverage)
+    target_link_options(AlpineFlags INTERFACE --coverage)
+    message(STATUS "Code coverage instrumentation enabled")
+endif()
+
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)
 target_link_libraries(AlpineFlags INTERFACE Threads::Threads)
 
 if(ALPINE_ENABLE_TLS)
@@ -133,6 +141,21 @@ else()
     add_library(Asio::Asio ALIAS asio_standalone)
     target_include_directories(asio_standalone INTERFACE ${asio_SOURCE_DIR}/asio/include)
     target_compile_definitions(asio_standalone INTERFACE ASIO_STANDALONE ASIO_NO_DEPRECATED)
+endif()
+
+# linenoise for interactive CLI (BSD-licensed, single-file C library)
+FetchContent_Declare(linenoise
+    GIT_REPOSITORY https://github.com/antirez/linenoise.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(linenoise)
+
+# antirez/linenoise has no CMakeLists.txt, so we create a library target.
+if(NOT TARGET linenoise)
+    add_library(linenoise STATIC ${linenoise_SOURCE_DIR}/linenoise.c)
+    target_include_directories(linenoise PUBLIC ${linenoise_SOURCE_DIR})
+    set_target_properties(linenoise PROPERTIES C_STANDARD 11)
 endif()
 
 if(WIN32)
@@ -281,6 +304,7 @@ if(ALPINE_BUILD_TESTS)
 
     add_subdirectory(test/unit)
     add_subdirectory(test/integration)
+    add_subdirectory(test/load)
 endif()
 
 # Fuzzing targets (requires Clang with libFuzzer)

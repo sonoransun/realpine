@@ -83,6 +83,7 @@ class AlpineQueryMgr
 
     struct t_QueryState {
         ulong                                  queryId;
+        uint8_t                                priority{128};
         std::unique_ptr<AlpineQuery>           query;    // only present while active
         std::unique_ptr<AlpineQueryResults>    results;
         std::unique_ptr<t_PendingReplyIndex>   pending;

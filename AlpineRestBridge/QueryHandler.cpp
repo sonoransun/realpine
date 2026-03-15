@@ -5,12 +5,18 @@
 #include <AlpineStackInterface.h>
 #include <JsonReader.h>
 #include <JsonWriter.h>
+#include <WebhookDispatcher.h>
+#include <MutexLock.h>
 #include <Log.h>
 #include <SafeParse.h>
 
 #ifdef ALPINE_TRACING_ENABLED
 #include <Tracing.h>
 #endif
+
+
+std::unordered_map<ulong, string, OptHash<ulong>>  QueryHandler::callbackUrls_s;
+Mutex                                                QueryHandler::callbackUrlsMutex_s;
 
 
 void
@@ -57,16 +63,44 @@ QueryHandler::startQuery (const HttpRequest & request,
     options.autoDownload = false;
     options.optionId = 0;
 
+    // Parse optional priority (0-255, default 128)
+    ulong priorityValue = 128;
+    if (reader.getUlong("priority", priorityValue)) {
+        if (priorityValue > 255)
+            return HttpResponse::badRequest("priority must be 0-255");
+        options.priority = static_cast<uint8_t>(priorityValue);
+    }
+
+    // Parse optional webhook callback URL
+    string callbackUrl;
+    reader.getString("callbackUrl", callbackUrl);
+
     auto result = AlpineStackInterface::startQuery2(options, queryString);
     if (!result)
         return HttpResponse::serverError("Failed to start query");
 
     ulong queryId = *result;
 
+    // If a callback URL was provided, register a result callback for webhook delivery
+    if (!callbackUrl.empty()) {
+        registerWebhookCallback(queryId, callbackUrl);
+
+        AlpineStackInterface::registerQueryResultCallback(queryId,
+            [](ulong qId, ulong pId) {
+                onQueryCompleted(qId, pId);
+            });
+    }
+
     JsonWriter writer;
     writer.beginObject();
     writer.key("queryId");
     writer.value(queryId);
+    writer.key("priority");
+    writer.value(static_cast<ulong>(options.priority));
+    if (!callbackUrl.empty()) {
+        writer.key("callbackUrl");
+        writer.value(callbackUrl);
+    }
     writer.endObject();
 
     auto response = HttpResponse::accepted(writer.result());
@@ -349,4 +383,87 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
     response.setHeader("Connection", "keep-alive");
     response.setBody(std::move(sseBody));
     return response;
+}
+
+
+
+void
+QueryHandler::registerWebhookCallback (ulong queryId, const string & callbackUrl)
+{
+    MutexLock lock(callbackUrlsMutex_s);
+    callbackUrls_s[queryId] = callbackUrl;
+}
+
+
+
+void
+QueryHandler::onQueryCompleted (ulong queryId, ulong /* peerId */)
+{
+    // Check if the query is still in progress — only fire webhook when complete
+    if (AlpineStackInterface::queryInProgress(queryId))
+        return;
+
+    // Retrieve and remove the callback URL
+    string callbackUrl;
+    {
+        MutexLock lock(callbackUrlsMutex_s);
+        auto it = callbackUrls_s.find(queryId);
+        if (it == callbackUrls_s.end())
+            return;
+        callbackUrl = it->second;
+        callbackUrls_s.erase(it);
+    }
+
+    // Build the results JSON payload
+    auto resultsResult = AlpineStackInterface::getQueryResults2(queryId);
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("event");
+    writer.value("query.completed"s);
+    writer.key("queryId");
+    writer.value(queryId);
+
+    if (resultsResult) {
+        auto & results = *resultsResult;
+
+        writer.key("totalPeers");
+        writer.value(static_cast<ulong>(results.size()));
+
+        ulong totalHits = 0;
+        for (const auto& [pid, peerRes] : results)
+            totalHits += peerRes.resourceDescList.size();
+
+        writer.key("totalHits");
+        writer.value(totalHits);
+
+        writer.key("data");
+        writer.beginArray();
+
+        for (const auto& [pid, peerRes] : results) {
+            for (const auto& res : peerRes.resourceDescList) {
+                writer.beginObject();
+                writer.key("peerId");
+                writer.value(pid);
+                writer.key("resourceId");
+                writer.value(res.resourceId);
+                writer.key("size");
+                writer.value(res.size);
+                writer.key("description");
+                writer.value(res.description);
+                writer.key("locators");
+                writer.beginArray();
+                for (const auto& loc : res.locators)
+                    writer.value(loc);
+                writer.endArray();
+                writer.endObject();
+            }
+        }
+
+        writer.endArray();
+    }
+
+    writer.endObject();
+
+    WebhookDispatcher::dispatch(callbackUrl, writer.result(), "query.completed"s);
 }

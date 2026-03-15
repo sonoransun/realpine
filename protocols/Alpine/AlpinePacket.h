@@ -41,6 +41,8 @@ class AlpinePacket : public StackLinkInterface
     //
     // some alpine protocol constants
     //
+    static constexpr uint16_t PROTOCOL_VERSION = 1;
+
     enum class t_PacketType {
         none              = 0, // uninitialized
 
@@ -58,12 +60,18 @@ class AlpinePacket : public StackLinkInterface
         proxyAccepted     = 10,
         proxyHalt         = 11,
 
+        versionHandshake  = 12,
+        versionAccept     = 13,
+        queryCancellation = 14,
+
     };
 
 
     t_PacketType  getPacketType ();
 
     bool setPacketType (t_PacketType  type);
+
+    uint16_t  getProtocolVersion ();
 
     static bool packetTypeAsString (t_PacketType  type,
                                     string &      typeString);
@@ -73,6 +81,7 @@ class AlpinePacket : public StackLinkInterface
 
     StackLinkInterface * parent_;
     t_PacketType         packetType_;
+    uint16_t             protocolVersion_;
 
 };
 

@@ -41,6 +41,7 @@
 #include <ApiDocsHandler.h>
 #include <AdminHandler.h>
 #include <ClusterCoordinator.h>
+#include <WebhookDispatcher.h>
 #include <thread>
 #include <chrono>
 
@@ -186,6 +187,9 @@ main (int argc, char *argv[])
     string corsOrigin;
     if (Configuration::getValue("CORS Origin", corsOrigin))
         HttpResponse::setCorsOrigin(corsOrigin);
+
+    // Initialize webhook dispatcher (non-fatal)
+    WebhookDispatcher::initialize();
 
 
     // Initialize OpenTelemetry tracing (non-fatal)
@@ -593,6 +597,7 @@ main (int argc, char *argv[])
     if (!server.start(restBindAddress, restPort)) {
         // Failed to start — cleanup and exit
         Log::Error(string("Failed to start HTTP server.  Exiting."));
+        WebhookDispatcher::shutdown();
 #ifdef ALPINE_FUSE_ENABLED
         if (AlpineFuse::isRunning())
             AlpineFuse::shutdown();
@@ -636,6 +641,9 @@ main (int argc, char *argv[])
     if (server.getActiveConnections() > 0) {
         Log::Info("Drain timeout reached with "s + std::to_string(server.getActiveConnections()) + " connections still active"s);
     }
+
+    // Shutdown webhook dispatcher (drain pending deliveries)
+    WebhookDispatcher::shutdown();
 
     // Cluster coordinator departure heartbeat
     ClusterCoordinator::shutdown();

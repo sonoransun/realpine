@@ -79,6 +79,14 @@ class AlpineQueryPacket : public StackLinkInterface
 
     bool  getReplySetSize (ushort &  setSize);
 
+    bool  setPriority (uint8_t  priority);
+
+    bool  getPriority (uint8_t &  priority);
+
+    bool  setTraceContext (const string &  traceContext);
+
+    bool  getTraceContext (string &  traceContext);
+
     bool  setResourceDescList (t_ResourceDescList &  resourceList);
 
     bool  getResourceDescList (t_ResourceDescList &  resourceList);
@@ -112,6 +120,8 @@ class AlpineQueryPacket : public StackLinkInterface
     ushort                         uploadSlots_;
     ulong                          offset_;
     ushort                         replySetSize_;
+    uint8_t                        priority_{128};
+    string                         traceContext_;
     t_ResourceDescList *           resourceList_;
 
 

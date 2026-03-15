@@ -26,6 +26,12 @@ class StatusHandler
     static HttpResponse  getHealth (const HttpRequest & request,
                                     const std::unordered_map<string, string> & params);
 
+    static HttpResponse  handleReadinessProbe (const HttpRequest & request,
+                                               const std::unordered_map<string, string> & params);
+
+    static HttpResponse  handleLivenessProbe (const HttpRequest & request,
+                                              const std::unordered_map<string, string> & params);
+
     static std::chrono::steady_clock::time_point  startTime_s;
 
 };

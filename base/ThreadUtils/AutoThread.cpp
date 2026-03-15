@@ -23,8 +23,10 @@ AutoThread::~AutoThread ()
     Log::Debug ("AutoThread destructor invoked.");
 #endif
 
-    // Signal the thread to exit if it is still running, then
-    // join so the thread completes cleanly before destruction.
+    // Signal the thread to exit if it is still running.
+    // The jthread destructor will call request_stop() + join()
+    // automatically, but we also set our own flags and wake the
+    // CV so the thread loop observes the stop promptly.
     //
     destroyed_ = true;
 
@@ -34,9 +36,25 @@ AutoThread::~AutoThread ()
     }
     cv_.notify_one ();
 
+    // request_stop() ensures the stop_token is signalled before
+    // the jthread destructor joins.
+    //
     if (thread_.joinable ()) {
-        thread_.join ();
+        thread_.request_stop ();
     }
+    // jthread destructor handles the join.
+}
+
+
+
+void
+AutoThread::threadMain (std::stop_token /* stopToken */)
+{
+    // Default implementation: delegate to the legacy threadMain().
+    // Subclasses that want cooperative cancellation should override
+    // this overload and check stopToken.stop_requested() directly.
+    //
+    threadMain ();
 }
 
 
@@ -54,10 +72,12 @@ AutoThread::create ()
     }
 
 
-    // Launch the thread.  It will immediately wait on the
-    // condition variable until resume() is called.
+    // Launch the thread via std::jthread.  The jthread constructor
+    // passes the stop_token as the first argument to the callable.
     //
-    thread_ = std::thread ([this] { threadEntry (this); });
+    thread_ = std::jthread ([this] (std::stop_token st) {
+        threadEntry (std::move (st), this);
+    });
 
     threadId_ = thread_.get_id ();
 
@@ -80,12 +100,15 @@ AutoThread::destroy ()
 #endif
 
     // Flag-based stop: set destroyed_ so the thread loop exits
-    // on its next check.  This replaces the previous pthread_cancel
-    // approach.
+    // on its next check.
     //
     destroyed_ = true;
 
-    // Wake the thread if it is waiting so it can observe the flag.
+    // Request cooperative cancellation via the stop token.
+    //
+    thread_.request_stop ();
+
+    // Wake the thread if it is waiting so it can observe the stop.
     //
     {
         std::lock_guard<std::mutex> lk(cvMutex_);
@@ -170,7 +193,7 @@ AutoThread::getThreadId (t_ThreadId & threadId)
 
 
 void
-AutoThread::threadEntry (AutoThread * self)
+AutoThread::threadEntry (std::stop_token stopToken, AutoThread * self)
 {
 #ifdef _VERBOSE
     Log::Debug ("AutoThread::threadEntry invoked.");
@@ -180,11 +203,13 @@ AutoThread::threadEntry (AutoThread * self)
     //
     {
         std::unique_lock<std::mutex> lk(self->cvMutex_);
-        self->cv_.wait (lk, [self] { return self->resumed_; });
+        self->cv_.wait (lk, [self, &stopToken] {
+            return self->resumed_ || stopToken.stop_requested ();
+        });
         self->resumed_ = false;
     }
 
-    if (self->destroyed_)
+    if (self->destroyed_ || stopToken.stop_requested ())
         return;
 
 
@@ -202,16 +227,16 @@ AutoThread::threadEntry (AutoThread * self)
 
         self->running_ = true;
 
-        // Invoke derived threadMain ()...
+        // Invoke derived threadMain (stop_token)...
         //
-        self->threadMain ();
+        self->threadMain (stopToken);
 
         // Suspend thread until next resume().
         self->running_ = false;
 
-        // Check if we have been destroyed while running.
+        // Check if we have been destroyed or stop requested.
         //
-        if (self->destroyed_) {
+        if (self->destroyed_ || stopToken.stop_requested ()) {
             break;
         }
 
@@ -219,11 +244,13 @@ AutoThread::threadEntry (AutoThread * self)
         //
         {
             std::unique_lock<std::mutex> lk(self->cvMutex_);
-            self->cv_.wait (lk, [self] { return self->resumed_; });
+            self->cv_.wait (lk, [self, &stopToken] {
+                return self->resumed_ || stopToken.stop_requested ();
+            });
             self->resumed_ = false;
         }
 
-        if (self->destroyed_) {
+        if (self->destroyed_ || stopToken.stop_requested ()) {
             break;
         }
     }

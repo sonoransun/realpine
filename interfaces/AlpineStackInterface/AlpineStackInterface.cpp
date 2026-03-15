@@ -87,6 +87,10 @@ AlpineStackInterface::startQuery (const t_QueryOptions &  options,
     }
 
 
+    // Set query priority
+    //
+    queryOptions.setPriority (options.priority);
+
     // Finally, set actual query string before creating this query
     //
     queryOptions.setQuery (queryString);

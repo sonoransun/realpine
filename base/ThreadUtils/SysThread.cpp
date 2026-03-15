@@ -27,16 +27,42 @@ SysThread::~SysThread ()
     Log::Debug ("SysThread destructor invoked.");
 #endif
 
-    // If deleteOnExit_ is true, the thread will delete itself,
-    // so we must detach.  Otherwise join for a clean shutdown.
+    // Signal the thread to stop via the jthread stop token, then
+    // allow the jthread destructor to request_stop + join.
     //
     running_ = false;
 
-    if (deleteOnExit_ && thread_.joinable ()) {
-        thread_.detach ();
-    } else if (thread_.joinable ()) {
-        thread_.join ();
+    if (deleteOnExit_) {
+        // When deleteOnExit_ is true the thread deletes `this`,
+        // so we must detach to avoid the jthread destructor
+        // joining a thread that references a destroyed object.
+        //
+        if (thread_.joinable ()) {
+            thread_.request_stop ();
+            thread_.detach ();
+        }
+    } else {
+        // jthread destructor will call request_stop() + join()
+        // automatically.  Explicit request_stop() here ensures
+        // the stop is signalled even before the destructor body
+        // finishes, so shouldContinue() returns false immediately.
+        //
+        if (thread_.joinable ()) {
+            thread_.request_stop ();
+        }
     }
+}
+
+
+
+void
+SysThread::threadMain (std::stop_token /* stopToken */)
+{
+    // Default implementation: delegate to the legacy threadMain().
+    // Subclasses that want cooperative cancellation should override
+    // this overload and check stopToken.stop_requested() directly.
+    //
+    threadMain ();
 }
 
 
@@ -66,9 +92,12 @@ SysThread::run ()
     }
 
 
-    // Launch the thread via std::thread.
+    // Launch the thread via std::jthread.  The jthread constructor
+    // passes the stop_token as the first argument to the callable.
     //
-    thread_ = std::thread ([this] { threadEntry (this); });
+    thread_ = std::jthread ([this] (std::stop_token st) {
+        threadEntry (std::move (st), this);
+    });
 
     threadId_ = thread_.get_id ();
 
@@ -100,9 +129,10 @@ SysThread::stop ()
     Log::Debug ("SysThread::stop invoked.");
 #endif
 
-    // Flag-based stop: the thread should check running_ and exit.
-    // This replaces the previous pthread_cancel approach.
+    // Request cooperative cancellation via the stop token,
+    // then set the legacy running_ flag for backward compat.
     //
+    thread_.request_stop ();
     running_ = false;
 
     // Join the thread so it completes cleanly before we return.
@@ -147,17 +177,20 @@ SysThread::getThreadId ()
 bool
 SysThread::shouldContinue () const
 {
-    return running_.load ();
+    return running_.load () && !stopToken_.stop_requested ();
 }
 
 
 
 void
-SysThread::threadEntry (SysThread * self)
+SysThread::threadEntry (std::stop_token stopToken, SysThread * self)
 {
 #ifdef _VERBOSE
     Log::Debug ("SysThread::threadEntry invoked.");
 #endif
+
+    // Cache the stop token so shouldContinue() can inspect it.
+    self->stopToken_ = stopToken;
 
     // Pause for initial resume
     //
@@ -175,9 +208,10 @@ SysThread::threadEntry (SysThread * self)
 #endif
 
 
-    // Invoke derived threadMain ()...
+    // Invoke derived threadMain (stop_token) overload, which by
+    // default calls the legacy threadMain().
     //
-    self->threadMain ();
+    self->threadMain (stopToken);
 
     self->running_ = false;
 

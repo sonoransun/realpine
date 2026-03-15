@@ -31,6 +31,8 @@ StatusHandler::registerRoutes (HttpRouter & router)
 {
     router.addRoute("GET", "/status", getStatus);
     router.addRoute("GET", "/status/health", getHealth);
+    router.addRoute("GET", "/health/ready", handleReadinessProbe);
+    router.addRoute("GET", "/health/live", handleLivenessProbe);
 }
 
 
@@ -148,4 +150,54 @@ StatusHandler::getHealth (const HttpRequest & request,
     HttpResponse resp(503, "Service Unavailable");
     resp.setJsonBody(writer.result());
     return resp;
+}
+
+
+HttpResponse
+StatusHandler::handleReadinessProbe (const HttpRequest & request,
+                                     const std::unordered_map<string, string> & params)
+{
+    // The stack is ready if we can successfully query default group info.
+    auto result = AlpineStackInterface::getDefaultGroupInfo2();
+
+    if (result) {
+        JsonWriter writer;
+        writer.beginObject();
+        writer.key("status");
+        writer.value("ok"s);
+        writer.endObject();
+        return HttpResponse::ok(writer.result());
+    }
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("status");
+    writer.value("not_ready"s);
+    writer.key("reason");
+    writer.value("Alpine stack is not initialized"s);
+    writer.endObject();
+
+    HttpResponse resp(503, "Service Unavailable");
+    resp.setJsonBody(writer.result());
+    return resp;
+}
+
+
+HttpResponse
+StatusHandler::handleLivenessProbe (const HttpRequest & request,
+                                    const std::unordered_map<string, string> & params)
+{
+    auto uptimeSeconds = static_cast<ulong>(
+        std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - startTime_s).count());
+
+    JsonWriter writer;
+    writer.beginObject();
+    writer.key("status");
+    writer.value("ok"s);
+    writer.key("uptimeSeconds");
+    writer.value(uptimeSeconds);
+    writer.endObject();
+
+    return HttpResponse::ok(writer.result());
 }

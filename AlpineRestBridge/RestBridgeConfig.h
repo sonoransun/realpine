@@ -34,6 +34,11 @@ class RestBridgeConfig
     // Shutdown drain
     static int   getShutdownDrainSeconds ();
 
+    // Webhook
+    static string  getWebhookSecret ();
+    static int     getWebhookMaxRetries ();
+    static int     getWebhookTimeoutSeconds ();
+
 
   private:
 

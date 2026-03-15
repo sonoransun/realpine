@@ -3,12 +3,14 @@
 
 #include <MetricsHandler.h>
 #include <sstream>
+#include <iomanip>
 
 
 std::mutex                                               MetricsRegistry::registryMutex_s;
 std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicCounter>>       MetricsRegistry::counters_s;
 std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicGauge>>         MetricsRegistry::gauges_s;
 std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicLabeledCounter>> MetricsRegistry::labeledCounters_s;
+std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicHistogram>>     MetricsRegistry::histograms_s;
 
 std::array<std::atomic<long long>, METRIC_LABEL_COUNT>  MetricsRegistry::labelArray_s{};
 
@@ -82,6 +84,49 @@ MetricsRegistry::findOrCreateLabeled (const string & key)
 
 
 
+MetricsRegistry::AtomicHistogram *
+MetricsRegistry::findOrCreateHistogram (const string & name)
+{
+    std::lock_guard lock(registryMutex_s);
+    auto it = histograms_s.find(name);
+    if (it != histograms_s.end())
+        return it->second.get();
+
+    auto ptr = std::make_unique<AtomicHistogram>();
+    ptr->name = name;
+    auto * raw = ptr.get();
+    histograms_s[name] = std::move(ptr);
+    return raw;
+}
+
+
+
+void
+MetricsRegistry::recordHistogram (const string & name,
+                                  double         value)
+{
+    auto * hist = findOrCreateHistogram(name);
+
+    // Increment all buckets whose boundary >= value (cumulative).
+    for (size_t i = 0; i < hist->boundaries.size(); ++i) {
+        if (value <= hist->boundaries[i])
+            hist->bucketCounts[i].fetch_add(1, std::memory_order_relaxed);
+    }
+    // +Inf bucket always incremented.
+    hist->bucketCounts[hist->boundaries.size()].fetch_add(1, std::memory_order_relaxed);
+
+    // Accumulate sum via CAS loop.
+    double oldSum = hist->sum.load(std::memory_order_relaxed);
+    while (!hist->sum.compare_exchange_weak(oldSum, oldSum + value,
+                                            std::memory_order_relaxed,
+                                            std::memory_order_relaxed))
+        ;
+
+    hist->count.fetch_add(1, std::memory_order_relaxed);
+}
+
+
+
 void
 MetricsRegistry::incrementCounter (const string & name,
                                    long long      delta)
@@ -145,6 +190,25 @@ MetricsRegistry::serialize ()
 
         for (const auto & [key, ptr] : labeledCounters_s) {
             oss << key << " " << ptr->value.load(std::memory_order_relaxed) << "\n";
+        }
+
+        for (const auto & [name, ptr] : histograms_s) {
+            oss << "# TYPE " << name << " histogram\n";
+
+            long long cumulative = 0;
+            for (size_t i = 0; i < ptr->boundaries.size(); ++i) {
+                cumulative += ptr->bucketCounts[i].load(std::memory_order_relaxed);
+                oss << name << "_bucket{le=\""
+                    << std::fixed << std::setprecision(3) << ptr->boundaries[i]
+                    << "\"} " << cumulative << "\n";
+            }
+            // +Inf bucket
+            long long total = ptr->bucketCounts[ptr->boundaries.size()].load(std::memory_order_relaxed);
+            oss << name << "_bucket{le=\"+Inf\"} " << total << "\n";
+
+            oss << name << "_sum " << std::fixed << std::setprecision(1)
+                << ptr->sum.load(std::memory_order_relaxed) << "\n";
+            oss << name << "_count " << ptr->count.load(std::memory_order_relaxed) << "\n";
         }
     }
 

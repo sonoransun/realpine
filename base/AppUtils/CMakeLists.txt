@@ -1,5 +1,6 @@
 add_library(AppUtils
     AgedQueue.cpp
+    AuditLog.cpp
     EventBus.cpp
     Log.cpp
     OptHash.cpp

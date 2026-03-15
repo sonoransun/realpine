@@ -4,10 +4,12 @@
 #include <HttpServer.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
+#include <Compression.h>
 #include <SafeParse.h>
 #include <WebSocketSession.h>
 #include <RateLimiter.h>
 #include <RestBridgeConfig.h>
+#include <MetricsHandler.h>
 #include <StringUtils.h>
 #include <Log.h>
 #include <Platform.h>
@@ -591,6 +593,15 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             auto response = router_.dispatch(request);
             response.setRequestId(requestId);
 
+            // Compress response if client accepts it and body is large enough
+            auto acceptEncoding = request.headers.find("accept-encoding"s);
+            if (acceptEncoding != request.headers.end() && response.bodySize() > Compression::MIN_COMPRESS_SIZE) {
+                auto encoding = Compression::selectEncoding(acceptEncoding->second);
+                if (encoding != "identity"s) {
+                    response.compressBody(encoding);
+                }
+            }
+
             // Determine whether to close after this response
             ++requestCount;
             auto connIt = request.headers.find("connection"s);
@@ -611,6 +622,9 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
 
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now() - startTime).count();
+
+            MetricsRegistry::recordHistogram("http_request_duration_seconds"s,
+                                             elapsed / 1000.0);
 
 #ifdef ALPINE_TRACING_ENABLED
             rootSpan.addAttribute("http.status_code"s, std::to_string(response.statusCode()));
@@ -821,6 +835,15 @@ HttpServer::processRequest (Stream &          stream,
         auto response = router_.dispatch(request);
         response.setRequestId(requestId);
 
+        // Compress response if client accepts it and body is large enough
+        auto acceptEncoding = request.headers.find("accept-encoding"s);
+        if (acceptEncoding != request.headers.end() && response.bodySize() > Compression::MIN_COMPRESS_SIZE) {
+            auto encoding = Compression::selectEncoding(acceptEncoding->second);
+            if (encoding != "identity"s) {
+                response.compressBody(encoding);
+            }
+        }
+
         // Determine whether to close after this response
         ++requestCount;
         auto connIt = request.headers.find("connection"s);
@@ -841,6 +864,9 @@ HttpServer::processRequest (Stream &          stream,
 
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - startTime).count();
+
+        MetricsRegistry::recordHistogram("http_request_duration_seconds"s,
+                                         elapsed / 1000.0);
 
         Log::Info("request"s, {
             {"method"s,     StringUtils::sanitizeForLog(request.method)},

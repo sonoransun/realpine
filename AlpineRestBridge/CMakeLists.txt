@@ -6,6 +6,7 @@ add_executable(AlpineRestBridge
     HttpResponse.cpp
     HttpRouter.cpp
     HttpServer.cpp
+    Compression.cpp
     RateLimiter.cpp
     ApiKeyAuth.cpp
     RestBridgeConfig.cpp
@@ -27,6 +28,7 @@ add_executable(AlpineRestBridge
     AdminHandler.cpp
     WebSocketSession.cpp
     ClusterCoordinator.cpp
+    WebhookDispatcher.cpp
     AlpineRestBridge.cpp
 )
 target_include_directories(AlpineRestBridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -42,6 +44,7 @@ target_link_libraries(AlpineRestBridge PRIVATE
     Alpine::ConfigUtils
     nlohmann_json::nlohmann_json
     Asio::Asio
+    ZLIB::ZLIB
 )
 
 if(ALPINE_ENABLE_TLS)

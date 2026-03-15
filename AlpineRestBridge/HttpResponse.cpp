@@ -2,6 +2,7 @@
 
 
 #include <HttpResponse.h>
+#include <Compression.h>
 #include <StringUtils.h>
 #include <Log.h>
 #include <cstdio>
@@ -124,6 +125,20 @@ HttpResponse::setKeepAliveParams (int timeout, int maxRequests)
 {
     headers_["Keep-Alive"] = "timeout="s + std::to_string(timeout)
                              + ", max="s + std::to_string(maxRequests);
+}
+
+
+void
+HttpResponse::compressBody (const string & encoding)
+{
+    if (encoding == "gzip"s) {
+        auto compressed = Compression::gzipCompress(body_);
+        if (!compressed.empty()) {
+            body_ = std::move(compressed);
+            headers_["Content-Encoding"] = "gzip"s;
+            headers_.erase("Content-Length");
+        }
+    }
 }
 
 

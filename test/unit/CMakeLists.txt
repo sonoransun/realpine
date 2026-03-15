@@ -129,3 +129,35 @@ if(ALPINE_ENABLE_TLS)
     target_compile_definitions(test_packet_auth PRIVATE ALPINE_TLS_ENABLED)
 endif()
 catch_discover_tests(test_packet_auth)
+
+# --- Compression tests ---
+add_executable(test_compression
+    test_compression.cpp
+    ${REST_SRC_DIR}/Compression.cpp
+)
+target_include_directories(test_compression PRIVATE ${REST_SRC_DIR})
+target_link_libraries(test_compression PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    ZLIB::ZLIB
+)
+catch_discover_tests(test_compression)
+
+# --- WebhookDispatcher tests ---
+add_executable(test_webhook_dispatcher
+    test_webhook_dispatcher.cpp
+    ${REST_SRC_DIR}/WebhookDispatcher.cpp
+)
+target_include_directories(test_webhook_dispatcher PRIVATE ${REST_SRC_DIR})
+target_link_libraries(test_webhook_dispatcher PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+    Asio::Asio
+)
+if(ALPINE_ENABLE_TLS)
+    target_link_libraries(test_webhook_dispatcher PRIVATE OpenSSL::Crypto)
+    target_compile_definitions(test_webhook_dispatcher PRIVATE ALPINE_TLS_ENABLED)
+endif()
+catch_discover_tests(test_webhook_dispatcher)

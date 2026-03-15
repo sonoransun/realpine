@@ -433,6 +433,33 @@ RestBridgeConfig::createConfigElements ()
     currElement->optionType    = ConfigData::t_ElementType::String;
     currElement->required      = false;
     configElements_s->push_back(currElement);
+
+    // Webhook Secret
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Webhook Secret";
+    currElement->argOptionName = "webhookSecret";
+    currElement->envOptionName = "WEBHOOK_SECRET";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // Webhook Max Retries
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Webhook Max Retries";
+    currElement->argOptionName = "webhookMaxRetries";
+    currElement->envOptionName = "WEBHOOK_MAX_RETRIES";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
+
+    // Webhook Timeout Seconds
+    currElement = new ConfigData::t_ConfigElement;
+    currElement->elementName   = "Webhook Timeout Seconds";
+    currElement->argOptionName = "webhookTimeoutSeconds";
+    currElement->envOptionName = "WEBHOOK_TIMEOUT_SECONDS";
+    currElement->optionType    = ConfigData::t_ElementType::String;
+    currElement->required      = false;
+    configElements_s->push_back(currElement);
 }
 
 
@@ -472,3 +499,13 @@ int RestBridgeConfig::getHttpIdleTimeoutSeconds ()    { return getIntConfig("HTT
 int RestBridgeConfig::getHttpKeepAliveMaxRequests () { return getIntConfig("HTTP Keep-Alive Max Requests"s, 100, 1, 10000); }
 int RestBridgeConfig::getHttpWriteTimeoutSeconds ()  { return getIntConfig("HTTP Write Timeout Seconds"s, 10, 1, 300); }
 int RestBridgeConfig::getShutdownDrainSeconds ()     { return getIntConfig("Shutdown Drain Seconds"s, 5, 1, 60); }
+
+string RestBridgeConfig::getWebhookSecret ()
+{
+    string value;
+    Configuration::getValue("Webhook Secret"s, value);
+    return value;
+}
+
+int RestBridgeConfig::getWebhookMaxRetries ()        { return getIntConfig("Webhook Max Retries"s, 3, 0, 20); }
+int RestBridgeConfig::getWebhookTimeoutSeconds ()    { return getIntConfig("Webhook Timeout Seconds"s, 10, 1, 120); }

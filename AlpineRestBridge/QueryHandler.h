@@ -6,6 +6,9 @@
 #include <HttpRequest.h>
 #include <HttpResponse.h>
 #include <HttpRouter.h>
+#include <Mutex.h>
+#include <unordered_map>
+#include <OptHash.h>
 
 
 class QueryHandler
@@ -31,5 +34,12 @@ class QueryHandler
 
     static HttpResponse  streamQueryResults (const HttpRequest & request,
                                               const std::unordered_map<string, string> & params);
+
+    // Webhook callback URL tracking per query
+    static void  registerWebhookCallback (ulong queryId, const string & callbackUrl);
+    static void  onQueryCompleted (ulong queryId, ulong peerId);
+
+    static std::unordered_map<ulong, string, OptHash<ulong>>  callbackUrls_s;
+    static Mutex                                                callbackUrlsMutex_s;
 
 };

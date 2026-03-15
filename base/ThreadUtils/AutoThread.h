@@ -9,6 +9,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <stop_token>
 
 
 class AutoThread
@@ -21,9 +22,15 @@ class AutoThread
 
 
 
-    // Derived threadMain ()
+    // Derived threadMain — legacy overload (no stop_token).
     //
     virtual void threadMain () = 0;
+
+    // Derived threadMain — cooperative-cancellation overload.
+    // Default implementation delegates to the legacy threadMain()
+    // so existing subclasses keep working without changes.
+    //
+    virtual void threadMain (std::stop_token stopToken);
 
 
     bool create ();
@@ -40,7 +47,7 @@ class AutoThread
 
   private:
 
-    std::thread         thread_;
+    std::jthread        thread_;
     t_ThreadId          threadId_;
 
     std::atomic<bool>   running_{false};
@@ -56,7 +63,7 @@ class AutoThread
     bool                resumed_{false};
 
 
-    static void threadEntry (AutoThread * self);
+    static void threadEntry (std::stop_token stopToken, AutoThread * self);
 
 };
 

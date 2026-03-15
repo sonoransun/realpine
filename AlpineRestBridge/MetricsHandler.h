@@ -54,6 +54,10 @@ class MetricsRegistry
     static void  incrementLabeledCounter (MetricLabel  label,
                                           long long    delta = 1);
 
+    /// Record a value into a histogram with default latency buckets.
+    static void  recordHistogram (const string & name,
+                                  double         value);
+
     static string  serialize ();
 
 
@@ -77,20 +81,32 @@ class MetricsRegistry
         std::atomic<long long>     value{0};
     };
 
+    /// Histogram with fixed bucket boundaries (thread-safe via atomics).
+    struct AtomicHistogram {
+        string                                name;
+        std::array<double, 11>                boundaries = {0.005, 0.01, 0.025, 0.05, 0.1,
+                                                            0.25,  0.5,  1.0,   2.5,  5.0, 10.0};
+        std::array<std::atomic<long long>, 12> bucketCounts{};   // 11 buckets + 1 for +Inf
+        std::atomic<double>                   sum{0.0};
+        std::atomic<long long>                count{0};
+    };
+
     /// Registry mutex — only held during first registration of a new metric name,
     /// never during increment or serialize.
     static std::mutex                                               registryMutex_s;
     static std::unordered_map<string, std::unique_ptr<AtomicCounter>>       counters_s;
     static std::unordered_map<string, std::unique_ptr<AtomicGauge>>         gauges_s;
     static std::unordered_map<string, std::unique_ptr<AtomicLabeledCounter>> labeledCounters_s;
+    static std::unordered_map<string, std::unique_ptr<AtomicHistogram>>     histograms_s;
 
     /// Pre-registered flat array for enum-based labeled counters (fully lock-free).
     static std::array<std::atomic<long long>, METRIC_LABEL_COUNT>   labelArray_s;
     static const std::array<string, METRIC_LABEL_COUNT>             labelNames_s;
 
-    static AtomicCounter *        findOrCreateCounter (const string & name);
-    static AtomicGauge *          findOrCreateGauge   (const string & name);
-    static AtomicLabeledCounter * findOrCreateLabeled (const string & key);
+    static AtomicCounter *        findOrCreateCounter   (const string & name);
+    static AtomicGauge *          findOrCreateGauge     (const string & name);
+    static AtomicLabeledCounter * findOrCreateLabeled   (const string & key);
+    static AtomicHistogram *      findOrCreateHistogram (const string & name);
 
 };
 

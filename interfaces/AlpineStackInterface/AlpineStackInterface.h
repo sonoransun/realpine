@@ -26,6 +26,7 @@ class AlpineStackInterface
         ulong     peerDescMax;
         ulong     optionId;
         string    optionData;
+        uint8_t   priority{128};
     };
 
 
