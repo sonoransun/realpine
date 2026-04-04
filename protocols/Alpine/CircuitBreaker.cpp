@@ -11,6 +11,9 @@
 
 CircuitBreaker::t_CircuitIndex  CircuitBreaker::circuitIndex_s;
 ReadWriteSem                    CircuitBreaker::dataLock_s;
+int                             CircuitBreaker::failureThreshold_s  = 5;
+int                             CircuitBreaker::halfOpenMaxProbes_s = 2;
+int                             CircuitBreaker::openDurationSecs_s  = 30;
 
 
 
@@ -22,7 +25,7 @@ CircuitBreaker::evaluateState (PeerCircuit & circuit)
     }
 
     auto elapsed = Clock::now() - circuit.openedAt;
-    if (elapsed >= std::chrono::seconds(OPEN_DURATION_SECS)) {
+    if (elapsed >= std::chrono::seconds(openDurationSecs_s)) {
         circuit.state          = State::HalfOpen;
         circuit.halfOpenProbes = 0;
     }
@@ -48,7 +51,7 @@ CircuitBreaker::allowRequest (ulong peerId)
     }
 
     if (circuit.state == State::HalfOpen) {
-        if (circuit.halfOpenProbes < HALF_OPEN_MAX_PROBES) {
+        if (circuit.halfOpenProbes < halfOpenMaxProbes_s) {
             ++circuit.halfOpenProbes;
             return true;
         }
@@ -104,11 +107,11 @@ CircuitBreaker::recordFailure (ulong peerId)
 
     ++circuit.failureCount;
 
-    if (circuit.failureCount >= FAILURE_THRESHOLD && circuit.state == State::Closed) {
+    if (circuit.failureCount >= failureThreshold_s && circuit.state == State::Closed) {
         circuit.state    = State::Open;
         circuit.openedAt = Clock::now();
         Log::Info("CircuitBreaker: peer "s + std::to_string(peerId) +
-                  " circuit opened after "s + std::to_string(FAILURE_THRESHOLD) +
+                  " circuit opened after "s + std::to_string(failureThreshold_s) +
                   " consecutive failures"s);
     }
 }
@@ -130,3 +133,23 @@ CircuitBreaker::getState (ulong peerId)
 }
 
 
+
+void
+CircuitBreaker::configure (int failureThreshold, int openDurationSecs)
+{
+    WriteLock lock(dataLock_s);
+    failureThreshold_s  = failureThreshold;
+    openDurationSecs_s  = openDurationSecs;
+}
+
+
+
+void
+CircuitBreaker::reset ()
+{
+    WriteLock lock(dataLock_s);
+    circuitIndex_s.clear();
+    failureThreshold_s  = 5;
+    halfOpenMaxProbes_s = 2;
+    openDurationSecs_s  = 30;
+}

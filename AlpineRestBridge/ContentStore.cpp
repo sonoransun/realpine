@@ -3,9 +3,12 @@
 
 #include <ContentStore.h>
 #include <Log.h>
+#include <ReadLock.h>
+#include <WriteLock.h>
 
 #include <cstdio>
 #include <chrono>
+#include <memory>
 #include <thread>
 
 #include <dirent.h>
@@ -68,22 +71,20 @@ ContentStore::shutdown ()
 void
 ContentStore::rescan ()
 {
-    lock_.acquireWrite();
+    WriteLock guard(lock_);
 
     items_.clear();
     idToPath_.clear();
     nextId_ = 1;
     scanDirectory(mediaDirectory_);
     systemUpdateId_++;
-
-    lock_.releaseWrite();
 }
 
 
 bool
 ContentStore::getItem (const string & id, MediaItem & item)
 {
-    lock_.acquireRead();
+    ReadLock guard(lock_);
 
     auto pathIt = idToPath_.find(id);
 
@@ -91,12 +92,10 @@ ContentStore::getItem (const string & id, MediaItem & item)
         auto itemIt = items_.find(pathIt->second);
         if (itemIt != items_.end()) {
             item = itemIt->second;
-            lock_.releaseRead();
             return true;
         }
     }
 
-    lock_.releaseRead();
     return false;
 }
 
@@ -111,34 +110,28 @@ ContentStore::getAllItemsMap ()
 void
 ContentStore::getAllItems (vector<MediaItem> & items)
 {
-    lock_.acquireRead();
+    ReadLock guard(lock_);
 
     items.clear();
     items.reserve(items_.size());
     for (const auto & [path, item] : items_)
         items.push_back(item);
-
-    lock_.releaseRead();
 }
 
 
 ulong
 ContentStore::getItemCount ()
 {
-    lock_.acquireRead();
-    ulong count = items_.size();
-    lock_.releaseRead();
-    return count;
+    ReadLock guard(lock_);
+    return items_.size();
 }
 
 
 ulong
 ContentStore::getSystemUpdateId ()
 {
-    lock_.acquireRead();
-    ulong id = systemUpdateId_;
-    lock_.releaseRead();
-    return id;
+    ReadLock guard(lock_);
+    return systemUpdateId_;
 }
 
 
@@ -164,14 +157,13 @@ ContentStore::indexFile (const string & fullPath)
     if (mimeIt == mimeTypes_s.end())
         return;
 
-    lock_.acquireWrite();
+    WriteLock guard(lock_);
 
     auto existing = items_.find(fullPath);
 
     if (existing != items_.end()) {
         existing->second.fileSize = (ulong)fileStat.st_size;
         systemUpdateId_++;
-        lock_.releaseWrite();
         return;
     }
 
@@ -188,15 +180,13 @@ ContentStore::indexFile (const string & fullPath)
     idToPath_[item.id] = fullPath;
     items_.emplace(fullPath, std::move(item));
     systemUpdateId_++;
-
-    lock_.releaseWrite();
 }
 
 
 void
 ContentStore::removeFile (const string & fullPath)
 {
-    lock_.acquireWrite();
+    WriteLock guard(lock_);
 
     auto it = items_.find(fullPath);
 
@@ -205,15 +195,17 @@ ContentStore::removeFile (const string & fullPath)
         items_.erase(it);
         systemUpdateId_++;
     }
-
-    lock_.releaseWrite();
 }
 
 
 void
 ContentStore::scanDirectory (const string & dir)
 {
-    DIR * dirp = opendir(dir.c_str());
+    struct DirCloser {
+        void operator() (DIR * d) const { if (d) closedir(d); }
+    };
+
+    std::unique_ptr<DIR, DirCloser> dirp(opendir(dir.c_str()));
 
     if (!dirp) {
         Log::Error("ContentStore: Cannot open directory: "s + dir);
@@ -222,7 +214,7 @@ ContentStore::scanDirectory (const string & dir)
 
     struct dirent * entry;
 
-    while ((entry = readdir(dirp)) != nullptr)
+    while ((entry = readdir(dirp.get())) != nullptr)
     {
         string name = entry->d_name;
 
@@ -267,8 +259,6 @@ ContentStore::scanDirectory (const string & dir)
         idToPath_[item.id] = fullPath;
         items_.emplace(fullPath, std::move(item));
     }
-
-    closedir(dirp);
 }
 
 
@@ -281,7 +271,7 @@ void
 ContentStore::startWatcher ()
 {
     watcherStop_.store(false);
-    watcher_ = new WatcherThread(*this);
+    watcher_ = std::make_unique<WatcherThread>(*this);
     watcher_->create();
     watcher_->resume();
 }
@@ -290,8 +280,9 @@ ContentStore::startWatcher ()
 void
 ContentStore::stopWatcher ()
 {
-    if (!watcher_)
+    if (!watcher_) {
         return;
+    }
 
     watcherStop_.store(true);
 
@@ -306,8 +297,7 @@ ContentStore::stopWatcher ()
 #endif
 
     watcher_->destroy();
-    delete watcher_;
-    watcher_ = nullptr;
+    watcher_.reset();
 }
 
 

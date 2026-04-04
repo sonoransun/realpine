@@ -40,8 +40,9 @@ ReadWriteSem                                     ClusterCoordinator::nodesMutex_
 
 std::array<ClusterCoordinator::t_DedupShard, ClusterCoordinator::DEDUP_SHARD_COUNT>  ClusterCoordinator::dedupShards_s;
 
-ClusterCoordinator::HeartbeatThread *            ClusterCoordinator::heartbeatThread_s{nullptr};
-ClusterCoordinator::ListenerThread *             ClusterCoordinator::listenerThread_s{nullptr};
+std::unique_ptr<ClusterCoordinator::HeartbeatThread>  ClusterCoordinator::heartbeatThread_s;
+std::unique_ptr<ClusterCoordinator::ListenerThread>   ClusterCoordinator::listenerThread_s;
+std::once_flag                                        ClusterCoordinator::initFlag_s;
 
 std::atomic<bool>                                ClusterCoordinator::initialized_s{false};
 
@@ -54,66 +55,65 @@ std::atomic<bool>                                ClusterCoordinator::initialized
 bool
 ClusterCoordinator::initialize (ushort restPort, ushort beaconPort)
 {
-    if (initialized_s.load())
-        return true;
+    bool success = true;
 
-    restPort_s   = restPort;
-    beaconPort_s = beaconPort;
-    nodeId_s     = generateNodeId();
+    std::call_once(initFlag_s, [&] {
+        restPort_s   = restPort;
+        beaconPort_s = beaconPort;
+        nodeId_s     = generateNodeId();
 
-    // Determine local hostname for cluster identification
-    char hostname[256];
-    gethostname(hostname, sizeof(hostname));
-    localHost_s = hostname;
+        // Determine local hostname for cluster identification
+        char hostname[256];
+        gethostname(hostname, sizeof(hostname));
+        localHost_s = hostname;
 
-    // Read region from environment
-    const char * regionEnv = getenv("ALPINE_REGION");
-    localRegion_s = regionEnv ? string(regionEnv) : "default"s;
+        // Read region from environment
+        const char * regionEnv = getenv("ALPINE_REGION");
+        localRegion_s = regionEnv ? string(regionEnv) : "default"s;
 
-    Log::Info("ClusterCoordinator: Initializing node "s + nodeId_s +
-              " (host: " + localHost_s + ", region: " + localRegion_s +
-              ", REST port: " + std::to_string(restPort_s) + ")");
+        Log::Info("ClusterCoordinator: Initializing node "s + nodeId_s +
+                  " (host: " + localHost_s + ", region: " + localRegion_s +
+                  ", REST port: " + std::to_string(restPort_s) + ")");
 
-    // Start heartbeat broadcast thread
-    heartbeatThread_s = new HeartbeatThread();
-    heartbeatThread_s->run();
+        // Start heartbeat broadcast thread
+        heartbeatThread_s = std::make_unique<HeartbeatThread>();
+        heartbeatThread_s->run();
 
-    // Start beacon listener thread
-    listenerThread_s = new ListenerThread();
+        // Start beacon listener thread
+        auto listener = std::make_unique<ListenerThread>();
 
-    if (listenerThread_s->initialize(beaconPort)) {
-        listenerThread_s->run();
-    } else {
-        Log::Error("ClusterCoordinator: Beacon listener failed to initialize.");
-        delete listenerThread_s;
-        listenerThread_s = nullptr;
-    }
+        if (listener->initialize(beaconPort)) {
+            listenerThread_s = std::move(listener);
+            listenerThread_s->run();
+        } else {
+            Log::Error("ClusterCoordinator: Beacon listener failed to initialize.");
+        }
 
-    initialized_s.store(true);
+        initialized_s.store(true, std::memory_order_release);
 
-    Log::Info("ClusterCoordinator: Initialized successfully.");
-    return true;
+        Log::Info("ClusterCoordinator: Initialized successfully.");
+    });
+
+    return success;
 }
 
 
 void
 ClusterCoordinator::shutdown ()
 {
-    if (!initialized_s.load())
+    if (!initialized_s.load(std::memory_order_acquire))
         return;
 
-    initialized_s.store(false);
+    initialized_s.store(false, std::memory_order_release);
 
     if (heartbeatThread_s) {
         heartbeatThread_s->stop();
-        delete heartbeatThread_s;
-        heartbeatThread_s = nullptr;
+        heartbeatThread_s.reset();
     }
 
     if (listenerThread_s) {
         listenerThread_s->stop();
-        delete listenerThread_s;
-        listenerThread_s = nullptr;
+        listenerThread_s.reset();
     }
 
     {

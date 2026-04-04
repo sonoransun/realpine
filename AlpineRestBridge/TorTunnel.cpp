@@ -7,6 +7,8 @@
 #include <TorSocksProxy.h>
 #include <JsonReader.h>
 #include <JsonWriter.h>
+#include <SafeParse.h>
+#include <StringUtils.h>
 #include <Log.h>
 
 #include <Platform.h>
@@ -178,7 +180,13 @@ TorTunnel::connectToConfiguredPeers ()
         auto colonPos = peerAddr.rfind(':');
         if (colonPos != string::npos) {
             addr = peerAddr.substr(0, colonPos);
-            port = static_cast<ushort>(atoi(peerAddr.substr(colonPos + 1).c_str()));
+            auto portOpt = parseUshort(peerAddr.substr(colonPos + 1));
+            if (!portOpt) {
+                Log::Error("TorTunnel: Invalid port in peer address: "s +
+                           StringUtils::sanitizeForLog(peerAddr));
+                continue;
+            }
+            port = *portOpt;
         }
 
         // Skip if already connected to this peer

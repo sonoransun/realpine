@@ -150,7 +150,7 @@ TcpTransport::blocking ()
 
 
 
-bool 
+bool
 TcpTransport::send (const byte *  data,
                     ulong         dataLength)
 {
@@ -162,20 +162,27 @@ TcpTransport::send (const byte *  data,
         Log::Error ("Call to TcpTransport::send when connection closed!");
         return false;
     }
-    int retVal;
-    retVal = ::send (socketFd_, data, dataLength, 0);
 
-    if (retVal < 0) {
-        if (alpine_socket_errno() == EAGAIN) {
+    ulong totalSent = 0;
+
+    while (totalSent < dataLength) {
+        ssize_t retVal = ::send(socketFd_, data + totalSent, dataLength - totalSent, 0);
+
+        if (retVal < 0) {
+            if (alpine_socket_errno() == EINTR)
+                continue;
+            if (alpine_socket_errno() == EAGAIN)
+                return false;
+
+            string errorCode;
+            NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+            Log::Error("Send error: "s + errorCode + " in TcpTransport::send!");
             return false;
         }
-        string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Send error: "s + errorCode +
-                    " in TcpTransport::send!");
 
-        return false;
+        totalSent += retVal;
     }
+
     return true;
 }
 
@@ -194,17 +201,20 @@ TcpTransport::receive (byte *   buffer,
         Log::Error ("Call to TcpTransport::receive when connection closed!");
         return false;
     }
-    int retVal;
-    retVal = ::recv (socketFd_, buffer, bufferSize, 0);
+    ssize_t retVal;
+
+    do {
+        retVal = ::recv(socketFd_, buffer, bufferSize, 0);
+    } while (retVal < 0 && alpine_socket_errno() == EINTR);
 
     if (retVal < 0) {
         if (alpine_socket_errno() == EAGAIN) {
             return false;
         }
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Receive error: "s + errorCode +
-                    " in TcpTransport::receive!");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Receive error: "s + errorCode +
+                   " in TcpTransport::receive!");
 
         return false;
     }

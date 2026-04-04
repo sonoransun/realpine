@@ -14,6 +14,7 @@
 #include <chrono>
 #include <atomic>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <condition_variable>
 #include <array>
@@ -203,8 +204,10 @@ class ClusterCoordinator
 
     // --- Threads ---
 
-    static HeartbeatThread *  heartbeatThread_s;
-    static ListenerThread *   listenerThread_s;
+    static std::unique_ptr<HeartbeatThread>  heartbeatThread_s;
+    static std::unique_ptr<ListenerThread>   listenerThread_s;
+
+    static std::once_flag  initFlag_s;
 
     static std::atomic<bool>  initialized_s;
 

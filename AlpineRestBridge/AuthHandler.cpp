@@ -8,6 +8,8 @@
 #include <Log.h>
 #include <Error.h>
 #include <Platform.h>
+#include <ReadLock.h>
+#include <WriteLock.h>
 
 #include <iomanip>
 #include <sstream>
@@ -68,9 +70,10 @@ AuthHandler::enrollDevice (const HttpRequest & request,
     device.biometricType = biometricType;
     device.enrolledAt    = std::chrono::system_clock::now();
 
-    dataLock_s.acquireWrite();
-    enrolledDevices_s[deviceId] = std::move(device);
-    dataLock_s.releaseWrite();
+    {
+        WriteLock guard(dataLock_s);
+        enrolledDevices_s[deviceId] = std::move(device);
+    }
 
     Log::Info("AuthHandler: device enrolled: "s + deviceId
               + " ("s + deviceName + ", "s + biometricType + ")"s);
@@ -97,26 +100,24 @@ AuthHandler::getChallenge (const HttpRequest & request,
 {
     evictExpiredChallenges();
 
-    dataLock_s.acquireRead();
-    auto pendingCount = pendingChallenges_s.size();
-    dataLock_s.releaseRead();
-
-    if (pendingCount >= MAX_PENDING_CHALLENGES)
-    {
-        Log::Error("AuthHandler: pending challenge limit reached"s);
-        return HttpResponse::tooManyRequests("Too many pending challenges");
-    }
-
     auto challengeId = generateId();
     auto nonce       = generateNonce();
 
-    t_PendingChallenge challenge;
-    challenge.nonce     = nonce;
-    challenge.createdAt = std::chrono::steady_clock::now();
+    {
+        WriteLock guard(dataLock_s);
 
-    dataLock_s.acquireWrite();
-    pendingChallenges_s[challengeId] = std::move(challenge);
-    dataLock_s.releaseWrite();
+        if (pendingChallenges_s.size() >= MAX_PENDING_CHALLENGES)
+        {
+            Log::Error("AuthHandler: pending challenge limit reached"s);
+            return HttpResponse::tooManyRequests("Too many pending challenges");
+        }
+
+        t_PendingChallenge challenge;
+        challenge.nonce     = nonce;
+        challenge.createdAt = std::chrono::steady_clock::now();
+
+        pendingChallenges_s[challengeId] = std::move(challenge);
+    }
 
     JsonWriter writer;
     writer.beginObject();
@@ -153,45 +154,45 @@ AuthHandler::verifySignature (const HttpRequest & request,
         return HttpResponse::badRequest("Missing publicKey");
 
     // Look up and consume the challenge
-    dataLock_s.acquireWrite();
+    string challengeNonce;
 
-    auto it = pendingChallenges_s.find(challengeId);
-    if (it == pendingChallenges_s.end())
     {
-        dataLock_s.releaseWrite();
-        return HttpResponse::badRequest("Unknown or expired challenge");
-    }
+        WriteLock guard(dataLock_s);
 
-    auto elapsed = std::chrono::steady_clock::now() - it->second.createdAt;
-    auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+        auto it = pendingChallenges_s.find(challengeId);
+        if (it == pendingChallenges_s.end())
+            return HttpResponse::badRequest("Unknown or expired challenge");
 
-    if (static_cast<ulong>(elapsedSeconds) > CHALLENGE_TTL_SECONDS)
-    {
+        auto elapsed = std::chrono::steady_clock::now() - it->second.createdAt;
+        auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
+
+        if (static_cast<ulong>(elapsedSeconds) > CHALLENGE_TTL_SECONDS)
+        {
+            pendingChallenges_s.erase(it);
+            return HttpResponse::badRequest("Challenge expired");
+        }
+
+        // Save nonce before consuming (needed for signature verification)
+        challengeNonce = it->second.nonce;
+
+        // Consume the challenge (one-time use)
         pendingChallenges_s.erase(it);
-        dataLock_s.releaseWrite();
-        return HttpResponse::badRequest("Challenge expired");
     }
-
-    // Save nonce before consuming (needed for signature verification)
-    auto challengeNonce = it->second.nonce;
-
-    // Consume the challenge (one-time use)
-    pendingChallenges_s.erase(it);
-    dataLock_s.releaseWrite();
 
     // Verify the public key is enrolled
     bool enrolled = false;
 
-    dataLock_s.acquireRead();
-    for (const auto & [id, device] : enrolledDevices_s)
     {
-        if (device.publicKey == publicKey)
+        ReadLock guard(dataLock_s);
+        for (const auto & [id, device] : enrolledDevices_s)
         {
-            enrolled = true;
-            break;
+            if (device.publicKey == publicKey)
+            {
+                enrolled = true;
+                break;
+            }
         }
     }
-    dataLock_s.releaseRead();
 
     if (!enrolled)
     {
@@ -342,7 +343,7 @@ AuthHandler::evictExpiredChallenges ()
 {
     auto now = std::chrono::steady_clock::now();
 
-    dataLock_s.acquireWrite();
+    WriteLock guard(dataLock_s);
 
     for (auto it = pendingChallenges_s.begin(); it != pendingChallenges_s.end(); )
     {
@@ -353,6 +354,4 @@ AuthHandler::evictExpiredChallenges ()
         else
             ++it;
     }
-
-    dataLock_s.releaseWrite();
 }

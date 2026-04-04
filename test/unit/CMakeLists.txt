@@ -161,3 +161,90 @@ if(ALPINE_ENABLE_TLS)
     target_compile_definitions(test_webhook_dispatcher PRIVATE ALPINE_TLS_ENABLED)
 endif()
 catch_discover_tests(test_webhook_dispatcher)
+
+# Sources from protocol layer
+set(PROTO_SRC_DIR ${CMAKE_SOURCE_DIR}/protocols/Alpine)
+set(VFS_SRC_DIR ${CMAKE_SOURCE_DIR}/base/VfsUtils)
+
+# --- CircuitBreaker tests ---
+add_executable(test_circuit_breaker test_circuit_breaker.cpp)
+target_link_libraries(test_circuit_breaker PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AlpineProtocol
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+)
+catch_discover_tests(test_circuit_breaker)
+
+# --- IpFilter tests ---
+add_executable(test_ip_filter test_ip_filter.cpp)
+target_link_libraries(test_ip_filter PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AlpineProtocol
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+)
+catch_discover_tests(test_ip_filter)
+
+# --- RbacPolicy tests ---
+add_executable(test_rbac_policy
+    test_rbac_policy.cpp
+    ${REST_SRC_DIR}/RbacPolicy.cpp
+)
+target_include_directories(test_rbac_policy PRIVATE ${REST_SRC_DIR})
+target_link_libraries(test_rbac_policy PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    nlohmann_json::nlohmann_json
+)
+catch_discover_tests(test_rbac_policy)
+
+# --- RateLimiter tests ---
+add_executable(test_rate_limiter
+    test_rate_limiter.cpp
+    ${REST_SRC_DIR}/RateLimiter.cpp
+)
+target_include_directories(test_rate_limiter PRIVATE ${REST_SRC_DIR})
+target_link_libraries(test_rate_limiter PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    Alpine::ThreadUtils
+    Asio::Asio
+)
+catch_discover_tests(test_rate_limiter)
+
+# --- QueryCache tests ---
+add_executable(test_query_cache
+    test_query_cache.cpp
+    ${PROTO_SRC_DIR}/QueryCache.cpp
+)
+target_include_directories(test_query_cache PRIVATE ${PROTO_SRC_DIR})
+target_link_libraries(test_query_cache PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::ThreadUtils
+    Alpine::AppUtils
+)
+catch_discover_tests(test_query_cache)
+
+# --- AuditLog tests ---
+add_executable(test_audit_log test_audit_log.cpp)
+target_link_libraries(test_audit_log PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+    nlohmann_json::nlohmann_json
+)
+catch_discover_tests(test_audit_log)
+
+# --- AccessTracker tests ---
+add_executable(test_access_tracker
+    test_access_tracker.cpp
+    ${VFS_SRC_DIR}/AccessTracker.cpp
+)
+target_include_directories(test_access_tracker PRIVATE ${VFS_SRC_DIR})
+target_link_libraries(test_access_tracker PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::ThreadUtils
+    Alpine::AppUtils
+    nlohmann_json::nlohmann_json
+)
+catch_discover_tests(test_access_tracker)

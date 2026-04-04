@@ -10,6 +10,8 @@
 #include <StringUtils.h>
 #include <NetUtils.h>
 
+static constexpr ulong MAX_STRING_LEN = 65536;
+
 
 
 AlpineQueryPacket::AlpineQueryPacket ()
@@ -895,6 +897,8 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
     readLength += sizeof(long);
 
     if (packetType_ == AlpinePacket::t_PacketType::queryDiscover) {
+        if (readLength > bufferSize)
+            return false;
         status = verifyStringData (curr, (bufferSize - readLength));
 
         if (!status) {
@@ -952,6 +956,11 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
         curr         += sizeof(long);
         readLength   += sizeof(long);
 
+        if (numHits_ > MAX_HITS) {
+            Log::Error("AlpineQueryPacket: numHits exceeds maximum"s);
+            return false;
+        }
+
         uploadSlots_  = static_cast<short>(ntohl(*(reinterpret_cast<short *>(curr))));
         curr         += sizeof(short);
         readLength   += sizeof(short);
@@ -1006,6 +1015,8 @@ AlpineQueryPacket::readData (DataBuffer * linkBuffer)
             return false;
         }
 
+        if (readLength > bufferSize)
+            return false;
         status = verifyStringData (curr, (bufferSize - readLength));
 
         if (!status) {
@@ -1415,6 +1426,8 @@ AlpineQueryPacket::readResourceListData (DataBuffer *  linkBuffer)
         locatorList.clear ();
         for (currListIndex = 0; currListIndex < expectedListLength; currListIndex++) {
 
+            if (readLength > bufferSize)
+                return false;
             status = verifyStringData (curr, bufferSize - readLength);
             if (!status) {
 #ifdef _VERBOSE
@@ -1444,6 +1457,8 @@ AlpineQueryPacket::readResourceListData (DataBuffer *  linkBuffer)
 
         // Description
         //
+        if (readLength > bufferSize)
+            return false;
         status = verifyStringData (curr, bufferSize - readLength);
 
         if (!status) {
@@ -1547,10 +1562,11 @@ AlpineQueryPacket::verifyStringData (const byte *  data,
     if (dataLength == 0) {
         return false;
     }
+    ulong scanLen = (dataLength < MAX_STRING_LEN) ? dataLength : MAX_STRING_LEN;
     const byte * curr   = data;
     ulong i;
 
-    for (i = 0; i < dataLength; i++) {
+    for (i = 0; i < scanLen; i++) {
         if (*curr == 0) {
             return true;
 

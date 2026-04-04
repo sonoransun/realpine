@@ -116,7 +116,8 @@ SpawnProcess::readEnvVars ()
     // Parse env settings into key / value pairs and update envronmentMap_
     //
     const int buffSize = 2048;
-    currSet = new char[buffSize];
+    std::vector<char> buffer(buffSize);
+    currSet = buffer.data();
 
     while (*envVars) {
         strncpy(currSet, *envVars, buffSize-1);
@@ -140,8 +141,6 @@ SpawnProcess::readEnvVars ()
 
         envVars++;
     }
-
-    delete [] currSet;
 #endif
 }
 
@@ -567,7 +566,8 @@ SpawnProcess::createExecInfo ()
         char * currValue;
         char * nextSubstr = nullptr;
         const int buffSize = 2048;
-        argList = new char[buffSize];
+        std::vector<char> argBuf(buffSize);
+        argList = argBuf.data();
         bool finished = false;
 
         strncpy (argList, arguments_.c_str(), buffSize-1);
@@ -592,8 +592,6 @@ SpawnProcess::createExecInfo ()
 
             argumentList.emplace_back(currValue);
         }
-
-        delete [] argList;
     }
 
 
@@ -683,7 +681,8 @@ SpawnProcess::verifyCommand (string & command)
     char * currValue;
     char * nextSubstr = nullptr;
     const int buffSize = 2048;
-    argList = new char[buffSize];
+    std::vector<char> argBuf2(buffSize);
+    argList = argBuf2.data();
     bool finished = false;
 
     strncpy (argList, command.c_str(), buffSize-1);
@@ -749,7 +748,8 @@ SpawnProcess::verifyCommand (string & command)
         // Relative command, check for an executable file in path...
 
         // buffer for parsing path directories.
-        currSet = new char[buffSize];
+        std::vector<char> pathBuf(buffSize);
+        currSet = pathBuf.data();
 
         strncpy (currSet, getenv(pathEnv), buffSize-1);
 
@@ -770,8 +770,6 @@ SpawnProcess::verifyCommand (string & command)
 
             currDir = strtok_r (nullptr, delimiter, &nextSubstr);
         }
-
-        delete [] currSet;
     }
 
 

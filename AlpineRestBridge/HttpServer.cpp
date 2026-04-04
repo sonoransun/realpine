@@ -534,8 +534,10 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             struct timeval tv;
             tv.tv_sec  = idleTimeoutSeconds_;
             tv.tv_usec = 0;
-            setsockopt(socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO,
-                       reinterpret_cast<const char *>(&tv), sizeof(tv));
+            if (setsockopt(socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO,
+                           reinterpret_cast<const char *>(&tv), sizeof(tv)) < 0) {
+                Log::Error("HttpServer: setsockopt SO_RCVTIMEO failed"s);
+            }
         }
 
         // Set write timeout on the socket
@@ -543,8 +545,10 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             struct timeval sendTv;
             sendTv.tv_sec  = writeTimeoutSeconds_;
             sendTv.tv_usec = 0;
-            setsockopt(socket.native_handle(), SOL_SOCKET, SO_SNDTIMEO,
-                       reinterpret_cast<const char *>(&sendTv), sizeof(sendTv));
+            if (setsockopt(socket.native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                           reinterpret_cast<const char *>(&sendTv), sizeof(sendTv)) < 0) {
+                Log::Error("HttpServer: setsockopt SO_SNDTIMEO failed"s);
+            }
         }
 
         // Keep-alive loop: process multiple requests on the same connection
@@ -716,8 +720,10 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
             struct timeval sendTv;
             sendTv.tv_sec  = writeTimeoutSeconds_;
             sendTv.tv_usec = 0;
-            setsockopt(stream.lowest_layer().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
-                       reinterpret_cast<const char *>(&sendTv), sizeof(sendTv));
+            if (setsockopt(stream.lowest_layer().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
+                           reinterpret_cast<const char *>(&sendTv), sizeof(sendTv)) < 0) {
+                Log::Error("HttpServer: setsockopt SO_SNDTIMEO failed"s);
+            }
         }
 
         processRequest(stream, clientIp, guard);
@@ -820,6 +826,14 @@ HttpServer::processRequest (Stream &          stream,
                 if (ec || bytesRead == 0)
                     break;
                 request.body.append(reinterpret_cast<const char *>(buffer.data()), bytesRead);
+            }
+
+            if (request.body.length() < contentLength) {
+                auto resp = HttpResponse::badRequest("Incomplete request body");
+                resp.setConnectionClose();
+                auto respStr = resp.build();
+                asio::write(stream, asio::buffer(respStr), ec);
+                break;
             }
         }
 

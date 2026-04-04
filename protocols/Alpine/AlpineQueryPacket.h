@@ -41,6 +41,8 @@ class AlpineQueryPacket : public StackLinkInterface
     //
     using t_ResourceDescList = vector<AlpineResourceDesc>;
 
+    static constexpr ulong MAX_HITS = 10000;
+
 
 
     ////

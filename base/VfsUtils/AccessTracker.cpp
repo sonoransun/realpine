@@ -249,3 +249,15 @@ AccessTracker::serializeText ()
 
     return out.str();
 }
+
+
+
+void
+AccessTracker::reset ()
+{
+    dataLock_s.acquireWrite();
+    resourceStats_s.clear();
+    peerStats_s.clear();
+    queryTermStats_s.clear();
+    dataLock_s.releaseWrite();
+}

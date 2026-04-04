@@ -43,12 +43,20 @@ class CircuitBreaker
     ///
     static State getState (ulong peerId);
 
+    /// Configure thresholds (primarily for testing).
+    ///
+    static void  configure (int failureThreshold, int openDurationSecs);
+
+    /// Reset all circuit state (primarily for testing).
+    ///
+    static void  reset ();
+
 
   private:
 
-    static constexpr int  FAILURE_THRESHOLD    = 5;
-    static constexpr int  HALF_OPEN_MAX_PROBES = 2;
-    static constexpr int  OPEN_DURATION_SECS   = 30;
+    static int  failureThreshold_s;
+    static int  halfOpenMaxProbes_s;
+    static int  openDurationSecs_s;
 
     using Clock     = std::chrono::steady_clock;
     using TimePoint = Clock::time_point;

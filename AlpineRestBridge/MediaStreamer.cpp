@@ -59,6 +59,12 @@ MediaStreamer::serveFile (int socketFd, ContentStore & store,
         return false;
     }
 
+    if (item.fileSize == 0) {
+        sendFileHeaders(socketFd, 200, "OK", item.mimeType, 0, 0, 0, 0);
+        fclose(fp);
+        return true;
+    }
+
     ulong rangeStart = 0;
     ulong rangeEnd   = item.fileSize - 1;
     bool  hasRange   = !rangeHeader.empty() &&
@@ -180,6 +186,9 @@ bool
 MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
                            ulong & start, ulong & end)
 {
+    if (fileSize == 0)
+        return false;
+
     auto eqPos = rangeHeader.find('=');
 
     if (eqPos == string::npos)

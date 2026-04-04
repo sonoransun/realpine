@@ -64,6 +64,10 @@ class AccessTracker
 
     static string  serializeText ();
 
+    /// Reset all tracked state (primarily for testing).
+    ///
+    static void  reset ();
+
 
   private:
 

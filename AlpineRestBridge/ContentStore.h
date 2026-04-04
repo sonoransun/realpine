@@ -8,6 +8,7 @@
 #include <AutoThread.h>
 #include <unordered_map>
 #include <atomic>
+#include <memory>
 
 
 class ContentStore
@@ -64,7 +65,7 @@ class ContentStore
         ContentStore &  store_;
     };
 
-    WatcherThread *          watcher_ = nullptr;
+    std::unique_ptr<WatcherThread>  watcher_;
     std::atomic<bool>        watcherStop_{false};
 
     void  startWatcher ();
