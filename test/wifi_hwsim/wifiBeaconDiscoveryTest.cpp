@@ -28,53 +28,51 @@
 #include <NetUtils.h>
 #include <WifiDiscovery.h>
 
-#include <cstring>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <chrono>
+#include <cstring>
+#include <sys/wait.h>
 #include <thread>
+#include <unistd.h>
 
 
 // Peer configuration for the two virtual stations
-struct StationConfig {
+struct StationConfig
+{
     string peerId;
     string ipAddress;
     ushort port;
     ushort restPort;
-    uint   capabilities;
+    uint capabilities;
     string interfaceName;
 };
 
 
 static bool
-runStation (const StationConfig & self,
-            const string &        expectedPeerId,
-            int                   timeoutSec)
+runStation(const StationConfig & self, const string & expectedPeerId, int timeoutSec)
 {
-    Log::Info ("Station ["s + self.peerId + "]: Starting on interface " + self.interfaceName);
+    Log::Info("Station ["s + self.peerId + "]: Starting on interface " + self.interfaceName);
 
     // Configure WifiDiscovery
     WifiDiscovery::setWifiInterface(self.interfaceName);
-    WifiDiscovery::setBeaconInterval(500);     // 500ms for faster testing
-    WifiDiscovery::setAnnounceInterval(1);     // 1s multicast announce
-    WifiDiscovery::setPeerTimeout(timeoutSec); // same as test timeout
+    WifiDiscovery::setBeaconInterval(500);      // 500ms for faster testing
+    WifiDiscovery::setAnnounceInterval(1);      // 1s multicast announce
+    WifiDiscovery::setPeerTimeout(timeoutSec);  // same as test timeout
 
     // Use a non-standard multicast port to avoid collisions with production
     WifiDiscovery::setMulticastPort(41799);
 
-    if (!WifiDiscovery::initialize(self.peerId, self.ipAddress,
-                                   self.port, self.restPort,
-                                   self.capabilities)) {
-        Log::Error ("Station ["s + self.peerId + "]: WifiDiscovery init failed.");
+    if (!WifiDiscovery::initialize(self.peerId, self.ipAddress, self.port, self.restPort, self.capabilities)) {
+        Log::Error("Station ["s + self.peerId + "]: WifiDiscovery init failed.");
         return false;
     }
 
-    Log::Info ("Station ["s + self.peerId + "]: WifiDiscovery initialized. "
-               "Waiting for peer '" + expectedPeerId + "'...");
+    Log::Info("Station ["s + self.peerId +
+              "]: WifiDiscovery initialized. "
+              "Waiting for peer '" +
+              expectedPeerId + "'...");
 
     // Poll for the expected peer
-    auto deadline = std::chrono::steady_clock::now() +
-                    std::chrono::seconds(timeoutSec);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(timeoutSec);
 
     bool peerFound = false;
 
@@ -86,21 +84,18 @@ runStation (const StationConfig & self,
         if (it != peers.end()) {
             const auto & peer = it->second;
 
-            Log::Info ("Station ["s + self.peerId + "]: Found peer '" +
-                       peer.peerId + "' at " + peer.ipAddress + ":" +
-                       std::to_string(peer.port));
+            Log::Info("Station ["s + self.peerId + "]: Found peer '" + peer.peerId + "' at " + peer.ipAddress + ":" +
+                      std::to_string(peer.port));
 
             // Validate peer info
             if (peer.port == 0) {
-                Log::Error ("Station ["s + self.peerId +
-                            "]: Peer port is 0, expected non-zero.");
+                Log::Error("Station ["s + self.peerId + "]: Peer port is 0, expected non-zero.");
                 WifiDiscovery::shutdown();
                 return false;
             }
 
             if (peer.ipAddress.empty()) {
-                Log::Error ("Station ["s + self.peerId +
-                            "]: Peer IP is empty.");
+                Log::Error("Station ["s + self.peerId + "]: Peer IP is empty.");
                 WifiDiscovery::shutdown();
                 return false;
             }
@@ -115,19 +110,17 @@ runStation (const StationConfig & self,
     WifiDiscovery::shutdown();
 
     if (!peerFound) {
-        Log::Error ("Station ["s + self.peerId +
-                    "]: Timeout - peer '" + expectedPeerId + "' not discovered.");
+        Log::Error("Station ["s + self.peerId + "]: Timeout - peer '" + expectedPeerId + "' not discovered.");
         return false;
     }
 
-    Log::Info ("Station ["s + self.peerId + "]: Peer discovery OK.");
+    Log::Info("Station ["s + self.peerId + "]: Peer discovery OK.");
     return true;
 }
 
 
-
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <monitor_iface0> <monitor_iface1>\n", argv[0]);
@@ -137,46 +130,40 @@ main (int argc, char * argv[])
     string iface0 = argv[1];
     string iface1 = argv[2];
 
-    Log::initialize("/tmp/alpine_wifi_tests/beacon_discovery_test.log",
-                    Log::t_LogLevel::Debug);
+    Log::initialize("/tmp/alpine_wifi_tests/beacon_discovery_test.log", Log::t_LogLevel::Debug);
 
-    Log::Info ("=== WiFi Beacon Discovery Test ===");
-    Log::Info ("Interface 0: "s + iface0);
-    Log::Info ("Interface 1: "s + iface1);
+    Log::Info("=== WiFi Beacon Discovery Test ===");
+    Log::Info("Interface 0: "s + iface0);
+    Log::Info("Interface 1: "s + iface1);
 
     static constexpr int DISCOVERY_TIMEOUT_SEC = 15;
 
-    StationConfig station0 {
-        .peerId        = "alpine-test-peer-A",
-        .ipAddress     = "10.55.0.1",
-        .port          = 9000,
-        .restPort      = 9080,
-        .capabilities  = WifiDiscovery::CAP_QUERY | WifiDiscovery::CAP_TRANSFER,
-        .interfaceName = iface0
-    };
+    StationConfig station0{.peerId = "alpine-test-peer-A",
+                           .ipAddress = "10.55.0.1",
+                           .port = 9000,
+                           .restPort = 9080,
+                           .capabilities = WifiDiscovery::CAP_QUERY | WifiDiscovery::CAP_TRANSFER,
+                           .interfaceName = iface0};
 
-    StationConfig station1 {
-        .peerId        = "alpine-test-peer-B",
-        .ipAddress     = "10.55.0.2",
-        .port          = 9001,
-        .restPort      = 9081,
-        .capabilities  = WifiDiscovery::CAP_QUERY,
-        .interfaceName = iface1
-    };
+    StationConfig station1{.peerId = "alpine-test-peer-B",
+                           .ipAddress = "10.55.0.2",
+                           .port = 9001,
+                           .restPort = 9081,
+                           .capabilities = WifiDiscovery::CAP_QUERY,
+                           .interfaceName = iface1};
 
     // Fork: child runs station 1, parent runs station 0.
     // WifiDiscovery uses static state, so they must be in separate processes.
     pid_t pid = fork();
 
     if (pid < 0) {
-        Log::Error ("fork() failed.");
+        Log::Error("fork() failed.");
         return 1;
     }
 
     if (pid == 0) {
         // Child: station 1 expects to find station 0
-        Log::initialize("/tmp/alpine_wifi_tests/beacon_station1.log",
-                        Log::t_LogLevel::Debug);
+        Log::initialize("/tmp/alpine_wifi_tests/beacon_station1.log", Log::t_LogLevel::Debug);
 
         bool ok = runStation(station1, station0.peerId, DISCOVERY_TIMEOUT_SEC);
         _exit(ok ? 0 : 1);
@@ -191,13 +178,15 @@ main (int argc, char * argv[])
     bool station1Ok = WIFEXITED(status) && WEXITSTATUS(status) == 0;
 
     if (station0Ok && station1Ok) {
-        Log::Info ("=== TEST PASSED: Both stations discovered each other ===");
+        Log::Info("=== TEST PASSED: Both stations discovered each other ===");
         return 0;
     }
 
-    if (!station0Ok) Log::Error ("Station 0 failed.");
-    if (!station1Ok) Log::Error ("Station 1 failed.");
-    Log::Error ("=== TEST FAILED ===");
+    if (!station0Ok)
+        Log::Error("Station 0 failed.");
+    if (!station1Ok)
+        Log::Error("Station 1 failed.");
+    Log::Error("=== TEST FAILED ===");
     return 1;
 }
 
@@ -208,7 +197,7 @@ main (int argc, char * argv[])
 #include <cstdio>
 
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     fprintf(stderr, "SKIP: Beacon injection tests require Linux.\n");
     return 77;

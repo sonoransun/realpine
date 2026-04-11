@@ -2,9 +2,9 @@
 
 
 #pragma once
+#include <AlpinePacket.h>
 #include <Common.h>
 #include <StackLinkInterface.h>
-#include <AlpinePacket.h>
 
 
 class DataBuffer;
@@ -14,61 +14,51 @@ class AlpineProxyOptionData;
 class AlpineProxyPacket : public StackLinkInterface
 {
   public:
+    AlpineProxyPacket();
 
-    AlpineProxyPacket ();
+    AlpineProxyPacket(StackLinkInterface * parent);
 
-    AlpineProxyPacket (StackLinkInterface * parent);
+    AlpineProxyPacket(const AlpineProxyPacket & copy);
 
-    AlpineProxyPacket (const AlpineProxyPacket & copy);
+    virtual ~AlpineProxyPacket();
 
-    virtual ~AlpineProxyPacket ();
-
-    AlpineProxyPacket & operator = (const AlpineProxyPacket & copy);
-
+    AlpineProxyPacket & operator=(const AlpineProxyPacket & copy);
 
 
-    AlpinePacket::t_PacketType  getPacketType ();
+    AlpinePacket::t_PacketType getPacketType();
 
-    bool setPacketType (AlpinePacket::t_PacketType  type);
-
+    bool setPacketType(AlpinePacket::t_PacketType type);
 
 
     ////
     //
     // Alpine Proxy operations
     //
-    bool  setOptionId (ulong  optionId);
+    bool setOptionId(ulong optionId);
 
-    bool  getOptionId (ulong &  optionId);
+    bool getOptionId(ulong & optionId);
 
-    bool  setOptionData (AlpineProxyOptionData *  optionData);
+    bool setOptionData(AlpineProxyOptionData * optionData);
 
-    bool  getOptionData (AlpineProxyOptionData *&  optionData);
-
+    bool getOptionData(AlpineProxyOptionData *& optionData);
 
 
     ////
     //
     // StackLink operations
     //
-    virtual bool  setParent (StackLinkInterface *  parent);
+    virtual bool setParent(StackLinkInterface * parent);
 
-    virtual void  unsetParent ();
+    virtual void unsetParent();
 
-    virtual bool  writeData (DataBuffer * linkBuffer);
+    virtual bool writeData(DataBuffer * linkBuffer);
 
-    virtual bool  readData (DataBuffer * linkBuffer);
-
-
+    virtual bool readData(DataBuffer * linkBuffer);
 
 
   protected:
-
-    StackLinkInterface *           parent_;
-    AlpinePacket::t_PacketType     packetType_;
-    ulong                          optionId_;
-    AlpineProxyOptionData *        optionData_;
-
+    StackLinkInterface * parent_;
+    AlpinePacket::t_PacketType packetType_;
+    ulong optionId_;
+    AlpineProxyOptionData * optionData_;
 };
-
-

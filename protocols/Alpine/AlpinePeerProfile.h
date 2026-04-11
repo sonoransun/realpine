@@ -8,50 +8,43 @@
 class AlpinePeerProfile
 {
   public:
+    AlpinePeerProfile();
 
-    AlpinePeerProfile ();
+    AlpinePeerProfile(const AlpinePeerProfile & copy);
 
-    AlpinePeerProfile (const AlpinePeerProfile &copy);
+    AlpinePeerProfile(ulong peerId);
 
-    AlpinePeerProfile (ulong  peerId);
+    ~AlpinePeerProfile();
 
-    ~AlpinePeerProfile ();
-
-    AlpinePeerProfile & operator = (const AlpinePeerProfile &copy);
-
+    AlpinePeerProfile & operator=(const AlpinePeerProfile & copy);
 
 
-    void  getPeerId (ulong &  peerId);
+    void getPeerId(ulong & peerId);
 
-    void  getRelativeQuality (short &  quality);
+    void getRelativeQuality(short & quality);
 
-    void  getTotalQueries (ulong &  total);
+    void getTotalQueries(ulong & total);
 
-    void  getTotalResponses (ulong &  total);
-
+    void getTotalResponses(ulong & total);
 
 
   private:
-
-    ulong   peerId_;
-    short   quality_;
-    ulong   queries_;
-    ulong   responses_;
-  
-
-    void  setPeerId (ulong  peerId);
-
-    void  setRelativeQuality (short  quality);
-
-    void  modifyRelativeQuality (short  delta);
-
-    void  incrTotalQueries ();
-
-    void  incrTotalResponses ();
+    ulong peerId_;
+    short quality_;
+    ulong queries_;
+    ulong responses_;
 
 
- 
+    void setPeerId(ulong peerId);
+
+    void setRelativeQuality(short quality);
+
+    void modifyRelativeQuality(short delta);
+
+    void incrTotalQueries();
+
+    void incrTotalResponses();
+
+
     friend class AlpinePeerProfileIndex;
 };
-
-

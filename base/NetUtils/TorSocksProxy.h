@@ -11,9 +11,6 @@ class TcpTransport;
 class TorSocksProxy
 {
   public:
-
-    static bool connect (ushort socksPort,
-                         const string & targetHost,
-                         ushort targetPort,
-                         std::unique_ptr<TcpTransport> & transport);
+    static bool
+    connect(ushort socksPort, const string & targetHost, ushort targetPort, std::unique_ptr<TcpTransport> & transport);
 };

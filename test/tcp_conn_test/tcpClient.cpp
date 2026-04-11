@@ -1,39 +1,34 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TcpAcceptor.h>
-#include <TcpConnector.h>
-#include <TcpTransport.h>
-#include <TcpClientConfig.h>
-#include <TcpClientConnector.h>
-#include <TcpClientThread.h>
 #include <ApplCore.h>
 #include <Configuration.h>
 #include <Log.h>
 #include <StringUtils.h>
+#include <TcpAcceptor.h>
+#include <TcpClientConfig.h>
+#include <TcpClientConnector.h>
+#include <TcpClientThread.h>
+#include <TcpConnector.h>
+#include <TcpTransport.h>
 #include <unistd.h>
 
 
+void runAsycClientEvents(ulong ipAddress, ushort port, uint numTransports);
 
-void  runAsycClientEvents (ulong   ipAddress,
-                           ushort  port,
-                           uint    numTransports);
-
-void  runSyncClientEvents (ulong   ipAddress,
-                           ushort  port,
-                           uint    numTransports);
+void runSyncClientEvents(ulong ipAddress, ushort port, uint numTransports);
 
 
-int 
-main (int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
     // Initialize application core
     //
     bool status;
-    status = ApplCore::initialize (argc, argv);
+    status = ApplCore::initialize(argc, argv);
 
     if (!status) {
-        Log::Error ("Initialization of Application Core failed!  Exiting...");
+        Log::Error("Initialization of Application Core failed!  Exiting...");
         return 1;
     }
 
@@ -42,70 +37,61 @@ main (int argc, char *argv[])
     //
     ConfigData::t_ConfigElementList * configElements;
 
-    TcpClientConfig::getConfigElements (configElements);
+    TcpClientConfig::getConfigElements(configElements);
 
-    status = Configuration::initialize (argc,
-                                        argv,
-                                        *configElements,
-                                        TcpClientConfig::configFile_s);
+    status = Configuration::initialize(argc, argv, *configElements, TcpClientConfig::configFile_s);
 
     if (!status) {
-        Log::Error ("Initialization of application configuration failed!  Exiting...");
+        Log::Error("Initialization of application configuration failed!  Exiting...");
         return 2;
     }
 
 
     // Get configuration settings
     //
-    string  ipAddressStr;
-    string  portStr;
-    string  transportsStr;
-    string  connMethod;
-    ulong   ipAddress;
-    ushort  port;
-    uint    transports;
+    string ipAddressStr;
+    string portStr;
+    string transportsStr;
+    string connMethod;
+    ulong ipAddress;
+    ushort port;
+    uint transports;
 
-    Configuration::getValue ("IP Address", ipAddressStr);
-    Configuration::getValue ("Port", portStr);
-    Configuration::getValue ("Transports", transportsStr);
-    Configuration::getValue ("Method", connMethod);
+    Configuration::getValue("IP Address", ipAddressStr);
+    Configuration::getValue("Port", portStr);
+    Configuration::getValue("Transports", transportsStr);
+    Configuration::getValue("Method", connMethod);
 
-    status = NetUtils::stringIpToLong (ipAddressStr, ipAddress);
+    status = NetUtils::stringIpToLong(ipAddressStr, ipAddress);
     if (!status) {
-        Log::Error ("Invalid IP address given!  Exiting...");
+        Log::Error("Invalid IP address given!  Exiting...");
         return 3;
     }
-   
-    port = atoi (portStr.c_str());
+
+    port = atoi(portStr.c_str());
     port = htons(port);
 
-    transports = atoi (transportsStr.c_str());
+    transports = atoi(transportsStr.c_str());
 
 
     // Verify that connection method is synchronous or async.
     //
-    if ( (connMethod != "Async") && 
-         (connMethod != "Async") ) {
+    if ((connMethod != "Async") && (connMethod != "Async")) {
 
-        Log::Error ("Invalid Connection Method given in configuartion!"
-                             "  Valid values are: Async, Sync");
+        Log::Error("Invalid Connection Method given in configuartion!"
+                   "  Valid values are: Async, Sync");
         return 3;
     }
 
 
-    Log::Info ("Starting TCP client."s +
-               "\n IP: "s + ipAddressStr +
-               "\n Port: "s + portStr +
-               "\n Num Transports: "s + transportsStr +
-               "\n Conn Method: "s + connMethod +
-               "\n");
+    Log::Info("Starting TCP client."s + "\n IP: "s + ipAddressStr + "\n Port: "s + portStr + "\n Num Transports: "s +
+              transportsStr + "\n Conn Method: "s + connMethod + "\n");
 
 
     if (connMethod == "Async") {
-        runAsycClientEvents (ipAddress, port, transports); 
-    }
-    else {
-        runSyncClientEvents (ipAddress, port, transports); 
+        runAsycClientEvents(ipAddress, port, transports);
+    } else {
+        runSyncClientEvents(ipAddress, port, transports);
     }
 
 
@@ -113,22 +99,19 @@ main (int argc, char *argv[])
 }
 
 
-
 void
-runAsycClientEvents (ulong  ipAddress,
-                     ushort port,
-                     uint   numTransports)
+runAsycClientEvents(ulong ipAddress, ushort port, uint numTransports)
 {
-    TcpClientConnector *  connector;
+    TcpClientConnector * connector;
     connector = new TcpClientConnector;
 
-    bool  status;
-    status = connector->setDestination (ipAddress, port);
+    bool status;
+    status = connector->setDestination(ipAddress, port);
 
     if (!status) {
-        Log::Error ("Setting connector destination failed in call to runAsyncClientEvents!");
+        Log::Error("Setting connector destination failed in call to runAsyncClientEvents!");
         delete connector;
-        exit (4);
+        exit(4);
     }
 
 
@@ -138,47 +121,44 @@ runAsycClientEvents (ulong  ipAddress,
 
 
     uint i;
-    ulong  currId;
+    ulong currId;
 
     for (i = 0; i < numTransports; i++) {
-        status = connector->requestConnection (currId);
+        status = connector->requestConnection(currId);
 
         if (!status) {
-            Log::Error ("Setting connector destination failed in call to runAsyncClientEvents!");
+            Log::Error("Setting connector destination failed in call to runAsyncClientEvents!");
             delete connector;
-            exit (4);
+            exit(4);
         }
 
-        Log::Info ("Requested connection with ID: "s + std::to_string(currId));
+        Log::Info("Requested connection with ID: "s + std::to_string(currId));
     }
 
-    Log::Debug ("Requested all transports, entering event loop...");
+    Log::Debug("Requested all transports, entering event loop...");
 
     // Proces events into infinity...
     //
     while (true) {
-        connector->processEvents (true);
-        sleep (1);
+        connector->processEvents(true);
+        sleep(1);
     }
 }
 
 
-
 void
-runSyncClientEvents (ulong  ipAddress,
-                     ushort port,
-                     uint   numTransports)
+runSyncClientEvents(ulong ipAddress, ushort port, uint numTransports)
 {
-    TcpConnector *  connector;
+    TcpConnector * connector;
     connector = new TcpConnector;
 
-    bool  status;
-    status = connector->setDestination (ipAddress, port);
+    bool status;
+    status = connector->setDestination(ipAddress, port);
 
     if (!status) {
-        Log::Error ("Setting connector destination failed in call to runSyncClientEvents!");
+        Log::Error("Setting connector destination failed in call to runSyncClientEvents!");
         delete connector;
-        exit (4);
+        exit(4);
     }
 
 
@@ -188,26 +168,25 @@ runSyncClientEvents (ulong  ipAddress,
 
 
     uint i;
-    TcpTransport *  transport;
+    TcpTransport * transport;
 
     for (i = 0; i < numTransports; i++) {
-        status = connector->connect (transport);
+        status = connector->connect(transport);
 
         if (!status) {
-            Log::Error ("Connect to destination failed in call to runSyncClientEvents!");
+            Log::Error("Connect to destination failed in call to runSyncClientEvents!");
             delete connector;
-            exit (4);
+            exit(4);
         }
 
-        TcpClientThread *  clientThread;
-        clientThread = new TcpClientThread (transport);
-        clientThread->run ();
+        TcpClientThread * clientThread;
+        clientThread = new TcpClientThread(transport);
+        clientThread->run();
 
-        Log::Info ("Started client thread for connected transport.");
+        Log::Info("Started client thread for connected transport.");
     }
 
-    while (1) { sleep (3600); } // this should be a thread exit
+    while (1) {
+        sleep(3600);
+    }  // this should be a thread exit
 }
-
-
-

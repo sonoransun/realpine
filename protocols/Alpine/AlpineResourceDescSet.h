@@ -2,52 +2,48 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AlpineQueryPacket.h>
 #include <AlpineResourceDesc.h>
+#include <Common.h>
 #include <vector>
 
 
 class AlpineResourceDescSet
 {
   public:
+    AlpineResourceDescSet();
 
-    AlpineResourceDescSet ();
+    AlpineResourceDescSet(const AlpineResourceDescSet & copy);
 
-    AlpineResourceDescSet (const AlpineResourceDescSet & copy);
+    ~AlpineResourceDescSet();
 
-    ~AlpineResourceDescSet ();
-
-    AlpineResourceDescSet & operator = (const AlpineResourceDescSet & copy);
-
+    AlpineResourceDescSet & operator=(const AlpineResourceDescSet & copy);
 
 
     using t_ResourceDescList = vector<AlpineResourceDesc>;
 
 
+    bool clear();
 
-    bool   clear ();
-
-    bool   reserve (ulong  size);  // if the expected size is know, provide a hint
+    bool reserve(ulong size);  // if the expected size is know, provide a hint
 
     // These methods track data from query reply packets
-    // 
-    bool   getResourceDataPacket (AlpineQueryPacket *  queryPacket);
+    //
+    bool getResourceDataPacket(AlpineQueryPacket * queryPacket);
 
-    bool   addResourceDataPacket (AlpineQueryPacket *  queryPacket);
+    bool addResourceDataPacket(AlpineQueryPacket * queryPacket);
 
-    ulong  size ();
+    ulong size();
 
-    bool   getCurrOffset (ulong &  offset);
+    bool getCurrOffset(ulong & offset);
 
-    bool   getRemaining (ulong &  numRemaining);
- 
-    bool   addResource (AlpineResourceDesc &  resource);
+    bool getRemaining(ulong & numRemaining);
 
-    bool   addResourceList (t_ResourceDescList &  resourceList);
+    bool addResource(AlpineResourceDesc & resource);
 
-    bool   getResourceList (t_ResourceDescList &  resourceList);
+    bool addResourceList(t_ResourceDescList & resourceList);
 
+    bool getResourceList(t_ResourceDescList & resourceList);
 
 
     // Internal types
@@ -56,17 +52,13 @@ class AlpineResourceDescSet
 
 
   private:
-
-    ulong                   arraySize_;
-    ulong                   numResources_;
-    ulong                   currOffset_;
-    t_ResourceDescArray *   resourceList_;
-
+    ulong arraySize_;
+    ulong numResources_;
+    ulong currOffset_;
+    t_ResourceDescArray * resourceList_;
 
 
-    static ulong getResourceDescSize (AlpineResourceDesc *  desc);
+    static ulong getResourceDescSize(AlpineResourceDesc * desc);
 
-    bool  resize (ulong  newSize);
+    bool resize(ulong newSize);
 };
-
-

@@ -1,27 +1,23 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <SsdpService.h>
 #include <Log.h>
+#include <SsdpService.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
 static const char * NOTIFY_TYPES[] = {
-    "upnp:rootdevice",
-    "urn:schemas-upnp-org:device:MediaServer:1",
-    "urn:schemas-upnp-org:service:ContentDirectory:1"
-};
+    "upnp:rootdevice", "urn:schemas-upnp-org:device:MediaServer:1", "urn:schemas-upnp-org:service:ContentDirectory:1"};
 
 
-SsdpService::SsdpService ()
+SsdpService::SsdpService()
     : ssdpFd_(-1)
-{
-}
+{}
 
 
-SsdpService::~SsdpService ()
+SsdpService::~SsdpService()
 {
     stop();
 
@@ -31,12 +27,10 @@ SsdpService::~SsdpService ()
 
 
 bool
-SsdpService::initialize (const string & deviceUuid,
-                          const string & locationUrl,
-                          const string & serverString)
+SsdpService::initialize(const string & deviceUuid, const string & locationUrl, const string & serverString)
 {
-    deviceUuid_   = deviceUuid;
-    locationUrl_  = locationUrl;
+    deviceUuid_ = deviceUuid;
+    locationUrl_ = locationUrl;
     serverString_ = serverString;
 
     ssdpFd_ = socket(AF_INET, SOCK_DGRAM, 0);
@@ -55,9 +49,9 @@ SsdpService::initialize (const string & deviceUuid,
 
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(addr));
-    addr.sin_family      = AF_INET;
+    addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port        = htons(SSDP_PORT);
+    addr.sin_port = htons(SSDP_PORT);
 
     if (bind(ssdpFd_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         Log::Error("SsdpService: Failed to bind to port 1900.");
@@ -70,8 +64,7 @@ SsdpService::initialize (const string & deviceUuid,
     mreq.imr_multiaddr.s_addr = inet_addr("239.255.255.250");
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
-    if (setsockopt(ssdpFd_, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                   &mreq, sizeof(mreq)) < 0) {
+    if (setsockopt(ssdpFd_, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
         Log::Error("SsdpService: Failed to join SSDP multicast group.");
         alpine_close_socket(ssdpFd_);
         ssdpFd_ = -1;
@@ -84,7 +77,7 @@ SsdpService::initialize (const string & deviceUuid,
 
 
 void
-SsdpService::threadMain ()
+SsdpService::threadMain()
 {
     Log::Info("SsdpService: Thread started.");
 
@@ -92,29 +85,24 @@ SsdpService::threadMain ()
 
     int tickCount = 0;
 
-    while (isActive())
-    {
+    while (isActive()) {
         struct pollfd pfd;
-        pfd.fd      = ssdpFd_;
-        pfd.events  = POLLIN;
+        pfd.fd = ssdpFd_;
+        pfd.events = POLLIN;
         pfd.revents = 0;
 
         int ret = alpine_poll(&pfd, 1, POLL_TIMEOUT_MS);
 
-        if (ret > 0 && (pfd.revents & POLLIN))
-        {
+        if (ret > 0 && (pfd.revents & POLLIN)) {
             byte buffer[2048];
             struct sockaddr_in srcAddr;
             socklen_t srcLen = sizeof(srcAddr);
 
-            ssize_t bytesRead = recvfrom(ssdpFd_, buffer, sizeof(buffer) - 1, 0,
-                                         (struct sockaddr *)&srcAddr, &srcLen);
+            ssize_t bytesRead = recvfrom(ssdpFd_, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&srcAddr, &srcLen);
 
             if (bytesRead > 0) {
                 buffer[bytesRead] = 0;
-                handleMSearch(buffer, bytesRead,
-                              ntohl(srcAddr.sin_addr.s_addr),
-                              ntohs(srcAddr.sin_port));
+                handleMSearch(buffer, bytesRead, ntohl(srcAddr.sin_addr.s_addr), ntohs(srcAddr.sin_port));
             }
         }
 
@@ -133,95 +121,103 @@ SsdpService::threadMain ()
 
 
 void
-SsdpService::sendNotifyAlive ()
+SsdpService::sendNotifyAlive()
 {
     struct sockaddr_in destAddr;
     memset(&destAddr, 0, sizeof(destAddr));
-    destAddr.sin_family      = AF_INET;
+    destAddr.sin_family = AF_INET;
     destAddr.sin_addr.s_addr = inet_addr("239.255.255.250");
-    destAddr.sin_port        = htons(SSDP_PORT);
+    destAddr.sin_port = htons(SSDP_PORT);
 
-    for (const auto * nt : NOTIFY_TYPES)
-    {
+    for (const auto * nt : NOTIFY_TYPES) {
         string usn = deviceUuid_ + "::" + nt;
 
-        string msg =
-            "NOTIFY * HTTP/1.1\r\n"
-            "HOST: 239.255.255.250:1900\r\n"
-            "CACHE-CONTROL: max-age=1800\r\n"
-            "LOCATION: "s + locationUrl_ + "\r\n"
-            "NT: " + nt + "\r\n"
-            "NTS: ssdp:alive\r\n"
-            "SERVER: " + serverString_ + "\r\n"
-            "USN: " + usn + "\r\n"
-            "\r\n";
+        string msg = "NOTIFY * HTTP/1.1\r\n"
+                     "HOST: 239.255.255.250:1900\r\n"
+                     "CACHE-CONTROL: max-age=1800\r\n"
+                     "LOCATION: "s +
+                     locationUrl_ +
+                     "\r\n"
+                     "NT: " +
+                     nt +
+                     "\r\n"
+                     "NTS: ssdp:alive\r\n"
+                     "SERVER: " +
+                     serverString_ +
+                     "\r\n"
+                     "USN: " +
+                     usn +
+                     "\r\n"
+                     "\r\n";
 
-        sendto(ssdpFd_, msg.c_str(), msg.length(), 0,
-               (struct sockaddr *)&destAddr, sizeof(destAddr));
+        sendto(ssdpFd_, msg.c_str(), msg.length(), 0, (struct sockaddr *)&destAddr, sizeof(destAddr));
     }
 }
 
 
 void
-SsdpService::sendNotifyByebye ()
+SsdpService::sendNotifyByebye()
 {
     struct sockaddr_in destAddr;
     memset(&destAddr, 0, sizeof(destAddr));
-    destAddr.sin_family      = AF_INET;
+    destAddr.sin_family = AF_INET;
     destAddr.sin_addr.s_addr = inet_addr("239.255.255.250");
-    destAddr.sin_port        = htons(SSDP_PORT);
+    destAddr.sin_port = htons(SSDP_PORT);
 
-    for (const auto * nt : NOTIFY_TYPES)
-    {
+    for (const auto * nt : NOTIFY_TYPES) {
         string usn = deviceUuid_ + "::" + nt;
 
-        string msg =
-            "NOTIFY * HTTP/1.1\r\n"
-            "HOST: 239.255.255.250:1900\r\n"
-            "NT: "s + nt + "\r\n"
-            "NTS: ssdp:byebye\r\n"
-            "USN: " + usn + "\r\n"
-            "\r\n";
+        string msg = "NOTIFY * HTTP/1.1\r\n"
+                     "HOST: 239.255.255.250:1900\r\n"
+                     "NT: "s +
+                     nt +
+                     "\r\n"
+                     "NTS: ssdp:byebye\r\n"
+                     "USN: " +
+                     usn +
+                     "\r\n"
+                     "\r\n";
 
-        sendto(ssdpFd_, msg.c_str(), msg.length(), 0,
-               (struct sockaddr *)&destAddr, sizeof(destAddr));
+        sendto(ssdpFd_, msg.c_str(), msg.length(), 0, (struct sockaddr *)&destAddr, sizeof(destAddr));
     }
 }
 
 
 void
-SsdpService::handleMSearch (const byte * data, ulong len,
-                             ulong srcIp, ushort srcPort)
+SsdpService::handleMSearch(const byte * data, ulong len, ulong srcIp, ushort srcPort)
 {
     string request((const char *)data, len);
 
     if (!request.contains("M-SEARCH"))
         return;
 
-    bool match = request.contains("ssdp:all") ||
-                 request.contains("upnp:rootdevice") ||
+    bool match = request.contains("ssdp:all") || request.contains("upnp:rootdevice") ||
                  request.contains("urn:schemas-upnp-org:device:MediaServer:1") ||
                  request.contains("urn:schemas-upnp-org:service:ContentDirectory:1");
 
     if (!match)
         return;
 
-    string response =
-        "HTTP/1.1 200 OK\r\n"
-        "CACHE-CONTROL: max-age=1800\r\n"
-        "LOCATION: "s + locationUrl_ + "\r\n"
-        "ST: urn:schemas-upnp-org:device:MediaServer:1\r\n"
-        "SERVER: " + serverString_ + "\r\n"
-        "USN: " + deviceUuid_ + "::urn:schemas-upnp-org:device:MediaServer:1\r\n"
-        "EXT:\r\n"
-        "\r\n";
+    string response = "HTTP/1.1 200 OK\r\n"
+                      "CACHE-CONTROL: max-age=1800\r\n"
+                      "LOCATION: "s +
+                      locationUrl_ +
+                      "\r\n"
+                      "ST: urn:schemas-upnp-org:device:MediaServer:1\r\n"
+                      "SERVER: " +
+                      serverString_ +
+                      "\r\n"
+                      "USN: " +
+                      deviceUuid_ +
+                      "::urn:schemas-upnp-org:device:MediaServer:1\r\n"
+                      "EXT:\r\n"
+                      "\r\n";
 
     struct sockaddr_in destAddr;
     memset(&destAddr, 0, sizeof(destAddr));
-    destAddr.sin_family      = AF_INET;
+    destAddr.sin_family = AF_INET;
     destAddr.sin_addr.s_addr = htonl(srcIp);
-    destAddr.sin_port        = htons(srcPort);
+    destAddr.sin_port = htons(srcPort);
 
-    sendto(ssdpFd_, response.c_str(), response.length(), 0,
-           (struct sockaddr *)&destAddr, sizeof(destAddr));
+    sendto(ssdpFd_, response.c_str(), response.length(), 0, (struct sockaddr *)&destAddr, sizeof(destAddr));
 }

@@ -2,13 +2,13 @@
 
 
 #include <IpFilter.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
 #include <Log.h>
 #include <Platform.h>
+#include <ReadLock.h>
+#include <WriteLock.h>
+#include <format>
 #include <fstream>
 #include <sstream>
-#include <format>
 
 #ifdef ALPINE_PLATFORM_POSIX
 #include <arpa/inet.h>
@@ -18,16 +18,15 @@
 #endif
 
 
-vector<IpFilter::t_CidrEntry>  IpFilter::allowlist_s;
-vector<IpFilter::t_CidrEntry>  IpFilter::blocklist_s;
-ReadWriteSem                   IpFilter::filterLock_s;
-string                         IpFilter::allowlistFile_s;
-string                         IpFilter::blocklistFile_s;
+vector<IpFilter::t_CidrEntry> IpFilter::allowlist_s;
+vector<IpFilter::t_CidrEntry> IpFilter::blocklist_s;
+ReadWriteSem IpFilter::filterLock_s;
+string IpFilter::allowlistFile_s;
+string IpFilter::blocklistFile_s;
 
 
 bool
-IpFilter::initialize (const string & allowlistFile,
-                      const string & blocklistFile)
+IpFilter::initialize(const string & allowlistFile, const string & blocklistFile)
 {
     allowlistFile_s = allowlistFile;
     blocklistFile_s = blocklistFile;
@@ -55,7 +54,7 @@ IpFilter::initialize (const string & allowlistFile,
 
 
 bool
-IpFilter::isAllowed (const string & ip)
+IpFilter::isAllowed(const string & ip)
 {
     ReadLock lock(filterLock_s);
 
@@ -83,7 +82,7 @@ IpFilter::isAllowed (const string & ip)
 
 
 bool
-IpFilter::allowIp (const string & cidr)
+IpFilter::allowIp(const string & cidr)
 {
     t_CidrEntry entry;
     if (!parseCidr(cidr, entry)) {
@@ -97,7 +96,7 @@ IpFilter::allowIp (const string & cidr)
 
 
 bool
-IpFilter::blockIp (const string & cidr)
+IpFilter::blockIp(const string & cidr)
 {
     t_CidrEntry entry;
     if (!parseCidr(cidr, entry)) {
@@ -111,11 +110,11 @@ IpFilter::blockIp (const string & cidr)
 
 
 bool
-IpFilter::removeAllow (const string & cidr)
+IpFilter::removeAllow(const string & cidr)
 {
     WriteLock lock(filterLock_s);
-    auto it = std::remove_if(allowlist_s.begin(), allowlist_s.end(),
-        [&cidr](const t_CidrEntry & e) { return e.original == cidr; });
+    auto it = std::remove_if(
+        allowlist_s.begin(), allowlist_s.end(), [&cidr](const t_CidrEntry & e) { return e.original == cidr; });
     if (it == allowlist_s.end()) {
         return false;
     }
@@ -125,11 +124,11 @@ IpFilter::removeAllow (const string & cidr)
 
 
 bool
-IpFilter::removeBlock (const string & cidr)
+IpFilter::removeBlock(const string & cidr)
 {
     WriteLock lock(filterLock_s);
-    auto it = std::remove_if(blocklist_s.begin(), blocklist_s.end(),
-        [&cidr](const t_CidrEntry & e) { return e.original == cidr; });
+    auto it = std::remove_if(
+        blocklist_s.begin(), blocklist_s.end(), [&cidr](const t_CidrEntry & e) { return e.original == cidr; });
     if (it == blocklist_s.end()) {
         return false;
     }
@@ -139,7 +138,7 @@ IpFilter::removeBlock (const string & cidr)
 
 
 vector<string>
-IpFilter::getAllowlist ()
+IpFilter::getAllowlist()
 {
     ReadLock lock(filterLock_s);
     vector<string> result;
@@ -152,7 +151,7 @@ IpFilter::getAllowlist ()
 
 
 vector<string>
-IpFilter::getBlocklist ()
+IpFilter::getBlocklist()
 {
     ReadLock lock(filterLock_s);
     vector<string> result;
@@ -165,7 +164,7 @@ IpFilter::getBlocklist ()
 
 
 bool
-IpFilter::reload ()
+IpFilter::reload()
 {
     WriteLock lock(filterLock_s);
     allowlist_s.clear();
@@ -183,7 +182,7 @@ IpFilter::reload ()
 
 
 bool
-IpFilter::parseCidr (const string & cidr, t_CidrEntry & entry)
+IpFilter::parseCidr(const string & cidr, t_CidrEntry & entry)
 {
     entry.original = cidr;
 
@@ -205,7 +204,8 @@ IpFilter::parseCidr (const string & cidr, t_CidrEntry & entry)
         ipStr = cidr;
     }
 
-    struct in_addr addr{};
+    struct in_addr addr
+    {};
     if (inet_pton(AF_INET, ipStr.c_str(), &addr) != 1) {
         return false;
     }
@@ -219,9 +219,10 @@ IpFilter::parseCidr (const string & cidr, t_CidrEntry & entry)
 
 
 bool
-IpFilter::matchesCidr (const string & ip, const t_CidrEntry & entry)
+IpFilter::matchesCidr(const string & ip, const t_CidrEntry & entry)
 {
-    struct in_addr addr{};
+    struct in_addr addr
+    {};
     if (inet_pton(AF_INET, ip.c_str(), &addr) != 1) {
         return false;
     }
@@ -232,7 +233,7 @@ IpFilter::matchesCidr (const string & ip, const t_CidrEntry & entry)
 
 
 bool
-IpFilter::loadFile (const string & filePath, vector<t_CidrEntry> & entries)
+IpFilter::loadFile(const string & filePath, vector<t_CidrEntry> & entries)
 {
     std::ifstream file(filePath);
     if (!file.is_open()) {

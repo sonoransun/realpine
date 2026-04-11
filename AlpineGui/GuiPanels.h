@@ -8,8 +8,8 @@
 class AsyncRpcClient;
 
 
-void  drawConnectionBar (AppState & state, AsyncRpcClient & client);
+void drawConnectionBar(AppState & state, AsyncRpcClient & client);
 
-void  drawMainTabs (AppState & state, AsyncRpcClient & client);
+void drawMainTabs(AppState & state, AsyncRpcClient & client);
 
-void  drawLogPanel (AppState & state);
+void drawLogPanel(AppState & state);

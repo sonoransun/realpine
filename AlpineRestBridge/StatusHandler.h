@@ -7,31 +7,28 @@
 #include <HttpResponse.h>
 #include <HttpRouter.h>
 
+#include <chrono>
+
 
 class StatusHandler
 {
   public:
-
-    static void  registerRoutes (HttpRouter & router);
+    static void registerRoutes(HttpRouter & router);
 
     /// Record the process start time (call once at startup).
-    static void  recordStartTime ();
+    static void recordStartTime();
 
 
   private:
+    static HttpResponse getStatus(const HttpRequest & request, const std::unordered_map<string, string> & params);
 
-    static HttpResponse  getStatus (const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params);
+    static HttpResponse getHealth(const HttpRequest & request, const std::unordered_map<string, string> & params);
 
-    static HttpResponse  getHealth (const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params);
+    static HttpResponse handleReadinessProbe(const HttpRequest & request,
+                                             const std::unordered_map<string, string> & params);
 
-    static HttpResponse  handleReadinessProbe (const HttpRequest & request,
-                                               const std::unordered_map<string, string> & params);
+    static HttpResponse handleLivenessProbe(const HttpRequest & request,
+                                            const std::unordered_map<string, string> & params);
 
-    static HttpResponse  handleLivenessProbe (const HttpRequest & request,
-                                              const std::unordered_map<string, string> & params);
-
-    static std::chrono::steady_clock::time_point  startTime_s;
-
+    static std::chrono::steady_clock::time_point startTime_s;
 };

@@ -6,23 +6,17 @@
 #include <StringUtils.h>
 
 
-
 // Ctor defaulted in header
 
 
-
-AlpineQueryStatus::AlpineQueryStatus (const AlpineQueryStatus & copy)
-{
-}
-
+AlpineQueryStatus::AlpineQueryStatus(const AlpineQueryStatus & copy) {}
 
 
 // Dtor defaulted in header
 
 
-
-const AlpineQueryStatus & 
-AlpineQueryStatus::operator = (const AlpineQueryStatus & copy)
+const AlpineQueryStatus &
+AlpineQueryStatus::operator=(const AlpineQueryStatus & copy)
 {
     if (&copy == this) {
         return *this;
@@ -33,104 +27,91 @@ AlpineQueryStatus::operator = (const AlpineQueryStatus & copy)
 }
 
 
-
 ulong
-AlpineQueryStatus::totalPackets ()
+AlpineQueryStatus::totalPackets()
 {
     return totalPackets_;
 }
 
 
-
-ulong  
-AlpineQueryStatus::numPacketsSent ()
+ulong
+AlpineQueryStatus::numPacketsSent()
 {
     return packetsSent_;
 }
 
 
-
-ulong  
-AlpineQueryStatus::numRepliesReceived ()
+ulong
+AlpineQueryStatus::numRepliesReceived()
 {
     return repliesReceived_;
 }
 
 
-
-double 
-AlpineQueryStatus::percentComplete ()
+double
+AlpineQueryStatus::percentComplete()
 {
     return percentComplete_;
 }
 
 
-
-bool   
-AlpineQueryStatus::isActive ()
+bool
+AlpineQueryStatus::isActive()
 {
     return isActive_;
 }
 
 
-
 void
-AlpineQueryStatus::setTotalPackets (ulong  totalPackets)
+AlpineQueryStatus::setTotalPackets(ulong totalPackets)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryStatus::setTotalPackets invoked.");
+    Log::Debug("AlpineQueryStatus::setTotalPackets invoked.");
 #endif
 
     totalPackets_ = totalPackets;
 }
 
 
-
-void  
-AlpineQueryStatus::setPacketsSent (ulong  numSent)
+void
+AlpineQueryStatus::setPacketsSent(ulong numSent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryStatus::setPacketsSent invoked.");
+    Log::Debug("AlpineQueryStatus::setPacketsSent invoked.");
 #endif
 
     packetsSent_ = numSent;
 }
 
 
-
-void  
-AlpineQueryStatus::setRepliesReceived (ulong  numReceived)
+void
+AlpineQueryStatus::setRepliesReceived(ulong numReceived)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryStatus::setRepliesReceived invoked.");
+    Log::Debug("AlpineQueryStatus::setRepliesReceived invoked.");
 #endif
 
     repliesReceived_ = numReceived;
 }
 
 
-
-void  
-AlpineQueryStatus::setPercentComplete (const double &  percentage)
+void
+AlpineQueryStatus::setPercentComplete(const double & percentage)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryStatus::setPercentComplete invoked.");
+    Log::Debug("AlpineQueryStatus::setPercentComplete invoked.");
 #endif
 
     percentComplete_ = percentage;
 }
 
 
-
-void  
-AlpineQueryStatus::setIsActive (bool  value)
+void
+AlpineQueryStatus::setIsActive(bool value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryStatus::setIsActive invoked.");
+    Log::Debug("AlpineQueryStatus::setIsActive invoked.");
 #endif
 
     isActive_ = value;
 }
-
-
-

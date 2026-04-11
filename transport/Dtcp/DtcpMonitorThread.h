@@ -2,8 +2,8 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AutoThread.h>
+#include <Common.h>
 
 
 class DtcpBaseUdpTransport;
@@ -12,19 +12,14 @@ class DtcpBaseUdpTransport;
 class DtcpMonitorThread : public AutoThread
 {
   public:
+    DtcpMonitorThread(DtcpBaseUdpTransport * udpTransport);
 
-    DtcpMonitorThread (DtcpBaseUdpTransport * udpTransport);
-
-    virtual ~DtcpMonitorThread ();
-
+    virtual ~DtcpMonitorThread();
 
 
-    virtual void threadMain ();
+    virtual void threadMain();
 
 
   private:
-
-    DtcpBaseUdpTransport *  udpTransport_;
-
+    DtcpBaseUdpTransport * udpTransport_;
 };
-

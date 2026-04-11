@@ -2,14 +2,12 @@
 
 
 #include <OutputFormatter.h>
-#include <sstream>
 #include <algorithm>
-
+#include <sstream>
 
 
 string
-OutputFormatter::formatTable (const vector<string> &          headers,
-                              const vector<vector<string>> &  rows)
+OutputFormatter::formatTable(const vector<string> & headers, const vector<vector<string>> & rows)
 {
     if (headers.empty())
         return {};
@@ -69,10 +67,8 @@ OutputFormatter::formatTable (const vector<string> &          headers,
 }
 
 
-
 string
-OutputFormatter::formatCsv (const vector<string> &          headers,
-                            const vector<vector<string>> &  rows)
+OutputFormatter::formatCsv(const vector<string> & headers, const vector<vector<string>> & rows)
 {
     if (headers.empty())
         return {};
@@ -118,10 +114,8 @@ OutputFormatter::formatCsv (const vector<string> &          headers,
 }
 
 
-
 string
-OutputFormatter::formatYaml (const vector<string> &          headers,
-                             const vector<vector<string>> &  rows)
+OutputFormatter::formatYaml(const vector<string> & headers, const vector<vector<string>> & rows)
 {
     if (headers.empty())
         return {};

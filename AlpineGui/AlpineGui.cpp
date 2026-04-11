@@ -9,29 +9,29 @@
 
 #include <AppState.h>
 #include <AsyncRpcClient.h>
-#include <GuiPanels.h>
 #include <GuiHelpers.h>
+#include <GuiPanels.h>
 
 #include <chrono>
 #include <cstdio>
 
 
 static void
-glfwErrorCallback (int error, const char * description)
+glfwErrorCallback(int error, const char * description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
 
 int
-main (int, char **)
+main(int, char **)
 {
     glfwSetErrorCallback(glfwErrorCallback);
 
     if (!glfwInit())
         return 1;
 
-    // GL context hints
+        // GL context hints
 #if defined(__APPLE__)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -44,10 +44,8 @@ main (int, char **)
     const char * glslVersion = "#version 130";
 #endif
 
-    GLFWwindow * window = glfwCreateWindow(1280, 800,
-                              "Alpine Server Management", nullptr, nullptr);
-    if (!window)
-    {
+    GLFWwindow * window = glfwCreateWindow(1280, 800, "Alpine Server Management", nullptr, nullptr);
+    if (!window) {
         glfwTerminate();
         return 1;
     }
@@ -66,7 +64,7 @@ main (int, char **)
     // Slight style tweaks
     ImGuiStyle & style = ImGui::GetStyle();
     style.FrameRounding = 3.0f;
-    style.GrabRounding  = 3.0f;
+    style.GrabRounding = 3.0f;
     style.WindowRounding = 4.0f;
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -79,8 +77,7 @@ main (int, char **)
     addLog(state, LogLevel::Info, "Alpine GUI started");
 
     // Main loop
-    while (!glfwWindowShouldClose(window))
-    {
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
@@ -91,14 +88,11 @@ main (int, char **)
         int winW, winH;
         glfwGetFramebufferSize(window, &winW, &winH);
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(static_cast<float>(winW),
-                                        static_cast<float>(winH)));
-        ImGui::Begin("##Main", nullptr,
-                     ImGuiWindowFlags_NoTitleBar |
-                     ImGuiWindowFlags_NoResize |
-                     ImGuiWindowFlags_NoMove |
-                     ImGuiWindowFlags_NoCollapse |
-                     ImGuiWindowFlags_NoBringToFrontOnFocus);
+        ImGui::SetNextWindowSize(ImVec2(static_cast<float>(winW), static_cast<float>(winH)));
+        ImGui::Begin("##Main",
+                     nullptr,
+                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         // Connection bar at top
         drawConnectionBar(state, client);
@@ -117,11 +111,9 @@ main (int, char **)
         ImGui::End();
 
         // Check pending async call
-        if (state.callInProgress && state.pendingCall.has_value())
-        {
+        if (state.callInProgress && state.pendingCall.has_value()) {
             auto & fut = state.pendingCall.value();
-            if (fut.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
-            {
+            if (fut.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
                 bool ok = fut.get();
                 state.pendingCall.reset();
                 state.callInProgress = false;
@@ -130,25 +122,34 @@ main (int, char **)
                 const auto & target = state.callTarget;
                 const auto & result = state.pendingResult;
 
-                if (ok)
-                {
+                if (ok) {
                     addLog(state, LogLevel::Info, "Call succeeded");
 
-                    if (target == "status")           state.statusResult = result;
-                    else if (target == "peers")       state.peersResult = result;
-                    else if (target == "peerInfo")    state.peerInfoResult = result;
-                    else if (target == "query")       state.queryResult = result;
-                    else if (target == "queryStatus") state.queryStatusResult = result;
-                    else if (target == "groups")      state.groupsResult = result;
-                    else if (target == "groupInfo")   state.groupInfoResult = result;
-                    else if (target == "modules")     state.modulesResult = result;
-                    else if (target == "moduleInfo")  state.moduleInfoResult = result;
-                    else if (target == "excludedHosts")   state.excludedHostsResult = result;
-                    else if (target == "excludedSubnets") state.excludedSubnetsResult = result;
-                    else if (target == "raw")         state.rawResult = result;
-                }
-                else
-                {
+                    if (target == "status")
+                        state.statusResult = result;
+                    else if (target == "peers")
+                        state.peersResult = result;
+                    else if (target == "peerInfo")
+                        state.peerInfoResult = result;
+                    else if (target == "query")
+                        state.queryResult = result;
+                    else if (target == "queryStatus")
+                        state.queryStatusResult = result;
+                    else if (target == "groups")
+                        state.groupsResult = result;
+                    else if (target == "groupInfo")
+                        state.groupInfoResult = result;
+                    else if (target == "modules")
+                        state.modulesResult = result;
+                    else if (target == "moduleInfo")
+                        state.moduleInfoResult = result;
+                    else if (target == "excludedHosts")
+                        state.excludedHostsResult = result;
+                    else if (target == "excludedSubnets")
+                        state.excludedSubnetsResult = result;
+                    else if (target == "raw")
+                        state.rawResult = result;
+                } else {
                     string msg = "Call failed";
                     if (!result.empty())
                         msg += ": " + result;

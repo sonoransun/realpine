@@ -3,35 +3,32 @@
 
 #include <ConfigFile.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <Platform.h>
+#include <StringUtils.h>
 
 #ifdef ALPINE_PLATFORM_POSIX
 #include <sys/stat.h>
 #endif
 
 
-
-ConfigFile::ConfigFile ()
+ConfigFile::ConfigFile()
 {
     nameIndex_ = nullptr;
-    isDirty_   = false;
+    isDirty_ = false;
 }
 
 
-
-ConfigFile::~ConfigFile ()
+ConfigFile::~ConfigFile()
 {
     delete nameIndex_;
 }
 
 
-
-bool  
-ConfigFile::initialize (const string & fileName)
+bool
+ConfigFile::initialize(const string & fileName)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ConfigFile::initialize invoked.");
+    Log::Debug("ConfigFile::initialize invoked.");
 #endif
 
     fileName_ = fileName;
@@ -49,12 +46,11 @@ ConfigFile::initialize (const string & fileName)
 }
 
 
-
-bool  
-ConfigFile::exists (const string & name)
+bool
+ConfigFile::exists(const string & name)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ConfigFile::exists invoked.");
+    Log::Debug("ConfigFile::exists invoked.");
 #endif
 
 
@@ -62,13 +58,11 @@ ConfigFile::exists (const string & name)
 }
 
 
-
-bool  
-ConfigFile::get (const string & name,
-                 string &       value)
+bool
+ConfigFile::get(const string & name, string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ConfigFile::get invoked.");
+    Log::Debug("ConfigFile::get invoked.");
 #endif
 
 
@@ -76,13 +70,11 @@ ConfigFile::get (const string & name,
 }
 
 
-
-bool  
-ConfigFile::set (const string & name,
-                 const string & value)
+bool
+ConfigFile::set(const string & name, const string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ConfigFile::set invoked.");
+    Log::Debug("ConfigFile::set invoked.");
 #endif
 
 
@@ -90,17 +82,13 @@ ConfigFile::set (const string & name,
 }
 
 
-
-bool  
-ConfigFile::save ()
+bool
+ConfigFile::save()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ConfigFile::save invoked.");
+    Log::Debug("ConfigFile::save invoked.");
 #endif
 
 
     return true;
 }
-
-
-

@@ -1,42 +1,39 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpSendQueue.h>
 #include <DataBuffer.h>
-#include <DtcpBroadcastStates.h>
-#include <DtcpBroadcastMgr.h>
+#include <DtcpBaseConnTransport.h>
 #include <DtcpBaseUdpTransport.h>
+#include <DtcpBroadcastMgr.h>
+#include <DtcpBroadcastStates.h>
 #include <DtcpConnPacket.h>
 #include <DtcpPacket.h>
-#include <DtcpBaseConnTransport.h>
+#include <DtcpSendQueue.h>
 #include <Log.h>
 #include <StringUtils.h>
 
 
-
-DtcpSendQueue::DtcpSendQueue (DtcpBaseUdpTransport *  parentTransport,
-                              ulong                   transferRate)
+DtcpSendQueue::DtcpSendQueue(DtcpBaseUdpTransport * parentTransport, ulong transferRate)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue constructor invoked.");
+    Log::Debug("DtcpSendQueue constructor invoked.");
 #endif
 
-    parentTransport_      = parentTransport;
-    transferRate_         = transferRate;
-    byteDelayValue_       = 0;
-    nextSendTime_.tv_sec  = 0;
-    nextSendTime_.tv_usec  = 0;
-    priorityRequestList_  = new t_RequestList;
-    normalRequestList_    = new t_RequestList;
-    broadcastStates_      = nullptr;
+    parentTransport_ = parentTransport;
+    transferRate_ = transferRate;
+    byteDelayValue_ = 0;
+    nextSendTime_.tv_sec = 0;
+    nextSendTime_.tv_usec = 0;
+    priorityRequestList_ = new t_RequestList;
+    normalRequestList_ = new t_RequestList;
+    broadcastStates_ = nullptr;
 }
 
 
-
-DtcpSendQueue::~DtcpSendQueue ()
+DtcpSendQueue::~DtcpSendQueue()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue destructor invoked.");
+    Log::Debug("DtcpSendQueue destructor invoked.");
 #endif
 
     delete priorityRequestList_;
@@ -45,40 +42,35 @@ DtcpSendQueue::~DtcpSendQueue ()
 }
 
 
-
-bool  
-DtcpSendQueue::addRequest (bool          priority,
-                           const ulong   ipAddress,
-                           const ushort  port,
-                           DataBuffer *  dataBuffer)
+bool
+DtcpSendQueue::addRequest(bool priority, const ulong ipAddress, const ushort port, DataBuffer * dataBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue::addRequest invoked.");
+    Log::Debug("DtcpSendQueue::addRequest invoked.");
 #endif
 
-    if ( (!broadcastStates_) && !locateBroadcastStates () ) {
+    if ((!broadcastStates_) && !locateBroadcastStates()) {
         // This should never happen...
         //
-        Log::Error ("locateBroadcastStates failed in DtcpSendQueue::addRequest!");
+        Log::Error("locateBroadcastStates failed in DtcpSendQueue::addRequest!");
         return false;
     }
     // Create state to hold this request until it can be satisfied.
     //
-    t_UnicastRequest *  newRequest;
+    t_UnicastRequest * newRequest;
     newRequest = new t_UnicastRequest;
 
     newRequest->dataBuffer = dataBuffer;
-    newRequest->ipAddress  = ipAddress;
-    newRequest->port       = port;
+    newRequest->ipAddress = ipAddress;
+    newRequest->port = port;
 
 
     // Put this request in the correct queue depending on priority
     //
     if (priority) {
-        priorityRequestList_->push_back (newRequest);
-    }
-    else {
-        normalRequestList_->push_back (newRequest);
+        priorityRequestList_->push_back(newRequest);
+    } else {
+        normalRequestList_->push_back(newRequest);
     }
 
 
@@ -86,12 +78,11 @@ DtcpSendQueue::addRequest (bool          priority,
 }
 
 
-
-bool  
-DtcpSendQueue::setTransferRate (ulong  rate)
+bool
+DtcpSendQueue::setTransferRate(ulong rate)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue::setTransferRate invoked.");
+    Log::Debug("DtcpSendQueue::setTransferRate invoked.");
 #endif
 
     // If the limiting rate is over a million bytes per second, just leave
@@ -99,8 +90,7 @@ DtcpSendQueue::setTransferRate (ulong  rate)
     //
     if (rate > 1000000L) {
         transferRate_ = 0;
-    }
-    else {
+    } else {
         transferRate_ = rate;
     }
 
@@ -109,69 +99,67 @@ DtcpSendQueue::setTransferRate (ulong  rate)
 }
 
 
-
-bool  
-DtcpSendQueue::queueIdle ()
+bool
+DtcpSendQueue::queueIdle()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue::queueIdle invoked.");
+    Log::Debug("DtcpSendQueue::queueIdle invoked.");
 #endif
 
-    if ( (!broadcastStates_) && !locateBroadcastStates () ) {
+    if ((!broadcastStates_) && !locateBroadcastStates()) {
         // This should never happen...
         //
-        Log::Error ("locateBroadcastStates failed in DtcpSendQueue::queueIdle!");
+        Log::Error("locateBroadcastStates failed in DtcpSendQueue::queueIdle!");
         return false;
     }
     // Check if we have any requests in any of the send queues
     //
-    if (priorityRequestList_->size ()) {
+    if (priorityRequestList_->size()) {
         return false;
     }
-    if (normalRequestList_->size ()) {
+    if (normalRequestList_->size()) {
         return false;
     }
-    return !broadcastStates_->requestsPending ();
+    return !broadcastStates_->requestsPending();
 }
 
 
-bool  
-DtcpSendQueue::requestsPending (ulong & numRequests)
+bool
+DtcpSendQueue::requestsPending(ulong & numRequests)
 {
-    if ( (!broadcastStates_) && !locateBroadcastStates () ) {
+    if ((!broadcastStates_) && !locateBroadcastStates()) {
         // This should never happen...
         //
-        Log::Error ("locateBroadcastStates failed in DtcpSendQueue::requestsPending!");
+        Log::Error("locateBroadcastStates failed in DtcpSendQueue::requestsPending!");
         return false;
     }
     numRequests = 0;
-    numRequests += priorityRequestList_->size ();
-    numRequests += normalRequestList_->size ();
-    numRequests += broadcastStates_->requestsPending ();
+    numRequests += priorityRequestList_->size();
+    numRequests += normalRequestList_->size();
+    numRequests += broadcastStates_->requestsPending();
 
 
     return true;
 }
 
 
-
-bool  
-DtcpSendQueue::processEvents (struct timeval &  currentDelay)
+bool
+DtcpSendQueue::processEvents(struct timeval & currentDelay)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue::processEvents invoked.");
+    Log::Debug("DtcpSendQueue::processEvents invoked.");
 #endif
 
-    if ( (!broadcastStates_) && !locateBroadcastStates () ) {
+    if ((!broadcastStates_) && !locateBroadcastStates()) {
         // This should never happen...
         //
-        Log::Error ("locateBroadcastStates failed in DtcpSendQueue::processEvents!");
+        Log::Error("locateBroadcastStates failed in DtcpSendQueue::processEvents!");
         return false;
     }
     // Verify that enough time has elapsed since we last sent a packet.
     //
     bool status;
-    status = waitTimeRemaining (nextSendTime_, currentDelay);
+    status = waitTimeRemaining(nextSendTime_, currentDelay);
 
     if (status) {
         // Still time remaining for send delay.  Return immediately with
@@ -184,28 +172,26 @@ DtcpSendQueue::processEvents (struct timeval &  currentDelay)
     // - Normal Data
     // - Broadcast Data
     //
-    t_UnicastRequest *  currRequest = nullptr;
+    t_UnicastRequest * currRequest = nullptr;
 
-    if (priorityRequestList_->size ()) {
-        currRequest = priorityRequestList_->front ();
-        priorityRequestList_->pop_front ();
-    }
-    else if (normalRequestList_->size ()) {
-        currRequest = normalRequestList_->front ();
-        normalRequestList_->pop_front ();
+    if (priorityRequestList_->size()) {
+        currRequest = priorityRequestList_->front();
+        priorityRequestList_->pop_front();
+    } else if (normalRequestList_->size()) {
+        currRequest = normalRequestList_->front();
+        normalRequestList_->pop_front();
     }
 
-    if ( (!currRequest) && (broadcastStates_->requestsPending () > 0) ) {
+    if ((!currRequest) && (broadcastStates_->requestsPending() > 0)) {
         // Nothing in our unicast send queues, check broadcast
         //
-        status = getBroadcastRequest (currRequest);
+        status = getBroadcastRequest(currRequest);
 
         if (!status) {
             // nothing to send?
-            Log::Error ("Broadcast states reporting pending requests, but "
-                                 "getBroadcastRequest failed in DtcpSendQueue::processEvents!");
+            Log::Error("Broadcast states reporting pending requests, but "
+                       "getBroadcastRequest failed in DtcpSendQueue::processEvents!");
             return false;
-
         }
         return false;
     }
@@ -214,35 +200,32 @@ DtcpSendQueue::processEvents (struct timeval &  currentDelay)
     // Send request through UDP port
     //
     DataBuffer * buffer;
-    byte *       data;
-    uint         dataLength;
+    byte * data;
+    uint dataLength;
 
     buffer = currRequest->dataBuffer;
-    status = buffer->getData (data, dataLength);
+    status = buffer->getData(data, dataLength);
 
     if (!status) {
-        Log::Error ("getData failed in DtcpSendQueue::processEvents.");
-        parentTransport_->releaseTempDataBuffer (buffer);
+        Log::Error("getData failed in DtcpSendQueue::processEvents.");
+        parentTransport_->releaseTempDataBuffer(buffer);
         return false;
     }
-    status = parentTransport_->sendUdpPacket (currRequest->ipAddress, 
-                                              currRequest->port,
-                                              data,
-                                              dataLength);
+    status = parentTransport_->sendUdpPacket(currRequest->ipAddress, currRequest->port, data, dataLength);
 
     struct timeval currTime;
-    gettimeofday (&currTime, 0);
+    gettimeofday(&currTime, 0);
 
-    parentTransport_->releaseTempDataBuffer (buffer);
+    parentTransport_->releaseTempDataBuffer(buffer);
     delete currRequest;
 
 
     // Calculate delay between now and next packet.
     //
-    calculateDelay (dataLength, currentDelay);
+    calculateDelay(dataLength, currentDelay);
 
     nextSendTime_ = currTime;
-    nextSendTime_.tv_sec  += currentDelay.tv_sec;
+    nextSendTime_.tv_sec += currentDelay.tv_sec;
     nextSendTime_.tv_usec += currentDelay.tv_usec;
 
     if (nextSendTime_.tv_usec >= 1000000L) {
@@ -255,72 +238,71 @@ DtcpSendQueue::processEvents (struct timeval &  currentDelay)
 }
 
 
-
-bool  
-DtcpSendQueue::getBroadcastRequest (t_UnicastRequest *&  request)
+bool
+DtcpSendQueue::getBroadcastRequest(t_UnicastRequest *& request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSendQueue::getBroadcastRequest invoked.");
+    Log::Debug("DtcpSendQueue::getBroadcastRequest invoked.");
 #endif
 
     // Locate an available unicast packet from a broadcast set,
     // prepare data for send.
     //
-    if (broadcastStates_->requestsPending () == 0) {
+    if (broadcastStates_->requestsPending() == 0) {
 #ifdef _VERBOSE
-        Log::Debug ("No pending requests in call to DtcpSendQueue::getBroadcastRequest.");
+        Log::Debug("No pending requests in call to DtcpSendQueue::getBroadcastRequest.");
 #endif
 
         return false;
     }
     bool status;
-    StackLinkInterface *     packet;
-    DtcpBaseConnTransport *  destination;
+    StackLinkInterface * packet;
+    DtcpBaseConnTransport * destination;
 
-    status = broadcastStates_->getCurrentRequest (packet, destination);
+    status = broadcastStates_->getCurrentRequest(packet, destination);
 
     if (!status) {
-        Log::Error ("Call to BroadcastStates getCurrentRequest failed "
-                             "in DtcpSendQueue::getBroadcastRequest!");
+        Log::Error("Call to BroadcastStates getCurrentRequest failed "
+                   "in DtcpSendQueue::getBroadcastRequest!");
 
         return false;
     }
     // Verify packet type and settings
     //
-    DtcpConnPacket *  connPacket;
-    DtcpPacket *   dtcpPacket;
-   
+    DtcpConnPacket * connPacket;
+    DtcpPacket * dtcpPacket;
+
     connPacket = dynamic_cast<DtcpConnPacket *>(packet);
 
     if (!connPacket) {
-        Log::Error ("Invalid packet (!DtcpConnPacket *) type passed "
-                             "in DtcpSendQueue::getBroadcastRequest!");
+        Log::Error("Invalid packet (!DtcpConnPacket *) type passed "
+                   "in DtcpSendQueue::getBroadcastRequest!");
 
         return false;
     }
     dtcpPacket = new DtcpPacket();
-    dtcpPacket->setParent (connPacket);
+    dtcpPacket->setParent(connPacket);
 
 
     // Get destination location information
     //
-    ulong   myId;
-    ulong   ipAddress;
-    ushort  port;
+    ulong myId;
+    ulong ipAddress;
+    ushort port;
 
-    status = destination->getMyId (myId);
+    status = destination->getMyId(myId);
 
     if (!status) {
-        Log::Error ("Error retreiving my ID from destiation "
-                             "in DtcpSendQueue::getBroadcastRequest!");
+        Log::Error("Error retreiving my ID from destiation "
+                   "in DtcpSendQueue::getBroadcastRequest!");
         delete dtcpPacket;
         return false;
     }
-    status = destination->getPeerLocation (ipAddress, port);
+    status = destination->getPeerLocation(ipAddress, port);
 
     if (!status) {
-        Log::Error ("Error retreiving peer location from destiation "
-                             "in DtcpSendQueue::getBroadcastRequest!");
+        Log::Error("Error retreiving peer location from destiation "
+                   "in DtcpSendQueue::getBroadcastRequest!");
         delete dtcpPacket;
         return false;
     }
@@ -329,41 +311,41 @@ DtcpSendQueue::getBroadcastRequest (t_UnicastRequest *&  request)
     // All we change during broadcasts is the MyID.  The rest
     // of the packet data should remain intact.
     //
-    connPacket->setMyId (myId);
+    connPacket->setMyId(myId);
 
 
     // Allocate & populate new request state for use in processEvents.
     //
-    t_UnicastRequest *  newRequest;
-    DataBuffer *        buffer;
+    t_UnicastRequest * newRequest;
+    DataBuffer * buffer;
     newRequest = new t_UnicastRequest;
 
-    status = parentTransport_->getTempDataBuffer (newRequest->dataBuffer);
+    status = parentTransport_->getTempDataBuffer(newRequest->dataBuffer);
 
     if (!status) {
-        Log::Error ("Call to DtcpBaseUdpTransport getTempDataBuffer failed "
-                             "in DtcpSendQueue::getBroadcastRequest!");
+        Log::Error("Call to DtcpBaseUdpTransport getTempDataBuffer failed "
+                   "in DtcpSendQueue::getBroadcastRequest!");
         delete newRequest;
         delete dtcpPacket;
 
         return false;
     }
     buffer = newRequest->dataBuffer;
-    buffer->writeReset ();
+    buffer->writeReset();
 
-    newRequest->ipAddress  = ipAddress;
-    newRequest->port       = port;
+    newRequest->ipAddress = ipAddress;
+    newRequest->port = port;
 
 
     // Write packet link data into send buffer and hand back to caller
     //
-    status = packet->writeData (buffer);
+    status = packet->writeData(buffer);
     delete dtcpPacket;
 
     if (!status) {
-        Log::Debug ("writeData failed for packet "
-                             "in DtcpSendQueue::getBroadcastRequest!");
-        parentTransport_->releaseTempDataBuffer (buffer);
+        Log::Debug("writeData failed for packet "
+                   "in DtcpSendQueue::getBroadcastRequest!");
+        parentTransport_->releaseTempDataBuffer(buffer);
         delete newRequest;
 
         return false;
@@ -372,26 +354,23 @@ DtcpSendQueue::getBroadcastRequest (t_UnicastRequest *&  request)
 }
 
 
-
 bool
-DtcpSendQueue::locateBroadcastStates ()
+DtcpSendQueue::locateBroadcastStates()
 {
     bool status;
 
     if (!broadcastStates_) {
         // Initialize states from Broadcast Manager
         //
-        status = DtcpBroadcastMgr::getBroadcastStates (parentTransport_,
-                                                       broadcastStates_);
+        status = DtcpBroadcastMgr::getBroadcastStates(parentTransport_, broadcastStates_);
 
         if (!status) {
             // This should never happen...
             //
-            Log::Error ("getBroadcastStates failed in DtcpSendQueue::locateBroadcastStates!");
+            Log::Error("getBroadcastStates failed in DtcpSendQueue::locateBroadcastStates!");
             broadcastStates_ = nullptr;
 
             return false;
-
         }
         return false;
     }
@@ -401,16 +380,14 @@ DtcpSendQueue::locateBroadcastStates ()
 }
 
 
-
-bool  
-DtcpSendQueue::calculateDelay (ulong             dataSize,
-                               struct timeval &  delay)
+bool
+DtcpSendQueue::calculateDelay(ulong dataSize, struct timeval & delay)
 {
     if (dataSize > 400000L) {
         // too large, something is wrong here
         return false;
     }
-    delay.tv_sec  = 0;
+    delay.tv_sec = 0;
     delay.tv_usec = 0;
 
     // If the transfer rate is zero, no throttling...
@@ -424,17 +401,16 @@ DtcpSendQueue::calculateDelay (ulong             dataSize,
     // accurate to the microsecond if data is < 4k, otherwise
     // accurate to a few hundreds of milliseconds.
     //
-    ulong  usDelay;
-    ulong  firstMultiplier;
-    ulong  secondMultiplier;
+    ulong usDelay;
+    ulong firstMultiplier;
+    ulong secondMultiplier;
 
     if (dataSize < 4294) {
-         firstMultiplier = 1000000;
-         secondMultiplier = 1;
-    }
-    else {
-         firstMultiplier = 10000;
-         secondMultiplier = 100;
+        firstMultiplier = 1000000;
+        secondMultiplier = 1;
+    } else {
+        firstMultiplier = 10000;
+        secondMultiplier = 100;
     }
 
     dataSize *= firstMultiplier;
@@ -448,30 +424,27 @@ DtcpSendQueue::calculateDelay (ulong             dataSize,
         delay.tv_sec++;
         delay.tv_usec -= 1000000L;
     }
- 
+
 
     return true;
 }
 
 
-
-bool  
-DtcpSendQueue::waitTimeRemaining (struct timeval &  endTime,
-                                  struct timeval &  remaining)
+bool
+DtcpSendQueue::waitTimeRemaining(struct timeval & endTime, struct timeval & remaining)
 {
     struct timeval currTime;
-    gettimeofday (&currTime, 0);
+    gettimeofday(&currTime, 0);
 
-    if ( (currTime.tv_sec < endTime.tv_sec) ||
-         ((currTime.tv_sec == endTime.tv_sec) && (currTime.tv_usec < endTime.tv_usec)) ) {
+    if ((currTime.tv_sec < endTime.tv_sec) ||
+        ((currTime.tv_sec == endTime.tv_sec) && (currTime.tv_usec < endTime.tv_usec))) {
 
         // Still time remaining...
         //
         if (endTime.tv_usec < currTime.tv_usec) {
             remaining.tv_sec = (endTime.tv_sec - currTime.tv_sec) - 1;
             remaining.tv_usec = (endTime.tv_usec + 1000000L) - currTime.tv_usec;
-        }
-        else {
+        } else {
             remaining.tv_sec = endTime.tv_sec - currTime.tv_sec;
             remaining.tv_usec = endTime.tv_usec - currTime.tv_usec;
         }
@@ -480,6 +453,3 @@ DtcpSendQueue::waitTimeRemaining (struct timeval &  endTime,
     }
     return false;
 }
-
-
-

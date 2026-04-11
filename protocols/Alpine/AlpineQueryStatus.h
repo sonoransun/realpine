@@ -8,51 +8,45 @@
 class AlpineQueryStatus
 {
   public:
+    AlpineQueryStatus() = default;
 
-    AlpineQueryStatus () = default;
+    AlpineQueryStatus(const AlpineQueryStatus & copy);
 
-    AlpineQueryStatus (const AlpineQueryStatus & copy);
+    ~AlpineQueryStatus() = default;
 
-    ~AlpineQueryStatus () = default;
-
-    const AlpineQueryStatus & operator = (const AlpineQueryStatus & copy);
-
+    const AlpineQueryStatus & operator=(const AlpineQueryStatus & copy);
 
 
-    ulong  totalPackets ();
+    ulong totalPackets();
 
-    ulong  numPacketsSent ();
+    ulong numPacketsSent();
 
-    ulong  numRepliesReceived ();
+    ulong numRepliesReceived();
 
-    double percentComplete ();
+    double percentComplete();
 
-    bool   isActive ();
-
+    bool isActive();
 
 
   private:
+    ulong totalPackets_;
+    ulong packetsSent_;
+    ulong repliesReceived_;
+    double percentComplete_;
+    bool isActive_;
 
-    ulong        totalPackets_;
-    ulong        packetsSent_;
-    ulong        repliesReceived_;
-    double       percentComplete_;
-    bool         isActive_;
 
-  
-    void  setTotalPackets (ulong  totalPackets);
- 
-    void  setPacketsSent (ulong  numSent);
+    void setTotalPackets(ulong totalPackets);
 
-    void  setRepliesReceived (ulong  numReceived);
+    void setPacketsSent(ulong numSent);
 
-    void  setPercentComplete (const double &  percentage);
+    void setRepliesReceived(ulong numReceived);
 
-    void  setIsActive (bool  value);
+    void setPercentComplete(const double & percentage);
+
+    void setIsActive(bool value);
 
 
     friend class AlpineQueryMgr;
     friend class AlpineQuery;
 };
-
-

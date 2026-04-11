@@ -1,30 +1,29 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <RawWifiConnection.h>
+#include <CovertChannel.h>
 #include <Log.h>
 #include <NetUtils.h>
-#include <CovertChannel.h>
+#include <RawWifiConnection.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
 #ifdef __linux__
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <linux/if_packet.h>
 #include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #include <unistd.h>
 #endif
-
 
 
 #ifdef __linux__
 
 
-RawWifiConnection::RawWifiConnection (const string & interfaceName)
+RawWifiConnection::RawWifiConnection(const string & interfaceName)
     : rawFd_(-1),
       ifIndex_(0),
       interfaceName_(interfaceName)
@@ -33,25 +32,28 @@ RawWifiConnection::RawWifiConnection (const string & interfaceName)
 }
 
 
-
-RawWifiConnection::~RawWifiConnection ()
+RawWifiConnection::~RawWifiConnection()
 {
     close();
 }
 
 
-
 bool
-RawWifiConnection::create (ulong ipAddress, ushort port)
+RawWifiConnection::create(ulong ipAddress, ushort port)
 {
     if (rawFd_ >= 0) {
         close();
     }
 
-    rawFd_ = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    rawFd_ = socket(AF_PACKET, SOCK_RAW | SOCK_CLOEXEC, htons(ETH_P_ALL));
 
     if (rawFd_ < 0) {
-        Log::Error("RawWifiConnection: socket() failed (need root/CAP_NET_RAW).");
+        if (errno == EPERM) {
+            Log::Error("RawWifiConnection: AF_PACKET socket denied (EPERM). "
+                       "Run as root or grant CAP_NET_RAW: setcap cap_net_raw=ep <binary>"s);
+        } else {
+            Log::Error("RawWifiConnection: socket() failed (need root/CAP_NET_RAW).");
+        }
         return false;
     }
 
@@ -61,8 +63,7 @@ RawWifiConnection::create (ulong ipAddress, ushort port)
     strncpy(ifr.ifr_name, interfaceName_.c_str(), IFNAMSIZ - 1);
 
     if (ioctl(rawFd_, SIOCGIFINDEX, &ifr) < 0) {
-        Log::Error("RawWifiConnection: Failed to get interface index for "s +
-                   interfaceName_);
+        Log::Error("RawWifiConnection: Failed to get interface index for "s + interfaceName_);
         ::close(rawFd_);
         rawFd_ = -1;
         return false;
@@ -72,8 +73,7 @@ RawWifiConnection::create (ulong ipAddress, ushort port)
 
     // Get MAC address
     if (ioctl(rawFd_, SIOCGIFHWADDR, &ifr) < 0) {
-        Log::Error("RawWifiConnection: Failed to get MAC address for "s +
-                   interfaceName_);
+        Log::Error("RawWifiConnection: Failed to get MAC address for "s + interfaceName_);
         ::close(rawFd_);
         rawFd_ = -1;
         return false;
@@ -84,8 +84,8 @@ RawWifiConnection::create (ulong ipAddress, ushort port)
     // Bind to interface
     struct sockaddr_ll sll;
     memset(&sll, 0, sizeof(sll));
-    sll.sll_family   = AF_PACKET;
-    sll.sll_ifindex  = ifIndex_;
+    sll.sll_family = AF_PACKET;
+    sll.sll_ifindex = ifIndex_;
     sll.sll_protocol = htons(ETH_P_ALL);
 
     if (bind(rawFd_, (struct sockaddr *)&sll, sizeof(sll)) < 0) {
@@ -104,9 +104,8 @@ RawWifiConnection::create (ulong ipAddress, ushort port)
 }
 
 
-
 void
-RawWifiConnection::close ()
+RawWifiConnection::close()
 {
     if (rawFd_ >= 0) {
         ::close(rawFd_);
@@ -115,20 +114,18 @@ RawWifiConnection::close ()
 }
 
 
-
 int
-RawWifiConnection::getFd ()
+RawWifiConnection::getFd()
 {
     return rawFd_;
 }
 
 
-
 bool
-RawWifiConnection::sendData (const ulong    destIpAddress,
-                              const ushort   destPort,
-                              const byte *   dataBuffer,
-                              const uint     dataLength)
+RawWifiConnection::sendData(const ulong destIpAddress,
+                            const ushort destPort,
+                            const byte * dataBuffer,
+                            const uint dataLength)
 {
     if (rawFd_ < 0) {
         return false;
@@ -175,8 +172,7 @@ RawWifiConnection::sendData (const ulong    destIpAddress,
     memset(destMac, 0xFF, 6);
 
     byte frame[4096];
-    uint frameLen = buildDataFrame(addressedPayload.data(), addressedLen,
-                                   destMac, frame, sizeof(frame));
+    uint frameLen = buildDataFrame(addressedPayload.data(), addressedLen, destMac, frame, sizeof(frame));
 
     if (frameLen == 0) {
         Log::Error("RawWifiConnection: Failed to build data frame.");
@@ -194,13 +190,9 @@ RawWifiConnection::sendData (const ulong    destIpAddress,
 }
 
 
-
 bool
-RawWifiConnection::receiveData (byte *     dataBuffer,
-                                 const uint bufferLength,
-                                 ulong &    sourceIpAddress,
-                                 ushort &   sourcePort,
-                                 uint &     dataLength)
+RawWifiConnection::receiveData(
+    byte * dataBuffer, const uint bufferLength, ulong & sourceIpAddress, ushort & sourcePort, uint & dataLength)
 {
     if (rawFd_ < 0) {
         return false;
@@ -227,8 +219,7 @@ RawWifiConnection::receiveData (byte *     dataBuffer,
     ulong srcIp = 0;
     ushort srcPort = 0;
 
-    if (!parseDataFrame(frame, static_cast<uint>(bytesRead),
-                        payload, payloadLen, srcIp, srcPort)) {
+    if (!parseDataFrame(frame, static_cast<uint>(bytesRead), payload, payloadLen, srcIp, srcPort)) {
         return false;
     }
 
@@ -260,11 +251,9 @@ RawWifiConnection::receiveData (byte *     dataBuffer,
 }
 
 
-
 uint
-RawWifiConnection::buildDataFrame (const byte * payload, uint payloadLen,
-                                    const byte * destMac, byte * frame,
-                                    uint frameSize)
+RawWifiConnection::buildDataFrame(
+    const byte * payload, uint payloadLen, const byte * destMac, byte * frame, uint frameSize)
 {
     uint totalLen = FRAME_OVERHEAD + payloadLen;
 
@@ -324,11 +313,9 @@ RawWifiConnection::buildDataFrame (const byte * payload, uint payloadLen,
 }
 
 
-
 bool
-RawWifiConnection::parseDataFrame (const byte * frame, uint frameLen,
-                                    byte * payload, uint & payloadLen,
-                                    ulong & sourceIp, ushort & sourcePort)
+RawWifiConnection::parseDataFrame(
+    const byte * frame, uint frameLen, byte * payload, uint & payloadLen, ulong & sourceIp, ushort & sourcePort)
 {
     if (frameLen < FRAME_OVERHEAD) {
         return false;
@@ -358,14 +345,12 @@ RawWifiConnection::parseDataFrame (const byte * frame, uint frameLen,
     }
 
     // Check LLC/SNAP: DSAP=0xAA, SSAP=0xAA, Control=0x03
-    if (frame[llcOffset] != 0xAA || frame[llcOffset + 1] != 0xAA ||
-        frame[llcOffset + 2] != 0x03) {
+    if (frame[llcOffset] != 0xAA || frame[llcOffset + 1] != 0xAA || frame[llcOffset + 2] != 0x03) {
         return false;
     }
 
     // Check OUI matches Alpine
-    if (frame[llcOffset + 3] != ALPINE_OUI[0] ||
-        frame[llcOffset + 4] != ALPINE_OUI[1] ||
+    if (frame[llcOffset + 3] != ALPINE_OUI[0] || frame[llcOffset + 4] != ALPINE_OUI[1] ||
         frame[llcOffset + 5] != ALPINE_OUI[2]) {
         return false;
     }
@@ -392,65 +377,50 @@ RawWifiConnection::parseDataFrame (const byte * frame, uint frameLen,
 }
 
 
-
 #else  // Non-Linux stubs
 
 
-
-RawWifiConnection::RawWifiConnection (const string & interfaceName)
+RawWifiConnection::RawWifiConnection(const string & interfaceName)
     : interfaceName_(interfaceName)
-{
-}
+{}
 
 
-
-RawWifiConnection::~RawWifiConnection ()
-{
-}
-
+RawWifiConnection::~RawWifiConnection() {}
 
 
 bool
-RawWifiConnection::create (ulong ipAddress, ushort port)
+RawWifiConnection::create(ulong ipAddress, ushort port)
 {
     Log::Error("RawWifiConnection: Raw 802.11 is only supported on Linux.");
     return false;
 }
 
 
-
 void
-RawWifiConnection::close ()
-{
-}
-
+RawWifiConnection::close()
+{}
 
 
 int
-RawWifiConnection::getFd ()
+RawWifiConnection::getFd()
 {
     return -1;
 }
 
 
-
 bool
-RawWifiConnection::sendData (const ulong    destIpAddress,
-                              const ushort   destPort,
-                              const byte *   dataBuffer,
-                              const uint     dataLength)
+RawWifiConnection::sendData(const ulong destIpAddress,
+                            const ushort destPort,
+                            const byte * dataBuffer,
+                            const uint dataLength)
 {
     return false;
 }
 
 
-
 bool
-RawWifiConnection::receiveData (byte *     dataBuffer,
-                                 const uint bufferLength,
-                                 ulong &    sourceIpAddress,
-                                 ushort &   sourcePort,
-                                 uint &     dataLength)
+RawWifiConnection::receiveData(
+    byte * dataBuffer, const uint bufferLength, ulong & sourceIpAddress, ushort & sourcePort, uint & dataLength)
 {
     return false;
 }

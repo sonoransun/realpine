@@ -2,19 +2,19 @@
 
 
 #include <MetricsHandler.h>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 
-std::mutex                                               MetricsRegistry::registryMutex_s;
-std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicCounter>>       MetricsRegistry::counters_s;
-std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicGauge>>         MetricsRegistry::gauges_s;
+std::mutex MetricsRegistry::registryMutex_s;
+std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicCounter>> MetricsRegistry::counters_s;
+std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicGauge>> MetricsRegistry::gauges_s;
 std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicLabeledCounter>> MetricsRegistry::labeledCounters_s;
-std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicHistogram>>     MetricsRegistry::histograms_s;
+std::unordered_map<string, std::unique_ptr<MetricsRegistry::AtomicHistogram>> MetricsRegistry::histograms_s;
 
-std::array<std::atomic<long long>, METRIC_LABEL_COUNT>  MetricsRegistry::labelArray_s{};
+std::array<std::atomic<long long>, METRIC_LABEL_COUNT> MetricsRegistry::labelArray_s{};
 
-const std::array<string, METRIC_LABEL_COUNT>            MetricsRegistry::labelNames_s = {{
+const std::array<string, METRIC_LABEL_COUNT> MetricsRegistry::labelNames_s = {{
     "http_requests_total{method=\"GET\"}"s,
     "http_requests_total{method=\"POST\"}"s,
     "http_requests_total{method=\"PUT\"}"s,
@@ -31,9 +31,8 @@ const std::array<string, METRIC_LABEL_COUNT>            MetricsRegistry::labelNa
 }};
 
 
-
 MetricsRegistry::AtomicCounter *
-MetricsRegistry::findOrCreateCounter (const string & name)
+MetricsRegistry::findOrCreateCounter(const string & name)
 {
     // Fast path: check without lock (pointer read is safe once published).
     {
@@ -52,7 +51,7 @@ MetricsRegistry::findOrCreateCounter (const string & name)
 
 
 MetricsRegistry::AtomicGauge *
-MetricsRegistry::findOrCreateGauge (const string & name)
+MetricsRegistry::findOrCreateGauge(const string & name)
 {
     std::lock_guard lock(registryMutex_s);
     auto it = gauges_s.find(name);
@@ -68,7 +67,7 @@ MetricsRegistry::findOrCreateGauge (const string & name)
 
 
 MetricsRegistry::AtomicLabeledCounter *
-MetricsRegistry::findOrCreateLabeled (const string & key)
+MetricsRegistry::findOrCreateLabeled(const string & key)
 {
     std::lock_guard lock(registryMutex_s);
     auto it = labeledCounters_s.find(key);
@@ -83,9 +82,8 @@ MetricsRegistry::findOrCreateLabeled (const string & key)
 }
 
 
-
 MetricsRegistry::AtomicHistogram *
-MetricsRegistry::findOrCreateHistogram (const string & name)
+MetricsRegistry::findOrCreateHistogram(const string & name)
 {
     std::lock_guard lock(registryMutex_s);
     auto it = histograms_s.find(name);
@@ -100,10 +98,8 @@ MetricsRegistry::findOrCreateHistogram (const string & name)
 }
 
 
-
 void
-MetricsRegistry::recordHistogram (const string & name,
-                                  double         value)
+MetricsRegistry::recordHistogram(const string & name, double value)
 {
     auto * hist = findOrCreateHistogram(name);
 
@@ -117,40 +113,32 @@ MetricsRegistry::recordHistogram (const string & name,
 
     // Accumulate sum via CAS loop.
     double oldSum = hist->sum.load(std::memory_order_relaxed);
-    while (!hist->sum.compare_exchange_weak(oldSum, oldSum + value,
-                                            std::memory_order_relaxed,
-                                            std::memory_order_relaxed))
+    while (
+        !hist->sum.compare_exchange_weak(oldSum, oldSum + value, std::memory_order_relaxed, std::memory_order_relaxed))
         ;
 
     hist->count.fetch_add(1, std::memory_order_relaxed);
 }
 
 
-
 void
-MetricsRegistry::incrementCounter (const string & name,
-                                   long long      delta)
+MetricsRegistry::incrementCounter(const string & name, long long delta)
 {
     auto * counter = findOrCreateCounter(name);
     counter->value.fetch_add(delta, std::memory_order_relaxed);
 }
 
 
-
 void
-MetricsRegistry::setGauge (const string &  name,
-                           double          value)
+MetricsRegistry::setGauge(const string & name, double value)
 {
     auto * gauge = findOrCreateGauge(name);
     gauge->value.store(value, std::memory_order_relaxed);
 }
 
 
-
 void
-MetricsRegistry::incrementLabeledCounter (const string & name,
-                                          const string & labels,
-                                          long long      delta)
+MetricsRegistry::incrementLabeledCounter(const string & name, const string & labels, long long delta)
 {
     string key = name + "{" + labels + "}";
     auto * counter = findOrCreateLabeled(key);
@@ -158,19 +146,16 @@ MetricsRegistry::incrementLabeledCounter (const string & name,
 }
 
 
-
 void
-MetricsRegistry::incrementLabeledCounter (MetricLabel  label,
-                                          long long    delta)
+MetricsRegistry::incrementLabeledCounter(MetricLabel label, long long delta)
 {
     auto idx = static_cast<size_t>(label);
     labelArray_s[idx].fetch_add(delta, std::memory_order_relaxed);
 }
 
 
-
 string
-MetricsRegistry::serialize ()
+MetricsRegistry::serialize()
 {
     std::ostringstream oss;
 
@@ -198,16 +183,15 @@ MetricsRegistry::serialize ()
             long long cumulative = 0;
             for (size_t i = 0; i < ptr->boundaries.size(); ++i) {
                 cumulative += ptr->bucketCounts[i].load(std::memory_order_relaxed);
-                oss << name << "_bucket{le=\""
-                    << std::fixed << std::setprecision(3) << ptr->boundaries[i]
-                    << "\"} " << cumulative << "\n";
+                oss << name << "_bucket{le=\"" << std::fixed << std::setprecision(3) << ptr->boundaries[i] << "\"} "
+                    << cumulative << "\n";
             }
             // +Inf bucket
             long long total = ptr->bucketCounts[ptr->boundaries.size()].load(std::memory_order_relaxed);
             oss << name << "_bucket{le=\"+Inf\"} " << total << "\n";
 
-            oss << name << "_sum " << std::fixed << std::setprecision(1)
-                << ptr->sum.load(std::memory_order_relaxed) << "\n";
+            oss << name << "_sum " << std::fixed << std::setprecision(1) << ptr->sum.load(std::memory_order_relaxed)
+                << "\n";
             oss << name << "_count " << ptr->count.load(std::memory_order_relaxed) << "\n";
         }
     }
@@ -223,18 +207,15 @@ MetricsRegistry::serialize ()
 }
 
 
-
 void
-MetricsHandler::registerRoutes (HttpRouter & router)
+MetricsHandler::registerRoutes(HttpRouter & router)
 {
     router.addRoute("GET", "/metrics", getMetrics);
 }
 
 
-
 HttpResponse
-MetricsHandler::getMetrics (const HttpRequest & request,
-                            const std::unordered_map<string, string> & params)
+MetricsHandler::getMetrics(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     string body = MetricsRegistry::serialize();
 

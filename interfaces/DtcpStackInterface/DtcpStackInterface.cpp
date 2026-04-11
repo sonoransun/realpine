@@ -1,13 +1,12 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpStackInterface.h>
-#include <DtcpStack.h>
 #include <DtcpBaseConnTransport.h>
+#include <DtcpStack.h>
+#include <DtcpStackInterface.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
-
+#include <StringUtils.h>
 
 
 // Ctor defaulted in header
@@ -16,161 +15,145 @@
 // Dtor defaulted in header
 
 
-
-bool  
-DtcpStackInterface::peerExists (const string &  ipAddress,
-                                ushort          port)
-{
-#ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::peerExists invoked.");
-#endif
-
-    bool   status;
-    ulong  peerIpAddress;
-
-    NetUtils::stringIpToLong (ipAddress, peerIpAddress);
-
-    status = DtcpStack::exists (peerIpAddress, port);
-
-
-    return status;
-}
-
-
-
 bool
-DtcpStackInterface::peerExists (ulong  peerId)
+DtcpStackInterface::peerExists(const string & ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::peerExists invoked.");
+    Log::Debug("DtcpStackInterface::peerExists invoked.");
 #endif
 
     bool status;
-    status = DtcpStack::exists (peerId);
+    ulong peerIpAddress;
+
+    NetUtils::stringIpToLong(ipAddress, peerIpAddress);
+
+    status = DtcpStack::exists(peerIpAddress, port);
+
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::addDtcpPeer (const string &  ipAddress,
-                                 ushort          port)
+bool
+DtcpStackInterface::peerExists(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::addDtcpPeer invoked.");
+    Log::Debug("DtcpStackInterface::peerExists invoked.");
 #endif
 
-    bool   status;
-    ulong  peerIpAddress;
+    bool status;
+    status = DtcpStack::exists(peerId);
 
-    NetUtils::stringIpToLong (ipAddress, peerIpAddress);
+    return status;
+}
+
+
+bool
+DtcpStackInterface::addDtcpPeer(const string & ipAddress, ushort port)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpStackInterface::addDtcpPeer invoked.");
+#endif
+
+    bool status;
+    ulong peerIpAddress;
+
+    NetUtils::stringIpToLong(ipAddress, peerIpAddress);
 
     DtcpBaseConnTransport * newTransport;
 
-    status = DtcpStack::createTransport (peerIpAddress,
-                                         port,
-                                         newTransport);
+    status = DtcpStack::createTransport(peerIpAddress, port, newTransport);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::getDtcpPeerId (const string &  ipAddress,
-                                   ushort          port,
-                                   ulong &         peerId)
+bool
+DtcpStackInterface::getDtcpPeerId(const string & ipAddress, ushort port, ulong & peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::getDtcpPeerId invoked.");
+    Log::Debug("DtcpStackInterface::getDtcpPeerId invoked.");
 #endif
 
-    bool   status;
-    ulong  peerIpAddress;
+    bool status;
+    ulong peerIpAddress;
 
-    NetUtils::stringIpToLong (ipAddress, peerIpAddress);
+    NetUtils::stringIpToLong(ipAddress, peerIpAddress);
 
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
-    status = DtcpStack::locateTransport (peerIpAddress,
-                                         port,
-                                         transport);
+    status = DtcpStack::locateTransport(peerIpAddress, port, transport);
 
     if (!status) {
         return false;
     }
 
-    status = transport->getTransportId (peerId);
+    status = transport->getTransportId(peerId);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::getDtcpPeerStatus (ulong               peerId,
-                                       t_DtcpPeerStatus &  status)
+bool
+DtcpStackInterface::getDtcpPeerStatus(ulong peerId, t_DtcpPeerStatus & status)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::getDtcpPeerStatus invoked.");
+    Log::Debug("DtcpStackInterface::getDtcpPeerStatus invoked.");
 #endif
 
     bool retVal;
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
-    retVal = DtcpStack::locateTransport (peerId,
-                                         transport);
+    retVal = DtcpStack::locateTransport(peerId, transport);
 
     if (!retVal) {
         return false;
     }
 
     ulong ipAddress;
-    retVal = transport->getPeerLocation (ipAddress, status.port);
+    retVal = transport->getPeerLocation(ipAddress, status.port);
 
     if (!retVal) {
         return false;
     }
 
-    NetUtils::longIpToString (ipAddress, status.ipAddress);
+    NetUtils::longIpToString(ipAddress, status.ipAddress);
 
 
     return retVal;
 }
 
 
-
-bool  
-DtcpStackInterface::getAllDtcpPeerIds (t_DtcpPeerIdList &  peerIdList)
+bool
+DtcpStackInterface::getAllDtcpPeerIds(t_DtcpPeerIdList & peerIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::getAllDtcpPeerIds invoked.");
+    Log::Debug("DtcpStackInterface::getAllDtcpPeerIds invoked.");
 #endif
 
-    bool  status;
+    bool status;
     ulong currId;
 
-    DtcpStack::t_ConnTransportList  transportList;
-    DtcpBaseConnTransport *         currTransport;
+    DtcpStack::t_ConnTransportList transportList;
+    DtcpBaseConnTransport * currTransport;
 
 
-    status = DtcpStack::getAllConnTransports (transportList);
+    status = DtcpStack::getAllConnTransports(transportList);
 
     if (!status) {
         return false;
     }
 
 
-    peerIdList.clear ();
+    peerIdList.clear();
 
-    for (const auto& item : transportList) {
+    for (const auto & item : transportList) {
 
         currTransport = item;
-        currTransport->getTransportId (currId);
-        peerIdList.push_back (currId);
+        currTransport->getTransportId(currId);
+        peerIdList.push_back(currId);
     }
 
 
@@ -178,12 +161,11 @@ DtcpStackInterface::getAllDtcpPeerIds (t_DtcpPeerIdList &  peerIdList)
 }
 
 
-
-bool  
-DtcpStackInterface::peerIsActive (ulong  peerId)
+bool
+DtcpStackInterface::peerIsActive(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::peerIsActive invoked.");
+    Log::Debug("DtcpStackInterface::peerIsActive invoked.");
 #endif
 
     // MRP_TEMP not supported
@@ -193,12 +175,11 @@ DtcpStackInterface::peerIsActive (ulong  peerId)
 }
 
 
-
-bool  
-DtcpStackInterface::activateDtcpPeer (ulong  peerId)
+bool
+DtcpStackInterface::activateDtcpPeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::activateDtcpPeer invoked.");
+    Log::Debug("DtcpStackInterface::activateDtcpPeer invoked.");
 #endif
 
     // MRP_TEMP not supported
@@ -208,12 +189,11 @@ DtcpStackInterface::activateDtcpPeer (ulong  peerId)
 }
 
 
-
-bool  
-DtcpStackInterface::deactivateDtcpPeer (ulong  peerId)
+bool
+DtcpStackInterface::deactivateDtcpPeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::deactivateDtcpPeer invoked.");
+    Log::Debug("DtcpStackInterface::deactivateDtcpPeer invoked.");
 #endif
 
     // MRP_TEMP not supported
@@ -223,12 +203,11 @@ DtcpStackInterface::deactivateDtcpPeer (ulong  peerId)
 }
 
 
-
-bool  
-DtcpStackInterface::pingDtcpPeer (ulong  peerId)
+bool
+DtcpStackInterface::pingDtcpPeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::pingDtcpPeer invoked.");
+    Log::Debug("DtcpStackInterface::pingDtcpPeer invoked.");
 #endif
 
     // MRP_TEMP not supported
@@ -238,164 +217,155 @@ DtcpStackInterface::pingDtcpPeer (ulong  peerId)
 }
 
 
-
-bool  
-DtcpStackInterface::hostIsExcluded (const string &  ipAddress)
+bool
+DtcpStackInterface::hostIsExcluded(const string & ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::hostIsExcluded invoked.");
+    Log::Debug("DtcpStackInterface::hostIsExcluded invoked.");
 #endif
 
-    bool   status;
-    ulong  hostIpAddress;
+    bool status;
+    ulong hostIpAddress;
 
-    NetUtils::stringIpToLong (ipAddress, hostIpAddress);
+    NetUtils::stringIpToLong(ipAddress, hostIpAddress);
 
-    status = DtcpStack::hostIsExcluded (hostIpAddress);
+    status = DtcpStack::hostIsExcluded(hostIpAddress);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::subnetIsExcluded (const string &  subnetIpAddress)
+bool
+DtcpStackInterface::subnetIsExcluded(const string & subnetIpAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::hostIsExcluded invoked.");
+    Log::Debug("DtcpStackInterface::hostIsExcluded invoked.");
 #endif
 
-    bool   status;
-    ulong  longSubnetIpAddress;
+    bool status;
+    ulong longSubnetIpAddress;
 
-    NetUtils::stringIpToLong (subnetIpAddress, longSubnetIpAddress);
+    NetUtils::stringIpToLong(subnetIpAddress, longSubnetIpAddress);
 
-    status = DtcpStack::subnetIsExcluded (longSubnetIpAddress);
+    status = DtcpStack::subnetIsExcluded(longSubnetIpAddress);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::peerIsExcluded (ulong  peerId)
+bool
+DtcpStackInterface::peerIsExcluded(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::peerIsExcluded invoked.");
+    Log::Debug("DtcpStackInterface::peerIsExcluded invoked.");
 #endif
 
-    bool   status;
-    ulong  ipAddress;
+    bool status;
+    ulong ipAddress;
     ushort port;
     DtcpBaseConnTransport * transport;
 
-    status = DtcpStack::locateTransport (peerId, transport);
+    status = DtcpStack::locateTransport(peerId, transport);
 
     if (!status) {
         return false;
     }
 
 
-    transport->getPeerLocation (ipAddress, port);
+    transport->getPeerLocation(ipAddress, port);
 
-    status = DtcpStack::hostIsExcluded (ipAddress);
+    status = DtcpStack::hostIsExcluded(ipAddress);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::excludeHost (const string & ipAddress)
+bool
+DtcpStackInterface::excludeHost(const string & ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::excludeHost invoked.");
+    Log::Debug("DtcpStackInterface::excludeHost invoked.");
 #endif
 
-    bool   status;
-    ulong  hostIpAddress;
+    bool status;
+    ulong hostIpAddress;
 
-    NetUtils::stringIpToLong (ipAddress, hostIpAddress);
+    NetUtils::stringIpToLong(ipAddress, hostIpAddress);
 
-    status = DtcpStack::excludeHost (hostIpAddress);
+    status = DtcpStack::excludeHost(hostIpAddress);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::excludeSubnet (const string & subnetIpAddress,
-                                   const string & subnetMask)
+bool
+DtcpStackInterface::excludeSubnet(const string & subnetIpAddress, const string & subnetMask)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::excludeSubnet invoked.");
+    Log::Debug("DtcpStackInterface::excludeSubnet invoked.");
 #endif
 
-    bool   status;
-    ulong  longSubnetIpAddress;
-    ulong  longSubnetMask;
+    bool status;
+    ulong longSubnetIpAddress;
+    ulong longSubnetMask;
 
-    NetUtils::stringIpToLong (subnetIpAddress, longSubnetIpAddress);
-    NetUtils::stringIpToLong (subnetMask, longSubnetMask);
+    NetUtils::stringIpToLong(subnetIpAddress, longSubnetIpAddress);
+    NetUtils::stringIpToLong(subnetMask, longSubnetMask);
 
-    status = DtcpStack::excludeSubnet (longSubnetIpAddress, longSubnetMask);
+    status = DtcpStack::excludeSubnet(longSubnetIpAddress, longSubnetMask);
 
 
     return status;
 }
 
-    
 
-bool  
-DtcpStackInterface::allowHost (const string & ipAddress)
+bool
+DtcpStackInterface::allowHost(const string & ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::allowHost invoked.");
+    Log::Debug("DtcpStackInterface::allowHost invoked.");
 #endif
 
-    bool   status;
-    ulong  hostIpAddress;
+    bool status;
+    ulong hostIpAddress;
 
-    NetUtils::stringIpToLong (ipAddress, hostIpAddress);
+    NetUtils::stringIpToLong(ipAddress, hostIpAddress);
 
-    status = DtcpStack::allowHost (hostIpAddress);
+    status = DtcpStack::allowHost(hostIpAddress);
 
 
     return status;
 }
 
 
-
-bool  
-DtcpStackInterface::allowSubnet (const string & subnetIpAddress)
-{   
-#ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::allowSubnet invoked.");
-#endif
-
-    bool   status;
-    ulong  longSubnetIpAddress;
-
-    NetUtils::stringIpToLong (subnetIpAddress, longSubnetIpAddress);
-
-    status = DtcpStack::allowSubnet (longSubnetIpAddress);
-
-
-    return status;
-}
-
-
-
-bool  
-DtcpStackInterface::listExcludedHosts (t_IpAddressList & ipAddressList)
+bool
+DtcpStackInterface::allowSubnet(const string & subnetIpAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::listExcludedHosts invoked.");
+    Log::Debug("DtcpStackInterface::allowSubnet invoked.");
+#endif
+
+    bool status;
+    ulong longSubnetIpAddress;
+
+    NetUtils::stringIpToLong(subnetIpAddress, longSubnetIpAddress);
+
+    status = DtcpStack::allowSubnet(longSubnetIpAddress);
+
+
+    return status;
+}
+
+
+bool
+DtcpStackInterface::listExcludedHosts(t_IpAddressList & ipAddressList)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpStackInterface::listExcludedHosts invoked.");
 #endif
 
     // MRP_TEMP not implemented.
@@ -405,12 +375,11 @@ DtcpStackInterface::listExcludedHosts (t_IpAddressList & ipAddressList)
 }
 
 
-
-bool  
-DtcpStackInterface::listExcludedSubnets (t_SubnetAddressList & subnetAddressList)
-{   
+bool
+DtcpStackInterface::listExcludedSubnets(t_SubnetAddressList & subnetAddressList)
+{
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackInterface::listExcludedSubnets invoked.");
+    Log::Debug("DtcpStackInterface::listExcludedSubnets invoked.");
 #endif
 
     // MRP_TEMP not implemented.
@@ -418,6 +387,3 @@ DtcpStackInterface::listExcludedSubnets (t_SubnetAddressList & subnetAddressList
 
     return true;
 }
-
-
-

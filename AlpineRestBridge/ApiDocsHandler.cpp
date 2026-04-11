@@ -5,11 +5,11 @@
 #include <JsonWriter.h>
 
 
-HttpRouter *  ApiDocsHandler::router_s = nullptr;
+HttpRouter * ApiDocsHandler::router_s = nullptr;
 
 
 void
-ApiDocsHandler::registerRoutes (HttpRouter & router)
+ApiDocsHandler::registerRoutes(HttpRouter & router)
 {
     router_s = &router;
     router.addRoute("GET", "/api", getApiDocs);
@@ -17,8 +17,7 @@ ApiDocsHandler::registerRoutes (HttpRouter & router)
 
 
 HttpResponse
-ApiDocsHandler::getApiDocs (const HttpRequest & request,
-                            const std::unordered_map<string, string> & params)
+ApiDocsHandler::getApiDocs(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     JsonWriter writer;
     writer.beginObject();
@@ -26,8 +25,7 @@ ApiDocsHandler::getApiDocs (const HttpRequest & request,
     writer.beginArray();
 
     if (router_s) {
-        for (const auto& route : router_s->getRoutes())
-        {
+        for (const auto & route : router_s->getRoutes()) {
             writer.beginObject();
             writer.key("method");
             writer.value(route.method);

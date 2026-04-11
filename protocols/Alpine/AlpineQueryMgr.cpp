@@ -1,15 +1,15 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineQueryMgr.h>
-#include <AlpineQuery.h>
-#include <AlpineQueryResults.h>
 #include <AlpinePeerMgr.h>
+#include <AlpineQuery.h>
+#include <AlpineQueryMgr.h>
+#include <AlpineQueryResults.h>
 #include <AlpineStack.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
+#include <WriteLock.h>
 
 #include <algorithm>
 #include <chrono>
@@ -19,43 +19,44 @@
 #endif
 
 // Helper: wake the event loop after state changes that need prompt processing.
-static inline void  wakeEventLoop () { AlpineStack::notifyEvent(); }
+static inline void
+wakeEventLoop()
+{
+    AlpineStack::notifyEvent();
+}
 
 
-
-bool                                                      AlpineQueryMgr::initialized_s = false;
-ulong                                                     AlpineQueryMgr::maxConncurent_s = 0;
-std::atomic<ulong>                                        AlpineQueryMgr::currQueryId_s = 0;
-std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::activeQueryIndex_s;
-std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex>        AlpineQueryMgr::pastQueryIndex_s;
-std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::activePeerQueryIndex_s;
-std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex>         AlpineQueryMgr::pastPeerQueryIndex_s;
-ReadWriteSem                                              AlpineQueryMgr::activeQueryLock_s;
-ReadWriteSem                                              AlpineQueryMgr::pastQueryLock_s;
-
+bool AlpineQueryMgr::initialized_s = false;
+ulong AlpineQueryMgr::maxConncurent_s = 0;
+std::atomic<ulong> AlpineQueryMgr::currQueryId_s = 0;
+std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex> AlpineQueryMgr::activeQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_QueryStateIndex> AlpineQueryMgr::pastQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex> AlpineQueryMgr::activePeerQueryIndex_s;
+std::unique_ptr<AlpineQueryMgr::t_PeerQueryIndex> AlpineQueryMgr::pastPeerQueryIndex_s;
+ReadWriteSem AlpineQueryMgr::activeQueryLock_s;
+ReadWriteSem AlpineQueryMgr::pastQueryLock_s;
 
 
 bool
-AlpineQueryMgr::initialize (ulong maxConcurrent)
+AlpineQueryMgr::initialize(ulong maxConcurrent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::initialize invoked.  MaxConcurrentQueries: "s +
-                std::to_string (maxConcurrent));
+    Log::Debug("AlpineQueryMgr::initialize invoked.  MaxConcurrentQueries: "s + std::to_string(maxConcurrent));
 #endif
 
-    WriteLock  activeLock(activeQueryLock_s);
-    WriteLock  pastLock(pastQueryLock_s);
+    WriteLock activeLock(activeQueryLock_s);
+    WriteLock pastLock(pastQueryLock_s);
 
     if (initialized_s) {
-        Log::Error ("Attempt to reinitialize AlpineQueryMgr!");
+        Log::Error("Attempt to reinitialize AlpineQueryMgr!");
         return false;
     }
     maxConncurent_s = maxConcurrent;
 
-    activeQueryIndex_s     = std::make_unique<t_QueryStateIndex>();
-    pastQueryIndex_s       = std::make_unique<t_QueryStateIndex>();
+    activeQueryIndex_s = std::make_unique<t_QueryStateIndex>();
+    pastQueryIndex_s = std::make_unique<t_QueryStateIndex>();
     activePeerQueryIndex_s = std::make_unique<t_PeerQueryIndex>();
-    pastPeerQueryIndex_s   = std::make_unique<t_PeerQueryIndex>();
+    pastPeerQueryIndex_s = std::make_unique<t_PeerQueryIndex>();
 
     initialized_s = true;
 
@@ -67,7 +68,7 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
         int staleCount = 0;
         PersistenceStore::executeWithCallback(
             "SELECT query_string, timestamp FROM query_results WHERE query_string LIKE 'wal:%'"s,
-            [&staleCount](int, char** values, char**) {
+            [&staleCount](int, char ** values, char **) {
                 if (values && values[0]) {
                     Log::Info("AlpineQueryMgr: WAL recovery — stale query entry: "s + values[0]);
                     ++staleCount;
@@ -75,10 +76,8 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
             });
 
         if (staleCount > 0) {
-            Log::Info("AlpineQueryMgr: WAL recovery — clearing "s +
-                      std::to_string(staleCount) + " stale entries."s);
-            PersistenceStore::execute(
-                "DELETE FROM query_results WHERE query_string LIKE 'wal:%'"s);
+            Log::Info("AlpineQueryMgr: WAL recovery — clearing "s + std::to_string(staleCount) + " stale entries."s);
+            PersistenceStore::execute("DELETE FROM query_results WHERE query_string LIKE 'wal:%'"s);
         }
     }
 #endif
@@ -88,21 +87,19 @@ AlpineQueryMgr::initialize (ulong maxConcurrent)
 }
 
 
-
 bool
-AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
-                             ulong &               queryId)
+AlpineQueryMgr::createQuery(AlpineQueryOptions & options, ulong & queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::createQuery invoked.");
+    Log::Debug("AlpineQueryMgr::createQuery invoked.");
 #endif
 
     // Early initialization check under ReadLock
     {
-        ReadLock  lock(activeQueryLock_s);
+        ReadLock lock(activeQueryLock_s);
 
         if (!initialized_s) {
-            Log::Error ("Call to AlpineQueryMgr::createQuery before initialization!");
+            Log::Error("Call to AlpineQueryMgr::createQuery before initialization!");
             return false;
         }
     }
@@ -124,7 +121,7 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
     newState->queryId = queryId;
 
     uint8_t priority = 128;
-    options.getPriority (priority);
+    options.getPriority(priority);
     newState->priority = priority;
 
     newState->query.reset(new AlpineQuery(options));
@@ -134,50 +131,49 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
 
     // Get list of peers involved in this query for indexing purposes.
     //
-    bool  status;
-    AlpineQuery::t_PeerIdList   peerIdList;
-    status = newState->query->getPeerIdList (peerIdList);
+    bool status;
+    AlpineQuery::t_PeerIdList peerIdList;
+    status = newState->query->getPeerIdList(peerIdList);
 
     if (!status) {
-        Log::Error ("getPeerIdList for query failed in call to AlpineQueryMgr::createQuery!");
+        Log::Error("getPeerIdList for query failed in call to AlpineQueryMgr::createQuery!");
         return false;
     }
     // Activate query — operates on the local newState, not yet in the index.
-    status = newState->query->startQuery ();
+    status = newState->query->startQuery();
 
     if (!status) {
         // This is likely due to invalid options.
         //
-        Log::Error ("startQuery failed in call to AlpineQueryMgr::createQuery!");
+        Log::Error("startQuery failed in call to AlpineQueryMgr::createQuery!");
         return false;
     }
 
     // Acquire WriteLock only for index mutations.
     {
-        WriteLock  lock(activeQueryLock_s);
+        WriteLock lock(activeQueryLock_s);
 
         // Index state by query ID and member peer ID's
         //
-        activeQueryIndex_s->emplace (queryId, std::move(newState));
+        activeQueryIndex_s->emplace(queryId, std::move(newState));
 
-        ulong  currPeerId;
+        ulong currPeerId;
 
-        for (auto& item : peerIdList) {
+        for (auto & item : peerIdList) {
 
             currPeerId = item;
 
             // If there is an existing queryIdList, we simply add this query ID to the list.
             // Otherwise allocate a new list with this query ID as the sole member.
             //
-            auto peerIter = activePeerQueryIndex_s->find (currPeerId);
+            auto peerIter = activePeerQueryIndex_s->find(currPeerId);
 
-            if (peerIter == activePeerQueryIndex_s->end ()) {
+            if (peerIter == activePeerQueryIndex_s->end()) {
                 auto idList = std::make_unique<t_QueryIdList>();
-                idList->push_back (queryId);
-                activePeerQueryIndex_s->emplace (currPeerId, std::move(idList));
-            }
-            else {
-                peerIter->second->push_back (queryId);
+                idList->push_back(queryId);
+                activePeerQueryIndex_s->emplace(currPeerId, std::move(idList));
+            } else {
+                peerIter->second->push_back(queryId);
             }
         }
     }
@@ -189,11 +185,10 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
         options.getQuery(queryString);
 
         auto now = static_cast<ulong>(
-            std::chrono::duration_cast<std::chrono::seconds>(
-                std::chrono::system_clock::now().time_since_epoch()).count());
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch())
+                .count());
 
-        PersistenceStore::storeQueryResult(
-            "wal:"s + std::to_string(queryId), queryString, now);
+        PersistenceStore::storeQueryResult("wal:"s + std::to_string(queryId), queryString, now);
     }
 #endif
 
@@ -203,41 +198,38 @@ AlpineQueryMgr::createQuery (AlpineQueryOptions &  options,
 }
 
 
-
 bool
-AlpineQueryMgr::getQueryStatus (ulong                queryId,
-                                AlpineQueryStatus &  queryStatus)
+AlpineQueryMgr::getQueryStatus(ulong queryId, AlpineQueryStatus & queryStatus)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getQueryStatus invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::getQueryStatus invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getQueryStatus before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getQueryStatus before initialization!");
         return false;
     }
 
     // Check active queries first (hot path)
     {
-        ReadLock  lock(activeQueryLock_s);
+        ReadLock lock(activeQueryLock_s);
 
-        auto iter = activeQueryIndex_s->find (queryId);
+        auto iter = activeQueryIndex_s->find(queryId);
 
-        if (iter != activeQueryIndex_s->end ()) {
+        if (iter != activeQueryIndex_s->end()) {
             auto & currState = iter->second;
             std::shared_lock qlock(currState->queryMutex);
 
             if (!currState->query) {
                 double percentage = 100.00;
-                queryStatus.setPercentComplete (percentage);
-                queryStatus.setIsActive (false);
+                queryStatus.setPercentComplete(percentage);
+                queryStatus.setIsActive(false);
                 return true;
             }
-            bool status = currState->query->getStatus (queryStatus);
+            bool status = currState->query->getStatus(queryStatus);
 
             if (!status) {
-                Log::Error ("AlpineQuery getStatus call failed in call to AlpineQueryMgr::getQueryStatus!");
+                Log::Error("AlpineQuery getStatus call failed in call to AlpineQueryMgr::getQueryStatus!");
                 return false;
             }
             return true;
@@ -246,211 +238,199 @@ AlpineQueryMgr::getQueryStatus (ulong                queryId,
 
     // Fallback: check past queries (cold path)
     {
-        ReadLock  lock(pastQueryLock_s);
+        ReadLock lock(pastQueryLock_s);
 
-        auto pastIter = pastQueryIndex_s->find (queryId);
+        auto pastIter = pastQueryIndex_s->find(queryId);
 
-        if (pastIter == pastQueryIndex_s->end ()) {
-            Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::getQueryStatus!");
+        if (pastIter == pastQueryIndex_s->end()) {
+            Log::Error("Invalid query ID passed in call to AlpineQueryMgr::getQueryStatus!");
             return false;
         }
         auto & currState = pastIter->second;
         std::shared_lock qlock(currState->queryMutex);
 
         double percentage = 100.00;
-        queryStatus.setPercentComplete (percentage);
-        queryStatus.setIsActive (false);
+        queryStatus.setPercentComplete(percentage);
+        queryStatus.setIsActive(false);
 
         return true;
     }
 }
 
 
-
 bool
-AlpineQueryMgr::exists (ulong  queryId)
+AlpineQueryMgr::exists(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::exists invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::exists invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::exists before initialization!");
+        Log::Error("Call to AlpineQueryMgr::exists before initialization!");
         return false;
     }
     {
-        ReadLock  lock(activeQueryLock_s);
-        if (activeQueryIndex_s->find (queryId) != activeQueryIndex_s->end ())
+        ReadLock lock(activeQueryLock_s);
+        if (activeQueryIndex_s->find(queryId) != activeQueryIndex_s->end())
             return true;
     }
     {
-        ReadLock  lock(pastQueryLock_s);
-        return pastQueryIndex_s->find (queryId) != pastQueryIndex_s->end ();
+        ReadLock lock(pastQueryLock_s);
+        return pastQueryIndex_s->find(queryId) != pastQueryIndex_s->end();
     }
 }
 
 
-
 bool
-AlpineQueryMgr::isActive (ulong  queryId)
+AlpineQueryMgr::isActive(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::isActive invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::isActive invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::isActive before initialization!");
+        Log::Error("Call to AlpineQueryMgr::isActive before initialization!");
         return false;
     }
-    return activeQueryIndex_s->find (queryId) != activeQueryIndex_s->end ();
+    return activeQueryIndex_s->find(queryId) != activeQueryIndex_s->end();
 }
 
 
-
 bool
-AlpineQueryMgr::inProgress (ulong  queryId)
+AlpineQueryMgr::inProgress(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::inProgress invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::inProgress invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::inProgress before initialization!");
+        Log::Error("Call to AlpineQueryMgr::inProgress before initialization!");
         return false;
     }
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::inProgress!");
+    if (iter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::inProgress!");
         return false;
     }
 
-    return iter->second->query->inProgress ();
+    return iter->second->query->inProgress();
 }
 
 
-
 bool
-AlpineQueryMgr::pauseQuery (ulong  queryId)
+AlpineQueryMgr::pauseQuery(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::pauseQuery invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::pauseQuery invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::pauseQuery before initialization!");
+        Log::Error("Call to AlpineQueryMgr::pauseQuery before initialization!");
         return false;
     }
     bool status;
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::pauseQuery!");
+    if (iter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::pauseQuery!");
         return false;
     }
     auto & currState = iter->second;
 
-    if (!currState->query->inProgress ()) {
+    if (!currState->query->inProgress()) {
         // Query already halted, consider this a success
         return true;
     }
-    status = currState->query->halt ();
+    status = currState->query->halt();
     if (!status) {
-        Log::Error ("Attempted query->halt failed in call to AlpineQueryMgr::pauseQuery!");
+        Log::Error("Attempted query->halt failed in call to AlpineQueryMgr::pauseQuery!");
         return false;
     }
     return true;
 }
 
 
-
 bool
-AlpineQueryMgr::resumeQuery (ulong  queryId)
+AlpineQueryMgr::resumeQuery(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::resumeQuery invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::resumeQuery invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::resumeQuery before initialization!");
+        Log::Error("Call to AlpineQueryMgr::resumeQuery before initialization!");
         return false;
     }
     bool status;
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::resumeQuery!");
+    if (iter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::resumeQuery!");
         return false;
     }
     auto & currState = iter->second;
 
-    if (currState->query->inProgress ()) {
+    if (currState->query->inProgress()) {
         // Query already in progress, consider this a success
         return true;
     }
-    status = currState->query->resume ();
+    status = currState->query->resume();
     if (!status) {
-        Log::Error ("Attempted query->resume failed in call to AlpineQueryMgr::resumeQuery!");
+        Log::Error("Attempted query->resume failed in call to AlpineQueryMgr::resumeQuery!");
         return false;
     }
     return true;
 }
 
 
-
 bool
-AlpineQueryMgr::cancelQuery (ulong  queryId)
+AlpineQueryMgr::cancelQuery(ulong queryId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::cancelQuery invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::cancelQuery invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    WriteLock  activeLock(activeQueryLock_s);
-    WriteLock  pastLock(pastQueryLock_s);
+    WriteLock activeLock(activeQueryLock_s);
+    WriteLock pastLock(pastQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::cancelQuery before initialization!");
+        Log::Error("Call to AlpineQueryMgr::cancelQuery before initialization!");
         return false;
     }
     bool status;
 
-    auto queryIter = activeQueryIndex_s->find (queryId);
+    auto queryIter = activeQueryIndex_s->find(queryId);
 
-    if (queryIter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::cancelQuery!");
+    if (queryIter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::cancelQuery!");
         return false;
     }
     auto & currState = queryIter->second;
 
-    status = currState->query->cancel ();
+    status = currState->query->cancel();
 
     if (!status) {
-        Log::Error ("Attempt to cancel query failed in AlpineQueryMgr::cancelQuery.  Ending query.");
+        Log::Error("Attempt to cancel query failed in AlpineQueryMgr::cancelQuery.  Ending query.");
         return false;
     }
 
     // Get peer list before releasing query
-    AlpineQuery::t_PeerIdList  peerIdList;
-    status = currState->query->getPeerIdList (peerIdList);
+    AlpineQuery::t_PeerIdList peerIdList;
+    status = currState->query->getPeerIdList(peerIdList);
 
     if (!status) {
-        Log::Error ("Call to query getPeerIdList failed in AlpineQueryMgr::cancelQuery!");
+        Log::Error("Call to query getPeerIdList failed in AlpineQueryMgr::cancelQuery!");
         return false;
     }
 
@@ -459,15 +439,14 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
     // remove from the active index, and place state in the past index
     //
     auto statePtr = std::move(queryIter->second);
-    activeQueryIndex_s->erase (queryIter);
-    pastQueryIndex_s->emplace (queryId, std::move(statePtr));
+    activeQueryIndex_s->erase(queryIter);
+    pastQueryIndex_s->emplace(queryId, std::move(statePtr));
 
 #ifdef ALPINE_ENABLE_PERSISTENCE
     // Remove WAL entry — query completed or cancelled
     if (PersistenceStore::isInitialized()) {
-        PersistenceStore::execute(
-            "DELETE FROM query_results WHERE query_string = 'wal:"s +
-            std::to_string(queryId) + "'"s);
+        PersistenceStore::execute("DELETE FROM query_results WHERE query_string = 'wal:"s + std::to_string(queryId) +
+                                  "'"s);
     }
 #endif
 
@@ -476,33 +455,32 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
     //
     ulong currPeerId;
 
-    for (auto& item : peerIdList) {
+    for (auto & item : peerIdList) {
 
         currPeerId = item;
 
         // We must remove the query ID from the peers active queryIdList and place it in the
         // past queryIdList.
         //
-        auto peerQueryIter = activePeerQueryIndex_s->find (currPeerId);
+        auto peerQueryIter = activePeerQueryIndex_s->find(currPeerId);
 
-        if (peerQueryIter == activePeerQueryIndex_s->end ()) {
-            Log::Error ("Could not find queryIdList for peer in call to "
-                                 "AlpineQueryMgr::cancelQuery!");
+        if (peerQueryIter == activePeerQueryIndex_s->end()) {
+            Log::Error("Could not find queryIdList for peer in call to "
+                       "AlpineQueryMgr::cancelQuery!");
             continue;
         }
 
         std::erase(*peerQueryIter->second, queryId);
 
-        auto pastPeerIter = pastPeerQueryIndex_s->find (currPeerId);
+        auto pastPeerIter = pastPeerQueryIndex_s->find(currPeerId);
 
-        if (pastPeerIter == pastPeerQueryIndex_s->end ()) {
+        if (pastPeerIter == pastPeerQueryIndex_s->end()) {
             auto idList = std::make_unique<t_QueryIdList>();
-            idList->push_back (queryId);
-            pastPeerQueryIndex_s->emplace (currPeerId, std::move(idList));
+            idList->push_back(queryId);
+            pastPeerQueryIndex_s->emplace(currPeerId, std::move(idList));
+        } else {
+            pastPeerIter->second->push_back(queryId);
         }
-        else {
-            pastPeerIter->second->push_back (queryId);
-        }
     }
 
 
@@ -510,25 +488,24 @@ AlpineQueryMgr::cancelQuery (ulong  queryId)
 }
 
 
-
 bool
-AlpineQueryMgr::getAllActiveQueryIds (t_QueryIdList  queryIdList)
+AlpineQueryMgr::getAllActiveQueryIds(t_QueryIdList queryIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getAllActiveQueryIds invoked.");
+    Log::Debug("AlpineQueryMgr::getAllActiveQueryIds invoked.");
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getAllActiveQueryIds before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getAllActiveQueryIds before initialization!");
         return false;
     }
-    queryIdList.clear ();
+    queryIdList.clear();
 
 
-    for (const auto& item : *activeQueryIndex_s) {
-        queryIdList.push_back (item.first);
+    for (const auto & item : *activeQueryIndex_s) {
+        queryIdList.push_back(item.first);
     }
 
 
@@ -536,25 +513,24 @@ AlpineQueryMgr::getAllActiveQueryIds (t_QueryIdList  queryIdList)
 }
 
 
-
 bool
-AlpineQueryMgr::getAllPastQueryIds (t_QueryIdList  queryIdList)
+AlpineQueryMgr::getAllPastQueryIds(t_QueryIdList queryIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getAllPastQueryIds invoked.");
+    Log::Debug("AlpineQueryMgr::getAllPastQueryIds invoked.");
 #endif
 
-    ReadLock  lock(pastQueryLock_s);
+    ReadLock lock(pastQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getAllPastQueryIds before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getAllPastQueryIds before initialization!");
         return false;
     }
-    queryIdList.clear ();
+    queryIdList.clear();
 
 
-    for (const auto& item : *pastQueryIndex_s) {
-        queryIdList.push_back (item.first);
+    for (const auto & item : *pastQueryIndex_s) {
+        queryIdList.push_back(item.first);
     }
 
 
@@ -562,26 +538,23 @@ AlpineQueryMgr::getAllPastQueryIds (t_QueryIdList  queryIdList)
 }
 
 
-
 bool
-AlpineQueryMgr::getQueryResults (ulong                  queryId,
-                                 AlpineQueryResults *&  results)
+AlpineQueryMgr::getQueryResults(ulong queryId, AlpineQueryResults *& results)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getQueryResults invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::getQueryResults invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getQueryResults before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getQueryResults before initialization!");
         return false;
     }
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::getQueryResults!");
+    if (iter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::getQueryResults!");
         return false;
     }
 
@@ -592,27 +565,24 @@ AlpineQueryMgr::getQueryResults (ulong                  queryId,
 }
 
 
-
 bool
-AlpineQueryMgr::registerResultCallback (ulong                queryId,
-                                        QueryResultCallback  callback)
+AlpineQueryMgr::registerResultCallback(ulong queryId, QueryResultCallback callback)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::registerResultCallback invoked. Query ID: "s +
-                std::to_string (queryId));
+    Log::Debug("AlpineQueryMgr::registerResultCallback invoked. Query ID: "s + std::to_string(queryId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::registerResultCallback before initialization!");
+        Log::Error("Call to AlpineQueryMgr::registerResultCallback before initialization!");
         return false;
     }
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::registerResultCallback!");
+    if (iter == activeQueryIndex_s->end()) {
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::registerResultCallback!");
         return false;
     }
 
@@ -624,29 +594,26 @@ AlpineQueryMgr::registerResultCallback (ulong                queryId,
 }
 
 
-
 bool
-AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
-                                        t_QueryIdList &  queryIdList)
+AlpineQueryMgr::getPeerActiveQueryList(ulong peerId, t_QueryIdList & queryIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getPeerActiveQueryList invoked. Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::getPeerActiveQueryList invoked. Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getPeerActiveQueryList before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getPeerActiveQueryList before initialization!");
         return false;
     }
-    queryIdList.clear ();
+    queryIdList.clear();
 
-    auto iter = activePeerQueryIndex_s->find (peerId);
+    auto iter = activePeerQueryIndex_s->find(peerId);
 
-    if (iter == activePeerQueryIndex_s->end ()) {
-        Log::Debug ("No queries active for peer ID passed in call to "
-                             "AlpineQueryMgr::getPeerActiveQueryList.");
+    if (iter == activePeerQueryIndex_s->end()) {
+        Log::Debug("No queries active for peer ID passed in call to "
+                   "AlpineQueryMgr::getPeerActiveQueryList.");
         return true;
     }
     auto & peerQueryIdList = iter->second;
@@ -662,29 +629,26 @@ AlpineQueryMgr::getPeerActiveQueryList (ulong            peerId,
 }
 
 
-
 bool
-AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
-                                      t_QueryIdList &  queryIdList)
+AlpineQueryMgr::getPeerPastQueryList(ulong peerId, t_QueryIdList & queryIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::getPeerPastQueryList invoked. Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::getPeerPastQueryList invoked. Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  lock(pastQueryLock_s);
+    ReadLock lock(pastQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::getPeerPastQueryList before initialization!");
+        Log::Error("Call to AlpineQueryMgr::getPeerPastQueryList before initialization!");
         return false;
     }
-    queryIdList.clear ();
+    queryIdList.clear();
 
-    auto iter = pastPeerQueryIndex_s->find (peerId);
+    auto iter = pastPeerQueryIndex_s->find(peerId);
 
-    if (iter == pastPeerQueryIndex_s->end ()) {
-        Log::Debug ("No queries active for peer ID passed in call to "
-                             "AlpineQueryMgr::getPeerPastQueryList.");
+    if (iter == pastPeerQueryIndex_s->end()) {
+        Log::Debug("No queries active for peer ID passed in call to "
+                   "AlpineQueryMgr::getPeerPastQueryList.");
         return true;
     }
     auto & peerQueryIdList = iter->second;
@@ -700,34 +664,28 @@ AlpineQueryMgr::getPeerPastQueryList (ulong            peerId,
 }
 
 
-
 bool
-AlpineQueryMgr::handleQueryDiscover (ulong                peerId,
-                                     AlpineQueryPacket *  discoverPacket)
+AlpineQueryMgr::handleQueryDiscover(ulong peerId, AlpineQueryPacket * discoverPacket)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleQueryDiscover invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::handleQueryDiscover invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleQueryDiscover before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleQueryDiscover before initialization!");
         return false;
     }
     return true;
 }
 
 
-
 bool
-AlpineQueryMgr::handleQueryOffer (ulong                peerId,
-                                  AlpineQueryPacket *  offerPacket)
+AlpineQueryMgr::handleQueryOffer(ulong peerId, AlpineQueryPacket * offerPacket)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleQueryOffer invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::handleQueryOffer invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // A query offer is considered a 'response' to a query (as far as quality metrics are concerned)
@@ -736,24 +694,24 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     // by the AlpineGroup for that group.
     //
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleQueryOffer before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleQueryOffer before initialization!");
         return false;
     }
     // Verify query ID, and locate state for this query.
     //
-    ulong  queryId;
-    offerPacket->getQueryId (queryId);
+    ulong queryId;
+    offerPacket->getQueryId(queryId);
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
+    if (iter == activeQueryIndex_s->end()) {
 #ifdef _VERBOSE
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::handleQueryOffer!");
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::handleQueryOffer!");
 #endif
-        AlpinePeerMgr::badPacketReceived (peerId);
+        AlpinePeerMgr::badPacketReceived(peerId);
 
         return false;
     }
@@ -766,32 +724,28 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
     // back to peer.  This starts the actual transfer of resource locators.
     //
     bool status;
-    AlpinePacket  packet;
-    AlpineQueryPacket  response;
-    packet.setParent (&response);
+    AlpinePacket packet;
+    AlpineQueryPacket response;
+    packet.setParent(&response);
 
-    status = currState->results->processQueryOffer (peerId,
-                                                    offerPacket,
-                                                    &response);
+    status = currState->results->processQueryOffer(peerId, offerPacket, &response);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Error ("Process query offer packet failed in call to AlpineQueryMgr::handleQueryOffer!");
+        Log::Error("Process query offer packet failed in call to AlpineQueryMgr::handleQueryOffer!");
 #endif
-        AlpinePeerMgr::badPacketReceived (peerId);
+        AlpinePeerMgr::badPacketReceived(peerId);
 
         return false;
     }
     // Send response to peer; start locator transfer
     //
-    ulong  requestId;
-    status = AlpineStack::sendReliablePacket (peerId,
-                                              &packet,
-                                              requestId);
+    ulong requestId;
+    status = AlpineStack::sendReliablePacket(peerId, &packet, requestId);
 
     if (!status) {
-        Log::Error ("sendReliableData for response packet data failed in call to "
-                             "AlpineQueryMgr::handleQueryOffer!");
+        Log::Error("sendReliableData for response packet data failed in call to "
+                   "AlpineQueryMgr::handleQueryOffer!");
         return false;
     }
     // Index this reliable request ID in case we need to acknowlege it manually
@@ -801,61 +755,55 @@ AlpineQueryMgr::handleQueryOffer (ulong                peerId,
         currState->pending = std::make_unique<t_PendingReplyIndex>();
     }
 
-    currState->pending->emplace (peerId, requestId);
+    currState->pending->emplace(peerId, requestId);
 
 
     return true;
 }
 
 
-
 bool
-AlpineQueryMgr::handleQueryRequest (ulong                peerId,
-                                    AlpineQueryPacket *  requestPacket)
+AlpineQueryMgr::handleQueryRequest(ulong peerId, AlpineQueryPacket * requestPacket)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleQueryRequest invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::handleQueryRequest invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleQueryRequest before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleQueryRequest before initialization!");
         return false;
     }
     return true;
 }
 
 
-
 bool
-AlpineQueryMgr::handleQueryReply (ulong                peerId,
-                                  AlpineQueryPacket *  replyPacket)
+AlpineQueryMgr::handleQueryReply(ulong peerId, AlpineQueryPacket * replyPacket)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleQueryReply invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::handleQueryReply invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleQueryReply before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleQueryReply before initialization!");
         return false;
     }
     // Verify query ID, and locate state for this query.
     //
-    ulong  queryId;
-    replyPacket->getQueryId (queryId);
+    ulong queryId;
+    replyPacket->getQueryId(queryId);
 
-    auto iter = activeQueryIndex_s->find (queryId);
+    auto iter = activeQueryIndex_s->find(queryId);
 
-    if (iter == activeQueryIndex_s->end ()) {
+    if (iter == activeQueryIndex_s->end()) {
 #ifdef _VERBOSE
-        Log::Error ("Invalid query ID passed in call to AlpineQueryMgr::handleQueryReply!");
+        Log::Error("Invalid query ID passed in call to AlpineQueryMgr::handleQueryReply!");
 #endif
-        AlpinePeerMgr::badPacketReceived (peerId);
+        AlpinePeerMgr::badPacketReceived(peerId);
 
         return false;
     }
@@ -867,54 +815,49 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
     // response information for this query.
     //
     bool status;
-    AlpinePacket  packet;
-    AlpineQueryPacket  response;
-    packet.setParent (&response);
+    AlpinePacket packet;
+    AlpineQueryPacket response;
+    packet.setParent(&response);
 
-    status = currState->results->processQueryReply (peerId,
-                                                    replyPacket,
-                                                    &response);
+    status = currState->results->processQueryReply(peerId, replyPacket, &response);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Error ("Process query reply packet failed in call to AlpineQueryMgr::handleQueryReply!");
+        Log::Error("Process query reply packet failed in call to AlpineQueryMgr::handleQueryReply!");
 #endif
-        AlpinePeerMgr::badPacketReceived (peerId);
+        AlpinePeerMgr::badPacketReceived(peerId);
 
         return false;
     }
     // The packet sent prior to this was a reliable transfer.  Make sure that the reliable transfer state
     // is cleaned up before sending anything else to this peer.
     //
-    ulong  requestId;
-    auto pendingIter = currState->pending->find (peerId);
+    ulong requestId;
+    auto pendingIter = currState->pending->find(peerId);
 
-    if (pendingIter == currState->pending->end ()) {
+    if (pendingIter == currState->pending->end()) {
         // This should be normal case, as the ack packet would have been received.
-    }
-    else {
+    } else {
         requestId = (*pendingIter).second;
-        currState->pending->erase (peerId);
+        currState->pending->erase(peerId);
 
-        AlpineStack::acknowledgeTransfer (peerId, requestId);
+        AlpineStack::acknowledgeTransfer(peerId, requestId);
     }
 
 
     // Send response to peer
     //
-    status = AlpineStack::sendReliablePacket (peerId,
-                                              &packet,
-                                              requestId);
+    status = AlpineStack::sendReliablePacket(peerId, &packet, requestId);
 
     if (!status) {
-        Log::Error ("sendReliableData for response packet data failed in call to "
-                             "AlpineQueryMgr::handleQueryOffer!");
+        Log::Error("sendReliableData for response packet data failed in call to "
+                   "AlpineQueryMgr::handleQueryOffer!");
         return false;
     }
     // Index this reliable request ID in case we need to acknowlege it manually
     // when/if another reply packet is received.
     //
-    currState->pending->emplace (peerId, requestId);
+    currState->pending->emplace(peerId, requestId);
 
     // Invoke result callback if registered (supports SSE streaming)
     //
@@ -933,93 +876,83 @@ AlpineQueryMgr::handleQueryReply (ulong                peerId,
 }
 
 
-
 bool
-AlpineQueryMgr::handleSendReceived (ulong  peerId,
-                                    ulong  requestId)
+AlpineQueryMgr::handleSendReceived(ulong peerId, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleSendReceived invoked.  Parameters:"s +
-                "\n Peer ID: "s + std::to_string (peerId) +
-                "\n Request ID: "s + std::to_string (requestId) +
-                "\n");
+    Log::Debug("AlpineQueryMgr::handleSendReceived invoked.  Parameters:"s + "\n Peer ID: "s + std::to_string(peerId) +
+               "\n Request ID: "s + std::to_string(requestId) + "\n");
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleSendReceived before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleSendReceived before initialization!");
         return false;
     }
     bool status;
-    status = removePendingRequest (peerId, requestId);
+    status = removePendingRequest(peerId, requestId);
 
 
     return status;
 }
 
 
-
 bool
-AlpineQueryMgr::handleSendFailure (ulong  peerId,
-                                   ulong  requestId)
+AlpineQueryMgr::handleSendFailure(ulong peerId, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::handleSendFailure invoked.  Parameters: "s +
-                "\n Peer ID: "s + std::to_string (peerId) +
-                "\n Request ID: "s + std::to_string (requestId) +
-                "\n");
+    Log::Debug("AlpineQueryMgr::handleSendFailure invoked.  Parameters: "s + "\n Peer ID: "s + std::to_string(peerId) +
+               "\n Request ID: "s + std::to_string(requestId) + "\n");
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::handleSendFailure before initialization!");
+        Log::Error("Call to AlpineQueryMgr::handleSendFailure before initialization!");
         return false;
     }
     // Modify status value due to failed transfer of reliable data.
     // MRP_TEMP - remove from queries & deactivate transport?
     //
-    AlpinePeerMgr::reliableTransferFailed (peerId);
+    AlpinePeerMgr::reliableTransferFailed(peerId);
 
     bool status;
-    status = removePendingRequest (peerId, requestId);
+    status = removePendingRequest(peerId, requestId);
 
 
     return status;
 }
 
 
-
 bool
-AlpineQueryMgr::cancelAll (ulong  peerId)
+AlpineQueryMgr::cancelAll(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::cancelAll invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineQueryMgr::cancelAll invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // scope lock
     {
-        ReadLock  lock(activeQueryLock_s);
+        ReadLock lock(activeQueryLock_s);
 
         if (!initialized_s) {
-            Log::Error ("Call to AlpineQueryMgr::cancelAll before initialization!");
+            Log::Error("Call to AlpineQueryMgr::cancelAll before initialization!");
             return false;
         }
     }
 
-    bool  status;
-    t_QueryIdList  queryIdList;
+    bool status;
+    t_QueryIdList queryIdList;
 
-    status = getAllActiveQueryIds (queryIdList);
+    status = getAllActiveQueryIds(queryIdList);
 
     if (!status) {
-        Log::Error ("getAllActiveQueryIds failed in call to AlpineQueryMgr::cancelAll!");
+        Log::Error("getAllActiveQueryIds failed in call to AlpineQueryMgr::cancelAll!");
         return false;
     }
-    for (auto& item : queryIdList) {
-        cancelQuery (item);
+    for (auto & item : queryIdList) {
+        cancelQuery(item);
     }
 
 
@@ -1027,54 +960,53 @@ AlpineQueryMgr::cancelAll (ulong  peerId)
 }
 
 
-
 std::vector<ulong>
-AlpineQueryMgr::processTimedEvents ()
+AlpineQueryMgr::processTimedEvents()
 {
 #ifdef _VERY_VERBOSE
-    Log::Debug ("AlpineQueryMgr::processTimedEvents invoked.");
+    Log::Debug("AlpineQueryMgr::processTimedEvents invoked.");
 #endif
 
-    ReadLock  lock(activeQueryLock_s);
+    ReadLock lock(activeQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::processTimedEvents before initialization!");
+        Log::Error("Call to AlpineQueryMgr::processTimedEvents before initialization!");
         return {};
     }
 
     // Build a priority-sorted snapshot of active query IDs so that
     // higher-priority queries are processed first each cycle.
     //
-    struct PrioritizedQuery {
-        ulong    queryId;
-        uint8_t  priority;
+    struct PrioritizedQuery
+    {
+        ulong queryId;
+        uint8_t priority;
     };
 
     std::vector<PrioritizedQuery> sortedQueries;
-    sortedQueries.reserve (activeQueryIndex_s->size ());
+    sortedQueries.reserve(activeQueryIndex_s->size());
 
-    for (const auto& [id, state] : *activeQueryIndex_s) {
-        sortedQueries.push_back ({id, state->priority});
+    for (const auto & [id, state] : *activeQueryIndex_s) {
+        sortedQueries.push_back({id, state->priority});
     }
 
     // Sort descending by priority (255 = highest, processed first)
-    std::sort (sortedQueries.begin (), sortedQueries.end (),
-               [](const PrioritizedQuery & a, const PrioritizedQuery & b) {
-                   return a.priority > b.priority;
-               });
+    std::sort(sortedQueries.begin(), sortedQueries.end(), [](const PrioritizedQuery & a, const PrioritizedQuery & b) {
+        return a.priority > b.priority;
+    });
 
     // Check for completed queries that have async callbacks registered.
     // A query is considered complete when it is no longer in progress.
     //
     std::vector<ulong> completedIds;
 
-    for (const auto& pq : sortedQueries) {
-        auto it = activeQueryIndex_s->find (pq.queryId);
+    for (const auto & pq : sortedQueries) {
+        auto it = activeQueryIndex_s->find(pq.queryId);
 
-        if (it == activeQueryIndex_s->end ())
+        if (it == activeQueryIndex_s->end())
             continue;
 
-        const auto& state = it->second;
+        const auto & state = it->second;
         if (state->query && !state->query->inProgress()) {
             completedIds.push_back(pq.queryId);
         }
@@ -1084,19 +1016,18 @@ AlpineQueryMgr::processTimedEvents ()
 }
 
 
-
 void
-AlpineQueryMgr::cleanUp ()
+AlpineQueryMgr::cleanUp()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryMgr::cleanUp invoked.");
+    Log::Debug("AlpineQueryMgr::cleanUp invoked.");
 #endif
 
-    WriteLock  activeLock(activeQueryLock_s);
-    WriteLock  pastLock(pastQueryLock_s);
+    WriteLock activeLock(activeQueryLock_s);
+    WriteLock pastLock(pastQueryLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpineQueryMgr::cleanUp before initialization!");
+        Log::Error("Call to AlpineQueryMgr::cleanUp before initialization!");
         return;
     }
 
@@ -1110,45 +1041,42 @@ AlpineQueryMgr::cleanUp ()
 }
 
 
-
 bool
-AlpineQueryMgr::removePendingRequest (ulong  peerId,
-                                      ulong  requestId)
+AlpineQueryMgr::removePendingRequest(ulong peerId, ulong requestId)
 {
     // NOTE: Caller must synchronize!
 
     // Locate all queries this peer is a member of and see if this request applies.
     //
-    auto peerIter = activePeerQueryIndex_s->find (peerId);
+    auto peerIter = activePeerQueryIndex_s->find(peerId);
 
-    if (peerIter == activePeerQueryIndex_s->end ()) {
+    if (peerIter == activePeerQueryIndex_s->end()) {
         // query canceled?
 #ifdef _VERBOSE
-        Log::Debug ("No active queries for peer ID passed in call to "
-                             "AlpineQueryMgr::removePendingRequest.  Ignoring.");
+        Log::Debug("No active queries for peer ID passed in call to "
+                   "AlpineQueryMgr::removePendingRequest.  Ignoring.");
 #endif
 
         return true;
     }
     auto & queryList = peerIter->second;
 
-    for (auto& queryItem : *queryList) {
+    for (auto & queryItem : *queryList) {
         // Locate query state for this query ID
-        auto stateIter = activeQueryIndex_s->find (queryItem);
+        auto stateIter = activeQueryIndex_s->find(queryItem);
 
-        if (stateIter == activeQueryIndex_s->end ()) {
-            Log::Error ("Unable to locate query state returned in ID list in call to "
-                                 "AlpineQueryMgr::removePendingRequest!");
+        if (stateIter == activeQueryIndex_s->end()) {
+            Log::Error("Unable to locate query state returned in ID list in call to "
+                       "AlpineQueryMgr::removePendingRequest!");
             return false;
         }
         auto & currState = stateIter->second;
 
         // If the request belongs to this query, remove it from the pending index.
-        if ( (currState->pending) &&
-             (currState->pending->find (peerId) != currState->pending->end ()) ) {
+        if ((currState->pending) && (currState->pending->find(peerId) != currState->pending->end())) {
 
             // check that both request ID's match?
-            currState->pending->erase (peerId);
+            currState->pending->erase(peerId);
             break;
         }
     }

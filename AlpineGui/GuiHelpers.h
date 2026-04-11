@@ -8,11 +8,8 @@
 #include <vector>
 
 
-void  addLog (AppState &         state,
-              LogLevel           level,
-              const std::string &  msg);
+void addLog(AppState & state, LogLevel level, const std::string & msg);
 
-std::string  formatJson (const std::string &  json);
+std::string formatJson(const std::string & json);
 
-void  parseJsonArray (const std::string &        json,
-                      std::vector<std::string> &  items);
+void parseJsonArray(const std::string & json, std::vector<std::string> & items);

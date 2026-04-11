@@ -11,8 +11,6 @@
 class UserUtils
 {
   public:
-
-
     // Public types
     //
     using t_Id = uint;
@@ -20,48 +18,41 @@ class UserUtils
 
     // User methods
     //
-    static bool  userExists (t_Id  userId);
+    static bool userExists(t_Id userId);
 
-    static bool  userExists (const string &  userName);
+    static bool userExists(const string & userName);
 
-    static bool  getUserName (t_Id      userId,
-                              string &  userName);
+    static bool getUserName(t_Id userId, string & userName);
 
-    static bool  getUserId (const string &  userName,
-                            t_Id &          userId);
+    static bool getUserId(const string & userName, t_Id & userId);
 
-    static t_Id  getMyRealUserId ();
+    static t_Id getMyRealUserId();
 
-    static string  getMyRealUserName ();
+    static string getMyRealUserName();
 
-    static t_Id  getMyEffectiveUserId ();
+    static t_Id getMyEffectiveUserId();
 
-    static string  getMyEffectiveUserName ();
-
+    static string getMyEffectiveUserName();
 
 
     // Group methods
     //
-    static bool  groupExists (t_Id  groupId);
+    static bool groupExists(t_Id groupId);
 
-    static bool  groupExists (const string &  groupName);
+    static bool groupExists(const string & groupName);
 
-    static bool  getGroupName (t_Id      groupId,
-                               string &  groupName);
+    static bool getGroupName(t_Id groupId, string & groupName);
 
-    static bool  getGroupId (const string &  groupName,
-                             t_Id &          groupId);
+    static bool getGroupId(const string & groupName, t_Id & groupId);
 
-    static t_Id  getMyRealGroupId ();
+    static t_Id getMyRealGroupId();
 
-    static string  getMyRealGroupName ();
+    static string getMyRealGroupName();
 
-    static t_Id  getMyEffectiveGroupId ();
+    static t_Id getMyEffectiveGroupId();
 
-    static string  getMyEffectiveGroupName ();
+    static string getMyEffectiveGroupName();
 
 
   private:
-
 };
-

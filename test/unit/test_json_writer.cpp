@@ -1,13 +1,13 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
-#include <catch2/catch_test_macros.hpp>
 #include <JsonWriter.h>
+#include <catch2/catch_test_macros.hpp>
 #include <nlohmann/json.hpp>
 
 
 // Helper: parse result and verify it is valid JSON
 static nlohmann::json
-parseResult (JsonWriter & writer)
+parseResult(JsonWriter & writer)
 {
     auto str = writer.result();
     auto doc = nlohmann::json::parse(str);

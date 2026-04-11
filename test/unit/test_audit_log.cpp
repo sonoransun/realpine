@@ -1,26 +1,27 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <catch2/catch_test_macros.hpp>
 #include <AuditLog.h>
+#include <catch2/catch_test_macros.hpp>
 #include <nlohmann/json.hpp>
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <thread>
 #include <vector>
 
 
-static string getTempLogPath ()
+static string
+getTempLogPath()
 {
     static int counter = 0;
-    auto path = std::filesystem::temp_directory_path() /
-                ("test_audit_log_" + std::to_string(++counter) + ".jsonl");
+    auto path = std::filesystem::temp_directory_path() / ("test_audit_log_" + std::to_string(++counter) + ".jsonl");
     return path.string();
 }
 
 
-static vector<string> readLines (const string & path)
+static vector<string>
+readLines(const string & path)
 {
     vector<string> lines;
     std::ifstream in(path);
@@ -129,9 +130,7 @@ TEST_CASE("AuditLog concurrent records", "[AuditLog]")
 
     auto worker = [](int threadId) {
         for (int i = 0; i < 20; ++i) {
-            AuditLog::record("concurrent",
-                             "thread-" + std::to_string(threadId),
-                             "action-" + std::to_string(i));
+            AuditLog::record("concurrent", "thread-" + std::to_string(threadId), "action-" + std::to_string(i));
         }
     };
 

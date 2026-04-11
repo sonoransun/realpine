@@ -1,19 +1,19 @@
 /// Unit tests for HttpRouter
 
-#include <catch2/catch_test_macros.hpp>
 #include <HttpRouter.h>
+#include <catch2/catch_test_macros.hpp>
 
 
-static HttpResponse echoHandler(const HttpRequest& request,
-                                const std::unordered_map<string, string>& params)
+static HttpResponse
+echoHandler(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     string json = "{\"path\":\"" + request.path + "\"}";
     return HttpResponse::ok(json);
 }
 
 
-static HttpResponse paramHandler(const HttpRequest& request,
-                                 const std::unordered_map<string, string>& params)
+static HttpResponse
+paramHandler(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     string id = (it != params.end()) ? it->second : "none";

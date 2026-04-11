@@ -12,43 +12,37 @@ class AlpinePeerOptionData;
 class AlpinePeerLocation
 {
   public:
+    AlpinePeerLocation();
 
-    AlpinePeerLocation ();
+    AlpinePeerLocation(const AlpinePeerLocation & copy);
 
-    AlpinePeerLocation (const AlpinePeerLocation & copy);
+    ~AlpinePeerLocation();
 
-    ~AlpinePeerLocation ();
-
-    AlpinePeerLocation & operator = (const AlpinePeerLocation & copy);
-
+    AlpinePeerLocation & operator=(const AlpinePeerLocation & copy);
 
 
     // Public Methods
     //
-    void  setIpAddress (ulong  ipAddress);
+    void setIpAddress(ulong ipAddress);
 
-    ulong  getIpAddress ();
+    ulong getIpAddress();
 
-    void  setPort (ushort  port);
+    void setPort(ushort port);
 
-    ushort  getPort ();
+    ushort getPort();
 
-    bool  setOptionId (ulong  optionId);
+    bool setOptionId(ulong optionId);
 
-    ulong  getOptionId ();
+    ulong getOptionId();
 
-    bool  setOptionData (AlpinePeerOptionData *  optionData);
+    bool setOptionData(AlpinePeerOptionData * optionData);
 
-    bool  getOptionData (AlpinePeerOptionData *&  optionData);
-
+    bool getOptionData(AlpinePeerOptionData *& optionData);
 
 
   private:
-
-    ulong                   ipAddress_;
-    ushort                  port_;
-    ulong                   optionId_;
-    AlpinePeerOptionData *  optionData_;
-
+    ulong ipAddress_;
+    ushort port_;
+    ulong optionId_;
+    AlpinePeerOptionData * optionData_;
 };
-

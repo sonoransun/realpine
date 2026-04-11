@@ -1,14 +1,14 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <benchmark/benchmark.h>
 #include <DataBlock.h>
-#include <vector>
+#include <benchmark/benchmark.h>
 #include <cstring>
+#include <vector>
 
 
 static void
-BM_DataBlockCreate (benchmark::State & state)
+BM_DataBlockCreate(benchmark::State & state)
 {
     auto size = static_cast<uint>(state.range(0));
     for (auto _ : state) {
@@ -21,7 +21,7 @@ BENCHMARK(BM_DataBlockCreate)->Range(64, 1 << 20);
 
 
 static void
-BM_DataBlockMove (benchmark::State & state)
+BM_DataBlockMove(benchmark::State & state)
 {
     auto size = static_cast<uint>(state.range(0));
     for (auto _ : state) {
@@ -35,7 +35,7 @@ BENCHMARK(BM_DataBlockMove)->Range(64, 1 << 20);
 
 
 static void
-BM_DataBlockBatchCreate (benchmark::State & state)
+BM_DataBlockBatchCreate(benchmark::State & state)
 {
     auto count = static_cast<uint>(state.range(0));
     for (auto _ : state) {

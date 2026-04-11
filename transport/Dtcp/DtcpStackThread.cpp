@@ -1,43 +1,40 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpStackThread.h>
 #include <DtcpBaseUdpTransport.h>
+#include <DtcpStackThread.h>
 #include <DtcpThreadTable.h>
 #include <Log.h>
 #include <StringUtils.h>
 
 
-
-DtcpStackThread::DtcpStackThread (DtcpBaseUdpTransport *  udpTransport)
+DtcpStackThread::DtcpStackThread(DtcpBaseUdpTransport * udpTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackThread constructor invoked.");
+    Log::Debug("DtcpStackThread constructor invoked.");
 #endif
 
     udpTransport_ = udpTransport;
 }
 
 
-
-DtcpStackThread::~DtcpStackThread ()
+DtcpStackThread::~DtcpStackThread()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackThread destructor invoked.");
+    Log::Debug("DtcpStackThread destructor invoked.");
 #endif
 }
 
 
-
-void 
-DtcpStackThread::threadMain ()
+void
+DtcpStackThread::threadMain()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStackThread::threadMain invoked.");
+    Log::Debug("DtcpStackThread::threadMain invoked.");
 #endif
 
-    t_ThreadId  id;
-    getThreadId (id);
+    t_ThreadId id;
+    getThreadId(id);
 
     bool finished = false;
     bool status;
@@ -46,7 +43,7 @@ DtcpStackThread::threadMain ()
     //
     while (!finished) {
 
-        status = udpTransport_->processEvents (id);
+        status = udpTransport_->processEvents(id);
 
         if (!status) {
             // nothing left in queue, finished...
@@ -54,8 +51,5 @@ DtcpStackThread::threadMain ()
         }
     }
 
-    udpTransport_->threadIdle (id);
+    udpTransport_->threadIdle(id);
 }
-
-
-

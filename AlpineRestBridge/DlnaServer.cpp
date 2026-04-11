@@ -1,24 +1,25 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DlnaServer.h>
 #include <DlnaHandler.h>
-#include <MediaStreamer.h>
+#include <DlnaServer.h>
 #include <Log.h>
+#include <MediaStreamer.h>
 
-#include <thread>
 #include <cstring>
+#include <thread>
 
 
 static string
-extractHeader (const string & request, const string & name)
+extractHeader(const string & request, const string & name)
 {
     auto pos = request.find(name);
 
     if (pos == string::npos) {
         // Try lowercase
         string lower = name;
-        for (auto & c : lower) c = toupper(c);
+        for (auto & c : lower)
+            c = toupper(c);
         pos = request.find(lower);
     }
 
@@ -34,15 +35,14 @@ extractHeader (const string & request, const string & name)
 }
 
 
-DlnaServer::DlnaServer (ContentStore & store)
+DlnaServer::DlnaServer(ContentStore & store)
     : store_(store),
       port_(0),
       transcodeEnabled_(true)
-{
-}
+{}
 
 
-DlnaServer::~DlnaServer ()
+DlnaServer::~DlnaServer()
 {
     stop();
     acceptor_.close();
@@ -50,15 +50,14 @@ DlnaServer::~DlnaServer ()
 
 
 bool
-DlnaServer::initialize (ushort port, const string & hostAddress,
-                         bool transcodeEnabled)
+DlnaServer::initialize(ushort port, const string & hostAddress, bool transcodeEnabled)
 {
-    port_             = port;
-    hostAddress_      = hostAddress;
+    port_ = port;
+    hostAddress_ = hostAddress;
     transcodeEnabled_ = transcodeEnabled;
 
     deviceUuid_ = generateUuid(hostAddress_, port_);
-    baseUrl_    = "http://"s + hostAddress_ + ":" + std::to_string(port_);
+    baseUrl_ = "http://"s + hostAddress_ + ":" + std::to_string(port_);
 
     if (!acceptor_.create(0, port_)) {
         Log::Error("DlnaServer: Failed to create acceptor on port "s + std::to_string(port_));
@@ -71,12 +70,11 @@ DlnaServer::initialize (ushort port, const string & hostAddress,
 
 
 void
-DlnaServer::threadMain ()
+DlnaServer::threadMain()
 {
     Log::Info("DlnaServer: Thread started.");
 
-    while (isActive())
-    {
+    while (isActive()) {
         std::unique_ptr<TcpTransport> transport;
 
         if (!acceptor_.accept(transport)) {
@@ -85,9 +83,7 @@ DlnaServer::threadMain ()
             continue;
         }
 
-        std::thread connThread([this, t = std::move(transport)]() mutable {
-            handleConnection(std::move(t));
-        });
+        std::thread connThread([this, t = std::move(transport)]() mutable { handleConnection(std::move(t)); });
         connThread.detach();
     }
 
@@ -96,28 +92,28 @@ DlnaServer::threadMain ()
 
 
 ushort
-DlnaServer::getPort ()
+DlnaServer::getPort()
 {
     return port_;
 }
 
 
 string
-DlnaServer::getBaseUrl ()
+DlnaServer::getBaseUrl()
 {
     return baseUrl_;
 }
 
 
 string
-DlnaServer::getDeviceUuid ()
+DlnaServer::getDeviceUuid()
 {
     return deviceUuid_;
 }
 
 
 void
-DlnaServer::handleConnection (std::unique_ptr<TcpTransport> transport)
+DlnaServer::handleConnection(std::unique_ptr<TcpTransport> transport)
 {
     byte buffer[8192];
     ulong bytesRead = 0;
@@ -130,11 +126,13 @@ DlnaServer::handleConnection (std::unique_ptr<TcpTransport> transport)
 
     // Parse method and path from first line
     auto spacePos = request.find(' ');
-    if (spacePos == string::npos) return;
+    if (spacePos == string::npos)
+        return;
 
     string method = request.substr(0, spacePos);
     auto pathEnd = request.find(' ', spacePos + 1);
-    if (pathEnd == string::npos) return;
+    if (pathEnd == string::npos)
+        return;
 
     string path = request.substr(spacePos + 1, pathEnd - spacePos - 1);
 
@@ -142,20 +140,20 @@ DlnaServer::handleConnection (std::unique_ptr<TcpTransport> transport)
 
     if (method == "GET") {
         if (path == "/device.xml") {
-            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"",
+            sendResponse(transport.get(),
+                         200,
+                         "text/xml; charset=\"utf-8\"",
                          DlnaHandler::deviceDescription(deviceUuid_, baseUrl_));
             return;
         }
 
         if (path == "/cds.xml") {
-            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"",
-                         DlnaHandler::cdsServiceDescription());
+            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"", DlnaHandler::cdsServiceDescription());
             return;
         }
 
         if (path == "/cms.xml") {
-            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"",
-                         DlnaHandler::cmsServiceDescription());
+            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"", DlnaHandler::cmsServiceDescription());
             return;
         }
 
@@ -183,15 +181,17 @@ DlnaServer::handleConnection (std::unique_ptr<TcpTransport> transport)
         string soapAction = extractHeader(request, "SOAPAction:");
 
         if (path == "/control/cds") {
-            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"",
-                         DlnaHandler::handleCdsAction(soapBody, soapAction,
-                                                       store_, baseUrl_,
-                                                       transcodeEnabled_));
+            sendResponse(transport.get(),
+                         200,
+                         "text/xml; charset=\"utf-8\"",
+                         DlnaHandler::handleCdsAction(soapBody, soapAction, store_, baseUrl_, transcodeEnabled_));
             return;
         }
 
         if (path == "/control/cms") {
-            sendResponse(transport.get(), 200, "text/xml; charset=\"utf-8\"",
+            sendResponse(transport.get(),
+                         200,
+                         "text/xml; charset=\"utf-8\"",
                          DlnaHandler::handleCmsAction(soapBody, soapAction));
             return;
         }
@@ -202,25 +202,28 @@ DlnaServer::handleConnection (std::unique_ptr<TcpTransport> transport)
 
 
 void
-DlnaServer::sendResponse (TcpTransport * t, int status,
-                           const string & contentType, const string & body)
+DlnaServer::sendResponse(TcpTransport * t, int status, const string & contentType, const string & body)
 {
-    const char * statusText = (status == 200) ? "OK" :
-                              (status == 404) ? "Not Found" : "Error";
+    const char * statusText = (status == 200) ? "OK" : (status == 404) ? "Not Found" : "Error";
 
-    string response = "HTTP/1.1 "s + std::to_string(status) + " " + statusText + "\r\n"
-        "Content-Type: " + contentType + "\r\n"
-        "Content-Length: " + std::to_string(body.length()) + "\r\n"
-        "Connection: close\r\n"
-        "\r\n" +
-        body;
+    string response = "HTTP/1.1 "s + std::to_string(status) + " " + statusText +
+                      "\r\n"
+                      "Content-Type: " +
+                      contentType +
+                      "\r\n"
+                      "Content-Length: " +
+                      std::to_string(body.length()) +
+                      "\r\n"
+                      "Connection: close\r\n"
+                      "\r\n" +
+                      body;
 
     t->send((const byte *)response.c_str(), response.length());
 }
 
 
 string
-DlnaServer::generateUuid (const string & hostname, ushort port)
+DlnaServer::generateUuid(const string & hostname, ushort port)
 {
     ulong hash = 5381;
     for (auto c : hostname)
@@ -228,7 +231,9 @@ DlnaServer::generateUuid (const string & hostname, ushort port)
     hash = hash * 33 + port;
 
     char buf[64];
-    snprintf(buf, sizeof(buf), "uuid:alpine-%08x-%04x-%04x-%04x-%012llx",
+    snprintf(buf,
+             sizeof(buf),
+             "uuid:alpine-%08x-%04x-%04x-%04x-%012llx",
              (uint)(hash & 0xFFFFFFFF),
              (uint)((hash >> 8) & 0xFFFF),
              (uint)((hash >> 16) & 0xFFFF),

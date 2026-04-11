@@ -9,9 +9,8 @@
 class DynamicLoader
 {
   public:
-
-    DynamicLoader ();
-    ~DynamicLoader ();
+    DynamicLoader();
+    ~DynamicLoader();
 
 
     enum class t_SymbolScope { Global, Private };
@@ -19,31 +18,28 @@ class DynamicLoader
     enum class t_BindingMethod { Now, Lazy };
 
 
-    bool  setSymbolScope (t_SymbolScope  scope);
+    bool setSymbolScope(t_SymbolScope scope);
 
-    t_SymbolScope  getSymbolScope ();
+    t_SymbolScope getSymbolScope();
 
-    bool  setBindingMethod (t_BindingMethod  method);
+    bool setBindingMethod(t_BindingMethod method);
 
-    t_BindingMethod  getBindingMethod ();
+    t_BindingMethod getBindingMethod();
 
 
-    bool  load (const string &  libPath);
+    bool load(const string & libPath);
 
-    bool  getFunctionHandle (const string &  functionName,
-                             void *&         functionHandle);
+    bool getFunctionHandle(const string & functionName, void *& functionHandle);
 
-    bool  close ();
+    bool close();
 
 
   private:
+    string libPath_;
+    t_SymbolScope symbolScope_;
+    t_BindingMethod bindingMethod_;
+    int dlFlags_;
+    alpine_dl_handle dlHandle_;
 
-    string              libPath_;
-    t_SymbolScope       symbolScope_;
-    t_BindingMethod     bindingMethod_;
-    int                 dlFlags_;
-    alpine_dl_handle    dlHandle_;
-
-    void  setFlags ();
+    void setFlags();
 };
-

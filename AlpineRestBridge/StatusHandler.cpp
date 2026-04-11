@@ -1,11 +1,11 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <StatusHandler.h>
-#include <JsonWriter.h>
 #include <AlpineStackInterface.h>
-#include <DtcpStackInterface.h>
 #include <ClusterCoordinator.h>
+#include <DtcpStackInterface.h>
+#include <JsonWriter.h>
+#include <StatusHandler.h>
 
 #ifdef ALPINE_FUSE_ENABLED
 #include <AlpineFuse.h>
@@ -16,18 +16,18 @@
 #endif
 
 
-std::chrono::steady_clock::time_point  StatusHandler::startTime_s;
+std::chrono::steady_clock::time_point StatusHandler::startTime_s;
 
 
 void
-StatusHandler::recordStartTime ()
+StatusHandler::recordStartTime()
 {
     startTime_s = std::chrono::steady_clock::now();
 }
 
 
 void
-StatusHandler::registerRoutes (HttpRouter & router)
+StatusHandler::registerRoutes(HttpRouter & router)
 {
     router.addRoute("GET", "/status", getStatus);
     router.addRoute("GET", "/status/health", getHealth);
@@ -37,16 +37,14 @@ StatusHandler::registerRoutes (HttpRouter & router)
 
 
 HttpResponse
-StatusHandler::getStatus (const HttpRequest & request,
-                          const std::unordered_map<string, string> & params)
+StatusHandler::getStatus(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("status.get"s);
 #endif
 
     auto uptimeSeconds = static_cast<ulong>(
-        std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::steady_clock::now() - startTime_s).count());
+        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - startTime_s).count());
 
     // Peer count
     DtcpStackInterface::t_DtcpPeerIdList peerIds;
@@ -61,8 +59,8 @@ StatusHandler::getStatus (const HttpRequest & request,
 
     // Cluster info
     auto clusterNodes = ClusterCoordinator::getClusterNodes();
-    auto localNode    = ClusterCoordinator::getLocalNodeInfo();
-    bool isolated     = ClusterCoordinator::isIsolated();
+    auto localNode = ClusterCoordinator::getLocalNodeInfo();
+    bool isolated = ClusterCoordinator::isIsolated();
 
     JsonWriter writer;
     writer.beginObject();
@@ -129,8 +127,7 @@ StatusHandler::getStatus (const HttpRequest & request,
 
 
 HttpResponse
-StatusHandler::getHealth (const HttpRequest & request,
-                          const std::unordered_map<string, string> & params)
+StatusHandler::getHealth(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     bool healthy = true;
 
@@ -154,8 +151,7 @@ StatusHandler::getHealth (const HttpRequest & request,
 
 
 HttpResponse
-StatusHandler::handleReadinessProbe (const HttpRequest & request,
-                                     const std::unordered_map<string, string> & params)
+StatusHandler::handleReadinessProbe(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // The stack is ready if we can successfully query default group info.
     auto result = AlpineStackInterface::getDefaultGroupInfo2();
@@ -184,12 +180,10 @@ StatusHandler::handleReadinessProbe (const HttpRequest & request,
 
 
 HttpResponse
-StatusHandler::handleLivenessProbe (const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params)
+StatusHandler::handleLivenessProbe(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto uptimeSeconds = static_cast<ulong>(
-        std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::steady_clock::now() - startTime_s).count());
+        std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - startTime_s).count());
 
     JsonWriter writer;
     writer.beginObject();

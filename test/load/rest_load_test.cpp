@@ -3,8 +3,8 @@
 
 #include <Common.h>
 
-#include <asio.hpp>
 #include <algorithm>
+#include <asio.hpp>
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
@@ -21,23 +21,23 @@ using Clock = std::chrono::steady_clock;
 
 struct Config
 {
-    string host        = "127.0.0.1"s;
-    string port        = "8080"s;
-    uint   connections = 10;
-    uint   requestsPer = 100;
-    string path        = "/status"s;
+    string host = "127.0.0.1"s;
+    string port = "8080"s;
+    uint connections = 10;
+    uint requestsPer = 100;
+    string path = "/status"s;
 };
 
 
 struct Stats
 {
-    std::vector<double>  latenciesUs;
-    std::atomic<uint>    errors{0};
+    std::vector<double> latenciesUs;
+    std::atomic<uint> errors{0};
 };
 
 
 static Config
-parseArgs (int argc, char * argv[])
+parseArgs(int argc, char * argv[])
 {
     Config cfg;
     for (int i = 1; i < argc; ++i) {
@@ -67,8 +67,7 @@ parseArgs (int argc, char * argv[])
 
 
 static void
-runConnection (asio::io_context & ioc, const Config & cfg,
-               Stats & stats, std::mutex & statsMtx)
+runConnection(asio::io_context & ioc, const Config & cfg, Stats & stats, std::mutex & statsMtx)
 {
     try {
         asio::ip::tcp::resolver resolver(ioc);
@@ -77,11 +76,8 @@ runConnection (asio::io_context & ioc, const Config & cfg,
         asio::ip::tcp::socket socket(ioc);
         asio::connect(socket, endpoints);
 
-        auto request = "GET "s + cfg.path + " HTTP/1.1\r\n"
-                     + "Host: "s + cfg.host + ":"s + cfg.port + "\r\n"
-                     + "Connection: keep-alive\r\n"
-                     + "Accept: application/json\r\n"
-                     + "\r\n"s;
+        auto request = "GET "s + cfg.path + " HTTP/1.1\r\n" + "Host: "s + cfg.host + ":"s + cfg.port + "\r\n" +
+                       "Connection: keep-alive\r\n" + "Accept: application/json\r\n" + "\r\n"s;
 
         std::vector<double> localLatencies;
         localLatencies.reserve(cfg.requestsPer);
@@ -105,7 +101,7 @@ runConnection (asio::io_context & ioc, const Config & cfg,
             }
 
             auto end = Clock::now();
-            auto us  = std::chrono::duration<double, std::micro>(end - start).count();
+            auto us = std::chrono::duration<double, std::micro>(end - start).count();
             localLatencies.push_back(us);
 
             // Suppress unused warning
@@ -117,10 +113,8 @@ runConnection (asio::io_context & ioc, const Config & cfg,
         socket.close(ignored);
 
         std::lock_guard lock(statsMtx);
-        stats.latenciesUs.insert(stats.latenciesUs.end(),
-                                 localLatencies.begin(), localLatencies.end());
-    }
-    catch (const std::exception & e) {
+        stats.latenciesUs.insert(stats.latenciesUs.end(), localLatencies.begin(), localLatencies.end());
+    } catch (const std::exception & e) {
         std::cerr << "Connection error: " << e.what() << "\n";
         stats.errors.fetch_add(cfg.requestsPer, std::memory_order_relaxed);
     }
@@ -128,7 +122,7 @@ runConnection (asio::io_context & ioc, const Config & cfg,
 
 
 static double
-percentile (std::vector<double> & sorted, double p)
+percentile(std::vector<double> & sorted, double p)
 {
     if (sorted.empty())
         return 0.0;
@@ -138,14 +132,14 @@ percentile (std::vector<double> & sorted, double p)
 
 
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     auto cfg = parseArgs(argc, argv);
 
     auto totalRequests = cfg.connections * cfg.requestsPer;
 
-    std::cout << "Load test: " << cfg.connections << " connections x "
-              << cfg.requestsPer << " requests = " << totalRequests << " total\n"
+    std::cout << "Load test: " << cfg.connections << " connections x " << cfg.requestsPer
+              << " requests = " << totalRequests << " total\n"
               << "Target: " << cfg.host << ":" << cfg.port << cfg.path << "\n\n";
 
     Stats stats;
@@ -159,29 +153,26 @@ main (int argc, char * argv[])
     std::vector<std::thread> threads;
     threads.reserve(cfg.connections);
     for (uint i = 0; i < cfg.connections; ++i) {
-        threads.emplace_back([&]() {
-            runConnection(ioc, cfg, stats, statsMtx);
-        });
+        threads.emplace_back([&]() { runConnection(ioc, cfg, stats, statsMtx); });
     }
 
     for (auto & t : threads)
         t.join();
 
-    auto wallEnd  = Clock::now();
+    auto wallEnd = Clock::now();
     auto wallSecs = std::chrono::duration<double>(wallEnd - wallStart).count();
 
     // Sort latencies for percentile calculation
     std::sort(stats.latenciesUs.begin(), stats.latenciesUs.end());
 
     auto successful = static_cast<uint>(stats.latenciesUs.size());
-    auto errors     = stats.errors.load(std::memory_order_relaxed);
-    auto rps        = wallSecs > 0.0 ? static_cast<double>(successful) / wallSecs : 0.0;
+    auto errors = stats.errors.load(std::memory_order_relaxed);
+    auto rps = wallSecs > 0.0 ? static_cast<double>(successful) / wallSecs : 0.0;
 
     double avgUs = 0.0;
     if (!stats.latenciesUs.empty()) {
-        avgUs = std::accumulate(stats.latenciesUs.begin(),
-                                stats.latenciesUs.end(), 0.0)
-              / static_cast<double>(stats.latenciesUs.size());
+        avgUs = std::accumulate(stats.latenciesUs.begin(), stats.latenciesUs.end(), 0.0) /
+                static_cast<double>(stats.latenciesUs.size());
     }
 
     std::cout << std::fixed << std::setprecision(2);

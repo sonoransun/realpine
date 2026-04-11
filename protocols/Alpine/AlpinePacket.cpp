@@ -2,66 +2,62 @@
 
 
 #include <AlpinePacket.h>
-#include <AlpineQueryPacket.h>
 #include <AlpinePeerPacket.h>
 #include <AlpineProxyPacket.h>
+#include <AlpineQueryPacket.h>
 #include <DataBuffer.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <StringUtils.h>
 
 
-
-AlpinePacket::AlpinePacket ()
+AlpinePacket::AlpinePacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket constructor invoked.");
+    Log::Debug("AlpinePacket constructor invoked.");
 #endif
 
-    parent_          = nullptr;
-    packetType_      = t_PacketType::none;
+    parent_ = nullptr;
+    packetType_ = t_PacketType::none;
     protocolVersion_ = PROTOCOL_VERSION;
 }
 
 
-
-AlpinePacket::AlpinePacket (const AlpinePacket & copy)
+AlpinePacket::AlpinePacket(const AlpinePacket & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket copy constructor invoked.");
+    Log::Debug("AlpinePacket copy constructor invoked.");
 #endif
 
-    parent_          = copy.parent_;
-    packetType_      = copy.packetType_;
+    parent_ = copy.parent_;
+    packetType_ = copy.packetType_;
     protocolVersion_ = copy.protocolVersion_;
 }
 
 
-
-AlpinePacket::~AlpinePacket ()
+AlpinePacket::~AlpinePacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket destructor invoked.");
+    Log::Debug("AlpinePacket destructor invoked.");
 #endif
 
     // Nothing to do here
 }
 
 
-
-AlpinePacket & 
-AlpinePacket::operator = (const AlpinePacket & copy)
+AlpinePacket &
+AlpinePacket::operator=(const AlpinePacket & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket assignment invoked.");
+    Log::Debug("AlpinePacket assignment invoked.");
 #endif
 
     if (&copy == this) {
         return *this;
     }
 
-    parent_          = copy.parent_;
-    packetType_      = copy.packetType_;
+    parent_ = copy.parent_;
+    packetType_ = copy.packetType_;
     protocolVersion_ = copy.protocolVersion_;
 
 
@@ -69,12 +65,11 @@ AlpinePacket::operator = (const AlpinePacket & copy)
 }
 
 
-
-bool  
-AlpinePacket::setParent (StackLinkInterface *  parent)
+bool
+AlpinePacket::setParent(StackLinkInterface * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::setParent invoked.");
+    Log::Debug("AlpinePacket::setParent invoked.");
 #endif
 
     parent_ = parent;
@@ -84,24 +79,22 @@ AlpinePacket::setParent (StackLinkInterface *  parent)
 }
 
 
-
-void  
-AlpinePacket::unsetParent ()
+void
+AlpinePacket::unsetParent()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::unsetParent invoked.");
+    Log::Debug("AlpinePacket::unsetParent invoked.");
 #endif
 
     parent_ = nullptr;
 }
 
 
-
 bool
-AlpinePacket::writeData (DataBuffer * linkBuffer)
+AlpinePacket::writeData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::writeData invoked.");
+    Log::Debug("AlpinePacket::writeData invoked.");
 #endif
 
     ////
@@ -110,13 +103,13 @@ AlpinePacket::writeData (DataBuffer * linkBuffer)
     //
     // ushort (2 bytes)  -- Packet Type
     //
-    bool   status;
+    bool status;
     byte * buffer;
     byte * curr;
-    uint   bufferSize;
-    uint   writeLength;
+    uint bufferSize;
+    uint writeLength;
 
-    status = linkBuffer->getWriteBuffer (buffer, bufferSize);
+    status = linkBuffer->getWriteBuffer(buffer, bufferSize);
 
     if (!status) {
         // no room left to write to?
@@ -125,34 +118,34 @@ AlpinePacket::writeData (DataBuffer * linkBuffer)
     if (parent_) {
         // If parent is any of the higher layer Alpine Packet types, update our packet type.
         //
-        bool  finished = false;
+        bool finished = false;
 
         if (!finished) {
             AlpineQueryPacket * queryPacket;
             queryPacket = dynamic_cast<AlpineQueryPacket *>(parent_);
 
             if (queryPacket) {
-                packetType_ = queryPacket->getPacketType ();
+                packetType_ = queryPacket->getPacketType();
                 finished = true;
             }
         }
 
         if (!finished) {
-            AlpinePeerPacket *  peerPacket;
+            AlpinePeerPacket * peerPacket;
             peerPacket = dynamic_cast<AlpinePeerPacket *>(parent_);
 
             if (peerPacket) {
-                packetType_ = peerPacket->getPacketType ();
+                packetType_ = peerPacket->getPacketType();
                 finished = true;
             }
         }
 
         if (!finished) {
-            AlpineProxyPacket *  proxyPacket;
+            AlpineProxyPacket * proxyPacket;
             proxyPacket = dynamic_cast<AlpineProxyPacket *>(parent_);
 
             if (proxyPacket) {
-                packetType_ = proxyPacket->getPacketType ();
+                packetType_ = proxyPacket->getPacketType();
                 finished = true;
             }
         }
@@ -181,17 +174,16 @@ AlpinePacket::writeData (DataBuffer * linkBuffer)
     *(reinterpret_cast<ushort *>(curr)) = htons(static_cast<ushort>(packetType_));
     curr += sizeof(short);
 
-    linkBuffer->addWriteBytes (writeLength);
+    linkBuffer->addWriteBytes(writeLength);
 
 
     if (parent_) {
         // We have a parent link set, have parent write data,
         //
-        status = parent_->writeData (linkBuffer);
+        status = parent_->writeData(linkBuffer);
 
         if (!status) {
             return false;
-
         }
         return false;
     }
@@ -201,12 +193,11 @@ AlpinePacket::writeData (DataBuffer * linkBuffer)
 }
 
 
-
-bool  
-AlpinePacket::readData (DataBuffer * linkBuffer)
+bool
+AlpinePacket::readData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::readData invoked.");
+    Log::Debug("AlpinePacket::readData invoked.");
 #endif
 
     ////
@@ -215,17 +206,17 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
     //
     // short (2 bytes)  -- Packet Type
     //
-    bool   status;
+    bool status;
     byte * buffer;
     byte * curr;
-    uint   bufferSize;
-    uint   readLength;
+    uint bufferSize;
+    uint readLength;
 
-    status = linkBuffer->getReadBuffer (buffer, bufferSize);
+    status = linkBuffer->getReadBuffer(buffer, bufferSize);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("getReadBuffer failed in AlpinePacket::readData.");
+        Log::Debug("getReadBuffer failed in AlpinePacket::readData.");
 #endif
         return false;
     }
@@ -233,7 +224,7 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
 
     if (bufferSize < readLength) {
 #ifdef _VERBOSE
-        Log::Debug ("Packet size too small in AlpinePacket::readData.");
+        Log::Debug("Packet size too small in AlpinePacket::readData.");
 #endif
         return false;
     }
@@ -253,73 +244,71 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
     if (firstWord != 0) {
         // Legacy packet — no version field present
         protocolVersion_ = 0;
-        packetType_      = static_cast<t_PacketType>(firstWord);
-        readLength       = sizeof(short);
-    }
-    else {
+        packetType_ = static_cast<t_PacketType>(firstWord);
+        readLength = sizeof(short);
+    } else {
         // Versioned packet — first word is zero marker, then version, then type
         if (bufferSize < sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short)) {
 #ifdef _VERBOSE
-            Log::Debug ("Packet size too small for versioned header in AlpinePacket::readData.");
+            Log::Debug("Packet size too small for versioned header in AlpinePacket::readData.");
 #endif
             return false;
         }
         curr += sizeof(uint16_t);  // skip marker
         protocolVersion_ = static_cast<uint16_t>(ntohs(*(reinterpret_cast<ushort *>(curr))));
         curr += sizeof(uint16_t);
-        packetType_      = static_cast<t_PacketType>(ntohs(*(reinterpret_cast<ushort *>(curr))));
-        readLength       = sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short);
+        packetType_ = static_cast<t_PacketType>(ntohs(*(reinterpret_cast<ushort *>(curr))));
+        readLength = sizeof(uint16_t) + sizeof(uint16_t) + sizeof(short);
     }
 
-    linkBuffer->addReadBytes (readLength);
+    linkBuffer->addReadBytes(readLength);
 
 
 #ifdef _VERBOSE
     string typeString;
-    packetTypeAsString (packetType_, typeString);
+    packetTypeAsString(packetType_, typeString);
 
-    Log::Debug ("Received Alpine packet type: '"s + typeString +
-                "'.");
+    Log::Debug("Received Alpine packet type: '"s + typeString + "'.");
 #endif
 
     if (parent_) {
         // We have a parent link set, have parent read remaining data.
         //
 #ifdef _VERBOSE
-        Log::Debug ("Invoking parent link interface readData.");
+        Log::Debug("Invoking parent link interface readData.");
 #endif
 
         // If parent is any of the higher layer Alpine Packet types,
         // update packet type before invoking readData ().
         //
-        bool  parentCheckDone = false;
+        bool parentCheckDone = false;
 
         if (!parentCheckDone) {
             AlpineQueryPacket * queryPacket;
             queryPacket = dynamic_cast<AlpineQueryPacket *>(parent_);
 
             if (queryPacket) {
-                queryPacket->setPacketType (packetType_);
+                queryPacket->setPacketType(packetType_);
                 parentCheckDone = true;
             }
         }
 
         if (!parentCheckDone) {
-            AlpinePeerPacket *  peerPacket;
+            AlpinePeerPacket * peerPacket;
             peerPacket = dynamic_cast<AlpinePeerPacket *>(parent_);
 
             if (peerPacket) {
-                peerPacket->setPacketType (packetType_);
+                peerPacket->setPacketType(packetType_);
                 parentCheckDone = true;
             }
         }
 
         if (!parentCheckDone) {
-            AlpineProxyPacket *  proxyPacket;
+            AlpineProxyPacket * proxyPacket;
             proxyPacket = dynamic_cast<AlpineProxyPacket *>(parent_);
 
             if (proxyPacket) {
-                proxyPacket->setPacketType (packetType_);
+                proxyPacket->setPacketType(packetType_);
                 parentCheckDone = true;
             }
         }
@@ -327,11 +316,10 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
 
         // Have parent packet link read remainder
         //
-        status = parent_->readData (linkBuffer);
+        status = parent_->readData(linkBuffer);
 
         if (!status) {
             return false;
-
         }
         return false;
     }
@@ -341,26 +329,24 @@ AlpinePacket::readData (DataBuffer * linkBuffer)
 }
 
 
-
-AlpinePacket::t_PacketType  
-AlpinePacket::getPacketType ()
+AlpinePacket::t_PacketType
+AlpinePacket::getPacketType()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::getPacketType invoked.");
+    Log::Debug("AlpinePacket::getPacketType invoked.");
 #endif
 
     return packetType_;
 }
 
 
-
-bool 
-AlpinePacket::setPacketType (t_PacketType  type)
+bool
+AlpinePacket::setPacketType(t_PacketType type)
 {
 #ifdef _VERBOSE
-    string  packetTypeString;
-    packetTypeAsString (type, packetTypeString);
-    Log::Debug ("AlpinePacket::setPacketType invoked.  New type: "s + packetTypeString);
+    string packetTypeString;
+    packetTypeAsString(type, packetTypeString);
+    Log::Debug("AlpinePacket::setPacketType invoked.  New type: "s + packetTypeString);
 #endif
 
     packetType_ = type;
@@ -369,97 +355,89 @@ AlpinePacket::setPacketType (t_PacketType  type)
 }
 
 
-
-bool 
-AlpinePacket::packetTypeAsString (t_PacketType  type,
-                                  string &      typeString)
+bool
+AlpinePacket::packetTypeAsString(t_PacketType type, string & typeString)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::packetTypeAsString invoked.");
+    Log::Debug("AlpinePacket::packetTypeAsString invoked.");
 #endif
 
     switch (type) {
 
-        case t_PacketType::none :
-          typeString = "no type set";
-          break;
+    case t_PacketType::none:
+        typeString = "no type set";
+        break;
 
-        case t_PacketType::queryDiscover :
-          typeString = "query discover";
-          break;
+    case t_PacketType::queryDiscover:
+        typeString = "query discover";
+        break;
 
-        case t_PacketType::queryOffer :
-          typeString = "query offer";
-          break;
+    case t_PacketType::queryOffer:
+        typeString = "query offer";
+        break;
 
-        case t_PacketType::queryRequest :
-          typeString = "query request";
-          break;
+    case t_PacketType::queryRequest:
+        typeString = "query request";
+        break;
 
-        case t_PacketType::queryReply :
-          typeString = "query reply";
-          break;
+    case t_PacketType::queryReply:
+        typeString = "query reply";
+        break;
 
-        case t_PacketType::peerListRequest :
-          typeString = "peer list request";
-          break;
+    case t_PacketType::peerListRequest:
+        typeString = "peer list request";
+        break;
 
-        case t_PacketType::peerListOffer :
-          typeString = "peer list offer";
-          break;
+    case t_PacketType::peerListOffer:
+        typeString = "peer list offer";
+        break;
 
-        case t_PacketType::peerListGet :
-          typeString = "peer list get";
-          break;
+    case t_PacketType::peerListGet:
+        typeString = "peer list get";
+        break;
 
-        case t_PacketType::peerListData :
-          typeString = "peer list data";
-          break;
+    case t_PacketType::peerListData:
+        typeString = "peer list data";
+        break;
 
-        case t_PacketType::proxyRequest :
-          typeString = "proxy request";
-          break;
+    case t_PacketType::proxyRequest:
+        typeString = "proxy request";
+        break;
 
-        case t_PacketType::proxyAccepted :
-          typeString = "proxy accepted";
-          break;
+    case t_PacketType::proxyAccepted:
+        typeString = "proxy accepted";
+        break;
 
-        case t_PacketType::proxyHalt :
-          typeString = "proxy halt/denied";
-          break;
+    case t_PacketType::proxyHalt:
+        typeString = "proxy halt/denied";
+        break;
 
-        case t_PacketType::versionHandshake :
-          typeString = "version handshake";
-          break;
+    case t_PacketType::versionHandshake:
+        typeString = "version handshake";
+        break;
 
-        case t_PacketType::versionAccept :
-          typeString = "version accept";
-          break;
+    case t_PacketType::versionAccept:
+        typeString = "version accept";
+        break;
 
-        case t_PacketType::queryCancellation :
-          typeString = "query cancellation";
-          break;
+    case t_PacketType::queryCancellation:
+        typeString = "query cancellation";
+        break;
 
-      default:
-        Log::Debug ("Invalid packet type passed to AlpinePacket::packetTypeAsString!");
+    default:
+        Log::Debug("Invalid packet type passed to AlpinePacket::packetTypeAsString!");
         return false;
     }
     return true;
 }
 
 
-
 uint16_t
-AlpinePacket::getProtocolVersion ()
+AlpinePacket::getProtocolVersion()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePacket::getProtocolVersion invoked.");
+    Log::Debug("AlpinePacket::getProtocolVersion invoked.");
 #endif
 
     return protocolVersion_;
 }
-
-
-
-
-

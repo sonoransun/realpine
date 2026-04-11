@@ -13,17 +13,13 @@ class MuxInterface;
 class AcceptorInterface
 {
   public:
+    AcceptorInterface() = default;
+    virtual ~AcceptorInterface();
 
-    AcceptorInterface () = default;
-    virtual ~AcceptorInterface ();
 
+    virtual bool acceptConnection(StackLinkInterface * request) = 0;
 
-    virtual bool acceptConnection (StackLinkInterface * request) = 0;
-     
-    virtual bool createTransport (TransportInterface *& transport) = 0;
+    virtual bool createTransport(TransportInterface *& transport) = 0;
 
-    virtual bool receiveTransport (TransportInterface * transport) = 0;
-
+    virtual bool receiveTransport(TransportInterface * transport) = 0;
 };
-
-

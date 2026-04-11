@@ -6,40 +6,36 @@
 #include <SysThread.h>
 #include <UdpConnection.h>
 
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
 
 
 class DiscoveryBeacon : public SysThread
 {
   public:
+    DiscoveryBeacon();
+    ~DiscoveryBeacon();
 
-    DiscoveryBeacon ();
-    ~DiscoveryBeacon ();
-
-    bool initialize (ushort restPort, ushort beaconPort);
+    bool initialize(ushort restPort, ushort beaconPort);
 
     /// Initialize with an IPv6 multicast group for beacon announcements.
     /// Falls back to IPv4 broadcast if multicastGroup is empty.
-    bool initialize (ushort restPort, ushort beaconPort,
-                     const string & multicastGroup);
+    bool initialize(ushort restPort, ushort beaconPort, const string & multicastGroup);
 
-    void threadMain ();
+    void threadMain();
 
     /// Signals the beacon thread to wake and exit, then joins.
-    bool stop ();
+    bool stop();
 
 
   private:
+    static constexpr int BEACON_INTERVAL_SEC = 3;
 
-    static const int    BEACON_INTERVAL_SEC = 3;
+    UdpConnection udpSocket_;
+    ushort restPort_;
+    ushort beaconPort_;
+    string multicastGroup_;
 
-    UdpConnection       udpSocket_;
-    ushort              restPort_;
-    ushort              beaconPort_;
-    string              multicastGroup_;
-
-    std::mutex              cvMutex_;
+    std::mutex cvMutex_;
     std::condition_variable cv_;
-
 };

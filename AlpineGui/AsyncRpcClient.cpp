@@ -2,17 +2,15 @@
 
 
 #include <AsyncRpcClient.h>
+#include <NetUtils.h>
 #include <TcpConnector.h>
 #include <TcpTransport.h>
-#include <NetUtils.h>
 #include <cstdlib>
 #include <cstring>
 
 
-
 bool
-AsyncRpcClient::connect (const string &  host,
-                         ushort          port)
+AsyncRpcClient::connect(const string & host, ushort port)
 {
     host_ = host;
     port_ = htons(port);
@@ -35,9 +33,8 @@ AsyncRpcClient::connect (const string &  host,
 }
 
 
-
 void
-AsyncRpcClient::disconnect ()
+AsyncRpcClient::disconnect()
 {
     connected_ = false;
     ipAddress_ = 0;
@@ -45,38 +42,28 @@ AsyncRpcClient::disconnect ()
 }
 
 
-
 bool
-AsyncRpcClient::isConnected () const
+AsyncRpcClient::isConnected() const
 {
     return connected_;
 }
 
 
-
 bool
-AsyncRpcClient::call (const string &  method,
-                      const string &  paramsJson,
-                      string &        resultJson)
+AsyncRpcClient::call(const string & method, const string & paramsJson, string & resultJson)
 {
     if (!connected_)
         return false;
 
     // Build JSON-RPC 2.0 request body
     string idStr = std::to_string(requestId_++);
-    string body = "{\"jsonrpc\":\"2.0\",\"method\":\""s + method +
-                  "\",\"params\":"s + paramsJson +
-                  ",\"id\":"s + idStr + "}";
+    string body =
+        "{\"jsonrpc\":\"2.0\",\"method\":\""s + method + "\",\"params\":"s + paramsJson + ",\"id\":"s + idStr + "}";
 
     // Build HTTP request
     string contentLength = std::to_string(body.length());
-    string httpRequest = "POST /rpc HTTP/1.1\r\n"s +
-                         "Host: "s + host_ + "\r\n" +
-                         "Content-Type: application/json\r\n" +
-                         "Content-Length: "s + contentLength + "\r\n" +
-                         "Connection: close\r\n" +
-                         "\r\n" +
-                         body;
+    string httpRequest = "POST /rpc HTTP/1.1\r\n"s + "Host: "s + host_ + "\r\n" + "Content-Type: application/json\r\n" +
+                         "Content-Length: "s + contentLength + "\r\n" + "Connection: close\r\n" + "\r\n" + body;
 
     // Connect
     TcpConnector connector;
@@ -88,8 +75,7 @@ AsyncRpcClient::call (const string &  method,
         return false;
 
     // Send request
-    if (!transport->send((const byte *)httpRequest.c_str(), httpRequest.length()))
-    {
+    if (!transport->send((const byte *)httpRequest.c_str(), httpRequest.length())) {
         delete transport;
         return false;
     }
@@ -98,8 +84,7 @@ AsyncRpcClient::call (const string &  method,
     string responseData;
     byte buffer[8192];
 
-    while (true)
-    {
+    while (true) {
         ulong bytesRead = 0;
         if (!transport->receive(buffer, sizeof(buffer), bytesRead))
             break;
@@ -127,17 +112,14 @@ AsyncRpcClient::call (const string &  method,
         return false;
 
     // Check for JSON-RPC error
-    if (jsonBody.find("\"error\"") != string::npos &&
-        jsonBody.find("\"result\"") == string::npos)
-    {
+    if (jsonBody.find("\"error\"") != string::npos && jsonBody.find("\"result\"") == string::npos) {
         resultJson = jsonBody;
         return false;
     }
 
     // Extract the result value
     ulong resultPos = jsonBody.find("\"result\":");
-    if (resultPos == string::npos)
-    {
+    if (resultPos == string::npos) {
         resultJson = jsonBody;
         return false;
     }
@@ -146,12 +128,9 @@ AsyncRpcClient::call (const string &  method,
 
     // Find ",\"id\":" which marks the end of the result
     ulong idMarker = jsonBody.rfind(",\"id\":");
-    if (idMarker != string::npos && idMarker > valueStart)
-    {
+    if (idMarker != string::npos && idMarker > valueStart) {
         resultJson = jsonBody.substr(valueStart, idMarker - valueStart);
-    }
-    else
-    {
+    } else {
         ulong lastBrace = jsonBody.rfind('}');
         if (lastBrace != string::npos && lastBrace > valueStart)
             resultJson = jsonBody.substr(valueStart, lastBrace - valueStart);

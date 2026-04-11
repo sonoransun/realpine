@@ -2,25 +2,21 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AutoThread.h>
+#include <Common.h>
 
 
 class TestThread : public AutoThread
 {
   public:
+    TestThread(const string message);
 
-    TestThread (const string  message);
-
-    virtual ~TestThread ();
+    virtual ~TestThread();
 
 
-    virtual void threadMain ();
+    virtual void threadMain();
 
 
   private:
-
     string msg_;
-
 };
-

@@ -3,22 +3,22 @@
 #ifdef ALPINE_TLS_ENABLED
 
 #include <DtlsWrapper.h>
-#include <TlsContext.h>
 #include <Log.h>
+#include <TlsContext.h>
 
-#include <openssl/ssl.h>
-#include <openssl/err.h>
 #include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
 
 
-DtlsWrapper::~DtlsWrapper ()
+DtlsWrapper::~DtlsWrapper()
 {
     shutdown();
 }
 
 
 bool
-DtlsWrapper::initialize (TlsContext & tlsCtx, t_Mode mode)
+DtlsWrapper::initialize(TlsContext & tlsCtx, t_Mode mode)
 {
     if (initialized_)
         return true;
@@ -34,9 +34,7 @@ DtlsWrapper::initialize (TlsContext & tlsCtx, t_Mode mode)
     SSL_CTX * ctx = nullptr;
 
     if (mode == t_Mode::DtlsClient || mode == t_Mode::DtlsServer) {
-        const SSL_METHOD * method = (mode == t_Mode::DtlsServer)
-                                    ? DTLS_server_method()
-                                    : DTLS_client_method();
+        const SSL_METHOD * method = (mode == t_Mode::DtlsServer) ? DTLS_server_method() : DTLS_client_method();
         ctx = SSL_CTX_new(method);
         if (!ctx) {
             Log::Error("DtlsWrapper: failed to create DTLS SSL_CTX");
@@ -65,7 +63,7 @@ DtlsWrapper::initialize (TlsContext & tlsCtx, t_Mode mode)
 
     if (isDtls()) {
         // Create memory BIOs for DTLS (datagram-oriented)
-        readBio_  = BIO_new(BIO_s_mem());
+        readBio_ = BIO_new(BIO_s_mem());
         writeBio_ = BIO_new(BIO_s_mem());
 
         if (!readBio_ || !writeBio_) {
@@ -85,7 +83,7 @@ DtlsWrapper::initialize (TlsContext & tlsCtx, t_Mode mode)
 
 
 bool
-DtlsWrapper::setSocketFd (int fd)
+DtlsWrapper::setSocketFd(int fd)
 {
     if (!initialized_) {
         Log::Error("DtlsWrapper: not initialized");
@@ -100,7 +98,7 @@ DtlsWrapper::setSocketFd (int fd)
             return false;
         }
         SSL_set_bio(ssl_, dgBio, dgBio);
-        readBio_  = nullptr;
+        readBio_ = nullptr;
         writeBio_ = nullptr;
     } else {
         // For TLS, set the socket fd directly
@@ -115,7 +113,7 @@ DtlsWrapper::setSocketFd (int fd)
 
 
 bool
-DtlsWrapper::handshake ()
+DtlsWrapper::handshake()
 {
     if (!initialized_) {
         Log::Error("DtlsWrapper: not initialized");
@@ -137,14 +135,13 @@ DtlsWrapper::handshake ()
     if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE)
         return false;  // Non-blocking: try again later
 
-    Log::Error("DtlsWrapper: handshake failed, SSL error: "s +
-               std::to_string(err));
+    Log::Error("DtlsWrapper: handshake failed, SSL error: "s + std::to_string(err));
     return false;
 }
 
 
 int
-DtlsWrapper::wrapSend (const byte * data, uint len)
+DtlsWrapper::wrapSend(const byte * data, uint len)
 {
     if (!initialized_ || !handshakeComplete_)
         return -1;
@@ -154,8 +151,7 @@ DtlsWrapper::wrapSend (const byte * data, uint len)
         int err = SSL_get_error(ssl_, written);
         if (err == SSL_ERROR_WANT_WRITE)
             return 0;
-        Log::Error("DtlsWrapper: SSL_write failed, error: "s +
-                   std::to_string(err));
+        Log::Error("DtlsWrapper: SSL_write failed, error: "s + std::to_string(err));
         return -1;
     }
 
@@ -164,7 +160,7 @@ DtlsWrapper::wrapSend (const byte * data, uint len)
 
 
 int
-DtlsWrapper::unwrapRecv (byte * data, uint len)
+DtlsWrapper::unwrapRecv(byte * data, uint len)
 {
     if (!initialized_ || !handshakeComplete_)
         return -1;
@@ -176,8 +172,7 @@ DtlsWrapper::unwrapRecv (byte * data, uint len)
             return 0;
         if (err == SSL_ERROR_ZERO_RETURN)
             return 0;  // Peer closed connection
-        Log::Error("DtlsWrapper: SSL_read failed, error: "s +
-                   std::to_string(err));
+        Log::Error("DtlsWrapper: SSL_read failed, error: "s + std::to_string(err));
         return -1;
     }
 
@@ -186,7 +181,7 @@ DtlsWrapper::unwrapRecv (byte * data, uint len)
 
 
 void
-DtlsWrapper::shutdown ()
+DtlsWrapper::shutdown()
 {
     if (ssl_) {
         if (handshakeComplete_)
@@ -195,7 +190,7 @@ DtlsWrapper::shutdown ()
         ssl_ = nullptr;
     }
     // BIOs are freed by SSL_free when set via SSL_set_bio
-    readBio_  = nullptr;
+    readBio_ = nullptr;
     writeBio_ = nullptr;
     initialized_ = false;
     handshakeComplete_ = false;
@@ -203,38 +198,37 @@ DtlsWrapper::shutdown ()
 
 
 bool
-DtlsWrapper::enablePeerVerification (bool require)
+DtlsWrapper::enablePeerVerification(bool require)
 {
     if (!initialized_ || !ssl_) {
         Log::Error("DtlsWrapper: not initialized");
         return false;
     }
 
-    int mode = require ? (SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
-                       : SSL_VERIFY_NONE;
+    int mode = require ? (SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT) : SSL_VERIFY_NONE;
     SSL_set_verify(ssl_, mode, nullptr);
     return true;
 }
 
 
 SSL *
-DtlsWrapper::sslSession ()
+DtlsWrapper::sslSession()
 {
     return ssl_;
 }
 
 
 bool
-DtlsWrapper::isInitialized () const
+DtlsWrapper::isInitialized() const
 {
     return initialized_;
 }
 
 
 bool
-DtlsWrapper::isDtls () const
+DtlsWrapper::isDtls() const
 {
     return mode_ == t_Mode::DtlsClient || mode_ == t_Mode::DtlsServer;
 }
 
-#endif // ALPINE_TLS_ENABLED
+#endif  // ALPINE_TLS_ENABLED

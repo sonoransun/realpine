@@ -8,10 +8,8 @@
 class BroadcastUdpConnection : public UdpConnection
 {
   public:
+    BroadcastUdpConnection();
+    ~BroadcastUdpConnection() override;
 
-    BroadcastUdpConnection ();
-    ~BroadcastUdpConnection () override;
-
-    bool create (ulong ipAddress = 0, ushort port = 0) override;
-
+    bool create(ulong ipAddress = 0, ushort port = 0) override;
 };

@@ -3,8 +3,8 @@
 
 #pragma once
 #include <Common.h>
-#include <Platform.h>
 #include <NetUtils.h>
+#include <Platform.h>
 
 
 class TcpTransport;
@@ -13,27 +13,20 @@ class TcpTransport;
 class TcpConnector
 {
   public:
+    TcpConnector();
+    ~TcpConnector();
 
-    TcpConnector ();
-    ~TcpConnector ();
 
+    bool setDestination(ulong ipAddress, ushort port);
 
-    bool setDestination (ulong   ipAddress,
-                         ushort  port);
+    bool getDestination(ulong & ipAddress, ushort & port);
 
-    bool getDestination (ulong &   ipAddress,
-                         ushort &  port);
-
-    bool connect (TcpTransport *&  transport);
-
+    bool connect(TcpTransport *& transport);
 
 
   private:
-
-    ulong               destIpAddress_;
-    ushort              destPort_;
-    struct sockaddr_in  socketAddress_;
-    int                 addressSize_;
-
+    ulong destIpAddress_;
+    ushort destPort_;
+    struct sockaddr_in socketAddress_;
+    int addressSize_;
 };
-

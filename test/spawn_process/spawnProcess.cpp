@@ -2,23 +2,26 @@
 
 
 #include <Common.h>
+#include <Log.h>
+#include <SpawnProcess.h>
+#include <StringUtils.h>
 #include <iostream>
 #include <stdlib.h>
 #include <unistd.h>
-#include <Log.h>
-#include <StringUtils.h>
-#include <SpawnProcess.h>
 
-using std::cout; using std::cerr; using std::endl;
-
+using std::cerr;
+using std::cout;
+using std::endl;
 
 
-int 
-main (int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
     if (argc != 6) {
-        cerr << "Usage: " << argv[0] << " <debug filename> <debugLevel 1-4> "
-                "<command> <arguments (quoted)> <create count>" << endl;
+        cerr << "Usage: " << argv[0]
+             << " <debug filename> <debugLevel 1-4> "
+                "<command> <arguments (quoted)> <create count>"
+             << endl;
         return 1;
     }
 
@@ -29,49 +32,40 @@ main (int argc, char *argv[])
     int createCount;
 
     logFilename = argv[1];
-    debugLevel = atoi (argv[2]);
+    debugLevel = atoi(argv[2]);
 
     if (debugLevel == 1) {
-        Log::initialize (logFilename, Log::t_LogLevel::Silent);
-    }
-    else if (debugLevel == 2) {
-        Log::initialize (logFilename, Log::t_LogLevel::Error);
-    }
-    else if (debugLevel == 3) {
-        Log::initialize (logFilename, Log::t_LogLevel::Info);
-    }
-    else if (debugLevel == 4) {
-        Log::initialize (logFilename, Log::t_LogLevel::Debug);
-    }
-    else {
+        Log::initialize(logFilename, Log::t_LogLevel::Silent);
+    } else if (debugLevel == 2) {
+        Log::initialize(logFilename, Log::t_LogLevel::Error);
+    } else if (debugLevel == 3) {
+        Log::initialize(logFilename, Log::t_LogLevel::Info);
+    } else if (debugLevel == 4) {
+        Log::initialize(logFilename, Log::t_LogLevel::Debug);
+    } else {
         cout << "Invalid log level." << endl;
         return 1;
     }
 
     command = argv[3];
     arguments = argv[4];
-    createCount = atoi (argv[5]);
+    createCount = atoi(argv[5]);
 
 
-
-    Log::Info ("Starting spawn process test."s +
-               "\nCommand: "s + command +
-               "\nArguments: "s + arguments +
-               "\nCreate Count: "s + std::to_string (createCount));
+    Log::Info("Starting spawn process test."s + "\nCommand: "s + command + "\nArguments: "s + arguments +
+              "\nCreate Count: "s + std::to_string(createCount));
 
 
-    SpawnProcess  spawnMaker;
+    SpawnProcess spawnMaker;
 
-    spawnMaker.setCommand (command);
-    spawnMaker.setArguments (arguments);
+    spawnMaker.setCommand(command);
+    spawnMaker.setArguments(arguments);
 
     int i;
     for (i = 0; i < createCount; i++) {
-        spawnMaker.spawnProcess ();
+        spawnMaker.spawnProcess();
     }
 
- 
+
     return 0;
 }
-
-

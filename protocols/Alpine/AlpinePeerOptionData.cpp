@@ -7,7 +7,4 @@
 // Ctor defaulted in header
 
 
-AlpinePeerOptionData::~AlpinePeerOptionData () = default;
-
-
-
+AlpinePeerOptionData::~AlpinePeerOptionData() = default;

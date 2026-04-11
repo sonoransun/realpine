@@ -8,18 +8,31 @@
 class Mutex
 {
   public:
+    void
+    acquire()
+    {
+        mutex_.lock();
+    }
 
-    void  acquire ()      { mutex_.lock(); }
+    bool
+    tryAcquire()
+    {
+        return mutex_.try_lock();
+    }
 
-    bool  tryAcquire ()   { return mutex_.try_lock(); }
+    void
+    release()
+    {
+        mutex_.unlock();
+    }
 
-    void  release ()      { mutex_.unlock(); }
-
-    std::mutex &  native ()  { return mutex_; }
+    std::mutex &
+    native()
+    {
+        return mutex_;
+    }
 
 
   private:
-
-    std::mutex  mutex_;
-
+    std::mutex mutex_;
 };

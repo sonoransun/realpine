@@ -1,32 +1,32 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <WebhookDispatcher.h>
 #include <Configuration.h>
-#include <SafeParse.h>
 #include <Log.h>
+#include <SafeParse.h>
+#include <ThreadUtils.h>
+#include <WebhookDispatcher.h>
 
 #include <asio.hpp>
 
 #ifdef ALPINE_TLS_ENABLED
-#include <openssl/hmac.h>
 #include <openssl/evp.h>
+#include <openssl/hmac.h>
 #endif
 
 
-std::queue<WebhookDispatcher::t_PendingWebhook>  WebhookDispatcher::queue_s;
-std::mutex                                        WebhookDispatcher::queueMutex_s;
-std::condition_variable                           WebhookDispatcher::queueCv_s;
-string                                            WebhookDispatcher::secret_s;
-int                                               WebhookDispatcher::maxRetries_s   = 3;
-int                                               WebhookDispatcher::timeoutSeconds_s = 10;
-std::atomic<bool>                                 WebhookDispatcher::running_s{false};
-std::thread                                       WebhookDispatcher::workerThread_s;
-
+std::queue<WebhookDispatcher::t_PendingWebhook> WebhookDispatcher::queue_s;
+std::mutex WebhookDispatcher::queueMutex_s;
+std::condition_variable WebhookDispatcher::queueCv_s;
+string WebhookDispatcher::secret_s;
+int WebhookDispatcher::maxRetries_s = 3;
+int WebhookDispatcher::timeoutSeconds_s = 10;
+std::atomic<bool> WebhookDispatcher::running_s{false};
+std::thread WebhookDispatcher::workerThread_s;
 
 
 void
-WebhookDispatcher::initialize ()
+WebhookDispatcher::initialize()
 {
     if (running_s.load())
         return;
@@ -53,15 +53,13 @@ WebhookDispatcher::initialize ()
     running_s.store(true);
     workerThread_s = std::thread(workerLoop);
 
-    Log::Info("WebhookDispatcher initialized (maxRetries="s +
-              std::to_string(maxRetries_s) + ", timeout="s +
+    Log::Info("WebhookDispatcher initialized (maxRetries="s + std::to_string(maxRetries_s) + ", timeout="s +
               std::to_string(timeoutSeconds_s) + "s)"s);
 }
 
 
-
 void
-WebhookDispatcher::shutdown ()
+WebhookDispatcher::shutdown()
 {
     if (!running_s.load())
         return;
@@ -81,17 +79,14 @@ WebhookDispatcher::shutdown ()
 }
 
 
-
 void
-WebhookDispatcher::dispatch (const string & callbackUrl,
-                             const string & jsonPayload,
-                             const string & eventType)
+WebhookDispatcher::dispatch(const string & callbackUrl, const string & jsonPayload, const string & eventType)
 {
     t_PendingWebhook webhook;
     webhook.callbackUrl = callbackUrl;
     webhook.jsonPayload = jsonPayload;
-    webhook.eventType   = eventType;
-    webhook.retryCount  = 0;
+    webhook.eventType = eventType;
+    webhook.retryCount = 0;
     webhook.nextAttempt = std::chrono::steady_clock::now();
 
     {
@@ -103,42 +98,38 @@ WebhookDispatcher::dispatch (const string & callbackUrl,
 }
 
 
-
 void
-WebhookDispatcher::setSecret (const string & secret)
+WebhookDispatcher::setSecret(const string & secret)
 {
     secret_s = secret;
 }
 
 
-
 void
-WebhookDispatcher::setMaxRetries (int maxRetries)
+WebhookDispatcher::setMaxRetries(int maxRetries)
 {
     if (maxRetries >= 0 && maxRetries <= 20)
         maxRetries_s = maxRetries;
 }
 
 
-
 void
-WebhookDispatcher::setTimeoutSeconds (int timeout)
+WebhookDispatcher::setTimeoutSeconds(int timeout)
 {
     if (timeout >= 1 && timeout <= 120)
         timeoutSeconds_s = timeout;
 }
 
 
-
 string
-WebhookDispatcher::computeHmacSignature (const string & payload)
+WebhookDispatcher::computeHmacSignature(const string & payload)
 {
     if (secret_s.empty())
         return {};
 
 #ifdef ALPINE_TLS_ENABLED
-    unsigned char  hmacResult[EVP_MAX_MD_SIZE];
-    unsigned int   hmacLen = 0;
+    unsigned char hmacResult[EVP_MAX_MD_SIZE];
+    unsigned int hmacLen = 0;
 
     auto * result = HMAC(EVP_sha256(),
                          secret_s.data(),
@@ -167,9 +158,8 @@ WebhookDispatcher::computeHmacSignature (const string & payload)
 }
 
 
-
 bool
-WebhookDispatcher::parseUrl (const string & url, t_UrlParts & parts)
+WebhookDispatcher::parseUrl(const string & url, t_UrlParts & parts)
 {
     // Parse: scheme://host[:port][/path]
     string remaining = url;
@@ -222,19 +212,18 @@ WebhookDispatcher::parseUrl (const string & url, t_UrlParts & parts)
 }
 
 
-
 void
-WebhookDispatcher::workerLoop ()
+WebhookDispatcher::workerLoop()
 {
+    ThreadUtils::setCurrentThreadName("alpine-webhook"s);
+
     while (running_s.load()) {
-        t_PendingWebhook  webhook;
-        bool              haveWork = false;
+        t_PendingWebhook webhook;
+        bool haveWork = false;
 
         {
             std::unique_lock<std::mutex> lock(queueMutex_s);
-            queueCv_s.wait(lock, [] {
-                return !running_s.load() || !queue_s.empty();
-            });
+            queueCv_s.wait(lock, [] { return !running_s.load() || !queue_s.empty(); });
 
             if (!running_s.load() && queue_s.empty())
                 break;
@@ -265,30 +254,24 @@ WebhookDispatcher::workerLoop ()
             // Exponential backoff: 1s, 5s, 30s
             static constexpr int backoffSeconds[] = {1, 5, 30};
             int backoffIndex = std::min(webhook.retryCount - 1, 2);
-            webhook.nextAttempt = std::chrono::steady_clock::now() +
-                                  std::chrono::seconds(backoffSeconds[backoffIndex]);
+            webhook.nextAttempt = std::chrono::steady_clock::now() + std::chrono::seconds(backoffSeconds[backoffIndex]);
 
-            Log::Debug("Webhook delivery failed, scheduling retry "s +
-                       std::to_string(webhook.retryCount) + "/"s +
-                       std::to_string(maxRetries_s) + " for "s +
-                       webhook.callbackUrl);
+            Log::Debug("Webhook delivery failed, scheduling retry "s + std::to_string(webhook.retryCount) + "/"s +
+                       std::to_string(maxRetries_s) + " for "s + webhook.callbackUrl);
 
             std::lock_guard<std::mutex> lock(queueMutex_s);
             queue_s.push(std::move(webhook));
             queueCv_s.notify_one();
-        }
-        else if (!success) {
-            Log::Error("Webhook delivery failed after "s +
-                       std::to_string(maxRetries_s) +
-                       " retries for "s + webhook.callbackUrl);
+        } else if (!success) {
+            Log::Error("Webhook delivery failed after "s + std::to_string(maxRetries_s) + " retries for "s +
+                       webhook.callbackUrl);
         }
     }
 }
 
 
-
 bool
-WebhookDispatcher::deliverWebhook (const t_PendingWebhook & webhook)
+WebhookDispatcher::deliverWebhook(const t_PendingWebhook & webhook)
 {
     t_UrlParts urlParts;
     if (!parseUrl(webhook.callbackUrl, urlParts)) {
@@ -324,11 +307,8 @@ WebhookDispatcher::deliverWebhook (const t_PendingWebhook & webhook)
 
         // Write with timeout using io_context.run_for
         asio::error_code writeEc;
-        asio::async_write(socket,
-                          asio::buffer(requestStr),
-                          [&writeEc](const asio::error_code & ec, std::size_t) {
-                              writeEc = ec;
-                          });
+        asio::async_write(
+            socket, asio::buffer(requestStr), [&writeEc](const asio::error_code & ec, std::size_t) { writeEc = ec; });
 
         ioContext.run_for(std::chrono::seconds(timeoutSeconds_s));
 
@@ -340,10 +320,8 @@ WebhookDispatcher::deliverWebhook (const t_PendingWebhook & webhook)
         // Read response status line
         asio::streambuf responseBuf;
         asio::error_code readEc;
-        asio::async_read_until(socket, responseBuf, "\r\n"s,
-                               [&readEc](const asio::error_code & ec, std::size_t) {
-                                   readEc = ec;
-                               });
+        asio::async_read_until(
+            socket, responseBuf, "\r\n"s, [&readEc](const asio::error_code & ec, std::size_t) { readEc = ec; });
 
         ioContext.restart();
         ioContext.run_for(std::chrono::seconds(timeoutSeconds_s));
@@ -360,15 +338,12 @@ WebhookDispatcher::deliverWebhook (const t_PendingWebhook & webhook)
         responseStream >> httpVersion >> statusCode;
 
         if (statusCode >= 200 && statusCode < 300) {
-            Log::Debug("Webhook delivered successfully to "s +
-                       webhook.callbackUrl + " (HTTP "s +
+            Log::Debug("Webhook delivered successfully to "s + webhook.callbackUrl + " (HTTP "s +
                        std::to_string(statusCode) + ")"s);
             return true;
         }
 
-        Log::Error("Webhook delivery got HTTP "s +
-                   std::to_string(statusCode) + " from "s +
-                   webhook.callbackUrl);
+        Log::Error("Webhook delivery got HTTP "s + std::to_string(statusCode) + " from "s + webhook.callbackUrl);
         return false;
 
     } catch (const std::exception & e) {

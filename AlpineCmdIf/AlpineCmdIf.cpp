@@ -1,24 +1,25 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
-#include <time.h>
-#include <stdlib.h>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
-using std::cout; using std::endl; using std::cerr;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
 #include <OptHash.h>
+#include <StringUtils.h>
 
 #include <ApplCore.h>
 #include <Configuration.h>
 
-#include <JsonRpcClient.h>
 #include <JsonReader.h>
+#include <JsonRpcClient.h>
 #include <JsonWriter.h>
 
 #include <AlpineConfig.h>
@@ -34,53 +35,49 @@ static constexpr const char * ALPINE_CLI_VERSION = "devel-00019";
 
 // Types for command dispatch table
 //
-using t_Handler = bool(*)();
+using t_Handler = bool (*)();
 
-struct t_CommandEntry {
-    t_Handler    handler;
-    string       description;
-    string       detailedHelp;
+struct t_CommandEntry
+{
+    t_Handler handler;
+    string description;
+    string detailedHelp;
 };
 
-using t_DispatchTable = std::unordered_map<string,
-                 t_CommandEntry,
-                 OptHash<string>,
-                 equal_to<string> >;
+using t_DispatchTable = std::unordered_map<string, t_CommandEntry, OptHash<string>, equal_to<string>>;
 
 
 // Global members
 //
-static t_DispatchTable *  dispatchTable_s = nullptr;
-static bool    verbose_s     = false;
-static bool    jsonOutput_s  = false;
-static bool    quietOutput_s = false;
-static string  formatMode_s  = "json"s;
-static bool    colorEnabled_s = false;
+static t_DispatchTable * dispatchTable_s = nullptr;
+static bool verbose_s = false;
+static bool jsonOutput_s = false;
+static bool quietOutput_s = false;
+static string formatMode_s = "json"s;
+static bool colorEnabled_s = false;
 
 
-bool buildDispatchTable ();
+bool buildDispatchTable();
 
-bool commandExists (const string &  command);
+bool commandExists(const string & command);
 
-bool handleCommand (const string &  command);
+bool handleCommand(const string & command);
 
-void printUsage ();
+void printUsage();
 
-void printCommandList ();
+void printCommandList();
 
-void printCommandHelp (const string &  command);
+void printCommandHelp(const string & command);
 
-void printVersion ();
+void printVersion();
 
-vector<pair<string, string>>  getDispatchEntries ();
+vector<pair<string, string>> getDispatchEntries();
 
-int  runInteractive (const string & serverAddress, ushort serverPort);
+int runInteractive(const string & serverAddress, ushort serverPort);
 
-void linenoiseCompletionCallback (const char * buf, linenoiseCompletions * lc);
+void alpineCompletionCallback(const char * buf, linenoiseCompletions * lc);
 
-static string  historyFilePath ();
-
-
+static string historyFilePath();
 
 
 // Application main entry point
@@ -93,14 +90,14 @@ static string  historyFilePath ();
 //   3 - Request Failed
 //
 int
-main (int argc, char *argv[])
+main(int argc, char * argv[])
 {
     bool status;
 
-    status = buildDispatchTable ();
+    status = buildDispatchTable();
 
     if (!status) {
-        Log::Error ("Building dispatch table failed!  Exiting.");
+        Log::Error("Building dispatch table failed!  Exiting.");
         return 1;
     }
 
@@ -135,10 +132,10 @@ main (int argc, char *argv[])
 
     // Initialize application core
     //
-    status = ApplCore::initialize (argc, argv);
+    status = ApplCore::initialize(argc, argv);
 
     if (!status) {
-        Log::Error ("Unable to initialize application core!  Exiting.");
+        Log::Error("Unable to initialize application core!  Exiting.");
         return 1;
     }
 
@@ -146,16 +143,13 @@ main (int argc, char *argv[])
     //
     ConfigData::t_ConfigElementList * configElements;
 
-    AlpineConfig::createConfigElements ();
-    AlpineConfig::getConfigElements (configElements);
+    AlpineConfig::createConfigElements();
+    AlpineConfig::getConfigElements(configElements);
 
-    status = Configuration::initialize (argc,
-                                        argv,
-                                        *configElements,
-                                        AlpineConfig::configFile_s);
+    status = Configuration::initialize(argc, argv, *configElements, AlpineConfig::configFile_s);
 
     if (!status) {
-        Log::Error ("Error initializing configuration!  Exiting.");
+        Log::Error("Error initializing configuration!  Exiting.");
         return 1;
     }
 
@@ -185,8 +179,8 @@ main (int argc, char *argv[])
 
     // Load configuration settings
     //
-    string  serverAddress;
-    status = Configuration::getValue ("Server Address", serverAddress);
+    string serverAddress;
+    status = Configuration::getValue("Server Address", serverAddress);
 
     if (!status) {
         if (jsonOutput_s) {
@@ -197,8 +191,8 @@ main (int argc, char *argv[])
         return 1;
     }
 
-    string  serverPortStr;
-    status = Configuration::getValue ("Server Port", serverPortStr);
+    string serverPortStr;
+    status = Configuration::getValue("Server Port", serverPortStr);
 
     if (!status) {
         if (jsonOutput_s) {
@@ -212,7 +206,7 @@ main (int argc, char *argv[])
     ushort serverPort = static_cast<ushort>(atoi(serverPortStr.c_str()));
 
     string command;
-    status = Configuration::getValue ("Command", command);
+    status = Configuration::getValue("Command", command);
 
     if (!status) {
         if (jsonOutput_s) {
@@ -224,13 +218,12 @@ main (int argc, char *argv[])
     }
 
     string verboseValue;
-    status = Configuration::getValue ("Verbose", verboseValue);
+    status = Configuration::getValue("Verbose", verboseValue);
 
     if (status) {
         verbose_s = true;
         verboseValue = "Verbose mode ON";
-    }
-    else {
+    } else {
         verboseValue = "Verbose mode OFF";
     }
 
@@ -239,7 +232,7 @@ main (int argc, char *argv[])
     if (command == "help") {
         // Check if there's additional arg for per-command help
         string helpArg;
-        if (Configuration::getValue ("Query String", helpArg) && !helpArg.empty()) {
+        if (Configuration::getValue("Query String", helpArg) && !helpArg.empty()) {
             printCommandHelp(helpArg);
         } else {
             printCommandList();
@@ -249,17 +242,14 @@ main (int argc, char *argv[])
 
 
     if (!quietOutput_s) {
-        Log::Info ("Starting ALPINE Command Interface-"s +
-                   "\nServer: "s + serverAddress + ":" + serverPortStr +
-                   "\nCommand: "s +  command +
-                   "\n"s + verboseValue +
-                   "\n");
+        Log::Info("Starting ALPINE Command Interface-"s + "\nServer: "s + serverAddress + ":" + serverPortStr +
+                  "\nCommand: "s + command + "\n"s + verboseValue + "\n");
     }
 
 
     // Initialize JSON-RPC client
     //
-    status = JsonRpcClient::initialize (serverAddress, serverPort);
+    status = JsonRpcClient::initialize(serverAddress, serverPort);
 
     if (!status) {
         if (jsonOutput_s) {
@@ -267,7 +257,7 @@ main (int argc, char *argv[])
         } else {
             cerr << "Error: Initializing JsonRpcClient failed.  Exiting." << endl;
         }
-        Log::Error ("Initializing JsonRpcClient failed.  Exiting.");
+        Log::Error("Initializing JsonRpcClient failed.  Exiting.");
         return 1;
     }
 
@@ -275,13 +265,13 @@ main (int argc, char *argv[])
     // Interactive REPL mode
     //
     if (command == "interactive"s) {
-        return runInteractive (serverAddress, serverPort);
+        return runInteractive(serverAddress, serverPort);
     }
 
 
     // Perform requested command...
     //
-    status = commandExists (command);
+    status = commandExists(command);
 
     if (!status) {
         if (jsonOutput_s) {
@@ -289,250 +279,284 @@ main (int argc, char *argv[])
         } else {
             cerr << "Error: Invalid command '"s + command + "'.  Exiting." << endl;
         }
-        Log::Error ("Invalid command!  Exiting.");
+        Log::Error("Invalid command!  Exiting.");
         return 2;
     }
 
-    status = handleCommand (command);
+    status = handleCommand(command);
 
     if (!status) {
         return 3;
     }
 
 
-    Log::Info ("Command finished.  Exiting.");
+    Log::Info("Command finished.  Exiting.");
 
     return 0;
 }
 
 
-
 // Methods for each supported command type
 //
-bool  performAddDtcpPeer ();
-bool  performGetDtcpPeerId ();
-bool  performGetDtcpPeerStatus ();
-bool  performActivateDtcpPeer ();
-bool  performDeactivateDtcpPeer ();
-bool  performPingDtcpPeer ();
-bool  performExcludeHost ();
-bool  performExcludeSubnet ();
-bool  performAllowHost ();
-bool  performAllowSubnet ();
-bool  performListExcludedHosts ();
-bool  performListExcludedSubnets ();
-bool  performGetUserGroupList ();
-bool  performCreateUserGroup ();
-bool  performDestroyUserGroup ();
-bool  performGetPeerUserGroupList ();
-bool  performAddPeerToGroup ();
-bool  performRemovePeerFromGroup ();
-bool  performGetExtendedPeerList ();
-bool  performStartQuery ();
-bool  performGetQueryStatus ();
-bool  performPauseQuery ();
-bool  performResumeQuery ();
-bool  performCancelQuery ();
-bool  performGetQueryResults ();
-bool  performRegisterModule ();
-bool  performUnregisterModule ();
-bool  performLoadModule ();
-bool  performUnloadModule ();
-bool  performListActiveModules ();
-bool  performListAllModules ();
-bool  performGetModuleInfo ();
-bool  performGetStatus ();
+bool performAddDtcpPeer();
+bool performGetDtcpPeerId();
+bool performGetDtcpPeerStatus();
+bool performActivateDtcpPeer();
+bool performDeactivateDtcpPeer();
+bool performPingDtcpPeer();
+bool performExcludeHost();
+bool performExcludeSubnet();
+bool performAllowHost();
+bool performAllowSubnet();
+bool performListExcludedHosts();
+bool performListExcludedSubnets();
+bool performGetUserGroupList();
+bool performCreateUserGroup();
+bool performDestroyUserGroup();
+bool performGetPeerUserGroupList();
+bool performAddPeerToGroup();
+bool performRemovePeerFromGroup();
+bool performGetExtendedPeerList();
+bool performStartQuery();
+bool performGetQueryStatus();
+bool performPauseQuery();
+bool performResumeQuery();
+bool performCancelQuery();
+bool performGetQueryResults();
+bool performRegisterModule();
+bool performUnregisterModule();
+bool performLoadModule();
+bool performUnloadModule();
+bool performListActiveModules();
+bool performListAllModules();
+bool performGetModuleInfo();
+bool performGetStatus();
 
 
 // Initialize dispatch table
 //
 bool
-buildDispatchTable ()
+buildDispatchTable()
 {
     dispatchTable_s = new t_DispatchTable;
 
     // Peer commands
-    dispatchTable_s->emplace ("addDtcpPeer", t_CommandEntry{&performAddDtcpPeer,
-        "Add a DTCP peer by IP and port"s,
-        "Usage: --command addDtcpPeer --ipAddress <ip> --port <port>\n"
-        "Registers a new peer at the given address."s});
-    dispatchTable_s->emplace ("getDtcpPeerId", t_CommandEntry{&performGetDtcpPeerId,
-        "Get the peer ID for a given address"s,
-        "Usage: --command getDtcpPeerId --ipAddress <ip> --port <port>\n"
-        "Returns the numeric peer ID."s});
-    dispatchTable_s->emplace ("getDtcpPeerStatus", t_CommandEntry{&performGetDtcpPeerStatus,
-        "Get status details for a peer"s,
-        "Usage: --command getDtcpPeerStatus --peerId <id>\n"
-        "Returns IP, port, bandwidth, and timing information."s});
-    dispatchTable_s->emplace ("activateDtcpPeer", t_CommandEntry{&performActivateDtcpPeer,
-        "Activate a peer connection"s,
-        "Usage: --command activateDtcpPeer --peerId <id>\n"
-        "Enables communication with the specified peer."s});
-    dispatchTable_s->emplace ("deactivateDtcpPeer", t_CommandEntry{&performDeactivateDtcpPeer,
-        "Deactivate a peer connection"s,
-        "Usage: --command deactivateDtcpPeer --peerId <id>\n"
-        "Disables communication with the specified peer."s});
-    dispatchTable_s->emplace ("pingDtcpPeer", t_CommandEntry{&performPingDtcpPeer,
-        "Ping a peer to check connectivity"s,
-        "Usage: --command pingDtcpPeer --peerId <id>\n"
-        "Sends a ping request to the specified peer."s});
+    dispatchTable_s->emplace("addDtcpPeer",
+                             t_CommandEntry{&performAddDtcpPeer,
+                                            "Add a DTCP peer by IP and port"s,
+                                            "Usage: --command addDtcpPeer --ipAddress <ip> --port <port>\n"
+                                            "Registers a new peer at the given address."s});
+    dispatchTable_s->emplace("getDtcpPeerId",
+                             t_CommandEntry{&performGetDtcpPeerId,
+                                            "Get the peer ID for a given address"s,
+                                            "Usage: --command getDtcpPeerId --ipAddress <ip> --port <port>\n"
+                                            "Returns the numeric peer ID."s});
+    dispatchTable_s->emplace("getDtcpPeerStatus",
+                             t_CommandEntry{&performGetDtcpPeerStatus,
+                                            "Get status details for a peer"s,
+                                            "Usage: --command getDtcpPeerStatus --peerId <id>\n"
+                                            "Returns IP, port, bandwidth, and timing information."s});
+    dispatchTable_s->emplace("activateDtcpPeer",
+                             t_CommandEntry{&performActivateDtcpPeer,
+                                            "Activate a peer connection"s,
+                                            "Usage: --command activateDtcpPeer --peerId <id>\n"
+                                            "Enables communication with the specified peer."s});
+    dispatchTable_s->emplace("deactivateDtcpPeer",
+                             t_CommandEntry{&performDeactivateDtcpPeer,
+                                            "Deactivate a peer connection"s,
+                                            "Usage: --command deactivateDtcpPeer --peerId <id>\n"
+                                            "Disables communication with the specified peer."s});
+    dispatchTable_s->emplace("pingDtcpPeer",
+                             t_CommandEntry{&performPingDtcpPeer,
+                                            "Ping a peer to check connectivity"s,
+                                            "Usage: --command pingDtcpPeer --peerId <id>\n"
+                                            "Sends a ping request to the specified peer."s});
 
     // Network filter commands
-    dispatchTable_s->emplace ("excludeHost", t_CommandEntry{&performExcludeHost,
-        "Exclude a host by IP address"s,
-        "Usage: --command excludeHost --ipAddress <ip>\n"
-        "Blocks a host from peer communication."s});
-    dispatchTable_s->emplace ("excludeSubnet", t_CommandEntry{&performExcludeSubnet,
-        "Exclude a subnet"s,
-        "Usage: --command excludeSubnet --subnetIpAddress <ip> --subnetMask <mask>\n"
-        "Blocks an entire subnet from peer communication."s});
-    dispatchTable_s->emplace ("allowHost", t_CommandEntry{&performAllowHost,
-        "Allow a previously excluded host"s,
-        "Usage: --command allowHost --ipAddress <ip>\n"
-        "Removes a host from the exclusion list."s});
-    dispatchTable_s->emplace ("allowSubnet", t_CommandEntry{&performAllowSubnet,
-        "Allow a previously excluded subnet"s,
-        "Usage: --command allowSubnet --subnetIpAddress <ip>\n"
-        "Removes a subnet from the exclusion list."s});
-    dispatchTable_s->emplace ("listExcludedHosts", t_CommandEntry{&performListExcludedHosts,
-        "List all excluded hosts"s,
-        "Usage: --command listExcludedHosts\n"
-        "Displays all currently excluded host IP addresses."s});
-    dispatchTable_s->emplace ("listExcludedSubnets", t_CommandEntry{&performListExcludedSubnets,
-        "List all excluded subnets"s,
-        "Usage: --command listExcludedSubnets\n"
-        "Displays all currently excluded subnets."s});
+    dispatchTable_s->emplace("excludeHost",
+                             t_CommandEntry{&performExcludeHost,
+                                            "Exclude a host by IP address"s,
+                                            "Usage: --command excludeHost --ipAddress <ip>\n"
+                                            "Blocks a host from peer communication."s});
+    dispatchTable_s->emplace(
+        "excludeSubnet",
+        t_CommandEntry{&performExcludeSubnet,
+                       "Exclude a subnet"s,
+                       "Usage: --command excludeSubnet --subnetIpAddress <ip> --subnetMask <mask>\n"
+                       "Blocks an entire subnet from peer communication."s});
+    dispatchTable_s->emplace("allowHost",
+                             t_CommandEntry{&performAllowHost,
+                                            "Allow a previously excluded host"s,
+                                            "Usage: --command allowHost --ipAddress <ip>\n"
+                                            "Removes a host from the exclusion list."s});
+    dispatchTable_s->emplace("allowSubnet",
+                             t_CommandEntry{&performAllowSubnet,
+                                            "Allow a previously excluded subnet"s,
+                                            "Usage: --command allowSubnet --subnetIpAddress <ip>\n"
+                                            "Removes a subnet from the exclusion list."s});
+    dispatchTable_s->emplace("listExcludedHosts",
+                             t_CommandEntry{&performListExcludedHosts,
+                                            "List all excluded hosts"s,
+                                            "Usage: --command listExcludedHosts\n"
+                                            "Displays all currently excluded host IP addresses."s});
+    dispatchTable_s->emplace("listExcludedSubnets",
+                             t_CommandEntry{&performListExcludedSubnets,
+                                            "List all excluded subnets"s,
+                                            "Usage: --command listExcludedSubnets\n"
+                                            "Displays all currently excluded subnets."s});
 
     // Group commands
-    dispatchTable_s->emplace ("getUserGroupList", t_CommandEntry{&performGetUserGroupList,
-        "List all user groups"s,
-        "Usage: --command getUserGroupList\n"
-        "Returns the list of all defined user groups."s});
-    dispatchTable_s->emplace ("createUserGroup", t_CommandEntry{&performCreateUserGroup,
-        "Create a new user group"s,
-        "Usage: --command createUserGroup --groupName <name> [--description <desc>]\n"
-        "Creates a group and returns its ID."s});
-    dispatchTable_s->emplace ("destroyUserGroup", t_CommandEntry{&performDestroyUserGroup,
-        "Delete a user group"s,
-        "Usage: --command destroyUserGroup --groupId <id>\n"
-        "Permanently removes the specified group."s});
-    dispatchTable_s->emplace ("getPeerUserGroupList", t_CommandEntry{&performGetPeerUserGroupList,
-        "List peers in a group"s,
-        "Usage: --command getPeerUserGroupList --groupId <id>\n"
-        "Returns peers belonging to the specified group."s});
-    dispatchTable_s->emplace ("addPeerToGroup", t_CommandEntry{&performAddPeerToGroup,
-        "Add a peer to a group"s,
-        "Usage: --command addPeerToGroup --groupId <id> --peerId <id>\n"
-        "Adds the specified peer to the group."s});
-    dispatchTable_s->emplace ("removePeerFromGroup", t_CommandEntry{&performRemovePeerFromGroup,
-        "Remove a peer from a group"s,
-        "Usage: --command removePeerFromGroup --groupId <id> --peerId <id>\n"
-        "Removes the specified peer from the group."s});
-    dispatchTable_s->emplace ("getExtendedPeerList", t_CommandEntry{&performGetExtendedPeerList,
-        "Get extended list of all peers"s,
-        "Usage: --command getExtendedPeerList\n"
-        "Returns detailed information for all known peers."s});
+    dispatchTable_s->emplace("getUserGroupList",
+                             t_CommandEntry{&performGetUserGroupList,
+                                            "List all user groups"s,
+                                            "Usage: --command getUserGroupList\n"
+                                            "Returns the list of all defined user groups."s});
+    dispatchTable_s->emplace(
+        "createUserGroup",
+        t_CommandEntry{&performCreateUserGroup,
+                       "Create a new user group"s,
+                       "Usage: --command createUserGroup --groupName <name> [--description <desc>]\n"
+                       "Creates a group and returns its ID."s});
+    dispatchTable_s->emplace("destroyUserGroup",
+                             t_CommandEntry{&performDestroyUserGroup,
+                                            "Delete a user group"s,
+                                            "Usage: --command destroyUserGroup --groupId <id>\n"
+                                            "Permanently removes the specified group."s});
+    dispatchTable_s->emplace("getPeerUserGroupList",
+                             t_CommandEntry{&performGetPeerUserGroupList,
+                                            "List peers in a group"s,
+                                            "Usage: --command getPeerUserGroupList --groupId <id>\n"
+                                            "Returns peers belonging to the specified group."s});
+    dispatchTable_s->emplace("addPeerToGroup",
+                             t_CommandEntry{&performAddPeerToGroup,
+                                            "Add a peer to a group"s,
+                                            "Usage: --command addPeerToGroup --groupId <id> --peerId <id>\n"
+                                            "Adds the specified peer to the group."s});
+    dispatchTable_s->emplace("removePeerFromGroup",
+                             t_CommandEntry{&performRemovePeerFromGroup,
+                                            "Remove a peer from a group"s,
+                                            "Usage: --command removePeerFromGroup --groupId <id> --peerId <id>\n"
+                                            "Removes the specified peer from the group."s});
+    dispatchTable_s->emplace("getExtendedPeerList",
+                             t_CommandEntry{&performGetExtendedPeerList,
+                                            "Get extended list of all peers"s,
+                                            "Usage: --command getExtendedPeerList\n"
+                                            "Returns detailed information for all known peers."s});
 
     // Query commands
-    dispatchTable_s->emplace ("beginQuery", t_CommandEntry{&performStartQuery,
-        "Start a new resource query"s,
-        "Usage: --command beginQuery --queryString <query> [--groupName <group>]\n"
-        "       [--autoHaltLimit <n>] [--peerDescriptionLimit <n>]\n"
-        "Starts a distributed query and returns the query ID."s});
-    dispatchTable_s->emplace ("getQueryStatus", t_CommandEntry{&performGetQueryStatus,
-        "Get status of a running query"s,
-        "Usage: --command getQueryStatus --queryId <id>\n"
-        "Returns peer counts and hit totals."s});
-    dispatchTable_s->emplace ("pauseQuery", t_CommandEntry{&performPauseQuery,
-        "Pause a running query"s,
-        "Usage: --command pauseQuery --queryId <id>\n"
-        "Temporarily halts query propagation."s});
-    dispatchTable_s->emplace ("resumeQuery", t_CommandEntry{&performResumeQuery,
-        "Resume a paused query"s,
-        "Usage: --command resumeQuery --queryId <id>\n"
-        "Resumes a previously paused query."s});
-    dispatchTable_s->emplace ("cancelQuery", t_CommandEntry{&performCancelQuery,
-        "Cancel a query"s,
-        "Usage: --command cancelQuery --queryId <id>\n"
-        "Permanently stops the query."s});
-    dispatchTable_s->emplace ("getQueryResults", t_CommandEntry{&performGetQueryResults,
-        "Get results of a query"s,
-        "Usage: --command getQueryResults --queryId <id>\n"
-        "Returns discovered resources from all responding peers."s});
+    dispatchTable_s->emplace("beginQuery",
+                             t_CommandEntry{&performStartQuery,
+                                            "Start a new resource query"s,
+                                            "Usage: --command beginQuery --queryString <query> [--groupName <group>]\n"
+                                            "       [--autoHaltLimit <n>] [--peerDescriptionLimit <n>]\n"
+                                            "Starts a distributed query and returns the query ID."s});
+    dispatchTable_s->emplace("getQueryStatus",
+                             t_CommandEntry{&performGetQueryStatus,
+                                            "Get status of a running query"s,
+                                            "Usage: --command getQueryStatus --queryId <id>\n"
+                                            "Returns peer counts and hit totals."s});
+    dispatchTable_s->emplace("pauseQuery",
+                             t_CommandEntry{&performPauseQuery,
+                                            "Pause a running query"s,
+                                            "Usage: --command pauseQuery --queryId <id>\n"
+                                            "Temporarily halts query propagation."s});
+    dispatchTable_s->emplace("resumeQuery",
+                             t_CommandEntry{&performResumeQuery,
+                                            "Resume a paused query"s,
+                                            "Usage: --command resumeQuery --queryId <id>\n"
+                                            "Resumes a previously paused query."s});
+    dispatchTable_s->emplace("cancelQuery",
+                             t_CommandEntry{&performCancelQuery,
+                                            "Cancel a query"s,
+                                            "Usage: --command cancelQuery --queryId <id>\n"
+                                            "Permanently stops the query."s});
+    dispatchTable_s->emplace("getQueryResults",
+                             t_CommandEntry{&performGetQueryResults,
+                                            "Get results of a query"s,
+                                            "Usage: --command getQueryResults --queryId <id>\n"
+                                            "Returns discovered resources from all responding peers."s});
 
     // Module commands
-    dispatchTable_s->emplace ("registerModule", t_CommandEntry{&performRegisterModule,
-        "Register a new module"s,
-        "Usage: --command registerModule --moduleLibPath <path> --moduleSymbol <sym>\n"
-        "Registers a shared library module and returns its ID."s});
-    dispatchTable_s->emplace ("unregisterModule", t_CommandEntry{&performUnregisterModule,
-        "Unregister a module"s,
-        "Usage: --command unregisterModule --moduleId <id>\n"
-        "Removes the module registration."s});
-    dispatchTable_s->emplace ("loadModule", t_CommandEntry{&performLoadModule,
-        "Load a registered module"s,
-        "Usage: --command loadModule --moduleId <id>\n"
-        "Loads the module into the running server."s});
-    dispatchTable_s->emplace ("unloadModule", t_CommandEntry{&performUnloadModule,
-        "Unload an active module"s,
-        "Usage: --command unloadModule --moduleId <id>\n"
-        "Unloads the module from the running server."s});
-    dispatchTable_s->emplace ("listActiveModules", t_CommandEntry{&performListActiveModules,
-        "List currently loaded modules"s,
-        "Usage: --command listActiveModules\n"
-        "Returns all modules that are currently active."s});
-    dispatchTable_s->emplace ("listAllModules", t_CommandEntry{&performListAllModules,
-        "List all registered modules"s,
-        "Usage: --command listAllModules\n"
-        "Returns all registered modules (active and inactive)."s});
-    dispatchTable_s->emplace ("getModuleInfo", t_CommandEntry{&performGetModuleInfo,
-        "Get detailed module information"s,
-        "Usage: --command getModuleInfo --moduleId <id>\n"
-        "Returns name, version, library path, and active time."s});
+    dispatchTable_s->emplace(
+        "registerModule",
+        t_CommandEntry{&performRegisterModule,
+                       "Register a new module"s,
+                       "Usage: --command registerModule --moduleLibPath <path> --moduleSymbol <sym>\n"
+                       "Registers a shared library module and returns its ID."s});
+    dispatchTable_s->emplace("unregisterModule",
+                             t_CommandEntry{&performUnregisterModule,
+                                            "Unregister a module"s,
+                                            "Usage: --command unregisterModule --moduleId <id>\n"
+                                            "Removes the module registration."s});
+    dispatchTable_s->emplace("loadModule",
+                             t_CommandEntry{&performLoadModule,
+                                            "Load a registered module"s,
+                                            "Usage: --command loadModule --moduleId <id>\n"
+                                            "Loads the module into the running server."s});
+    dispatchTable_s->emplace("unloadModule",
+                             t_CommandEntry{&performUnloadModule,
+                                            "Unload an active module"s,
+                                            "Usage: --command unloadModule --moduleId <id>\n"
+                                            "Unloads the module from the running server."s});
+    dispatchTable_s->emplace("listActiveModules",
+                             t_CommandEntry{&performListActiveModules,
+                                            "List currently loaded modules"s,
+                                            "Usage: --command listActiveModules\n"
+                                            "Returns all modules that are currently active."s});
+    dispatchTable_s->emplace("listAllModules",
+                             t_CommandEntry{&performListAllModules,
+                                            "List all registered modules"s,
+                                            "Usage: --command listAllModules\n"
+                                            "Returns all registered modules (active and inactive)."s});
+    dispatchTable_s->emplace("getModuleInfo",
+                             t_CommandEntry{&performGetModuleInfo,
+                                            "Get detailed module information"s,
+                                            "Usage: --command getModuleInfo --moduleId <id>\n"
+                                            "Returns name, version, library path, and active time."s});
 
     // Status commands
-    dispatchTable_s->emplace ("getStatus", t_CommandEntry{&performGetStatus,
-        "Get server status and version"s,
-        "Usage: --command getStatus\n"
-        "Returns the server running status and version string."s});
+    dispatchTable_s->emplace("getStatus",
+                             t_CommandEntry{&performGetStatus,
+                                            "Get server status and version"s,
+                                            "Usage: --command getStatus\n"
+                                            "Returns the server running status and version string."s});
 
     // Interactive mode (handled specially in main, not via handler)
-    dispatchTable_s->emplace ("interactive", t_CommandEntry{nullptr,
-        "Enter interactive REPL with readline and history"s,
-        "Usage: --command interactive\n"
-        "Opens an interactive shell with tab completion, command\n"
-        "history, and line editing.  History is saved to\n"
-        "~/.alpine_history between sessions."s});
+    dispatchTable_s->emplace("interactive",
+                             t_CommandEntry{nullptr,
+                                            "Enter interactive REPL with readline and history"s,
+                                            "Usage: --command interactive\n"
+                                            "Opens an interactive shell with tab completion, command\n"
+                                            "history, and line editing.  History is saved to\n"
+                                            "~/.alpine_history between sessions."s});
 
 
     return true;
 }
 
 
-
 bool
-commandExists (const string &  command)
+commandExists(const string & command)
 {
     return dispatchTable_s->contains(command);
 }
 
 
-
 // Dispatch correct command
 //
 bool
-handleCommand (const string &  command)
+handleCommand(const string & command)
 {
-    auto iter = dispatchTable_s->find (command);
+    auto iter = dispatchTable_s->find(command);
 
-    if (iter == dispatchTable_s->end ()) {
-        Log::Error ("Invalid command option: "s + command + " provided!");
+    if (iter == dispatchTable_s->end()) {
+        Log::Error("Invalid command option: "s + command + " provided!");
         return false;
     }
     auto handler = iter->second.handler;
 
     if (!handler) {
-        Log::Error ("Command '"s + command + "' is not dispatchable.");
+        Log::Error("Command '"s + command + "' is not dispatchable.");
         return false;
     }
 
@@ -550,17 +574,15 @@ handleCommand (const string &  command)
 }
 
 
-
 void
-printVersion ()
+printVersion()
 {
     cout << "AlpineCmdIf version "s << ALPINE_CLI_VERSION << endl;
 }
 
 
-
 void
-printUsage ()
+printUsage()
 {
     cout << "AlpineCmdIf - Alpine P2P Command Line Interface\n"
          << "Version: "s << ALPINE_CLI_VERSION << "\n\n"
@@ -581,9 +603,8 @@ printUsage ()
 }
 
 
-
 void
-printCommandList ()
+printCommandList()
 {
     // Collect and sort command names for stable output
     vector<string> names;
@@ -631,9 +652,8 @@ printCommandList ()
 }
 
 
-
 void
-printCommandHelp (const string &  command)
+printCommandHelp(const string & command)
 {
     auto iter = dispatchTable_s->find(command);
     if (iter == dispatchTable_s->end()) {
@@ -659,14 +679,12 @@ printCommandHelp (const string &  command)
         return;
     }
 
-    cout << command << " - " << iter->second.description << "\n\n"
-         << iter->second.detailedHelp << endl;
+    cout << command << " - " << iter->second.description << "\n\n" << iter->second.detailedHelp << endl;
 }
 
 
-
 vector<pair<string, string>>
-getDispatchEntries ()
+getDispatchEntries()
 {
     vector<pair<string, string>> entries;
     if (!dispatchTable_s)
@@ -680,30 +698,29 @@ getDispatchEntries ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Peer commands
 // ---------------------------------------------------------------------------
 
 bool
-performAddDtcpPeer ()
+performAddDtcpPeer()
 {
-    Log::Debug ("performAddDtcpPeer invoked.");
+    Log::Debug("performAddDtcpPeer invoked.");
 
-    string  ipAddress;
-    string  portStr;
+    string ipAddress;
+    string portStr;
 
     bool status;
-    status = Configuration::getValue ("IP Address", ipAddress);
+    status = Configuration::getValue("IP Address", ipAddress);
 
     if (!status) {
-        Log::Error ("No IP Address value given!");
+        Log::Error("No IP Address value given!");
         return false;
     }
-    status = Configuration::getValue ("Port", portStr);
+    status = Configuration::getValue("Port", portStr);
 
     if (!status) {
-        Log::Error ("No Port value given!");
+        Log::Error("No Port value given!");
         return false;
     }
 
@@ -719,7 +736,7 @@ performAddDtcpPeer ()
     status = JsonRpcClient::call("addPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("addPeer RPC call failed!");
+        Log::Error("addPeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -730,26 +747,25 @@ performAddDtcpPeer ()
 }
 
 
-
 bool
-performGetDtcpPeerId ()
+performGetDtcpPeerId()
 {
-    Log::Debug ("performGetDtcpPeerId invoked.");
+    Log::Debug("performGetDtcpPeerId invoked.");
 
-    string  ipAddress;
-    string  portStr;
+    string ipAddress;
+    string portStr;
 
     bool status;
-    status = Configuration::getValue ("IP Address", ipAddress);
+    status = Configuration::getValue("IP Address", ipAddress);
 
     if (!status) {
-        Log::Error ("No IP Address value given!");
+        Log::Error("No IP Address value given!");
         return false;
     }
-    status = Configuration::getValue ("Port", portStr);
+    status = Configuration::getValue("Port", portStr);
 
     if (!status) {
-        Log::Error ("No Port value given!");
+        Log::Error("No Port value given!");
         return false;
     }
 
@@ -765,7 +781,7 @@ performGetDtcpPeerId ()
     status = JsonRpcClient::call("getPeerId", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getPeerId RPC call failed!");
+        Log::Error("getPeerId RPC call failed!");
         return false;
     }
 
@@ -776,8 +792,7 @@ performGetDtcpPeerId ()
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Peer ID: " << peerId << endl;
-    }
-    else {
+    } else {
         cout << peerId << endl;
     }
 
@@ -785,23 +800,22 @@ performGetDtcpPeerId ()
 }
 
 
-
 bool
-performGetDtcpPeerStatus ()
+performGetDtcpPeerStatus()
 {
-    Log::Debug ("performGetDtcpPeerStatus invoked.");
+    Log::Debug("performGetDtcpPeerStatus invoked.");
 
-    string  peerIdString;
-    ulong   peerId;
+    string peerIdString;
+    ulong peerId;
 
     bool status;
-    status = Configuration::getValue ("Peer ID", peerIdString);
+    status = Configuration::getValue("Peer ID", peerIdString);
 
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
-    peerId = strtoul (peerIdString.c_str(), 0, 0);
+    peerId = strtoul(peerIdString.c_str(), 0, 0);
 
     JsonWriter writer;
     writer.beginObject();
@@ -813,7 +827,7 @@ performGetDtcpPeerStatus ()
     status = JsonRpcClient::call("getPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getPeer RPC call failed!");
+        Log::Error("getPeer RPC call failed!");
         return false;
     }
 
@@ -837,8 +851,7 @@ performGetDtcpPeerStatus ()
         cout << "Average Bandwidth: " << avgBw << " Kbps" << endl;
         cout << "Peak Bandwidth: " << peakBw << " Kbps" << endl;
         cout << "---\n\n";
-    }
-    else {
+    } else {
         cout << ipAddr << " ";
         cout << port << " ";
         cout << lastRecv << " ";
@@ -852,23 +865,22 @@ performGetDtcpPeerStatus ()
 }
 
 
-
 bool
-performActivateDtcpPeer ()
+performActivateDtcpPeer()
 {
-    Log::Debug ("performActivateDtcpPeer invoked.");
+    Log::Debug("performActivateDtcpPeer invoked.");
 
-    string  peerIdString;
-    ulong   peerId;
+    string peerIdString;
+    ulong peerId;
 
     bool status;
-    status = Configuration::getValue ("Peer ID", peerIdString);
+    status = Configuration::getValue("Peer ID", peerIdString);
 
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
-    peerId = strtoul (peerIdString.c_str(), 0, 0);
+    peerId = strtoul(peerIdString.c_str(), 0, 0);
 
     JsonWriter writer;
     writer.beginObject();
@@ -880,7 +892,7 @@ performActivateDtcpPeer ()
     status = JsonRpcClient::call("activatePeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("activatePeer RPC call failed!");
+        Log::Error("activatePeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -891,23 +903,22 @@ performActivateDtcpPeer ()
 }
 
 
-
 bool
-performDeactivateDtcpPeer ()
+performDeactivateDtcpPeer()
 {
-    Log::Debug ("performDeactivateDtcpPeer invoked.");
+    Log::Debug("performDeactivateDtcpPeer invoked.");
 
-    string  peerIdString;
-    ulong   peerId;
+    string peerIdString;
+    ulong peerId;
 
     bool status;
-    status = Configuration::getValue ("Peer ID", peerIdString);
+    status = Configuration::getValue("Peer ID", peerIdString);
 
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
-    peerId = strtoul (peerIdString.c_str(), 0, 0);
+    peerId = strtoul(peerIdString.c_str(), 0, 0);
 
     JsonWriter writer;
     writer.beginObject();
@@ -919,7 +930,7 @@ performDeactivateDtcpPeer ()
     status = JsonRpcClient::call("deactivatePeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("deactivatePeer RPC call failed!");
+        Log::Error("deactivatePeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -930,23 +941,22 @@ performDeactivateDtcpPeer ()
 }
 
 
-
 bool
-performPingDtcpPeer ()
+performPingDtcpPeer()
 {
-    Log::Debug ("performPingDtcpPeer invoked.");
+    Log::Debug("performPingDtcpPeer invoked.");
 
-    string  peerIdString;
-    ulong   peerId;
+    string peerIdString;
+    ulong peerId;
 
     bool status;
-    status = Configuration::getValue ("Peer ID", peerIdString);
+    status = Configuration::getValue("Peer ID", peerIdString);
 
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
-    peerId = strtoul (peerIdString.c_str(), 0, 0);
+    peerId = strtoul(peerIdString.c_str(), 0, 0);
 
     JsonWriter writer;
     writer.beginObject();
@@ -958,7 +968,7 @@ performPingDtcpPeer ()
     status = JsonRpcClient::call("pingPeer", writer.result(), result);
 
     if (!status) {
-        Log::Error ("pingPeer RPC call failed!");
+        Log::Error("pingPeer RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -969,23 +979,22 @@ performPingDtcpPeer ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Network filter commands
 // ---------------------------------------------------------------------------
 
 bool
-performExcludeHost ()
+performExcludeHost()
 {
-    Log::Debug ("performExcludeHost invoked.");
+    Log::Debug("performExcludeHost invoked.");
 
     bool status;
     string ipAddress;
 
-    status = Configuration::getValue ("IP Address", ipAddress);
+    status = Configuration::getValue("IP Address", ipAddress);
 
     if (!status) {
-        Log::Error ("No IP Address value given!");
+        Log::Error("No IP Address value given!");
         return false;
     }
 
@@ -999,7 +1008,7 @@ performExcludeHost ()
     status = JsonRpcClient::call("excludeHost", writer.result(), result);
 
     if (!status) {
-        Log::Error ("excludeHost RPC call failed!");
+        Log::Error("excludeHost RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1010,26 +1019,25 @@ performExcludeHost ()
 }
 
 
-
 bool
-performExcludeSubnet ()
+performExcludeSubnet()
 {
-    Log::Debug ("performExcludeSubnet invoked.");
+    Log::Debug("performExcludeSubnet invoked.");
 
     bool status;
     string subnetIpAddress;
     string subnetMask;
 
-    status = Configuration::getValue ("Subnet IP Address", subnetIpAddress);
+    status = Configuration::getValue("Subnet IP Address", subnetIpAddress);
 
     if (!status) {
-        Log::Error ("No Subnet IP Address value given!");
+        Log::Error("No Subnet IP Address value given!");
         return false;
     }
-    status = Configuration::getValue ("Subnet Mask", subnetMask);
+    status = Configuration::getValue("Subnet Mask", subnetMask);
 
     if (!status) {
-        Log::Error ("No Subnet Mask value given!");
+        Log::Error("No Subnet Mask value given!");
         return false;
     }
 
@@ -1045,7 +1053,7 @@ performExcludeSubnet ()
     status = JsonRpcClient::call("excludeSubnet", writer.result(), result);
 
     if (!status) {
-        Log::Error ("excludeSubnet RPC call failed!");
+        Log::Error("excludeSubnet RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1056,19 +1064,18 @@ performExcludeSubnet ()
 }
 
 
-
 bool
-performAllowHost ()
+performAllowHost()
 {
-    Log::Debug ("performAllowHost invoked.");
+    Log::Debug("performAllowHost invoked.");
 
     bool status;
     string ipAddress;
 
-    status = Configuration::getValue ("IP Address", ipAddress);
+    status = Configuration::getValue("IP Address", ipAddress);
 
     if (!status) {
-        Log::Error ("No IP Address value given!");
+        Log::Error("No IP Address value given!");
         return false;
     }
 
@@ -1082,7 +1089,7 @@ performAllowHost ()
     status = JsonRpcClient::call("allowHost", writer.result(), result);
 
     if (!status) {
-        Log::Error ("allowHost RPC call failed!");
+        Log::Error("allowHost RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1093,19 +1100,18 @@ performAllowHost ()
 }
 
 
-
 bool
-performAllowSubnet ()
+performAllowSubnet()
 {
-    Log::Debug ("performAllowSubnet invoked.");
+    Log::Debug("performAllowSubnet invoked.");
 
     bool status;
     string subnetIpAddress;
 
-    status = Configuration::getValue ("Subnet IP Address", subnetIpAddress);
+    status = Configuration::getValue("Subnet IP Address", subnetIpAddress);
 
     if (!status) {
-        Log::Error ("No Subnet IP Address value given!");
+        Log::Error("No Subnet IP Address value given!");
         return false;
     }
 
@@ -1119,7 +1125,7 @@ performAllowSubnet ()
     status = JsonRpcClient::call("allowSubnet", writer.result(), result);
 
     if (!status) {
-        Log::Error ("allowSubnet RPC call failed!");
+        Log::Error("allowSubnet RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1130,17 +1136,16 @@ performAllowSubnet ()
 }
 
 
-
 bool
-performListExcludedHosts ()
+performListExcludedHosts()
 {
-    Log::Debug ("performListExcludedHosts invoked.");
+    Log::Debug("performListExcludedHosts invoked.");
 
     string result;
     bool status = JsonRpcClient::call("listExcludedHosts", "{}", result);
 
     if (!status) {
-        Log::Error ("listExcludedHosts RPC call failed!");
+        Log::Error("listExcludedHosts RPC call failed!");
         return false;
     }
 
@@ -1155,12 +1160,10 @@ performListExcludedHosts ()
     // Find the array content
     ulong arrStart = result.find('[');
     ulong arrEnd = result.rfind(']');
-    if (arrStart != string::npos && arrEnd != string::npos && arrEnd > arrStart)
-    {
+    if (arrStart != string::npos && arrEnd != string::npos && arrEnd > arrStart) {
         string arrContent = result.substr(arrStart + 1, arrEnd - arrStart - 1);
         ulong pos = 0;
-        while (pos < arrContent.length())
-        {
+        while (pos < arrContent.length()) {
             ulong qStart = arrContent.find('"', pos);
             if (qStart == string::npos)
                 break;
@@ -1183,17 +1186,16 @@ performListExcludedHosts ()
 }
 
 
-
 bool
-performListExcludedSubnets ()
+performListExcludedSubnets()
 {
-    Log::Debug ("performListExcludedSubnets invoked.");
+    Log::Debug("performListExcludedSubnets invoked.");
 
     string result;
     bool status = JsonRpcClient::call("listExcludedSubnets", "{}", result);
 
     if (!status) {
-        Log::Error ("listExcludedSubnets RPC call failed!");
+        Log::Error("listExcludedSubnets RPC call failed!");
         return false;
     }
 
@@ -1206,8 +1208,7 @@ performListExcludedSubnets ()
 
     // Simple parsing — find each {"ipAddress":"...","netMask":"..."} pair
     ulong searchPos = 0;
-    while (searchPos < result.length())
-    {
+    while (searchPos < result.length()) {
         ulong objStart = result.find('{', searchPos);
         if (objStart == string::npos)
             break;
@@ -1220,14 +1221,10 @@ performListExcludedSubnets ()
 
         string ipAddr;
         string netMask;
-        if (objReader.getString("ipAddress", ipAddr) &&
-            objReader.getString("netMask", netMask))
-        {
+        if (objReader.getString("ipAddress", ipAddr) && objReader.getString("netMask", netMask)) {
             if (verbose_s) {
-                cout << "   Subnet Address: " << ipAddr
-                     << " \tSubnet Mask: " << netMask << endl;
-            }
-            else {
+                cout << "   Subnet Address: " << ipAddr << " \tSubnet Mask: " << netMask << endl;
+            } else {
                 cout << ipAddr << "/" << netMask << endl;
             }
         }
@@ -1242,29 +1239,27 @@ performListExcludedSubnets ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Group commands
 // ---------------------------------------------------------------------------
 
 bool
-performGetUserGroupList ()
+performGetUserGroupList()
 {
-    Log::Debug ("performGetUserGroupList invoked.");
+    Log::Debug("performGetUserGroupList invoked.");
 
     string result;
     bool status = JsonRpcClient::call("listGroups", "{}", result);
 
     if (!status) {
-        Log::Error ("listGroups RPC call failed!");
+        Log::Error("listGroups RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -1272,22 +1267,21 @@ performGetUserGroupList ()
 }
 
 
-
 bool
-performCreateUserGroup ()
+performCreateUserGroup()
 {
-    Log::Debug ("performCreateUserGroup invoked.");
+    Log::Debug("performCreateUserGroup invoked.");
 
     string groupName;
     string description;
 
-    bool status = Configuration::getValue ("Group Name", groupName);
+    bool status = Configuration::getValue("Group Name", groupName);
     if (!status) {
-        Log::Error ("No Group Name value given!");
+        Log::Error("No Group Name value given!");
         return false;
     }
 
-    Configuration::getValue ("Description", description);
+    Configuration::getValue("Description", description);
 
     JsonWriter writer;
     writer.beginObject();
@@ -1301,7 +1295,7 @@ performCreateUserGroup ()
     status = JsonRpcClient::call("createGroup", writer.result(), result);
 
     if (!status) {
-        Log::Error ("createGroup RPC call failed!");
+        Log::Error("createGroup RPC call failed!");
         return false;
     }
 
@@ -1312,8 +1306,7 @@ performCreateUserGroup ()
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Group ID: " << groupId << endl;
-    }
-    else {
+    } else {
         cout << groupId << endl;
     }
 
@@ -1321,16 +1314,15 @@ performCreateUserGroup ()
 }
 
 
-
 bool
-performDestroyUserGroup ()
+performDestroyUserGroup()
 {
-    Log::Debug ("performDestroyUserGroup invoked.");
+    Log::Debug("performDestroyUserGroup invoked.");
 
     string groupIdStr;
-    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    bool status = Configuration::getValue("Group ID", groupIdStr);
     if (!status) {
-        Log::Error ("No Group ID value given!");
+        Log::Error("No Group ID value given!");
         return false;
     }
 
@@ -1346,7 +1338,7 @@ performDestroyUserGroup ()
     status = JsonRpcClient::call("deleteGroup", writer.result(), result);
 
     if (!status) {
-        Log::Error ("deleteGroup RPC call failed!");
+        Log::Error("deleteGroup RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1357,16 +1349,15 @@ performDestroyUserGroup ()
 }
 
 
-
 bool
-performGetPeerUserGroupList ()
+performGetPeerUserGroupList()
 {
-    Log::Debug ("performGetPeerUserGroupList invoked.");
+    Log::Debug("performGetPeerUserGroupList invoked.");
 
     string groupIdStr;
-    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    bool status = Configuration::getValue("Group ID", groupIdStr);
     if (!status) {
-        Log::Error ("No Group ID value given!");
+        Log::Error("No Group ID value given!");
         return false;
     }
 
@@ -1382,15 +1373,14 @@ performGetPeerUserGroupList ()
     status = JsonRpcClient::call("getGroupPeerList", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getGroupPeerList RPC call failed!");
+        Log::Error("getGroupPeerList RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -1398,24 +1388,23 @@ performGetPeerUserGroupList ()
 }
 
 
-
 bool
-performAddPeerToGroup ()
+performAddPeerToGroup()
 {
-    Log::Debug ("performAddPeerToGroup invoked.");
+    Log::Debug("performAddPeerToGroup invoked.");
 
     string groupIdStr;
     string peerIdStr;
 
-    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    bool status = Configuration::getValue("Group ID", groupIdStr);
     if (!status) {
-        Log::Error ("No Group ID value given!");
+        Log::Error("No Group ID value given!");
         return false;
     }
 
-    status = Configuration::getValue ("Peer ID", peerIdStr);
+    status = Configuration::getValue("Peer ID", peerIdStr);
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
 
@@ -1434,7 +1423,7 @@ performAddPeerToGroup ()
     status = JsonRpcClient::call("addPeerToGroup", writer.result(), result);
 
     if (!status) {
-        Log::Error ("addPeerToGroup RPC call failed!");
+        Log::Error("addPeerToGroup RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1445,24 +1434,23 @@ performAddPeerToGroup ()
 }
 
 
-
 bool
-performRemovePeerFromGroup ()
+performRemovePeerFromGroup()
 {
-    Log::Debug ("performRemovePeerFromGroup invoked.");
+    Log::Debug("performRemovePeerFromGroup invoked.");
 
     string groupIdStr;
     string peerIdStr;
 
-    bool status = Configuration::getValue ("Group ID", groupIdStr);
+    bool status = Configuration::getValue("Group ID", groupIdStr);
     if (!status) {
-        Log::Error ("No Group ID value given!");
+        Log::Error("No Group ID value given!");
         return false;
     }
 
-    status = Configuration::getValue ("Peer ID", peerIdStr);
+    status = Configuration::getValue("Peer ID", peerIdStr);
     if (!status) {
-        Log::Error ("No Peer ID value given!");
+        Log::Error("No Peer ID value given!");
         return false;
     }
 
@@ -1481,7 +1469,7 @@ performRemovePeerFromGroup ()
     status = JsonRpcClient::call("removePeerFromGroup", writer.result(), result);
 
     if (!status) {
-        Log::Error ("removePeerFromGroup RPC call failed!");
+        Log::Error("removePeerFromGroup RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1492,25 +1480,23 @@ performRemovePeerFromGroup ()
 }
 
 
-
 bool
-performGetExtendedPeerList ()
+performGetExtendedPeerList()
 {
-    Log::Debug ("performGetExtendedPeerList invoked.");
+    Log::Debug("performGetExtendedPeerList invoked.");
 
     string result;
     bool status = JsonRpcClient::call("getAllPeers", "{}", result);
 
     if (!status) {
-        Log::Error ("getAllPeers RPC call failed!");
+        Log::Error("getAllPeers RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -1518,20 +1504,19 @@ performGetExtendedPeerList ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Query commands
 // ---------------------------------------------------------------------------
 
 bool
-performStartQuery ()
+performStartQuery()
 {
-    Log::Debug ("performStartQuery invoked.");
+    Log::Debug("performStartQuery invoked.");
 
     string queryString;
-    bool status = Configuration::getValue ("Query String", queryString);
+    bool status = Configuration::getValue("Query String", queryString);
     if (!status) {
-        Log::Error ("No Query String value given!");
+        Log::Error("No Query String value given!");
         return false;
     }
 
@@ -1541,19 +1526,19 @@ performStartQuery ()
     writer.value(queryString);
 
     string groupName;
-    if (Configuration::getValue ("Group Name", groupName)) {
+    if (Configuration::getValue("Group Name", groupName)) {
         writer.key("groupName");
         writer.value(groupName);
     }
 
     string autoHaltStr;
-    if (Configuration::getValue ("Auto Halt Limit", autoHaltStr)) {
+    if (Configuration::getValue("Auto Halt Limit", autoHaltStr)) {
         writer.key("autoHaltLimit");
         writer.value(strtoul(autoHaltStr.c_str(), 0, 0));
     }
 
     string peerDescStr;
-    if (Configuration::getValue ("Peer Description Limit", peerDescStr)) {
+    if (Configuration::getValue("Peer Description Limit", peerDescStr)) {
         writer.key("peerDescMax");
         writer.value(strtoul(peerDescStr.c_str(), 0, 0));
     }
@@ -1564,7 +1549,7 @@ performStartQuery ()
     status = JsonRpcClient::call("startQuery", writer.result(), result);
 
     if (!status) {
-        Log::Error ("startQuery RPC call failed!");
+        Log::Error("startQuery RPC call failed!");
         return false;
     }
 
@@ -1575,8 +1560,7 @@ performStartQuery ()
     if (verbose_s) {
         cout << "Query start successful.\n";
         cout << "Query ID: " << queryId << endl;
-    }
-    else {
+    } else {
         cout << queryId << endl;
     }
 
@@ -1584,16 +1568,15 @@ performStartQuery ()
 }
 
 
-
 bool
-performGetQueryStatus ()
+performGetQueryStatus()
 {
-    Log::Debug ("performGetQueryStatus invoked.");
+    Log::Debug("performGetQueryStatus invoked.");
 
     string queryIdStr;
-    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    bool status = Configuration::getValue("Query ID", queryIdStr);
     if (!status) {
-        Log::Error ("No Query ID value given!");
+        Log::Error("No Query ID value given!");
         return false;
     }
 
@@ -1609,7 +1592,7 @@ performGetQueryStatus ()
     status = JsonRpcClient::call("getQueryStatus", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getQueryStatus RPC call failed!");
+        Log::Error("getQueryStatus RPC call failed!");
         return false;
     }
 
@@ -1628,8 +1611,7 @@ performGetQueryStatus ()
         cout << "Peer Responses: " << numResponses << endl;
         cout << "Total Hits: " << totalHits << endl;
         cout << "---\n\n";
-    }
-    else {
+    } else {
         cout << totalPeers << " ";
         cout << peersQueried << " ";
         cout << numResponses << " ";
@@ -1640,16 +1622,15 @@ performGetQueryStatus ()
 }
 
 
-
 bool
-performPauseQuery ()
+performPauseQuery()
 {
-    Log::Debug ("performPauseQuery invoked.");
+    Log::Debug("performPauseQuery invoked.");
 
     string queryIdStr;
-    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    bool status = Configuration::getValue("Query ID", queryIdStr);
     if (!status) {
-        Log::Error ("No Query ID value given!");
+        Log::Error("No Query ID value given!");
         return false;
     }
 
@@ -1665,7 +1646,7 @@ performPauseQuery ()
     status = JsonRpcClient::call("pauseQuery", writer.result(), result);
 
     if (!status) {
-        Log::Error ("pauseQuery RPC call failed!");
+        Log::Error("pauseQuery RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1676,16 +1657,15 @@ performPauseQuery ()
 }
 
 
-
 bool
-performResumeQuery ()
+performResumeQuery()
 {
-    Log::Debug ("performResumeQuery invoked.");
+    Log::Debug("performResumeQuery invoked.");
 
     string queryIdStr;
-    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    bool status = Configuration::getValue("Query ID", queryIdStr);
     if (!status) {
-        Log::Error ("No Query ID value given!");
+        Log::Error("No Query ID value given!");
         return false;
     }
 
@@ -1701,7 +1681,7 @@ performResumeQuery ()
     status = JsonRpcClient::call("resumeQuery", writer.result(), result);
 
     if (!status) {
-        Log::Error ("resumeQuery RPC call failed!");
+        Log::Error("resumeQuery RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1712,16 +1692,15 @@ performResumeQuery ()
 }
 
 
-
 bool
-performCancelQuery ()
+performCancelQuery()
 {
-    Log::Debug ("performCancelQuery invoked.");
+    Log::Debug("performCancelQuery invoked.");
 
     string queryIdStr;
-    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    bool status = Configuration::getValue("Query ID", queryIdStr);
     if (!status) {
-        Log::Error ("No Query ID value given!");
+        Log::Error("No Query ID value given!");
         return false;
     }
 
@@ -1737,7 +1716,7 @@ performCancelQuery ()
     status = JsonRpcClient::call("cancelQuery", writer.result(), result);
 
     if (!status) {
-        Log::Error ("cancelQuery RPC call failed!");
+        Log::Error("cancelQuery RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1748,16 +1727,15 @@ performCancelQuery ()
 }
 
 
-
 bool
-performGetQueryResults ()
+performGetQueryResults()
 {
-    Log::Debug ("performGetQueryResults invoked.");
+    Log::Debug("performGetQueryResults invoked.");
 
     string queryIdStr;
-    bool status = Configuration::getValue ("Query ID", queryIdStr);
+    bool status = Configuration::getValue("Query ID", queryIdStr);
     if (!status) {
-        Log::Error ("No Query ID value given!");
+        Log::Error("No Query ID value given!");
         return false;
     }
 
@@ -1773,15 +1751,14 @@ performGetQueryResults ()
     status = JsonRpcClient::call("getQueryResults", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getQueryResults RPC call failed!");
+        Log::Error("getQueryResults RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -1789,28 +1766,27 @@ performGetQueryResults ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Module commands
 // ---------------------------------------------------------------------------
 
 bool
-performRegisterModule ()
+performRegisterModule()
 {
-    Log::Debug ("performRegisterModule invoked.");
+    Log::Debug("performRegisterModule invoked.");
 
     string libPath;
     string symbol;
 
-    bool status = Configuration::getValue ("Module Lib Path", libPath);
+    bool status = Configuration::getValue("Module Lib Path", libPath);
     if (!status) {
-        Log::Error ("No Module Lib Path value given!");
+        Log::Error("No Module Lib Path value given!");
         return false;
     }
 
-    status = Configuration::getValue ("Module Symbol", symbol);
+    status = Configuration::getValue("Module Symbol", symbol);
     if (!status) {
-        Log::Error ("No Module Symbol value given!");
+        Log::Error("No Module Symbol value given!");
         return false;
     }
 
@@ -1826,7 +1802,7 @@ performRegisterModule ()
     status = JsonRpcClient::call("registerModule", writer.result(), result);
 
     if (!status) {
-        Log::Error ("registerModule RPC call failed!");
+        Log::Error("registerModule RPC call failed!");
         return false;
     }
 
@@ -1837,8 +1813,7 @@ performRegisterModule ()
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Module ID: " << moduleId << endl;
-    }
-    else {
+    } else {
         cout << moduleId << endl;
     }
 
@@ -1846,16 +1821,15 @@ performRegisterModule ()
 }
 
 
-
 bool
-performUnregisterModule ()
+performUnregisterModule()
 {
-    Log::Debug ("performUnregisterModule invoked.");
+    Log::Debug("performUnregisterModule invoked.");
 
     string moduleIdStr;
-    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    bool status = Configuration::getValue("Module ID", moduleIdStr);
     if (!status) {
-        Log::Error ("No Module ID value given!");
+        Log::Error("No Module ID value given!");
         return false;
     }
 
@@ -1871,7 +1845,7 @@ performUnregisterModule ()
     status = JsonRpcClient::call("unregisterModule", writer.result(), result);
 
     if (!status) {
-        Log::Error ("unregisterModule RPC call failed!");
+        Log::Error("unregisterModule RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1882,16 +1856,15 @@ performUnregisterModule ()
 }
 
 
-
 bool
-performLoadModule ()
+performLoadModule()
 {
-    Log::Debug ("performLoadModule invoked.");
+    Log::Debug("performLoadModule invoked.");
 
     string moduleIdStr;
-    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    bool status = Configuration::getValue("Module ID", moduleIdStr);
     if (!status) {
-        Log::Error ("No Module ID value given!");
+        Log::Error("No Module ID value given!");
         return false;
     }
 
@@ -1907,7 +1880,7 @@ performLoadModule ()
     status = JsonRpcClient::call("loadModule", writer.result(), result);
 
     if (!status) {
-        Log::Error ("loadModule RPC call failed!");
+        Log::Error("loadModule RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1918,16 +1891,15 @@ performLoadModule ()
 }
 
 
-
 bool
-performUnloadModule ()
+performUnloadModule()
 {
-    Log::Debug ("performUnloadModule invoked.");
+    Log::Debug("performUnloadModule invoked.");
 
     string moduleIdStr;
-    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    bool status = Configuration::getValue("Module ID", moduleIdStr);
     if (!status) {
-        Log::Error ("No Module ID value given!");
+        Log::Error("No Module ID value given!");
         return false;
     }
 
@@ -1943,7 +1915,7 @@ performUnloadModule ()
     status = JsonRpcClient::call("unloadModule", writer.result(), result);
 
     if (!status) {
-        Log::Error ("unloadModule RPC call failed!");
+        Log::Error("unloadModule RPC call failed!");
         return false;
     }
     if (verbose_s) {
@@ -1954,25 +1926,23 @@ performUnloadModule ()
 }
 
 
-
 bool
-performListActiveModules ()
+performListActiveModules()
 {
-    Log::Debug ("performListActiveModules invoked.");
+    Log::Debug("performListActiveModules invoked.");
 
     string result;
     bool status = JsonRpcClient::call("listActiveModules", "{}", result);
 
     if (!status) {
-        Log::Error ("listActiveModules RPC call failed!");
+        Log::Error("listActiveModules RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -1980,25 +1950,23 @@ performListActiveModules ()
 }
 
 
-
 bool
-performListAllModules ()
+performListAllModules()
 {
-    Log::Debug ("performListAllModules invoked.");
+    Log::Debug("performListAllModules invoked.");
 
     string result;
     bool status = JsonRpcClient::call("listAllModules", "{}", result);
 
     if (!status) {
-        Log::Error ("listAllModules RPC call failed!");
+        Log::Error("listAllModules RPC call failed!");
         return false;
     }
 
     if (verbose_s) {
         cout << "Request successful.\n";
         cout << "Result: " << result << endl;
-    }
-    else {
+    } else {
         cout << result << endl;
     }
 
@@ -2006,16 +1974,15 @@ performListAllModules ()
 }
 
 
-
 bool
-performGetModuleInfo ()
+performGetModuleInfo()
 {
-    Log::Debug ("performGetModuleInfo invoked.");
+    Log::Debug("performGetModuleInfo invoked.");
 
     string moduleIdStr;
-    bool status = Configuration::getValue ("Module ID", moduleIdStr);
+    bool status = Configuration::getValue("Module ID", moduleIdStr);
     if (!status) {
-        Log::Error ("No Module ID value given!");
+        Log::Error("No Module ID value given!");
         return false;
     }
 
@@ -2031,7 +1998,7 @@ performGetModuleInfo ()
     status = JsonRpcClient::call("getModuleInfo", writer.result(), result);
 
     if (!status) {
-        Log::Error ("getModuleInfo RPC call failed!");
+        Log::Error("getModuleInfo RPC call failed!");
         return false;
     }
 
@@ -2057,8 +2024,7 @@ performGetModuleInfo ()
         cout << "Symbol: " << modSym << endl;
         cout << "Active Time: " << activeTime << endl;
         cout << "---\n\n";
-    }
-    else {
+    } else {
         cout << modId << " " << modName << " " << modVer << endl;
     }
 
@@ -2066,21 +2032,20 @@ performGetModuleInfo ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Status commands
 // ---------------------------------------------------------------------------
 
 bool
-performGetStatus ()
+performGetStatus()
 {
-    Log::Debug ("performGetStatus invoked.");
+    Log::Debug("performGetStatus invoked.");
 
     string result;
     bool status = JsonRpcClient::call("getStatus", "{}", result);
 
     if (!status) {
-        Log::Error ("getStatus RPC call failed!");
+        Log::Error("getStatus RPC call failed!");
         return false;
     }
 
@@ -2096,14 +2061,12 @@ performGetStatus ()
         cout << "Status: " << serverStatus << endl;
         cout << "Version: " << version << endl;
         cout << "---\n\n";
-    }
-    else {
+    } else {
         cout << serverStatus << " " << version << endl;
     }
 
     return true;
 }
-
 
 
 // ---------------------------------------------------------------------------
@@ -2114,13 +2077,13 @@ performGetStatus ()
 /// Resolve the history file path (~/.alpine_history).
 ///
 static string
-historyFilePath ()
+historyFilePath()
 {
     string path;
 
-    const char * home = getenv ("HOME");
+    const char * home = getenv("HOME");
     if (home) {
-        path = string (home) + "/.alpine_history"s;
+        path = string(home) + "/.alpine_history"s;
     } else {
         path = ".alpine_history"s;
     }
@@ -2128,33 +2091,31 @@ historyFilePath ()
 }
 
 
-
 /// Linenoise tab-completion callback.
 /// Matches partially-typed input against the dispatch table keys.
 ///
 void
-linenoiseCompletionCallback (const char * buf, linenoiseCompletions * lc)
+alpineCompletionCallback(const char * buf, linenoiseCompletions * lc)
 {
     if (!dispatchTable_s || !buf)
         return;
 
-    string prefix (buf);
+    string prefix(buf);
 
     for (const auto & [name, entry] : *dispatchTable_s) {
-        if (name.starts_with (prefix)) {
-            linenoiseAddCompletion (lc, name.c_str ());
+        if (name.starts_with(prefix)) {
+            linenoiseAddCompletion(lc, name.c_str());
         }
     }
 
     // REPL built-in commands
-    static const char * builtins[] = { "help", "exit", "quit", nullptr };
+    static const char * builtins[] = {"help", "exit", "quit", nullptr};
     for (const char ** cmd = builtins; *cmd; ++cmd) {
-        if (string (*cmd).starts_with (prefix)) {
-            linenoiseAddCompletion (lc, *cmd);
+        if (string(*cmd).starts_with(prefix)) {
+            linenoiseAddCompletion(lc, *cmd);
         }
     }
 }
-
 
 
 /// Enter the interactive REPL loop.
@@ -2162,45 +2123,44 @@ linenoiseCompletionCallback (const char * buf, linenoiseCompletions * lc)
 /// Returns the process exit code (0 on clean exit).
 ///
 int
-runInteractive (const string & serverAddress, ushort serverPort)
+runInteractive(const string & serverAddress, ushort serverPort)
 {
-    string histFile = historyFilePath ();
+    string histFile = historyFilePath();
 
     // Configure linenoise
-    linenoiseSetMultiLine (0);
-    linenoiseHistorySetMaxLen (500);
-    linenoiseHistoryLoad (histFile.c_str ());
-    linenoiseSetCompletionCallback (linenoiseCompletionCallback);
+    linenoiseSetMultiLine(0);
+    linenoiseHistorySetMaxLen(500);
+    linenoiseHistoryLoad(histFile.c_str());
+    linenoiseSetCompletionCallback(alpineCompletionCallback);
 
     if (!quietOutput_s) {
-        cout << "Alpine interactive shell (server "s
-             << serverAddress << ":"s << serverPort << ")\n"s
+        cout << "Alpine interactive shell (server "s << serverAddress << ":"s << serverPort << ")\n"s
              << "Type a command name, 'help' for a list, or Ctrl-D to exit.\n"s;
     }
 
     while (true) {
-        char * line = linenoise ("alpine> ");
+        char * line = linenoise("alpine> ");
 
         if (!line) {
             // EOF / Ctrl-D
             break;
         }
 
-        string input (line);
-        linenoiseFree (line);
+        string input(line);
+        linenoiseFree(line);
 
         // Trim leading/trailing whitespace
-        while (!input.empty () && input.front () == ' ')
-            input.erase (input.begin ());
-        while (!input.empty () && input.back () == ' ')
-            input.pop_back ();
+        while (!input.empty() && input.front() == ' ')
+            input.erase(input.begin());
+        while (!input.empty() && input.back() == ' ')
+            input.pop_back();
 
-        if (input.empty ())
+        if (input.empty())
             continue;
 
         // Add to history and persist
-        linenoiseHistoryAdd (input.c_str ());
-        linenoiseHistorySave (histFile.c_str ());
+        linenoiseHistoryAdd(input.c_str());
+        linenoiseHistorySave(histFile.c_str());
 
         // Built-in REPL commands
         if (input == "exit"s || input == "quit"s) {
@@ -2208,30 +2168,29 @@ runInteractive (const string & serverAddress, ushort serverPort)
         }
 
         if (input == "help"s) {
-            printCommandList ();
+            printCommandList();
             continue;
         }
 
-        if (input.starts_with ("help "s)) {
-            string helpCmd = input.substr (5);
-            while (!helpCmd.empty () && helpCmd.front () == ' ')
-                helpCmd.erase (helpCmd.begin ());
-            if (!helpCmd.empty ()) {
-                printCommandHelp (helpCmd);
+        if (input.starts_with("help "s)) {
+            string helpCmd = input.substr(5);
+            while (!helpCmd.empty() && helpCmd.front() == ' ')
+                helpCmd.erase(helpCmd.begin());
+            if (!helpCmd.empty()) {
+                printCommandHelp(helpCmd);
             } else {
-                printCommandList ();
+                printCommandList();
             }
             continue;
         }
 
         // Dispatch the command
-        if (!commandExists (input)) {
-            cerr << "Unknown command: "s << input
-                 << ".  Type 'help' for a list." << endl;
+        if (!commandExists(input)) {
+            cerr << "Unknown command: "s << input << ".  Type 'help' for a list." << endl;
             continue;
         }
 
-        handleCommand (input);
+        handleCommand(input);
     }
 
     if (!quietOutput_s) {
@@ -2240,5 +2199,3 @@ runInteractive (const string & serverAddress, ushort serverPort)
 
     return 0;
 }
-
-

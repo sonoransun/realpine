@@ -11,16 +11,11 @@
 class PeerHandler
 {
   public:
-
-    static void  registerRoutes (HttpRouter & router);
+    static void registerRoutes(HttpRouter & router);
 
 
   private:
+    static HttpResponse getAllPeers(const HttpRequest & request, const std::unordered_map<string, string> & params);
 
-    static HttpResponse  getAllPeers (const HttpRequest & request,
-                                     const std::unordered_map<string, string> & params);
-
-    static HttpResponse  getPeer (const HttpRequest & request,
-                                  const std::unordered_map<string, string> & params);
-
+    static HttpResponse getPeer(const HttpRequest & request, const std::unordered_map<string, string> & params);
 };

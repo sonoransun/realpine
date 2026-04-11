@@ -6,29 +6,23 @@
 #include <StringUtils.h>
 
 
-
-ArgumentMap::ArgumentMap ()
+ArgumentMap::ArgumentMap()
 {
     argIndex_ = nullptr;
 }
 
 
-
-ArgumentMap::~ArgumentMap ()
+ArgumentMap::~ArgumentMap()
 {
     delete argIndex_;
 }
 
 
-  
-bool  
-ArgumentMap::load (int     argc,
-                   char ** argv)
+bool
+ArgumentMap::load(int argc, char ** argv)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ArgumentMap::load invoked"s +
-                "\nArg Count: "s + std::to_string(argc) +
-                "\n");
+    Log::Debug("ArgumentMap::load invoked"s + "\nArg Count: "s + std::to_string(argc) + "\n");
 #endif
 
     if (!argIndex_) {
@@ -55,7 +49,7 @@ ArgumentMap::load (int     argc,
     currArgPtr = argv;
     currArg = *(currArgPtr++);
     lastArg = argv[argc - 1];
-    
+
 
     bool finished = false;
 
@@ -69,24 +63,21 @@ ArgumentMap::load (int     argc,
                 // the previous option has no value, insert into the index,
                 // update the optionName to this new option.
                 //
-                argIndex_->emplace (std::string(optionName), "");
+                argIndex_->emplace(std::string(optionName), "");
 
 #ifdef _VERBOSE
-                Log::Debug ("Added null option name: "s + std::string(optionName));
+                Log::Debug("Added null option name: "s + std::string(optionName));
 #endif
 
-                if (*(currArg+1) == '-') {
+                if (*(currArg + 1) == '-') {
                     optionName = currArg + 2;
-                }
-                else {
+                } else {
                     optionName = currArg + 1;
                 }
-            }
-            else {
-                if (*(currArg+1) == '-') {
+            } else {
+                if (*(currArg + 1) == '-') {
                     optionName = currArg + 2;
-                }
-                else {
+                } else {
                     optionName = currArg + 1;
                 }
             }
@@ -95,8 +86,7 @@ ArgumentMap::load (int     argc,
             //
             if (currArg == lastArg) {
                 finished = true;
-            }
-            else {
+            } else {
                 currArg = *(currArgPtr++);
             }
 
@@ -109,11 +99,10 @@ ArgumentMap::load (int     argc,
 
             // add to index and reset optionName...
             //
-            argIndex_->emplace (std::string(optionName), std::string(currArg));
+            argIndex_->emplace(std::string(optionName), std::string(currArg));
 
 #ifdef _VERBOSE
-            Log::Debug ("Added option: "s + std::string(optionName) + 
-                        "="s + std::string(currArg));
+            Log::Debug("Added option: "s + std::string(optionName) + "="s + std::string(currArg));
 #endif
 
             optionName = nullptr;
@@ -123,8 +112,7 @@ ArgumentMap::load (int     argc,
         //
         if (currArg == lastArg) {
             finished = true;
-        }
-        else {
+        } else {
             currArg = *(currArgPtr++);
         }
     }
@@ -134,36 +122,33 @@ ArgumentMap::load (int     argc,
 }
 
 
-
-bool  
-ArgumentMap::exists (const string & name)
+bool
+ArgumentMap::exists(const string & name)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ArgumentMap::exists invoked for option name: "s + name);
+    Log::Debug("ArgumentMap::exists invoked for option name: "s + name);
 #endif
 
     if (!argIndex_) {
         return false;
     }
-    return argIndex_->find (name) != argIndex_->end ();
+    return argIndex_->find(name) != argIndex_->end();
 }
 
 
-
 bool
-ArgumentMap::get (const string & name,
-                  string &       value)
+ArgumentMap::get(const string & name, string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ArgumentMap::get invoked for option name: "s + name);
+    Log::Debug("ArgumentMap::get invoked for option name: "s + name);
 #endif
 
     if (!argIndex_) {
         return false;
     }
-    auto iter = argIndex_->find (name);
+    auto iter = argIndex_->find(name);
 
-    if (iter == argIndex_->end ()) {
+    if (iter == argIndex_->end()) {
         // nope...
         return false;
     }
@@ -172,6 +157,3 @@ ArgumentMap::get (const string & name,
 
     return true;
 }
-
-
-

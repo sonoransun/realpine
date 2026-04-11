@@ -12,18 +12,14 @@ class TcpTransport;
 class TcpClientThread : public SysThread
 {
   public:
+    TcpClientThread(TcpTransport * transport);
 
-    TcpClientThread (TcpTransport *  transport);
-
-    virtual ~TcpClientThread ();
+    virtual ~TcpClientThread();
 
 
-    virtual void threadMain ();
+    virtual void threadMain();
 
 
   private:
-
-    TcpTransport *  transport_;
-
+    TcpTransport * transport_;
 };
-

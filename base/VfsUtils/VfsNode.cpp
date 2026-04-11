@@ -4,29 +4,25 @@
 #include <VfsNode.h>
 
 
-VfsNode::VfsNode (std::string_view  nodeName,
-                  t_NodeType        type,
-                  VfsNode *         parentNode)
-    : name       (nodeName),
-      nodeType   (type),
-      createdAt  (std::chrono::system_clock::now()),
-      accessedAt (std::chrono::system_clock::now()),
-      parent     (parentNode)
-{
-}
+VfsNode::VfsNode(std::string_view nodeName, t_NodeType type, VfsNode * parentNode)
+    : name(nodeName),
+      nodeType(type),
+      createdAt(std::chrono::system_clock::now()),
+      accessedAt(std::chrono::system_clock::now()),
+      parent(parentNode)
+{}
 
 
 VfsNode *
-VfsNode::addChild (std::string_view  childName,
-                   t_NodeType        type)
+VfsNode::addChild(std::string_view childName, t_NodeType type)
 {
     auto key = string(childName);
 
     if (children.contains(key))
         return children[key].get();
 
-    auto node    = std::make_unique<VfsNode>(childName, type, this);
-    auto * raw   = node.get();
+    auto node = std::make_unique<VfsNode>(childName, type, this);
+    auto * raw = node.get();
     children[key] = std::move(node);
 
     return raw;
@@ -34,10 +30,10 @@ VfsNode::addChild (std::string_view  childName,
 
 
 VfsNode *
-VfsNode::findChild (std::string_view  childName)
+VfsNode::findChild(std::string_view childName)
 {
     auto key = string(childName);
-    auto it  = children.find(key);
+    auto it = children.find(key);
 
     if (it == children.end())
         return nullptr;
@@ -48,7 +44,7 @@ VfsNode::findChild (std::string_view  childName)
 
 
 bool
-VfsNode::removeChild (std::string_view  childName)
+VfsNode::removeChild(std::string_view childName)
 {
     auto key = string(childName);
     return children.erase(key) > 0;
@@ -56,7 +52,7 @@ VfsNode::removeChild (std::string_view  childName)
 
 
 string
-VfsNode::fullPath () const
+VfsNode::fullPath() const
 {
     if (!parent)
         return "/"s + name;
@@ -72,7 +68,7 @@ VfsNode::fullPath () const
 
 
 bool
-VfsNode::isDirectory () const
+VfsNode::isDirectory() const
 {
     return nodeType == t_NodeType::Directory;
 }

@@ -2,8 +2,8 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AlpineBaseOptionData.h>
+#include <Common.h>
 
 
 ////
@@ -30,17 +30,12 @@ class DataBuffer;
 class AlpineProxyOptionData : public AlpineBaseOptionData
 {
   public:
+    AlpineProxyOptionData() = default;
 
-    AlpineProxyOptionData () = default;
-
-    virtual ~AlpineProxyOptionData ();
-
+    virtual ~AlpineProxyOptionData();
 
 
     // Copy option data
     //
-    virtual AlpineProxyOptionData *  duplicate () = 0;
-   
-
+    virtual AlpineProxyOptionData * duplicate() = 0;
 };
-

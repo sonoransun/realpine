@@ -1,0 +1,65 @@
+[Unit]
+Description=Alpine REST bridge — decentralized P2P resource discovery daemon
+Documentation=https://github.com/sonoransun/alpine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/AlpineRestBridge \
+    --configFile /etc/alpine/alpine.conf \
+    --logLevel Info
+Restart=on-failure
+RestartSec=2s
+
+# --- Hardening -----------------------------------------------------------
+# Alpine dynamically loads protocol plugin modules via dlopen, so the syscall
+# surface cannot be tightened beyond @system-service without breaking plugins.
+# Everything else is locked down.
+DynamicUser=yes
+NoNewPrivileges=yes
+
+ProtectSystem=strict
+ProtectHome=yes
+ProtectHostname=yes
+ProtectClock=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+PrivateTmp=yes
+PrivateDevices=yes
+MemoryDenyWriteExecute=yes
+RemoveIPC=yes
+
+# The daemon needs inet sockets for REST + UDP beacon + multicast discovery,
+# plus netlink for interface enumeration on Linux.
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+
+# No ambient capabilities — CAP_NET_RAW is only needed for the optional
+# raw-wifi transport, which is deliberately not enabled by the unit.  Operators
+# who want it can drop in /etc/systemd/system/alpine-rest-bridge.service.d/*.conf
+# with AmbientCapabilities=CAP_NET_RAW CapabilityBoundingSet=CAP_NET_RAW.
+AmbientCapabilities=
+CapabilityBoundingSet=
+
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources @obsolete
+SystemCallArchitectures=native
+
+# Writable directories the daemon expects.
+RuntimeDirectory=alpine
+StateDirectory=alpine
+LogsDirectory=alpine
+ConfigurationDirectory=alpine
+
+# File descriptor headroom for many concurrent HTTP + P2P connections.
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

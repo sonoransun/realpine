@@ -1,7 +1,6 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
 #include <DtcpBaseConnAcceptor.h>
 #include <DtcpBaseConnTransport.h>
 #include <DtcpPacket.h>
@@ -9,11 +8,10 @@
 #include <StringUtils.h>
 
 
-
-DtcpBaseConnAcceptor::DtcpBaseConnAcceptor ()
+DtcpBaseConnAcceptor::DtcpBaseConnAcceptor()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor constructor invoked.");
+    Log::Debug("DtcpBaseConnAcceptor constructor invoked.");
 #endif
 
     mux_ = nullptr;
@@ -21,22 +19,19 @@ DtcpBaseConnAcceptor::DtcpBaseConnAcceptor ()
 }
 
 
-
-DtcpBaseConnAcceptor::~DtcpBaseConnAcceptor ()
+DtcpBaseConnAcceptor::~DtcpBaseConnAcceptor()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor destructor invoked.");
+    Log::Debug("DtcpBaseConnAcceptor destructor invoked.");
 #endif
 }
 
 
-
-bool 
-DtcpBaseConnAcceptor::initialize (MuxInterface *        multiplexor,
-                                  TransportInterface *  parentTransport)
+bool
+DtcpBaseConnAcceptor::initialize(MuxInterface * multiplexor, TransportInterface * parentTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor::initialize invoked.");
+    Log::Debug("DtcpBaseConnAcceptor::initialize invoked.");
 #endif
 
     mux_ = multiplexor;
@@ -46,54 +41,52 @@ DtcpBaseConnAcceptor::initialize (MuxInterface *        multiplexor,
 }
 
 
-
-bool 
-DtcpBaseConnAcceptor::acceptConnection (StackLinkInterface * request)
+bool
+DtcpBaseConnAcceptor::acceptConnection(StackLinkInterface * request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor::acceptConnection invoked.");
+    Log::Debug("DtcpBaseConnAcceptor::acceptConnection invoked.");
 #endif
 
-    DtcpPacket *  dtcpPacket;
+    DtcpPacket * dtcpPacket;
 
-    dtcpPacket =  dynamic_cast<DtcpPacket *>(request);
+    dtcpPacket = dynamic_cast<DtcpPacket *>(request);
 
     if (!dtcpPacket) {
         return false;
     }
 
-    bool   status;
-    ulong  ipAddress;
+    bool status;
+    ulong ipAddress;
     ushort port;
 
-    status = dtcpPacket->getPeerLocation (ipAddress, port);
+    status = dtcpPacket->getPeerLocation(ipAddress, port);
 
     if (!status) {
         // Invalid packet?
         return false;
     }
-   
-    status = this->acceptConnection (ipAddress, port);
+
+    status = this->acceptConnection(ipAddress, port);
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnAcceptor::createTransport (TransportInterface *& transport)
+bool
+DtcpBaseConnAcceptor::createTransport(TransportInterface *& transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor::createTransport invoked.");
+    Log::Debug("DtcpBaseConnAcceptor::createTransport invoked.");
 #endif
 
     bool status;
     DtcpBaseConnTransport * connTransport;
 
-    status = createTransport (connTransport);
+    status = createTransport(connTransport);
 
-    if (status ==  false) {
-        Log::Error ("Derived createTransport failed in DtcpBaseConnAcceptor::createTransport.");
+    if (status == false) {
+        Log::Error("Derived createTransport failed in DtcpBaseConnAcceptor::createTransport.");
         return false;
     }
 
@@ -104,12 +97,11 @@ DtcpBaseConnAcceptor::createTransport (TransportInterface *& transport)
 }
 
 
-
 bool
-DtcpBaseConnAcceptor::receiveTransport (TransportInterface * transport)
+DtcpBaseConnAcceptor::receiveTransport(TransportInterface * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnAcceptor::receiveTransport invoked.");
+    Log::Debug("DtcpBaseConnAcceptor::receiveTransport invoked.");
 #endif
 
     bool status;
@@ -118,14 +110,12 @@ DtcpBaseConnAcceptor::receiveTransport (TransportInterface * transport)
     connTransport = dynamic_cast<DtcpBaseConnTransport *>(transport);
 
     if (!connTransport) {
-        Log::Error ("Invalid transport type passed to DtcpBaseConnAcceptor::receiveTransport.");
+        Log::Error("Invalid transport type passed to DtcpBaseConnAcceptor::receiveTransport.");
         return false;
     }
 
-    status = receiveTransport (connTransport);
+    status = receiveTransport(connTransport);
 
 
     return status;
 }
-
-

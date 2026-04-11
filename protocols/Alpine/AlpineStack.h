@@ -2,13 +2,13 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AlpineStackConfig.h>
+#include <Common.h>
 #include <ReadWriteSem.h>
-#include <condition_variable>
-#include <mutex>
-#include <functional>
 #include <atomic>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
 
 
 class AlpinePacket;
@@ -21,54 +21,50 @@ class DtcpBaseUdpTransport;
 class AlpineStack
 {
   public:
+    AlpineStack() = default;
+    ~AlpineStack() = default;
 
-    AlpineStack () = default;
-    ~AlpineStack () = default;
 
+    static bool initialize(AlpineStackConfig & configuration);
 
-    static bool  initialize (AlpineStackConfig &  configuration);
-
-    static void  cleanUp ();
+    static void cleanUp();
 
     /// Request the event processing loop to stop.
-    static void  requestShutdown ();
+    static void requestShutdown();
 
 
   private:
+    static bool initialized_s;
+    static AlpineServiceThread * serviceThread_s;
+    static AlpineStackConfig * configuration_s;
+    static AlpineDtcpUdpTransport * baseUdpTransport_s;  // primary unicast endpoint
+    static DtcpBaseUdpTransport * multicastTransport_s;
+    static DtcpBaseUdpTransport * broadcastTransport_s;
+    static DtcpBaseUdpTransport * rawWifiTransport_s;
+    static ReadWriteSem dataLock_s;
 
-    static bool                       initialized_s;
-    static AlpineServiceThread *      serviceThread_s;
-    static AlpineStackConfig *        configuration_s;
-    static AlpineDtcpUdpTransport *   baseUdpTransport_s;  // primary unicast endpoint
-    static DtcpBaseUdpTransport *     multicastTransport_s;
-    static DtcpBaseUdpTransport *     broadcastTransport_s;
-    static DtcpBaseUdpTransport *     rawWifiTransport_s;
-    static ReadWriteSem               dataLock_s;
-
-    static std::condition_variable    eventCV_s;
-    static std::mutex                 eventMutex_s;
-    static bool                       eventPending_s;
-    static std::atomic<bool>          shutdownRequested_s;
+    static std::condition_variable eventCV_s;
+    static std::mutex eventMutex_s;
+    static bool eventPending_s;
+    static std::atomic<bool> shutdownRequested_s;
 
 
-    static void  processEvents ();
+    static void processEvents();
 
 
   public:
-
     /// Wake the event loop immediately so it processes pending events
     /// without waiting for the poll timeout.  Safe to call from any thread.
-    static void  notifyEvent ();
+    static void notifyEvent();
 
     /// Callback invoked with query IDs that completed during processTimedEvents.
     /// Set by AlpineStackInterface to bridge async callback notifications.
     using CompletedQueryCallback = std::function<void(const std::vector<ulong> &)>;
-    static void  setCompletedQueryCallback (CompletedQueryCallback callback);
+    static void setCompletedQueryCallback(CompletedQueryCallback callback);
 
 
   private:
-
-    static CompletedQueryCallback     completedQueryCallback_s;
+    static CompletedQueryCallback completedQueryCallback_s;
 
 
     // The AlpineDtcpConn classes use the AlpineStack to coordinate
@@ -77,31 +73,24 @@ class AlpineStack
     // The following methods provide the entry points used by the derived
     // classes to handle various events they receive from the DTPC stack.
     //
-    static bool  registerTransport (ulong                      peerId,
-                                    AlpineDtcpConnTransport *  transport);
+    static bool registerTransport(ulong peerId, AlpineDtcpConnTransport * transport);
 
-    static bool  handleConnectionClose (ulong  peerId);
+    static bool handleConnectionClose(ulong peerId);
 
-    static bool  handleConnectionDeactivate (ulong  peerId);
+    static bool handleConnectionDeactivate(ulong peerId);
 
-    static bool  handleBadDataEvent (ulong  peerId);
+    static bool handleBadDataEvent(ulong peerId);
 
-    static bool  handleSendReceived (ulong  peerId,
-                                     ulong  requestId);
+    static bool handleSendReceived(ulong peerId, ulong requestId);
 
-    static bool  handleSendFailure (ulong  peerId,
-                                    ulong  requestId);
+    static bool handleSendFailure(ulong peerId, ulong requestId);
 
 
     // Utility methods for various AlpineStack components.
     //
-    static bool  sendReliablePacket (ulong           peerId,
-                                     AlpinePacket *  packet,
-                                     ulong &         requestId);
+    static bool sendReliablePacket(ulong peerId, AlpinePacket * packet, ulong & requestId);
 
-    static bool  acknowledgeTransfer (ulong  peerId,
-                                      ulong  requestId);
-
+    static bool acknowledgeTransfer(ulong peerId, ulong requestId);
 
 
     friend class AlpineDtcpConnConnector;
@@ -111,4 +100,3 @@ class AlpineStack
     friend class AlpineQueryMgr;
     friend class AlpineStackInterface;
 };
-

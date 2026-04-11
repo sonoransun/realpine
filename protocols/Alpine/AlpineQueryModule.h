@@ -2,18 +2,17 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AlpineQueryRequest.h>
 #include <AlpineResourceDesc.h>
+#include <Common.h>
 #include <vector>
 
 
 class AlpineQueryModule
 {
   public:
-
-    AlpineQueryModule () {};
-    virtual ~AlpineQueryModule () {};
+    AlpineQueryModule(){};
+    virtual ~AlpineQueryModule(){};
 
 
     using t_OptionIdList = vector<ulong>;
@@ -23,21 +22,16 @@ class AlpineQueryModule
 
     // Control
     //
-    virtual bool  start () = 0;
+    virtual bool start() = 0;
 
-    virtual bool  isActive () = 0;
+    virtual bool isActive() = 0;
 
-    virtual bool  stop () = 0;
-
+    virtual bool stop() = 0;
 
 
     // Search Facility
     //
-    virtual bool  getQueryOptionExtensionList (t_OptionIdList &  optionIdList) = 0;
+    virtual bool getQueryOptionExtensionList(t_OptionIdList & optionIdList) = 0;
 
-    virtual bool  processQuery (AlpineQueryRequest &  queryRequest,
-                                t_ResourceDescList &  queryResults) = 0;
-
-
+    virtual bool processQuery(AlpineQueryRequest & queryRequest, t_ResourceDescList & queryResults) = 0;
 };
-

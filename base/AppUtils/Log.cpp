@@ -2,28 +2,25 @@
 
 
 #include "Log.h"
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 
-Log::t_LogLevel          Log::logLevel_s    = t_LogLevel::Debug;
-bool                     Log::jsonFormat_s  = false;
+Log::t_LogLevel Log::logLevel_s = t_LogLevel::Debug;
+bool Log::jsonFormat_s = false;
 thread_local std::string Log::correlationId_s;
 
 
 bool
-Log::initialize (const std::string & logFileName,
-                 t_LogLevel          logLevel)
+Log::initialize(const std::string & logFileName, t_LogLevel logLevel)
 {
     try {
-        auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(
-            logFileName, 10 * 1024 * 1024, 3);
+        auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFileName, 10 * 1024 * 1024, 3);
         auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 
-        auto logger = std::make_shared<spdlog::logger>("alpine",
-            spdlog::sinks_init_list{fileSink, consoleSink});
+        auto logger = std::make_shared<spdlog::logger>("alpine", spdlog::sinks_init_list{fileSink, consoleSink});
         logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%t] [%l] %v");
         logger->flush_on(spdlog::level::err);
 
@@ -38,41 +35,52 @@ Log::initialize (const std::string & logFileName,
 
 
 void
-Log::setLogLevel (t_LogLevel logLevel)
+Log::setLogLevel(t_LogLevel logLevel)
 {
     logLevel_s = logLevel;
     switch (logLevel) {
-        case t_LogLevel::Silent: spdlog::set_level(spdlog::level::off);   break;
-        case t_LogLevel::Error:  spdlog::set_level(spdlog::level::err);   break;
-        case t_LogLevel::Info:   spdlog::set_level(spdlog::level::info);  break;
-        case t_LogLevel::Debug:  spdlog::set_level(spdlog::level::debug); break;
+    case t_LogLevel::Silent:
+        spdlog::set_level(spdlog::level::off);
+        break;
+    case t_LogLevel::Error:
+        spdlog::set_level(spdlog::level::err);
+        break;
+    case t_LogLevel::Info:
+        spdlog::set_level(spdlog::level::info);
+        break;
+    case t_LogLevel::Debug:
+        spdlog::set_level(spdlog::level::debug);
+        break;
     }
 }
 
 
 Log::t_LogLevel
-Log::getLogLevel ()
+Log::getLogLevel()
 {
     return logLevel_s;
 }
 
 
 std::string_view
-Log::logLevelToString (t_LogLevel logLevel)
+Log::logLevelToString(t_LogLevel logLevel)
 {
     switch (logLevel) {
-        case t_LogLevel::Silent: return "Silent";
-        case t_LogLevel::Error:  return "Error";
-        case t_LogLevel::Info:   return "Info";
-        case t_LogLevel::Debug:  return "Debug";
+    case t_LogLevel::Silent:
+        return "Silent";
+    case t_LogLevel::Error:
+        return "Error";
+    case t_LogLevel::Info:
+        return "Info";
+    case t_LogLevel::Debug:
+        return "Debug";
     }
     return "Unknown";
 }
 
 
 bool
-Log::stringToLogLevel (std::string_view  logLevelStr,
-                       t_LogLevel &      logLevel)
+Log::stringToLogLevel(std::string_view logLevelStr, t_LogLevel & logLevel)
 {
     if (logLevelStr == "silent" || logLevelStr == "Silent") {
         logLevel = t_LogLevel::Silent;
@@ -90,7 +98,7 @@ Log::stringToLogLevel (std::string_view  logLevelStr,
 
 
 void
-Log::Error (std::string_view logMsg)
+Log::Error(std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Error)
         return;
@@ -99,7 +107,7 @@ Log::Error (std::string_view logMsg)
 
 
 void
-Log::Info (std::string_view logMsg)
+Log::Info(std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Info)
         return;
@@ -108,7 +116,7 @@ Log::Info (std::string_view logMsg)
 
 
 void
-Log::Debug (std::string_view logMsg)
+Log::Debug(std::string_view logMsg)
 {
     if (logLevel_s < t_LogLevel::Debug)
         return;
@@ -117,7 +125,7 @@ Log::Debug (std::string_view logMsg)
 
 
 void
-Log::Error (std::string_view logMsg, t_KvPairs kvPairs)
+Log::Error(std::string_view logMsg, t_KvPairs kvPairs)
 {
     if (logLevel_s < t_LogLevel::Error)
         return;
@@ -126,7 +134,7 @@ Log::Error (std::string_view logMsg, t_KvPairs kvPairs)
 
 
 void
-Log::Info (std::string_view logMsg, t_KvPairs kvPairs)
+Log::Info(std::string_view logMsg, t_KvPairs kvPairs)
 {
     if (logLevel_s < t_LogLevel::Info)
         return;
@@ -135,7 +143,7 @@ Log::Info (std::string_view logMsg, t_KvPairs kvPairs)
 
 
 void
-Log::Debug (std::string_view logMsg, t_KvPairs kvPairs)
+Log::Debug(std::string_view logMsg, t_KvPairs kvPairs)
 {
     if (logLevel_s < t_LogLevel::Debug)
         return;
@@ -144,29 +152,28 @@ Log::Debug (std::string_view logMsg, t_KvPairs kvPairs)
 
 
 void
-Log::setCorrelationId (const std::string & id)
+Log::setCorrelationId(const std::string & id)
 {
     correlationId_s = id;
 }
 
 
 void
-Log::clearCorrelationId ()
+Log::clearCorrelationId()
 {
     correlationId_s.clear();
 }
 
 
 void
-Log::setJsonFormat (bool enable)
+Log::setJsonFormat(bool enable)
 {
     jsonFormat_s = enable;
 }
 
 
 std::string
-Log::formatStructured (std::string_view  logMsg,
-                       t_KvPairs         kvPairs)
+Log::formatStructured(std::string_view logMsg, t_KvPairs kvPairs)
 {
     if (jsonFormat_s) {
         std::ostringstream oss;
@@ -194,7 +201,7 @@ Log::formatStructured (std::string_view  logMsg,
 
 
 std::string
-Log::formatWithCorrelation (std::string_view logMsg)
+Log::formatWithCorrelation(std::string_view logMsg)
 {
     if (jsonFormat_s) {
         std::ostringstream oss;

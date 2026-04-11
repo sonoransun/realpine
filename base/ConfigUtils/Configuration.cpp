@@ -1,29 +1,27 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
+#include <ArgumentMap.h>
+#include <ConfigFile.h>
 #include <Configuration.h>
 #include <EnvironMap.h>
-#include <ConfigFile.h>
-#include <ArgumentMap.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
+#include <WriteLock.h>
 #include <format>
 
 
+std::unique_ptr<ConfigData::t_ConfigElementList> Configuration::configElementList_s = nullptr;
+std::unique_ptr<ConfigData> Configuration::configData_s = nullptr;
+std::unique_ptr<EnvironMap> Configuration::environMap_s = nullptr;
+std::unique_ptr<ConfigFile> Configuration::configFile_s = nullptr;
+std::unique_ptr<ArgumentMap> Configuration::argumentMap_s = nullptr;
+bool Configuration::initialized_s = false;
+std::once_flag Configuration::initFlag_s;
 
-std::unique_ptr<ConfigData::t_ConfigElementList>      Configuration::configElementList_s = nullptr;
-std::unique_ptr<ConfigData>                           Configuration::configData_s        = nullptr;
-std::unique_ptr<EnvironMap>                           Configuration::environMap_s        = nullptr;
-std::unique_ptr<ConfigFile>                           Configuration::configFile_s        = nullptr;
-std::unique_ptr<ArgumentMap>                          Configuration::argumentMap_s       = nullptr;
-bool                                   Configuration::initialized_s       = false;
-std::once_flag                         Configuration::initFlag_s;
-
-ReadWriteSem                           Configuration::dataLock_s;
-string                                 Configuration::configFilePath_s;
-
+ReadWriteSem Configuration::dataLock_s;
+string Configuration::configFilePath_s;
 
 
 // Ctor defaulted in header
@@ -32,39 +30,37 @@ string                                 Configuration::configFilePath_s;
 // Dtor defaulted in header
 
 
-
 bool
-Configuration::initialize (int                                argc,
-                           char **                            argv,
-                           ConfigData::t_ConfigElementList &  configElements,
-                           const string &                     configFilePath)
+Configuration::initialize(int argc,
+                          char ** argv,
+                          ConfigData::t_ConfigElementList & configElements,
+                          const string & configFilePath)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::initialize invoked.");
+    Log::Debug("Configuration::initialize invoked.");
 #endif
 
     bool result = false;
 
     std::call_once(initFlag_s, [&]() {
-
-        WriteLock  lock(dataLock_s);
+        WriteLock lock(dataLock_s);
 
         // Allocate configuration utlity objects
         //
         if (!configElementList_s)
             configElementList_s = std::make_unique<ConfigData::t_ConfigElementList>();
 
-        copyConfigElementList (configElements, *configElementList_s);
+        copyConfigElementList(configElements, *configElementList_s);
 
 
         if (!configData_s)
-            configData_s  = std::make_unique<ConfigData>(configElementList_s.get());
+            configData_s = std::make_unique<ConfigData>(configElementList_s.get());
 
         if (!environMap_s)
-            environMap_s  = std::make_unique<EnvironMap>();
+            environMap_s = std::make_unique<EnvironMap>();
 
         if (!configFile_s)
-            configFile_s  = std::make_unique<ConfigFile>();
+            configFile_s = std::make_unique<ConfigFile>();
 
         if (!argumentMap_s)
             argumentMap_s = std::make_unique<ArgumentMap>();
@@ -72,37 +68,37 @@ Configuration::initialize (int                                argc,
 
         bool status;
 
-        status = environMap_s->load ();
+        status = environMap_s->load();
 
         if (!status) {
-            Log::Error ("Loading environment variables failed in Configuration::initialize.");
-            return false;
+            Log::Error("Loading environment variables failed in Configuration::initialize.");
+            return;
         }
 
 
-        status = configFile_s->initialize (configFilePath);
+        status = configFile_s->initialize(configFilePath);
 
         if (!status) {
-            Log::Error ("Loading config file failed in Configuration::initialize.");
-            return false;
+            Log::Error("Loading config file failed in Configuration::initialize.");
+            return;
         }
 
 
-        status = argumentMap_s->load (argc, argv);
+        status = argumentMap_s->load(argc, argv);
 
         if (!status) {
-            Log::Error ("Processing command line arguments failed in Configuration::initialize.");
-            return false;
+            Log::Error("Processing command line arguments failed in Configuration::initialize.");
+            return;
         }
 
 
         // Attempt to load all configurable values into ConfigData container.
         //
-        status = populateValues ();
+        status = populateValues();
 
         if (!status) {
-            Log::Error ("populateValues() failed in Configuration::initialize.");
-            return false;
+            Log::Error("populateValues() failed in Configuration::initialize.");
+            return;
         }
 
         configFilePath_s = configFilePath;
@@ -115,12 +111,11 @@ Configuration::initialize (int                                argc,
 }
 
 
-
-bool  
-Configuration::save ()
+bool
+Configuration::save()
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::save invoked.");
+    Log::Debug("Configuration::save invoked.");
 #endif
 
 
@@ -128,53 +123,46 @@ Configuration::save ()
 }
 
 
-
-bool  
-Configuration::getValue (const string & name,
-                         string &       value)
+bool
+Configuration::getValue(const string & name, string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::getValue invoked.");
+    Log::Debug("Configuration::getValue invoked.");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock lock(dataLock_s);
 
-    bool status;
+    // Configuration may be queried before initialize() has completed
+    // (for example from unit tests or early startup hooks).  Return false
+    // cleanly instead of crashing through a null unique_ptr.
+    if (!configData_s)
+        return false;
 
-    status = configData_s->getValue (name, value);
-
-
-    return status;
+    return configData_s->getValue(name, value);
 }
 
 
-
-bool  
-Configuration::getValue (const string &             name,
-                         ConfigData::t_ValueList &  valueList)
+bool
+Configuration::getValue(const string & name, ConfigData::t_ValueList & valueList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::getValue invoked.");
+    Log::Debug("Configuration::getValue invoked.");
 #endif
 
-    ReadLock  lock(dataLock_s);
+    ReadLock lock(dataLock_s);
 
-    bool status; 
-      
-    status = configData_s->getValue (name, valueList);
+    if (!configData_s)
+        return false;
 
-    
-    return status;
+    return configData_s->getValue(name, valueList);
 }
 
 
-
-bool  
-Configuration::setValue (const string & name,
-                         string &       value)
+bool
+Configuration::setValue(const string & name, string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::setValue invoked.");
+    Log::Debug("Configuration::setValue invoked.");
 #endif
 
 
@@ -182,13 +170,11 @@ Configuration::setValue (const string & name,
 }
 
 
-
-bool  
-Configuration::setValue (const string &             name,
-                         ConfigData::t_ValueList &  valueList)
+bool
+Configuration::setValue(const string & name, ConfigData::t_ValueList & valueList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::setValue invoked.");
+    Log::Debug("Configuration::setValue invoked.");
 #endif
 
 
@@ -196,66 +182,61 @@ Configuration::setValue (const string &             name,
 }
 
 
-
-void  
-Configuration::copyConfigElementList (ConfigData::t_ConfigElementList &  source,
-                                      ConfigData::t_ConfigElementList &  dest)
+void
+Configuration::copyConfigElementList(ConfigData::t_ConfigElementList & source, ConfigData::t_ConfigElementList & dest)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::copyConfigElementList invoked.");
+    Log::Debug("Configuration::copyConfigElementList invoked.");
 #endif
 
-    ConfigData::t_ConfigElement *  currElement;
-    ConfigData::t_ConfigElement *  newElement;
+    ConfigData::t_ConfigElement * currElement;
+    ConfigData::t_ConfigElement * newElement;
 
-    for (const auto& item : source) {
+    for (const auto & item : source) {
 
         currElement = item;
 
         newElement = new ConfigData::t_ConfigElement;
         *newElement = *currElement;
 
-        dest.push_back (newElement);
+        dest.push_back(newElement);
     }
 }
 
 
-
 bool
-Configuration::populateValues ()
+Configuration::populateValues()
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::populateValues invoked.");
+    Log::Debug("Configuration::populateValues invoked.");
 #endif
 
 
-    Log::Debug ("Loading configuration settings.");
+    Log::Debug("Loading configuration settings.");
 
     // Iterate through each configure element and attempt to locate
     // a value.  Use precendence for various sources of config values.
     //
-    ConfigData::t_ConfigElement *  currElement;
-    string                         currValue;
-    ConfigData::t_ValueList        currValueList;
-    
+    ConfigData::t_ConfigElement * currElement;
+    string currValue;
+    ConfigData::t_ValueList currValueList;
+
     bool status;
 
-    for (const auto& item : *configElementList_s) {
+    for (const auto & item : *configElementList_s) {
 
         currElement = item;
 
-        status = locateValue (currElement, currValue);
+        status = locateValue(currElement, currValue);
 
         if (!status) {
             // Could not locate value.  If this is a required parameter,
             // return error.
             //
             if (currElement->required) {
-                Log::Error ("Could not locate required configuration element: "s +
-                             currElement->elementName);
+                Log::Error("Could not locate required configuration element: "s + currElement->elementName);
 
                 return false;
-
             }
             continue;
         }
@@ -264,27 +245,24 @@ Configuration::populateValues ()
         // If this element is a list value, parse into individual values.
         // Otherwise, just insert into ConfigData container.
         //
-        if ( (currElement->optionType == ConfigData::t_ElementType::String) ||
-             (currElement->optionType == ConfigData::t_ElementType::Number) )  {
+        if ((currElement->optionType == ConfigData::t_ElementType::String) ||
+            (currElement->optionType == ConfigData::t_ElementType::Number)) {
 
-            status = configData_s->setValue (currElement->elementName, currValue);
-        }
-        else {
-            currValueList.clear ();
-            parseValueList (currValue, currValueList);
+            status = configData_s->setValue(currElement->elementName, currValue);
+        } else {
+            currValueList.clear();
+            parseValueList(currValue, currValueList);
 
-            status = configData_s->setValue (currElement->elementName, currValueList);
+            status = configData_s->setValue(currElement->elementName, currValueList);
         }
 
         if (!status) {
-            Log::Error ("Error assigning value for configuration element: "s +
-                        currElement->elementName);
+            Log::Error("Error assigning value for configuration element: "s + currElement->elementName);
 
             if (currElement->required) {
                 // Fail if this is a required configuration element.
                 //
                 return false;
-
             }
             continue;
         }
@@ -295,14 +273,12 @@ Configuration::populateValues ()
 }
 
 
-
-bool  
-Configuration::locateValue (ConfigData::t_ConfigElement *  element,
-                            string &                       value)
+bool
+Configuration::locateValue(ConfigData::t_ConfigElement * element, string & value)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::locateValue invoked.");
-#endif            
+    Log::Debug("Configuration::locateValue invoked.");
+#endif
 
     // Locate element based on order of precedence.
     // 1st - ConfigFile
@@ -311,7 +287,7 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
     //
 
 #ifdef _VERBOSE
-    Log::Debug ("Locating value for config element name: "s + element->elementName);
+    Log::Debug("Locating value for config element name: "s + element->elementName);
 #endif
 
     bool status = false;
@@ -319,11 +295,11 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
     // Check config file first.
     //
     if (!element->fileOptionName.empty())
-        status = configFile_s->get (element->fileOptionName, value);
+        status = configFile_s->get(element->fileOptionName, value);
 
     if (status) {
 #ifdef _VERBOSE
-        Log::Debug ("Located in config file, value: "s + value);
+        Log::Debug("Located in config file, value: "s + value);
 #endif
         return true;
     }
@@ -333,11 +309,11 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
         // Try arguments
         //
         if (!element->argOptionName.empty())
-            status = argumentMap_s->get (element->argOptionName, value);
+            status = argumentMap_s->get(element->argOptionName, value);
 
         if (status) {
 #ifdef _VERBOSE
-            Log::Debug ("Located in config file, value: "s + value);
+            Log::Debug("Located in config file, value: "s + value);
 #endif
             return true;
         }
@@ -349,11 +325,11 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
         // Try program environment
         //
         if (!element->envOptionName.empty())
-            status = environMap_s->get (element->envOptionName, value);
+            status = environMap_s->get(element->envOptionName, value);
 
         if (status) {
 #ifdef _VERBOSE
-            Log::Debug ("Located in environment, value: "s + value);
+            Log::Debug("Located in environment, value: "s + value);
 #endif
             return true;
         }
@@ -364,8 +340,7 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
     if (!status) {
         // No value given in any location...
         //
-        Log::Error ("No value found for element option name: "s +
-                    element->elementName);
+        Log::Error("No value found for element option name: "s + element->elementName);
 
         return false;
     }
@@ -373,23 +348,20 @@ Configuration::locateValue (ConfigData::t_ConfigElement *  element,
 }
 
 
-
 void
-Configuration::parseValueList (const string &             values,
-                               ConfigData::t_ValueList &  valueList)
+Configuration::parseValueList(const string & values, ConfigData::t_ValueList & valueList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::parseValueList invoked.");
+    Log::Debug("Configuration::parseValueList invoked.");
 #endif
 }
 
 
-
 bool
-Configuration::reload ()
+Configuration::reload()
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::reload invoked.");
+    Log::Debug("Configuration::reload invoked.");
 #endif
 
     if (!initialized_s || configFilePath_s.empty()) {
@@ -418,12 +390,11 @@ Configuration::reload ()
 }
 
 
-
 bool
-Configuration::enableAutoReload (const string & configFilePath)
+Configuration::enableAutoReload(const string & configFilePath)
 {
 #ifdef _VERBOSE
-    Log::Debug ("Configuration::enableAutoReload invoked.");
+    Log::Debug("Configuration::enableAutoReload invoked.");
 #endif
 
     if (!initialized_s) {

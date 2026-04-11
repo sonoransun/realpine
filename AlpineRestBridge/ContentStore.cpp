@@ -6,8 +6,8 @@
 #include <ReadLock.h>
 #include <WriteLock.h>
 
-#include <cstdio>
 #include <chrono>
+#include <cstdio>
 #include <memory>
 #include <thread>
 
@@ -15,31 +15,29 @@
 #include <sys/stat.h>
 
 #if defined(ALPINE_PLATFORM_DARWIN)
-    #include <sys/event.h>
-    #include <fcntl.h>
+#include <fcntl.h>
+#include <sys/event.h>
 #elif defined(ALPINE_PLATFORM_LINUX)
-    #include <sys/inotify.h>
-    #include <poll.h>
+#include <poll.h>
+#include <sys/inotify.h>
 #endif
 
 
-const std::unordered_map<string, string>  ContentStore::mimeTypes_s = {
-    {"mp4",  "video/mp4"},
-    {"m4v",  "video/mp4"},
-    {"mkv",  "video/x-matroska"},
-    {"avi",  "video/x-msvideo"},
-    {"mov",  "video/quicktime"},
-    {"wmv",  "video/x-ms-wmv"},
-    {"webm", "video/webm"},
-    {"ts",   "video/mp2t"},
-    {"mpg",  "video/mpeg"},
-    {"mpeg", "video/mpeg"},
-    {"flv",  "video/x-flv"}
-};
+const std::unordered_map<string, string> ContentStore::mimeTypes_s = {{"mp4", "video/mp4"},
+                                                                      {"m4v", "video/mp4"},
+                                                                      {"mkv", "video/x-matroska"},
+                                                                      {"avi", "video/x-msvideo"},
+                                                                      {"mov", "video/quicktime"},
+                                                                      {"wmv", "video/x-ms-wmv"},
+                                                                      {"webm", "video/webm"},
+                                                                      {"ts", "video/mp2t"},
+                                                                      {"mpg", "video/mpeg"},
+                                                                      {"mpeg", "video/mpeg"},
+                                                                      {"flv", "video/x-flv"}};
 
 
 bool
-ContentStore::initialize (const string & mediaDirectory)
+ContentStore::initialize(const string & mediaDirectory)
 {
     mediaDirectory_ = mediaDirectory;
 
@@ -52,8 +50,7 @@ ContentStore::initialize (const string & mediaDirectory)
 
     rescan();
 
-    Log::Info("ContentStore: Scanned "s + std::to_string(items_.size()) +
-              " video files from " + mediaDirectory_);
+    Log::Info("ContentStore: Scanned "s + std::to_string(items_.size()) + " video files from " + mediaDirectory_);
 
     startWatcher();
 
@@ -62,14 +59,14 @@ ContentStore::initialize (const string & mediaDirectory)
 
 
 void
-ContentStore::shutdown ()
+ContentStore::shutdown()
 {
     stopWatcher();
 }
 
 
 void
-ContentStore::rescan ()
+ContentStore::rescan()
 {
     WriteLock guard(lock_);
 
@@ -82,7 +79,7 @@ ContentStore::rescan ()
 
 
 bool
-ContentStore::getItem (const string & id, MediaItem & item)
+ContentStore::getItem(const string & id, MediaItem & item)
 {
     ReadLock guard(lock_);
 
@@ -101,14 +98,14 @@ ContentStore::getItem (const string & id, MediaItem & item)
 
 
 const ContentStore::ItemMap &
-ContentStore::getAllItemsMap ()
+ContentStore::getAllItemsMap()
 {
     return items_;
 }
 
 
 void
-ContentStore::getAllItems (vector<MediaItem> & items)
+ContentStore::getAllItems(vector<MediaItem> & items)
 {
     ReadLock guard(lock_);
 
@@ -120,7 +117,7 @@ ContentStore::getAllItems (vector<MediaItem> & items)
 
 
 ulong
-ContentStore::getItemCount ()
+ContentStore::getItemCount()
 {
     ReadLock guard(lock_);
     return items_.size();
@@ -128,7 +125,7 @@ ContentStore::getItemCount ()
 
 
 ulong
-ContentStore::getSystemUpdateId ()
+ContentStore::getSystemUpdateId()
 {
     ReadLock guard(lock_);
     return systemUpdateId_;
@@ -136,7 +133,7 @@ ContentStore::getSystemUpdateId ()
 
 
 void
-ContentStore::indexFile (const string & fullPath)
+ContentStore::indexFile(const string & fullPath)
 {
     struct stat fileStat;
 
@@ -170,10 +167,10 @@ ContentStore::indexFile (const string & fullPath)
     MediaItem item;
     char idBuf[16];
     snprintf(idBuf, sizeof(idBuf), "media-%03lu", nextId_++);
-    item.id       = idBuf;
-    item.path     = fullPath;
+    item.id = idBuf;
+    item.path = fullPath;
     item.fileName = name;
-    item.title    = name.substr(0, dotPos);
+    item.title = name.substr(0, dotPos);
     item.mimeType = mimeIt->second;
     item.fileSize = (ulong)fileStat.st_size;
 
@@ -184,7 +181,7 @@ ContentStore::indexFile (const string & fullPath)
 
 
 void
-ContentStore::removeFile (const string & fullPath)
+ContentStore::removeFile(const string & fullPath)
 {
     WriteLock guard(lock_);
 
@@ -199,10 +196,16 @@ ContentStore::removeFile (const string & fullPath)
 
 
 void
-ContentStore::scanDirectory (const string & dir)
+ContentStore::scanDirectory(const string & dir)
 {
-    struct DirCloser {
-        void operator() (DIR * d) const { if (d) closedir(d); }
+    struct DirCloser
+    {
+        void
+        operator()(DIR * d) const
+        {
+            if (d)
+                closedir(d);
+        }
     };
 
     std::unique_ptr<DIR, DirCloser> dirp(opendir(dir.c_str()));
@@ -214,8 +217,7 @@ ContentStore::scanDirectory (const string & dir)
 
     struct dirent * entry;
 
-    while ((entry = readdir(dirp.get())) != nullptr)
-    {
+    while ((entry = readdir(dirp.get())) != nullptr) {
         string name = entry->d_name;
 
         if (name == "." || name == "..")
@@ -249,10 +251,10 @@ ContentStore::scanDirectory (const string & dir)
         MediaItem item;
         char idBuf[16];
         snprintf(idBuf, sizeof(idBuf), "media-%03lu", nextId_++);
-        item.id       = idBuf;
-        item.path     = fullPath;
+        item.id = idBuf;
+        item.path = fullPath;
         item.fileName = name;
-        item.title    = name.substr(0, dotPos);
+        item.title = name.substr(0, dotPos);
         item.mimeType = mimeIt->second;
         item.fileSize = (ulong)fileStat.st_size;
 
@@ -268,7 +270,7 @@ ContentStore::scanDirectory (const string & dir)
 
 
 void
-ContentStore::startWatcher ()
+ContentStore::startWatcher()
 {
     watcherStop_.store(false);
     watcher_ = std::make_unique<WatcherThread>(*this);
@@ -278,7 +280,7 @@ ContentStore::startWatcher ()
 
 
 void
-ContentStore::stopWatcher ()
+ContentStore::stopWatcher()
 {
     if (!watcher_) {
         return;
@@ -302,7 +304,7 @@ ContentStore::stopWatcher ()
 
 
 void
-ContentStore::WatcherThread::threadMain ()
+ContentStore::WatcherThread::threadMain()
 {
 #if defined(ALPINE_PLATFORM_DARWIN)
     store_.watcherLoopKqueue();
@@ -317,7 +319,7 @@ ContentStore::WatcherThread::threadMain ()
 #if defined(ALPINE_PLATFORM_DARWIN)
 
 void
-ContentStore::watcherLoopKqueue ()
+ContentStore::watcherLoopKqueue()
 {
     kqueueFd_ = kqueue();
 
@@ -327,7 +329,7 @@ ContentStore::watcherLoopKqueue ()
         return;
     }
 
-    int dirFd = open(mediaDirectory_.c_str(), O_RDONLY | O_EVTONLY);
+    int dirFd = open(mediaDirectory_.c_str(), O_RDONLY | O_EVTONLY | O_CLOEXEC);
 
     if (dirFd < 0) {
         Log::Error("ContentStore: Cannot open directory for kqueue watch: "s + mediaDirectory_);
@@ -338,10 +340,13 @@ ContentStore::watcherLoopKqueue ()
     }
 
     struct kevent change;
-    EV_SET(&change, dirFd, EVFILT_VNODE,
+    EV_SET(&change,
+           dirFd,
+           EVFILT_VNODE,
            EV_ADD | EV_ENABLE | EV_CLEAR,
            NOTE_WRITE | NOTE_DELETE | NOTE_RENAME | NOTE_REVOKE,
-           0, nullptr);
+           0,
+           nullptr);
 
     if (kevent(kqueueFd_, &change, 1, nullptr, 0, nullptr) < 0) {
         Log::Error("ContentStore: kevent registration failed"s);
@@ -356,10 +361,9 @@ ContentStore::watcherLoopKqueue ()
 
     auto lastFullScan = std::chrono::steady_clock::now();
 
-    while (!watcherStop_.load())
-    {
+    while (!watcherStop_.load()) {
         struct timespec timeout;
-        timeout.tv_sec  = 1;
+        timeout.tv_sec = 1;
         timeout.tv_nsec = 0;
 
         struct kevent event;
@@ -388,9 +392,9 @@ ContentStore::watcherLoopKqueue ()
 #elif defined(ALPINE_PLATFORM_LINUX)
 
 void
-ContentStore::watcherLoopInotify ()
+ContentStore::watcherLoopInotify()
 {
-    inotifyFd_ = inotify_init1(IN_NONBLOCK);
+    inotifyFd_ = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
 
     if (inotifyFd_ < 0) {
         Log::Error("ContentStore: inotify_init1() failed, falling back to periodic scan"s);
@@ -398,8 +402,8 @@ ContentStore::watcherLoopInotify ()
         return;
     }
 
-    int wd = inotify_add_watch(inotifyFd_, mediaDirectory_.c_str(),
-                                IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO);
+    int wd = inotify_add_watch(
+        inotifyFd_, mediaDirectory_.c_str(), IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_FROM | IN_MOVED_TO);
 
     if (wd < 0) {
         Log::Error("ContentStore: inotify_add_watch failed for: "s + mediaDirectory_);
@@ -414,10 +418,9 @@ ContentStore::watcherLoopInotify ()
     auto lastFullScan = std::chrono::steady_clock::now();
     char buf[4096] __attribute__((aligned(__alignof__(struct inotify_event))));
 
-    while (!watcherStop_.load())
-    {
+    while (!watcherStop_.load()) {
         struct pollfd pfd;
-        pfd.fd     = inotifyFd_;
+        pfd.fd = inotifyFd_;
         pfd.events = POLLIN;
 
         int ret = poll(&pfd, 1, 1000);
@@ -450,15 +453,13 @@ ContentStore::watcherLoopInotify ()
 
 
 void
-ContentStore::watcherLoopFallback ()
+ContentStore::watcherLoopFallback()
 {
-    Log::Info("ContentStore: Using periodic scan fallback (every "s +
-              std::to_string(fullScanIntervalSec_) + "s)");
+    Log::Info("ContentStore: Using periodic scan fallback (every "s + std::to_string(fullScanIntervalSec_) + "s)");
 
     auto lastScan = std::chrono::steady_clock::now();
 
-    while (!watcherStop_.load())
-    {
+    while (!watcherStop_.load()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         if (watcherStop_.load())

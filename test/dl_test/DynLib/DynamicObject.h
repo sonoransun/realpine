@@ -10,27 +10,23 @@
 //
 extern "C" {
 
-void *  createDynamicObject ();
-
+void * createDynamicObject();
 }
 
 
 class DynamicObject : public DynamicBase
 {
   public:
+    DynamicObject(ulong id);
+    virtual ~DynamicObject();
 
-    DynamicObject (ulong  id);
-    virtual ~DynamicObject ();
 
-
-    virtual void testMethod ();
+    virtual void testMethod();
 
   private:
+    ulong myId_;
 
-    ulong   myId_;
+    static ulong currMethodNum_s;
 
-    static ulong   currMethodNum_s;
-
-    friend void *createDynamicObject ();
+    friend void * createDynamicObject();
 };
-

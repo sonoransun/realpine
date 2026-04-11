@@ -5,7 +5,7 @@
 #include <Log.h>
 
 
-JsonReader::JsonReader (const string & json)
+JsonReader::JsonReader(const string & json)
     : valid_(false)
 {
     if (json.length() > 65536) {
@@ -29,7 +29,7 @@ JsonReader::JsonReader (const string & json)
 
 
 bool
-JsonReader::checkDepthAndKeys (const nlohmann::json & node, int depth)
+JsonReader::checkDepthAndKeys(const nlohmann::json & node, int depth)
 {
     if (depth > MAX_NESTING_DEPTH)
         return false;
@@ -41,8 +41,7 @@ JsonReader::checkDepthAndKeys (const nlohmann::json & node, int depth)
             if (!checkDepthAndKeys(val, depth + 1))
                 return false;
         }
-    }
-    else if (node.is_array()) {
+    } else if (node.is_array()) {
         for (const auto & elem : node) {
             if (!checkDepthAndKeys(elem, depth + 1))
                 return false;
@@ -54,7 +53,7 @@ JsonReader::checkDepthAndKeys (const nlohmann::json & node, int depth)
 
 
 bool
-JsonReader::getString (const string & key, string & value)
+JsonReader::getString(const string & key, string & value)
 {
     if (!valid_)
         return false;
@@ -69,7 +68,7 @@ JsonReader::getString (const string & key, string & value)
 
 
 bool
-JsonReader::getUlong (const string & key, ulong & value)
+JsonReader::getUlong(const string & key, ulong & value)
 {
     if (!valid_)
         return false;
@@ -82,7 +81,7 @@ JsonReader::getUlong (const string & key, ulong & value)
 
 
 bool
-JsonReader::getBool (const string & key, bool & value)
+JsonReader::getBool(const string & key, bool & value)
 {
     if (!valid_)
         return false;

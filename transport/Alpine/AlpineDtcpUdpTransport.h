@@ -8,18 +8,12 @@
 class AlpineDtcpUdpTransport : public DtcpBaseUdpTransport
 {
   public:
+    AlpineDtcpUdpTransport(const ulong ipAddress, const int port);
 
-    AlpineDtcpUdpTransport (const ulong ipAddress,
-                            const int   port);
-    
-    virtual ~AlpineDtcpUdpTransport ();
+    virtual ~AlpineDtcpUdpTransport();
 
 
+    virtual bool createMux(DtcpBaseConnMux *& connMux);
 
-    virtual bool createMux (DtcpBaseConnMux *& connMux);
-
-    virtual bool handleData (const byte * data,
-                             uint         dataLength);
-
+    virtual bool handleData(const byte * data, uint dataLength);
 };
-

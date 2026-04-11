@@ -1,12 +1,13 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
-#include <catch2/catch_test_macros.hpp>
 #include <Compression.h>
+#include <catch2/catch_test_macros.hpp>
 #include <zlib.h>
 
 
 /// Helper: decompress gzip data using zlib
-static string gzipDecompress (const string & compressed)
+static string
+gzipDecompress(const string & compressed)
 {
     if (compressed.empty())
         return ""s;
@@ -16,7 +17,7 @@ static string gzipDecompress (const string & compressed)
     if (inflateInit2(&zs, MAX_WBITS | 16) != Z_OK)
         return ""s;
 
-    zs.next_in  = reinterpret_cast<Bytef *>(const_cast<char *>(compressed.data()));
+    zs.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(compressed.data()));
     zs.avail_in = static_cast<uInt>(compressed.size());
 
     string output;
@@ -24,7 +25,7 @@ static string gzipDecompress (const string & compressed)
 
     int ret;
     do {
-        zs.next_out  = reinterpret_cast<Bytef *>(buffer);
+        zs.next_out = reinterpret_cast<Bytef *>(buffer);
         zs.avail_out = sizeof(buffer);
         ret = inflate(&zs, Z_NO_FLUSH);
         if (ret != Z_OK && ret != Z_STREAM_END) {

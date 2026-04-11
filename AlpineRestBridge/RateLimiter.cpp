@@ -1,41 +1,36 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <RateLimiter.h>
 #include <Log.h>
+#include <RateLimiter.h>
 
 
-double                                         RateLimiter::rate_s         = 10.0;
-uint                                           RateLimiter::burst_s        = 20;
-std::array<RateLimiter::t_Shard, RateLimiter::SHARD_COUNT>  RateLimiter::shards_s;
-bool                                           RateLimiter::initialized_s  = false;
-
+double RateLimiter::rate_s = 10.0;
+uint RateLimiter::burst_s = 20;
+std::array<RateLimiter::t_Shard, RateLimiter::SHARD_COUNT> RateLimiter::shards_s;
+bool RateLimiter::initialized_s = false;
 
 
 size_t
-RateLimiter::shardIndex (const string & clientIp)
+RateLimiter::shardIndex(const string & clientIp)
 {
     return std::hash<string>{}(clientIp) % SHARD_COUNT;
 }
 
 
-
 void
-RateLimiter::initialize (double  requestsPerSecond,
-                         uint    burstSize)
+RateLimiter::initialize(double requestsPerSecond, uint burstSize)
 {
     rate_s = requestsPerSecond;
     burst_s = burstSize;
     initialized_s = true;
-    Log::Info("RateLimiter initialized: "s +
-              std::to_string(requestsPerSecond) + " req/s, burst " +
+    Log::Info("RateLimiter initialized: "s + std::to_string(requestsPerSecond) + " req/s, burst " +
               std::to_string(burstSize));
 }
 
 
-
 string
-RateLimiter::normalizeIp (const string & ip)
+RateLimiter::normalizeIp(const string & ip)
 {
     // Strip IPv4-mapped IPv6 prefix
     string normalized = ip;
@@ -52,16 +47,15 @@ RateLimiter::normalizeIp (const string & ip)
 }
 
 
-
 bool
-RateLimiter::allowRequest (const string & clientIp)
+RateLimiter::allowRequest(const string & clientIp)
 {
     return allowRequestNormalized(normalizeIp(clientIp));
 }
 
 
 bool
-RateLimiter::allowRequestNormalized (const string & normalizedIp)
+RateLimiter::allowRequestNormalized(const string & normalizedIp)
 {
     if (!initialized_s)
         return true;
@@ -74,10 +68,7 @@ RateLimiter::allowRequestNormalized (const string & normalizedIp)
     auto it = shard.buckets.find(normalizedIp);
 
     if (it == shard.buckets.end()) {
-        shard.buckets[normalizedIp] = t_TokenBucket{
-            static_cast<double>(burst_s) - 1.0,
-            now
-        };
+        shard.buckets[normalizedIp] = t_TokenBucket{static_cast<double>(burst_s) - 1.0, now};
         return true;
     }
 
@@ -93,9 +84,8 @@ RateLimiter::allowRequestNormalized (const string & normalizedIp)
 }
 
 
-
 void
-RateLimiter::refillBucket (t_TokenBucket & bucket)
+RateLimiter::refillBucket(t_TokenBucket & bucket)
 {
     auto now = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration<double>(now - bucket.lastRefill).count();
@@ -108,9 +98,8 @@ RateLimiter::refillBucket (t_TokenBucket & bucket)
 }
 
 
-
 void
-RateLimiter::cleanup ()
+RateLimiter::cleanup()
 {
     auto now = std::chrono::steady_clock::now();
 

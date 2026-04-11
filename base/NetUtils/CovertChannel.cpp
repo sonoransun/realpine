@@ -3,15 +3,16 @@
 
 #include <CovertChannel.h>
 
+#include <cstring>
 
-bool           CovertChannel::enabled_s  = false;
-vector<byte>   CovertChannel::key_s;
-uint32_t       CovertChannel::keySeed_s  = 0;
 
+bool CovertChannel::enabled_s = false;
+vector<byte> CovertChannel::key_s;
+uint32_t CovertChannel::keySeed_s = 0;
 
 
 uint32_t
-CovertChannel::xorshift32(uint32_t& state)
+CovertChannel::xorshift32(uint32_t & state)
 {
     state ^= state << 13;
     state ^= state >> 17;
@@ -20,9 +21,8 @@ CovertChannel::xorshift32(uint32_t& state)
 }
 
 
-
 void
-CovertChannel::initialize(const string& key)
+CovertChannel::initialize(const string & key)
 {
     if (key.empty()) {
         return;
@@ -42,7 +42,6 @@ CovertChannel::initialize(const string& key)
 }
 
 
-
 bool
 CovertChannel::isEnabled()
 {
@@ -50,9 +49,8 @@ CovertChannel::isEnabled()
 }
 
 
-
 void
-CovertChannel::obfuscate(byte* data, uint length)
+CovertChannel::obfuscate(byte * data, uint length)
 {
     if (length == 0) {
         return;
@@ -80,9 +78,8 @@ CovertChannel::obfuscate(byte* data, uint length)
 }
 
 
-
 void
-CovertChannel::deobfuscate(byte* data, uint length)
+CovertChannel::deobfuscate(byte * data, uint length)
 {
     if (length == 0) {
         return;

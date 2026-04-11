@@ -7,16 +7,16 @@
 #include <format>
 
 
-std::queue<AuditLog::t_AuditEntry>   AuditLog::queue_s;
-std::mutex                           AuditLog::queueMutex_s;
-std::condition_variable              AuditLog::queueCv_s;
-std::atomic<bool>                    AuditLog::running_s{false};
-std::thread                          AuditLog::writerThread_s;
-std::ofstream                        AuditLog::file_s;
+std::queue<AuditLog::t_AuditEntry> AuditLog::queue_s;
+std::mutex AuditLog::queueMutex_s;
+std::condition_variable AuditLog::queueCv_s;
+std::atomic<bool> AuditLog::running_s{false};
+std::thread AuditLog::writerThread_s;
+std::ofstream AuditLog::file_s;
 
 
 bool
-AuditLog::initialize (const string & auditLogFileName)
+AuditLog::initialize(const string & auditLogFileName)
 {
     file_s.open(auditLogFileName, std::ios::app);
     if (!file_s.is_open()) {
@@ -33,7 +33,7 @@ AuditLog::initialize (const string & auditLogFileName)
 
 
 void
-AuditLog::shutdown ()
+AuditLog::shutdown()
 {
     if (!running_s) {
         return;
@@ -58,10 +58,7 @@ AuditLog::shutdown ()
 
 
 void
-AuditLog::record (std::string_view  eventType,
-                  std::string_view  actor,
-                  std::string_view  action,
-                  t_KvPairs         details)
+AuditLog::record(std::string_view eventType, std::string_view actor, std::string_view action, t_KvPairs details)
 {
     if (!running_s) {
         return;
@@ -78,13 +75,11 @@ AuditLog::record (std::string_view  eventType,
 
 
 void
-AuditLog::writerLoop ()
+AuditLog::writerLoop()
 {
     while (running_s) {
         std::unique_lock lock(queueMutex_s);
-        queueCv_s.wait(lock, [] {
-            return !queue_s.empty() || !running_s;
-        });
+        queueCv_s.wait(lock, [] { return !queue_s.empty() || !running_s; });
 
         // Drain all pending entries under one lock acquisition
         while (!queue_s.empty()) {
@@ -103,19 +98,14 @@ AuditLog::writerLoop ()
 
 
 string
-AuditLog::formatEntry (std::string_view  eventType,
-                       std::string_view  actor,
-                       std::string_view  action,
-                       t_KvPairs         details)
+AuditLog::formatEntry(std::string_view eventType, std::string_view actor, std::string_view action, t_KvPairs details)
 {
     auto now = std::chrono::system_clock::now();
-    auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(
-        now.time_since_epoch()).count();
+    auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
 
     // Build JSON-lines format entry
-    string json = std::format(
-        R"({{"timestamp":{},"event":"{}","actor":"{}","action":"{}")",
-        epoch, eventType, actor, action);
+    string json =
+        std::format(R"({{"timestamp":{},"event":"{}","actor":"{}","action":"{}")", epoch, eventType, actor, action);
 
     for (const auto & [k, v] : details) {
         json += std::format(",\"{}\":\"{}\"", k, v);

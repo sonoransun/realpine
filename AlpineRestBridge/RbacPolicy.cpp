@@ -1,22 +1,23 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <RbacPolicy.h>
 #include <Log.h>
-#include <nlohmann/json.hpp>
-#include <fstream>
+#include <RbacPolicy.h>
 #include <format>
+#include <fstream>
+#include <mutex>
+#include <nlohmann/json.hpp>
 
 
-std::unordered_map<string, std::unordered_set<string>>  RbacPolicy::roles_s;
-std::unordered_map<string, string>                      RbacPolicy::keyRoles_s;
-std::shared_mutex                                       RbacPolicy::policyMutex_s;
-string                                                  RbacPolicy::policyFilePath_s;
-bool                                                    RbacPolicy::enabled_s = false;
+std::unordered_map<string, std::unordered_set<string>> RbacPolicy::roles_s;
+std::unordered_map<string, string> RbacPolicy::keyRoles_s;
+std::shared_mutex RbacPolicy::policyMutex_s;
+string RbacPolicy::policyFilePath_s;
+bool RbacPolicy::enabled_s = false;
 
 
 bool
-RbacPolicy::initialize (const string & policyFilePath)
+RbacPolicy::initialize(const string & policyFilePath)
 {
     policyFilePath_s = policyFilePath;
     if (policyFilePath.empty()) {
@@ -29,15 +30,13 @@ RbacPolicy::initialize (const string & policyFilePath)
     }
 
     enabled_s = true;
-    Log::Info("RbacPolicy: loaded {} roles, {} key mappings",
-              roles_s.size(), keyRoles_s.size());
+    Log::Info("RbacPolicy: loaded {} roles, {} key mappings", roles_s.size(), keyRoles_s.size());
     return true;
 }
 
 
 bool
-RbacPolicy::hasPermission (const string & apiKey,
-                            const string & permission)
+RbacPolicy::hasPermission(const string & apiKey, const string & permission)
 {
     if (!enabled_s) {
         return true;  // RBAC disabled → all access granted
@@ -61,7 +60,7 @@ RbacPolicy::hasPermission (const string & apiKey,
 
 
 string
-RbacPolicy::getRoleForKey (const string & apiKey)
+RbacPolicy::getRoleForKey(const string & apiKey)
 {
     if (!enabled_s) {
         return "admin"s;
@@ -78,14 +77,14 @@ RbacPolicy::getRoleForKey (const string & apiKey)
 
 
 bool
-RbacPolicy::isEnabled ()
+RbacPolicy::isEnabled()
 {
     return enabled_s;
 }
 
 
 bool
-RbacPolicy::reload ()
+RbacPolicy::reload()
 {
     if (policyFilePath_s.empty()) {
         return false;
@@ -95,7 +94,7 @@ RbacPolicy::reload ()
 
 
 bool
-RbacPolicy::loadPolicy (const string & filePath)
+RbacPolicy::loadPolicy(const string & filePath)
 {
     try {
         std::ifstream file(filePath);

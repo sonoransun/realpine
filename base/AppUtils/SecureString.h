@@ -8,42 +8,39 @@
 class SecureString
 {
   public:
+    SecureString() = default;
 
-    SecureString () = default;
+    explicit SecureString(const string & s);
 
-    explicit SecureString (const string & s);
+    explicit SecureString(string && s);
 
-    explicit SecureString (string && s);
-
-    ~SecureString ();
+    ~SecureString();
 
 
     // Non-copyable
-    SecureString (const SecureString &)             = delete;
-    SecureString & operator= (const SecureString &) = delete;
+    SecureString(const SecureString &) = delete;
+    SecureString & operator=(const SecureString &) = delete;
 
     // Movable — securely erases the source after move
-    SecureString (SecureString && other) noexcept;
-    SecureString & operator= (SecureString && other) noexcept;
+    SecureString(SecureString && other) noexcept;
+    SecureString & operator=(SecureString && other) noexcept;
 
 
-    void  assign (const string & s);
+    void assign(const string & s);
 
-    void  assign (string && s);
+    void assign(string && s);
 
-    void  clear ();
+    void clear();
 
-    [[nodiscard]] const string &  value () const;
+    [[nodiscard]] const string & value() const;
 
-    [[nodiscard]] bool  empty () const;
+    [[nodiscard]] bool empty() const;
 
-    [[nodiscard]] bool  equals (const string & other) const;
+    [[nodiscard]] bool equals(const string & other) const;
 
 
   private:
+    string data_;
 
-    string  data_;
-
-    void  secureErase ();
-
+    void secureErase();
 };

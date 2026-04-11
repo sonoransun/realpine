@@ -12,34 +12,28 @@ class AlpineQuery;
 class AlpineBroadcast : public DtcpBroadcast
 {
   public:
+    AlpineBroadcast(DtcpBroadcastSet * destinations);
 
-    AlpineBroadcast (DtcpBroadcastSet *  destinations);
-
-    virtual ~AlpineBroadcast ();
+    virtual ~AlpineBroadcast();
 
 
-    virtual bool  handlePacketSend (ulong  transportId);
+    virtual bool handlePacketSend(ulong transportId);
 
-    virtual bool  handleSendComplete (ulong             numSent,
-                                      struct timeval &  duration);
-
+    virtual bool handleSendComplete(ulong numSent, struct timeval & duration);
 
 
   private:
+    AlpineQuery * query_;
 
-    AlpineQuery *  query_;
 
-    
-    void  setQueryParent (AlpineQuery *  query);
+    void setQueryParent(AlpineQuery * query);
 
 
     // Copy constructor and assignment operator not implemented
     //
-    AlpineBroadcast (const AlpineBroadcast & copy);
-    AlpineBroadcast & operator = (const AlpineBroadcast & copy);
-   
+    AlpineBroadcast(const AlpineBroadcast & copy);
+    AlpineBroadcast & operator=(const AlpineBroadcast & copy);
+
 
     friend class AlpineQuery;
 };
-
-

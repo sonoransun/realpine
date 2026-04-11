@@ -1,29 +1,26 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpinePeerMgr.h>
 #include <AlpineDtcpConnTransport.h>
-#include <AlpinePeerProfile.h>
-#include <AlpinePeerProfileIndex.h>
 #include <AlpineGroup.h>
 #include <AlpineGroupMgr.h>
+#include <AlpinePeerMgr.h>
+#include <AlpinePeerProfile.h>
+#include <AlpinePeerProfileIndex.h>
 #include <CircuitBreaker.h>
 #include <DtcpStack.h>
-#include <AlpineDtcpConnTransport.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
 #include <WriteLock.h>
-#include <ReadLock.h>
 #include <memory>
 
 
-
-bool                                     AlpinePeerMgr::initialized_s = false;
-AlpinePeerProfileIndex *                 AlpinePeerMgr::baseProfileIndex_s = nullptr;
-ReadWriteSem                             AlpinePeerMgr::dataLock_s;
-AlpinePeerMgr::t_PeerInfoIndex *         AlpinePeerMgr::peerInfoIndex_s = nullptr;
-ReadWriteSem                             AlpinePeerMgr::peerInfoLock_s;
-
+bool AlpinePeerMgr::initialized_s = false;
+AlpinePeerProfileIndex * AlpinePeerMgr::baseProfileIndex_s = nullptr;
+ReadWriteSem AlpinePeerMgr::dataLock_s;
+AlpinePeerMgr::t_PeerInfoIndex * AlpinePeerMgr::peerInfoIndex_s = nullptr;
+ReadWriteSem AlpinePeerMgr::peerInfoLock_s;
 
 
 // Ctor defaulted in header
@@ -32,59 +29,56 @@ ReadWriteSem                             AlpinePeerMgr::peerInfoLock_s;
 // Dtor defaulted in header
 
 
-  
-bool  
-AlpinePeerMgr::initialize ()
+bool
+AlpinePeerMgr::initialize()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::initialize invoked.");
+    Log::Debug("AlpinePeerMgr::initialize invoked.");
 #endif
 
-    WriteLock  dataLock(dataLock_s);
+    WriteLock dataLock(dataLock_s);
 
     if (initialized_s) {
-        Log::Error ("Attempt to reinitialize AlpinePeerMgr!");
+        Log::Error("Attempt to reinitialize AlpinePeerMgr!");
         return false;
     }
 
-    WriteLock  peerInfoLock(peerInfoLock_s);
+    WriteLock peerInfoLock(peerInfoLock_s);
 
-    peerInfoIndex_s    = new t_PeerInfoIndex;
+    peerInfoIndex_s = new t_PeerInfoIndex;
     baseProfileIndex_s = new AlpinePeerProfileIndex;
-    initialized_s      = true;
+    initialized_s = true;
 
 
     return true;
 }
 
 
-  
-bool  
-AlpinePeerMgr::getAlias (ulong     peerId,
-                         string &  alias)
+bool
+AlpinePeerMgr::getAlias(ulong peerId, string & alias)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::getAlias invoked.");
+    Log::Debug("AlpinePeerMgr::getAlias invoked.");
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::getAlias before initialization!");
+        Log::Error("Call to AlpinePeerMgr::getAlias before initialization!");
         return false;
     }
 
-    ReadLock  lock(peerInfoLock_s);
+    ReadLock lock(peerInfoLock_s);
 
-    auto iter = peerInfoIndex_s->find (peerId);
+    auto iter = peerInfoIndex_s->find(peerId);
 
-    if (iter == peerInfoIndex_s->end ()) {
-        Log::Error ("Invalid peer ID passed to AlpinePeerMgr::getAlias!");
+    if (iter == peerInfoIndex_s->end()) {
+        Log::Error("Invalid peer ID passed to AlpinePeerMgr::getAlias!");
         return false;
     }
 
     alias = "";
-    t_PeerInfo *  peerInfo = iter->second.get();
+    t_PeerInfo * peerInfo = iter->second.get();
 
     if (peerInfo->alias.has_value()) {
         alias = peerInfo->alias.value();
@@ -95,35 +89,31 @@ AlpinePeerMgr::getAlias (ulong     peerId,
 }
 
 
-
-bool  
-AlpinePeerMgr::setAlias (ulong           peerId,
-                         const string &  alias)
+bool
+AlpinePeerMgr::setAlias(ulong peerId, const string & alias)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::setAlias invoked.  Values: "s +
-                "\n Peer ID: "s + std::to_string (peerId) +
-                "\n Alias: "s + alias +
-                "\n");
+    Log::Debug("AlpinePeerMgr::setAlias invoked.  Values: "s + "\n Peer ID: "s + std::to_string(peerId) +
+               "\n Alias: "s + alias + "\n");
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::setAlias before initialization!");
+        Log::Error("Call to AlpinePeerMgr::setAlias before initialization!");
         return false;
     }
 
-    ReadLock  lock(peerInfoLock_s);
+    ReadLock lock(peerInfoLock_s);
 
-    auto iter = peerInfoIndex_s->find (peerId);
+    auto iter = peerInfoIndex_s->find(peerId);
 
-    if (iter == peerInfoIndex_s->end ()) {
-        Log::Error ("Invalid peer ID passed to AlpinePeerMgr::setAlias!");
+    if (iter == peerInfoIndex_s->end()) {
+        Log::Error("Invalid peer ID passed to AlpinePeerMgr::setAlias!");
         return false;
     }
 
-    t_PeerInfo *  peerInfo = iter->second.get();
+    t_PeerInfo * peerInfo = iter->second.get();
 
     peerInfo->alias = alias;
 
@@ -132,29 +122,27 @@ AlpinePeerMgr::setAlias (ulong           peerId,
 }
 
 
-
-bool  
-AlpinePeerMgr::getProfile (ulong                peerId,
-                           AlpinePeerProfile &  profile)
+bool
+AlpinePeerMgr::getProfile(ulong peerId, AlpinePeerProfile & profile)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::getProfile invoked.");
+    Log::Debug("AlpinePeerMgr::getProfile invoked.");
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::getProfile before initialization!");
+        Log::Error("Call to AlpinePeerMgr::getProfile before initialization!");
         return false;
     }
 
     bool status;
-    AlpinePeerProfile *  currProfile;
+    AlpinePeerProfile * currProfile;
 
-    status = baseProfileIndex_s->locate (peerId, currProfile);
+    status = baseProfileIndex_s->locate(peerId, currProfile);
 
     if (!status) {
-        Log::Error ("Locating base profile failed in AlpinePeerMgr::getProfile!");
+        Log::Error("Locating base profile failed in AlpinePeerMgr::getProfile!");
         return false;
     }
 
@@ -165,37 +153,34 @@ AlpinePeerMgr::getProfile (ulong                peerId,
 }
 
 
-
-bool  
-AlpinePeerMgr::getGroupProfile (ulong                peerId,
-                                ulong                groupId,
-                                AlpinePeerProfile &  profile)
+bool
+AlpinePeerMgr::getGroupProfile(ulong peerId, ulong groupId, AlpinePeerProfile & profile)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::getGroupProfile invoked.");
+    Log::Debug("AlpinePeerMgr::getGroupProfile invoked.");
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::getGroupProfile before initialization!");
+        Log::Error("Call to AlpinePeerMgr::getGroupProfile before initialization!");
         return false;
     }
 
     bool status;
-    AlpineGroup *  group;
-    status = AlpineGroupMgr::locateGroup (groupId, group);
+    AlpineGroup * group;
+    status = AlpineGroupMgr::locateGroup(groupId, group);
 
     if (!status) {
-        Log::Error ("Could not locate group in AlpinePeerMgr::getGroupProfile!");
+        Log::Error("Could not locate group in AlpinePeerMgr::getGroupProfile!");
         return false;
     }
 
-    AlpinePeerProfile *  currProfile;
-    status = group->getPeerProfile (peerId, currProfile);
+    AlpinePeerProfile * currProfile;
+    status = group->getPeerProfile(peerId, currProfile);
 
     if (!status) {
-        Log::Error ("Locating peer profile failed in AlpinePeerMgr::getGroupProfile!");
+        Log::Error("Locating peer profile failed in AlpinePeerMgr::getGroupProfile!");
         return false;
     }
 
@@ -206,36 +191,34 @@ AlpinePeerMgr::getGroupProfile (ulong                peerId,
 }
 
 
-
-bool  
-AlpinePeerMgr::getTransport (ulong                       peerId,
-                             AlpineDtcpConnTransport *&  transport)
+bool
+AlpinePeerMgr::getTransport(ulong peerId, AlpineDtcpConnTransport *& transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::getTransport invoked.");
+    Log::Debug("AlpinePeerMgr::getTransport invoked.");
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::getTransport before initialization!");
+        Log::Error("Call to AlpinePeerMgr::getTransport before initialization!");
         return false;
     }
 
     bool status;
-    DtcpBaseConnTransport *  baseTransport;
+    DtcpBaseConnTransport * baseTransport;
 
-    status = DtcpStack::locateTransport (peerId, baseTransport);
+    status = DtcpStack::locateTransport(peerId, baseTransport);
 
     if (!status) {
-        Log::Error ("DTCP Locate transport failed in AlpinePeerMgr::getTransport!");
+        Log::Error("DTCP Locate transport failed in AlpinePeerMgr::getTransport!");
         return false;
     }
 
     transport = dynamic_cast<AlpineDtcpConnTransport *>(baseTransport);
 
     if (!transport) {
-        Log::Error ("Invalid transport type returned in AlpinePeerMgr::getTransport!");
+        Log::Error("Invalid transport type returned in AlpinePeerMgr::getTransport!");
         return false;
     }
 
@@ -244,37 +227,34 @@ AlpinePeerMgr::getTransport (ulong                       peerId,
 }
 
 
-
 bool
-AlpinePeerMgr::querySent (ulong  peerId)
+AlpinePeerMgr::querySent(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::querySent invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::querySent invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::querySent before initialization!");
+        Log::Error("Call to AlpinePeerMgr::querySent before initialization!");
         return false;
     }
 
     // Check circuit breaker before sending query to this peer
     //
     if (!CircuitBreaker::allowRequest(peerId)) {
-        Log::Info ("AlpinePeerMgr::querySent: circuit open for peer "s +
-                   std::to_string(peerId) + ", skipping query"s);
+        Log::Info("AlpinePeerMgr::querySent: circuit open for peer "s + std::to_string(peerId) + ", skipping query"s);
         return false;
     }
 
     // Update the base profile for this peer
     //
-    bool  status;
-    status = baseProfileIndex_s->querySent (peerId);
+    bool status;
+    status = baseProfileIndex_s->querySent(peerId);
 
     if (!status) {
-        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::querySent!");
+        Log::Error("Updating base profile for peer failed in AlpinePeerMgr::querySent!");
         return false;
     }
 
@@ -283,19 +263,17 @@ AlpinePeerMgr::querySent (ulong  peerId)
 }
 
 
-
 bool
-AlpinePeerMgr::responseReceived (ulong  peerId)
+AlpinePeerMgr::responseReceived(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::responseReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::responseReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::responseReceived before initialization!");
+        Log::Error("Call to AlpinePeerMgr::responseReceived before initialization!");
         return false;
     }
 
@@ -305,11 +283,11 @@ AlpinePeerMgr::responseReceived (ulong  peerId)
 
     // Update the base profile for this peer
     //
-    bool  status;
-    status = baseProfileIndex_s->responseReceived (peerId);
+    bool status;
+    status = baseProfileIndex_s->responseReceived(peerId);
 
     if (!status) {
-        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::responseReceived!");
+        Log::Error("Updating base profile for peer failed in AlpinePeerMgr::responseReceived!");
         return false;
     }
 
@@ -318,74 +296,71 @@ AlpinePeerMgr::responseReceived (ulong  peerId)
 }
 
 
-
-bool  
-AlpinePeerMgr::registerTransport (ulong                      peerId,
-                                  AlpineDtcpConnTransport *  transport)
+bool
+AlpinePeerMgr::registerTransport(ulong peerId, AlpineDtcpConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::registerTransport invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::registerTransport invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::registerTransport before initialization!");
+        Log::Error("Call to AlpinePeerMgr::registerTransport before initialization!");
         return false;
     }
 
 
     // Create peer information
     //
-    auto  peerInfo = std::make_unique<t_PeerInfo>();
+    auto peerInfo = std::make_unique<t_PeerInfo>();
 
-    peerInfo->peerId     = peerId;
-    peerInfo->transport  = transport;
-    peerInfo->alias      = std::nullopt;
+    peerInfo->peerId = peerId;
+    peerInfo->transport = transport;
+    peerInfo->alias = std::nullopt;
 
     // Register peer with the default group.
     //
     bool status;
-    AlpineGroup *  defaultGroup;
+    AlpineGroup * defaultGroup;
 
-    status = AlpineGroupMgr::getDefaultGroup (defaultGroup);
+    status = AlpineGroupMgr::getDefaultGroup(defaultGroup);
 
     if (!status) {
-        Log::Error ("Locating default peer group failed in AlpinePeerMgr::registerTransport!");
+        Log::Error("Locating default peer group failed in AlpinePeerMgr::registerTransport!");
 
         return false;
     }
 
-    status = defaultGroup->addPeer (peerId);
+    status = defaultGroup->addPeer(peerId);
 
     if (!status) {
-        Log::Error ("Add peer to default group failed in AlpinePeerMgr::registerTransport!");
+        Log::Error("Add peer to default group failed in AlpinePeerMgr::registerTransport!");
 
         return false;
     }
 
-    ulong  groupId;
-    defaultGroup->getId (groupId);
+    ulong groupId;
+    defaultGroup->getId(groupId);
 
-    peerInfo->groupList  = std::make_unique<t_GroupIdList>();
-    peerInfo->groupList->push_back (groupId);
+    peerInfo->groupList = std::make_unique<t_GroupIdList>();
+    peerInfo->groupList->push_back(groupId);
 
 
     // Add peer info to index
     //
     {
-        WriteLock  lock(peerInfoLock_s);
+        WriteLock lock(peerInfoLock_s);
 
-        peerInfoIndex_s->emplace (peerId, std::move(peerInfo));
+        peerInfoIndex_s->emplace(peerId, std::move(peerInfo));
     }
 
     // Add peer to base profile
     //
-    status = baseProfileIndex_s->create (peerId);
+    status = baseProfileIndex_s->create(peerId);
 
     if (!status) {
-        Log::Error ("Adding peer to base profile failed in AlpinePeerMgr::registerTransport!");
+        Log::Error("Adding peer to base profile failed in AlpinePeerMgr::registerTransport!");
         return false;
     }
 
@@ -394,13 +369,11 @@ AlpinePeerMgr::registerTransport (ulong                      peerId,
 }
 
 
-
-bool  
-AlpinePeerMgr::deactivatePeer (ulong  peerId)
+bool
+AlpinePeerMgr::deactivatePeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::deactivatePeer invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::deactivatePeer invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // MRP_TEMP implement!
@@ -409,13 +382,11 @@ AlpinePeerMgr::deactivatePeer (ulong  peerId)
 }
 
 
-
-bool  
-AlpinePeerMgr::deletePeer (ulong  peerId)
+bool
+AlpinePeerMgr::deletePeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::deletePeer invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::deletePeer invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // MRP_TEMP implement!
@@ -424,34 +395,30 @@ AlpinePeerMgr::deletePeer (ulong  peerId)
 }
 
 
-
-bool  
-AlpinePeerMgr::banPeer (ulong  peerId)
+bool
+AlpinePeerMgr::banPeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::banPeer invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::banPeer invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // MRP_TEMP implement!
 
     return true;
 }
-                                 
 
 
-bool  
-AlpinePeerMgr::badPacketReceived (ulong  peerId)
+bool
+AlpinePeerMgr::badPacketReceived(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::badPacketReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::badPacketReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::badPacketReceived before initialization!");
+        Log::Error("Call to AlpinePeerMgr::badPacketReceived before initialization!");
         return false;
     }
 
@@ -462,11 +429,11 @@ AlpinePeerMgr::badPacketReceived (ulong  peerId)
     // Update the base profile for this peer.  Bad packets are ONLY tracked here, and not per group
     // like most other affinity/quality stats.
     //
-    bool  status;
-    status = baseProfileIndex_s->badPacketReceived (peerId);
+    bool status;
+    status = baseProfileIndex_s->badPacketReceived(peerId);
 
     if (!status) {
-        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::badPacketReceived!");
+        Log::Error("Updating base profile for peer failed in AlpinePeerMgr::badPacketReceived!");
         return false;
     }
 
@@ -475,19 +442,17 @@ AlpinePeerMgr::badPacketReceived (ulong  peerId)
 }
 
 
-
 bool
-AlpinePeerMgr::reliableTransferFailed (ulong  peerId)
+AlpinePeerMgr::reliableTransferFailed(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerMgr::reliableTransferFailed invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerMgr::reliableTransferFailed invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock  dataLock(dataLock_s);
+    ReadLock dataLock(dataLock_s);
 
     if (!initialized_s) {
-        Log::Error ("Call to AlpinePeerMgr::reliableTransferFailed before initialization!");
+        Log::Error("Call to AlpinePeerMgr::reliableTransferFailed before initialization!");
         return false;
     }
 
@@ -497,11 +462,11 @@ AlpinePeerMgr::reliableTransferFailed (ulong  peerId)
 
     // Update the base profile for this peer.  Transfer failures only tracked at global level.
     //
-    bool  status;
-    status = baseProfileIndex_s->reliableTransferFailed (peerId);
+    bool status;
+    status = baseProfileIndex_s->reliableTransferFailed(peerId);
 
     if (!status) {
-        Log::Error ("Updating base profile for peer failed in AlpinePeerMgr::badPacketReceived!");
+        Log::Error("Updating base profile for peer failed in AlpinePeerMgr::badPacketReceived!");
         return false;
     }
 
@@ -510,14 +475,10 @@ AlpinePeerMgr::reliableTransferFailed (ulong  peerId)
 }
 
 
-
-void  
-AlpinePeerMgr::processTimedEvents ()
+void
+AlpinePeerMgr::processTimedEvents()
 {
 #ifdef _VERY_VERBOSE
-    Log::Debug ("AlpinePeerMgr::processTimedEvents invoked.");
+    Log::Debug("AlpinePeerMgr::processTimedEvents invoked.");
 #endif
 }
-
-
-

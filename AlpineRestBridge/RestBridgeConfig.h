@@ -9,41 +9,38 @@
 class RestBridgeConfig
 {
   public:
+    RestBridgeConfig() = default;
+    ~RestBridgeConfig() = default;
 
-    RestBridgeConfig () = default;
-    ~RestBridgeConfig () = default;
 
+    static const string configFile_s;
 
-    static const string  configFile_s;
+    static void createConfigElements();
 
-    static void  createConfigElements ();
-
-    static void  getConfigElements (ConfigData::t_ConfigElementList *& configElements);
+    static void getConfigElements(ConfigData::t_ConfigElementList *& configElements);
 
     // HTTP server pool/connection config helpers
-    static int   getHttpMinThreads ();
-    static int   getHttpMaxThreads ();
-    static int   getHttpMaxConnections ();
-    static int   getHttpMaxConnectionsPerIp ();
-    static int   getHttpIdleTimeoutSeconds ();
+    static int getHttpMinThreads();
+    static int getHttpMaxThreads();
+    static int getHttpMaxConnections();
+    static int getHttpMaxConnectionsPerIp();
+    static int getHttpIdleTimeoutSeconds();
 
     // Keep-alive and write timeout
-    static int   getHttpKeepAliveMaxRequests ();
-    static int   getHttpWriteTimeoutSeconds ();
+    static int getHttpKeepAliveMaxRequests();
+    static int getHttpWriteTimeoutSeconds();
 
     // Shutdown drain
-    static int   getShutdownDrainSeconds ();
+    static int getShutdownDrainSeconds();
 
     // Webhook
-    static string  getWebhookSecret ();
-    static int     getWebhookMaxRetries ();
-    static int     getWebhookTimeoutSeconds ();
+    static string getWebhookSecret();
+    static int getWebhookMaxRetries();
+    static int getWebhookTimeoutSeconds();
 
 
   private:
+    static ConfigData::t_ConfigElementList * configElements_s;
 
-    static ConfigData::t_ConfigElementList *  configElements_s;
-
-    static int  getIntConfig (const string & name, int defaultValue, int minValue, int maxValue);
-
+    static int getIntConfig(const string & name, int defaultValue, int minValue, int maxValue);
 };

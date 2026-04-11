@@ -1,10 +1,10 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <catch2/catch_test_macros.hpp>
 #include <QueryCache.h>
-#include <thread>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
+#include <thread>
 
 
 TEST_CASE("QueryCache basic operations", "[QueryCache]")
@@ -93,8 +93,8 @@ TEST_CASE("QueryCache LRU eviction", "[QueryCache]")
 
     SECTION("Lookup promotes to MRU")
     {
-        QueryCache::lookup("a");       // promote "a" to most-recently-used
-        QueryCache::store("d", "4");   // should evict "b" (now LRU)
+        QueryCache::lookup("a");      // promote "a" to most-recently-used
+        QueryCache::store("d", "4");  // should evict "b" (now LRU)
         REQUIRE(QueryCache::lookup("a").has_value());
         REQUIRE_FALSE(QueryCache::lookup("b").has_value());
         REQUIRE(QueryCache::lookup("c").has_value());

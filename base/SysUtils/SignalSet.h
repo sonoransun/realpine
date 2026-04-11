@@ -14,28 +14,23 @@ constexpr int SignalMax = 31;
 class SignalSet
 {
   public:
+    SignalSet();
+    ~SignalSet() = default;
 
-    SignalSet ();
-    ~SignalSet () = default;
 
+    bool clear();
 
-    bool clear ();
+    bool fill();
 
-    bool fill ();
+    bool add(int sigNumber);
 
-    bool add (int sigNumber);
+    bool remove(int sigNumber);
 
-    bool remove (int sigNumber);
+    bool getSignalSet(sigset_t & signalSet);
 
-    bool getSignalSet (sigset_t & signalSet);
-
-    static bool signalAsString (int       sigNumber,
-                                string &  sigString);
+    static bool signalAsString(int sigNumber, string & sigString);
 
 
   private:
-
-    sigset_t     signalSet_;
-
+    sigset_t signalSet_;
 };
-

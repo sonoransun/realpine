@@ -1,16 +1,16 @@
 /// Unit tests for RbacPolicy
 
-#include <catch2/catch_test_macros.hpp>
 #include <RbacPolicy.h>
-#include <fstream>
+#include <catch2/catch_test_macros.hpp>
 #include <filesystem>
+#include <fstream>
 
 
 using namespace std::string_literals;
 
 
 static string
-writeTempPolicy (const string & content)
+writeTempPolicy(const string & content)
 {
     auto path = std::filesystem::temp_directory_path() / "test_rbac_policy.json";
     std::ofstream out(path);
@@ -21,7 +21,7 @@ writeTempPolicy (const string & content)
 
 
 static void
-cleanupTempPolicy ()
+cleanupTempPolicy()
 {
     auto path = std::filesystem::temp_directory_path() / "test_rbac_policy.json";
     std::filesystem::remove(path);

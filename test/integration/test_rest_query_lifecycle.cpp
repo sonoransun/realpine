@@ -6,11 +6,11 @@
 /// verifying route matching, parameter extraction, and response format
 /// for the full query lifecycle (start -> get -> results -> cancel).
 
-#include <catch2/catch_test_macros.hpp>
-#include <HttpRouter.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
+#include <HttpRouter.h>
 #include <QueryHandler.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 // Stub handler that simulates QueryHandler responses for testing
@@ -18,8 +18,8 @@
 
 static ulong nextQueryId = 1000;
 
-static HttpResponse stubStartQuery(const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params)
+static HttpResponse
+stubStartQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // Verify body has queryString
     if (request.body.empty())
@@ -34,21 +34,20 @@ static HttpResponse stubStartQuery(const HttpRequest & request,
 }
 
 
-static HttpResponse stubGetQuery(const HttpRequest & request,
-                                  const std::unordered_map<string, string> & params)
+static HttpResponse
+stubGetQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
         return HttpResponse::badRequest("Missing query id");
 
-    string json = "{\"queryId\":"s + it->second +
-                  ",\"inProgress\":true,\"totalHits\":0}";
+    string json = "{\"queryId\":"s + it->second + ",\"inProgress\":true,\"totalHits\":0}";
     return HttpResponse::ok(json);
 }
 
 
-static HttpResponse stubGetResults(const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params)
+static HttpResponse
+stubGetResults(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -59,8 +58,8 @@ static HttpResponse stubGetResults(const HttpRequest & request,
 }
 
 
-static HttpResponse stubCancelQuery(const HttpRequest & request,
-                                     const std::unordered_map<string, string> & params)
+static HttpResponse
+stubCancelQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -71,8 +70,8 @@ static HttpResponse stubCancelQuery(const HttpRequest & request,
 }
 
 
-static HttpResponse stubStreamResults(const HttpRequest & request,
-                                       const std::unordered_map<string, string> & params)
+static HttpResponse
+stubStreamResults(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -87,13 +86,14 @@ static HttpResponse stubStreamResults(const HttpRequest & request,
 }
 
 
-static void setupQueryRouter(HttpRouter & router)
+static void
+setupQueryRouter(HttpRouter & router)
 {
-    router.addRoute("POST",   "/query",             stubStartQuery);
-    router.addRoute("GET",    "/query/:id",          stubGetQuery);
-    router.addRoute("GET",    "/query/:id/results",  stubGetResults);
-    router.addRoute("GET",    "/query/:id/stream",   stubStreamResults);
-    router.addRoute("DELETE", "/query/:id",          stubCancelQuery);
+    router.addRoute("POST", "/query", stubStartQuery);
+    router.addRoute("GET", "/query/:id", stubGetQuery);
+    router.addRoute("GET", "/query/:id/results", stubGetResults);
+    router.addRoute("GET", "/query/:id/stream", stubStreamResults);
+    router.addRoute("DELETE", "/query/:id", stubCancelQuery);
 }
 
 
@@ -104,8 +104,8 @@ TEST_CASE("Query lifecycle: start query", "[integration][query]")
 
     HttpRequest req;
     req.method = "POST";
-    req.path   = "/query";
-    req.body   = "{\"queryString\":\"test search\"}";
+    req.path = "/query";
+    req.body = "{\"queryString\":\"test search\"}";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -123,7 +123,7 @@ TEST_CASE("Query lifecycle: get query status", "[integration][query]")
 
     HttpRequest req;
     req.method = "GET";
-    req.path   = "/query/42";
+    req.path = "/query/42";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -141,7 +141,7 @@ TEST_CASE("Query lifecycle: get query results", "[integration][query]")
 
     HttpRequest req;
     req.method = "GET";
-    req.path   = "/query/42/results";
+    req.path = "/query/42/results";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -159,7 +159,7 @@ TEST_CASE("Query lifecycle: cancel query", "[integration][query]")
 
     HttpRequest req;
     req.method = "DELETE";
-    req.path   = "/query/42";
+    req.path = "/query/42";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -177,7 +177,7 @@ TEST_CASE("Query lifecycle: stream results (SSE)", "[integration][query]")
 
     HttpRequest req;
     req.method = "GET";
-    req.path   = "/query/42/stream";
+    req.path = "/query/42/stream";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -195,7 +195,7 @@ TEST_CASE("Query lifecycle: missing query returns 404", "[integration][query]")
 
     HttpRequest req;
     req.method = "GET";
-    req.path   = "/query/nonexistent/bogus";
+    req.path = "/query/nonexistent/bogus";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -211,7 +211,7 @@ TEST_CASE("Query lifecycle: wrong method returns 405", "[integration][query]")
 
     HttpRequest req;
     req.method = "PUT";
-    req.path   = "/query";
+    req.path = "/query";
 
     auto resp = router.dispatch(req);
     string built = resp.build();
@@ -227,8 +227,8 @@ TEST_CASE("Query lifecycle: start with empty body returns 400", "[integration][q
 
     HttpRequest req;
     req.method = "POST";
-    req.path   = "/query";
-    req.body   = "";
+    req.path = "/query";
+    req.body = "";
 
     auto resp = router.dispatch(req);
     string built = resp.build();

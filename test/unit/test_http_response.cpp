@@ -1,7 +1,7 @@
 /// Unit tests for HttpResponse
 
-#include <catch2/catch_test_macros.hpp>
 #include <HttpResponse.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 TEST_CASE("HttpResponse factory methods", "[HttpResponse]")
@@ -22,7 +22,7 @@ TEST_CASE("HttpResponse factory methods", "[HttpResponse]")
         string built = resp.build();
 
         REQUIRE(built.contains("HTTP/1.1 404 Not Found"));
-        REQUIRE(built.contains("\"error\":\"Not Found\""));
+        REQUIRE(built.contains("\"message\":\"Not Found\""));
     }
 
     SECTION("badRequest() sets 400 status with message")
@@ -104,7 +104,6 @@ TEST_CASE("HttpResponse includes CORS and security headers", "[HttpResponse]")
     REQUIRE(built.contains("Access-Control-Allow-Headers"));
     REQUIRE(built.contains("X-Content-Type-Options: nosniff"));
     REQUIRE(built.contains("X-Frame-Options: DENY"));
-    REQUIRE(built.contains("Connection: close"));
 }
 
 

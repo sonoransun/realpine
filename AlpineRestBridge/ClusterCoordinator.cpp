@@ -1,51 +1,53 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <ClusterCoordinator.h>
-#include <AlpineStackInterface.h>
 #include <AlpineRatingEngine.h>
-#include <JsonWriter.h>
+#include <AlpineStackInterface.h>
+#include <ClusterCoordinator.h>
 #include <JsonReader.h>
-#include <SafeParse.h>
+#include <JsonWriter.h>
 #include <Log.h>
 #include <Platform.h>
 #include <ReadLock.h>
-#include <WriteLock.h>
+#include <SafeParse.h>
 #include <StringUtils.h>
+#include <WriteLock.h>
 
 #include <asio.hpp>
+#include <cstring>
 #include <functional>
+#include <iomanip>
 #include <memory>
 #include <sstream>
-#include <iomanip>
-#include <cstring>
 
 #ifdef ALPINE_PLATFORM_POSIX
 #include <unistd.h>
+#endif
+
+#if defined(ALPINE_PLATFORM_DARWIN) || defined(ALPINE_PLATFORM_BSD)
 #include <sys/sysctl.h>
 #endif
 
 
 // --- Static member initialization ---
 
-string                                           ClusterCoordinator::nodeId_s;
-string                                           ClusterCoordinator::localHost_s;
-string                                           ClusterCoordinator::localRegion_s;
-ushort                                           ClusterCoordinator::restPort_s{0};
-ushort                                           ClusterCoordinator::beaconPort_s{0};
-std::atomic<bool>                                ClusterCoordinator::isolated_s{false};
+string ClusterCoordinator::nodeId_s;
+string ClusterCoordinator::localHost_s;
+string ClusterCoordinator::localRegion_s;
+ushort ClusterCoordinator::restPort_s{0};
+ushort ClusterCoordinator::beaconPort_s{0};
+std::atomic<bool> ClusterCoordinator::isolated_s{false};
 
-std::unordered_map<string, ClusterCoordinator::NodeInfo>  ClusterCoordinator::nodes_s;
-ReadWriteSem                                     ClusterCoordinator::nodesMutex_s;
+std::unordered_map<string, ClusterCoordinator::NodeInfo> ClusterCoordinator::nodes_s;
+ReadWriteSem ClusterCoordinator::nodesMutex_s;
 
-std::array<ClusterCoordinator::t_DedupShard, ClusterCoordinator::DEDUP_SHARD_COUNT>  ClusterCoordinator::dedupShards_s;
+std::array<ClusterCoordinator::t_DedupShard, ClusterCoordinator::DEDUP_SHARD_COUNT> ClusterCoordinator::dedupShards_s;
 
-std::unique_ptr<ClusterCoordinator::HeartbeatThread>  ClusterCoordinator::heartbeatThread_s;
-std::unique_ptr<ClusterCoordinator::ListenerThread>   ClusterCoordinator::listenerThread_s;
-std::once_flag                                        ClusterCoordinator::initFlag_s;
+std::unique_ptr<ClusterCoordinator::HeartbeatThread> ClusterCoordinator::heartbeatThread_s;
+std::unique_ptr<ClusterCoordinator::ListenerThread> ClusterCoordinator::listenerThread_s;
+std::once_flag ClusterCoordinator::initFlag_s;
 
-std::atomic<bool>                                ClusterCoordinator::initialized_s{false};
-
+std::atomic<bool> ClusterCoordinator::initialized_s{false};
 
 
 // ============================================================================
@@ -53,14 +55,14 @@ std::atomic<bool>                                ClusterCoordinator::initialized
 // ============================================================================
 
 bool
-ClusterCoordinator::initialize (ushort restPort, ushort beaconPort)
+ClusterCoordinator::initialize(ushort restPort, ushort beaconPort)
 {
     bool success = true;
 
     std::call_once(initFlag_s, [&] {
-        restPort_s   = restPort;
+        restPort_s = restPort;
         beaconPort_s = beaconPort;
-        nodeId_s     = generateNodeId();
+        nodeId_s = generateNodeId();
 
         // Determine local hostname for cluster identification
         char hostname[256];
@@ -71,9 +73,8 @@ ClusterCoordinator::initialize (ushort restPort, ushort beaconPort)
         const char * regionEnv = getenv("ALPINE_REGION");
         localRegion_s = regionEnv ? string(regionEnv) : "default"s;
 
-        Log::Info("ClusterCoordinator: Initializing node "s + nodeId_s +
-                  " (host: " + localHost_s + ", region: " + localRegion_s +
-                  ", REST port: " + std::to_string(restPort_s) + ")");
+        Log::Info("ClusterCoordinator: Initializing node "s + nodeId_s + " (host: " + localHost_s +
+                  ", region: " + localRegion_s + ", REST port: " + std::to_string(restPort_s) + ")");
 
         // Start heartbeat broadcast thread
         heartbeatThread_s = std::make_unique<HeartbeatThread>();
@@ -99,7 +100,7 @@ ClusterCoordinator::initialize (ushort restPort, ushort beaconPort)
 
 
 void
-ClusterCoordinator::shutdown ()
+ClusterCoordinator::shutdown()
 {
     if (!initialized_s.load(std::memory_order_acquire))
         return;
@@ -131,14 +132,13 @@ ClusterCoordinator::shutdown ()
 
 
 void
-ClusterCoordinator::registerRoutes (HttpRouter & router)
+ClusterCoordinator::registerRoutes(HttpRouter & router)
 {
-    router.addRoute("GET",  "/cluster/status",      handleClusterStatus,    "Cluster status"s,    false);
-    router.addRoute("POST", "/cluster/query",       handleClusterQuery,     "Cluster query"s,     true);
-    router.addRoute("POST", "/cluster/heartbeat",   handleClusterHeartbeat, "Cluster heartbeat"s, true);
-    router.addRoute("GET",  "/cluster/results/:id", handleClusterResults,   "Cluster results"s,   true);
+    router.addRoute("GET", "/cluster/status", handleClusterStatus, "Cluster status"s, false);
+    router.addRoute("POST", "/cluster/query", handleClusterQuery, "Cluster query"s, true);
+    router.addRoute("POST", "/cluster/heartbeat", handleClusterHeartbeat, "Cluster heartbeat"s, true);
+    router.addRoute("GET", "/cluster/results/:id", handleClusterResults, "Cluster results"s, true);
 }
-
 
 
 // ============================================================================
@@ -146,7 +146,7 @@ ClusterCoordinator::registerRoutes (HttpRouter & router)
 // ============================================================================
 
 vector<ClusterCoordinator::NodeInfo>
-ClusterCoordinator::getClusterNodes ()
+ClusterCoordinator::getClusterNodes()
 {
     ReadLock lock(nodesMutex_s);
 
@@ -156,7 +156,7 @@ ClusterCoordinator::getClusterNodes ()
     // Include self
     result.push_back(getLocalNodeInfo());
 
-    for (const auto& [id, node] : nodes_s)
+    for (const auto & [id, node] : nodes_s)
         result.push_back(node);
 
     return result;
@@ -164,15 +164,15 @@ ClusterCoordinator::getClusterNodes ()
 
 
 ClusterCoordinator::NodeInfo
-ClusterCoordinator::getLocalNodeInfo ()
+ClusterCoordinator::getLocalNodeInfo()
 {
     NodeInfo info;
-    info.nodeId          = nodeId_s;
-    info.host            = localHost_s;
-    info.restPort        = restPort_s;
-    info.region          = localRegion_s;
+    info.nodeId = nodeId_s;
+    info.host = localHost_s;
+    info.restPort = restPort_s;
+    info.region = localRegion_s;
     info.cpuLoadEstimate = estimateCpuLoad();
-    info.lastHeartbeat   = std::chrono::steady_clock::now();
+    info.lastHeartbeat = std::chrono::steady_clock::now();
 
     // Count active queries via sharded dedup index
     {
@@ -193,15 +193,12 @@ ClusterCoordinator::getLocalNodeInfo ()
 }
 
 
-
 // ============================================================================
 //  Query deduplication
 // ============================================================================
 
 string
-ClusterCoordinator::hashQuery (const string & queryString,
-                               const string & groupName,
-                               ulong          autoHaltLimit)
+ClusterCoordinator::hashQuery(const string & queryString, const string & groupName, ulong autoHaltLimit)
 {
     // Simple deterministic hash combining query parameters.
     // Use std::hash with a combined key string.
@@ -216,9 +213,7 @@ ClusterCoordinator::hashQuery (const string & queryString,
 
 
 bool
-ClusterCoordinator::isDuplicateQuery (const string & queryHash,
-                                      string &       ownerHost,
-                                      ushort &       ownerPort)
+ClusterCoordinator::isDuplicateQuery(const string & queryHash, string & ownerHost, ushort & ownerPort)
 {
     auto now = std::chrono::steady_clock::now();
 
@@ -232,8 +227,7 @@ ClusterCoordinator::isDuplicateQuery (const string & queryHash,
     const auto & entry = it->second;
 
     // Check if within dedup window
-    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-        now - entry.registeredAt).count();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - entry.registeredAt).count();
 
     if (elapsed > DEDUP_WINDOW_SEC)
         return false;
@@ -256,29 +250,28 @@ ClusterCoordinator::isDuplicateQuery (const string & queryHash,
 
 
 void
-ClusterCoordinator::registerActiveQuery (const string & queryHash,
-                                         ulong          queryId)
+ClusterCoordinator::registerActiveQuery(const string & queryHash, ulong queryId)
 {
     auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
     WriteLock lock(shard.mutex);
 
     DedupEntry entry;
-    entry.nodeId       = nodeId_s;
-    entry.queryId      = queryId;
+    entry.nodeId = nodeId_s;
+    entry.queryId = queryId;
     entry.registeredAt = std::chrono::steady_clock::now();
-    entry.wallClockMs  = static_cast<uint64_t>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count());
+    entry.wallClockMs = static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count());
 
     shard.entries[queryHash] = entry;
 
-    Log::Debug("ClusterCoordinator: Registered query hash "s + queryHash +
-               " (queryId: " + std::to_string(queryId) + ")");
+    Log::Debug("ClusterCoordinator: Registered query hash "s + queryHash + " (queryId: " + std::to_string(queryId) +
+               ")");
 }
 
 
 void
-ClusterCoordinator::unregisterActiveQuery (const string & queryHash)
+ClusterCoordinator::unregisterActiveQuery(const string & queryHash)
 {
     auto & shard = dedupShards_s[dedupShardIndex(queryHash)];
     WriteLock lock(shard.mutex);
@@ -286,13 +279,12 @@ ClusterCoordinator::unregisterActiveQuery (const string & queryHash)
 }
 
 
-
 // ============================================================================
 //  Load-aware routing
 // ============================================================================
 
 bool
-ClusterCoordinator::shouldRedirect (string & redirectUrl)
+ClusterCoordinator::shouldRedirect(string & redirectUrl)
 {
     NodeInfo local = getLocalNodeInfo();
 
@@ -307,10 +299,11 @@ ClusterCoordinator::shouldRedirect (string & redirectUrl)
     const NodeInfo * best = nullptr;
     double bestScore = local.cpuLoadEstimate + static_cast<double>(local.activeQueries) * 0.1;
 
-    for (const auto& [id, node] : nodes_s) {
+    for (const auto & [id, node] : nodes_s) {
         // Skip nodes with stale heartbeats
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-            std::chrono::steady_clock::now() - node.lastHeartbeat).count();
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - node.lastHeartbeat)
+                .count();
 
         if (elapsed > timeoutSec)
             continue;
@@ -342,15 +335,12 @@ ClusterCoordinator::shouldRedirect (string & redirectUrl)
 }
 
 
-
 // ============================================================================
 //  Federated result aggregation
 // ============================================================================
 
 string
-ClusterCoordinator::fetchRemoteResults (const string & host,
-                                        ushort         port,
-                                        ulong          queryId)
+ClusterCoordinator::fetchRemoteResults(const string & host, ushort port, ulong queryId)
 {
     try {
         asio::io_context ioCtx;
@@ -362,9 +352,8 @@ ClusterCoordinator::fetchRemoteResults (const string & host,
         asio::connect(socket, endpoints);
 
         // Build GET request
-        string request = "GET /query/"s + std::to_string(queryId) + "/results HTTP/1.1\r\n" +
-                          "Host: " + host + ":" + std::to_string(port) + "\r\n" +
-                          "Connection: close\r\n\r\n";
+        string request = "GET /query/"s + std::to_string(queryId) + "/results HTTP/1.1\r\n" + "Host: " + host + ":" +
+                         std::to_string(port) + "\r\n" + "Connection: close\r\n\r\n";
 
         asio::write(socket, asio::buffer(request));
 
@@ -387,14 +376,12 @@ ClusterCoordinator::fetchRemoteResults (const string & host,
             return ""s;
 
         return response.substr(bodyPos + 4);
-    }
-    catch (const std::exception & e) {
-        Log::Debug("ClusterCoordinator: Failed to fetch remote results from "s +
-                   host + ":" + std::to_string(port) + " - " + e.what());
+    } catch (const std::exception & e) {
+        Log::Debug("ClusterCoordinator: Failed to fetch remote results from "s + host + ":" + std::to_string(port) +
+                   " - " + e.what());
         return ""s;
     }
 }
-
 
 
 // ============================================================================
@@ -402,8 +389,7 @@ ClusterCoordinator::fetchRemoteResults (const string & host,
 // ============================================================================
 
 HttpResponse
-ClusterCoordinator::handleClusterStatus (const HttpRequest & request,
-                                         const std::unordered_map<string, string> & params)
+ClusterCoordinator::handleClusterStatus(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto nodes = getClusterNodes();
 
@@ -452,8 +438,7 @@ ClusterCoordinator::handleClusterStatus (const HttpRequest & request,
 
 
 HttpResponse
-ClusterCoordinator::handleClusterQuery (const HttpRequest & request,
-                                        const std::unordered_map<string, string> & params)
+ClusterCoordinator::handleClusterQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // This endpoint receives a query request that may be redirected to this node,
     // or checks for dedup before starting.
@@ -514,11 +499,11 @@ ClusterCoordinator::handleClusterQuery (const HttpRequest & request,
 
     // Start the query locally
     AlpineStackInterface::t_QueryOptions options;
-    options.groupName     = groupName;
+    options.groupName = groupName;
     options.autoHaltLimit = autoHaltLimit;
-    options.peerDescMax   = 0;
-    options.autoDownload  = false;
-    options.optionId      = 0;
+    options.peerDescMax = 0;
+    options.autoDownload = false;
+    options.optionId = 0;
 
     auto result = AlpineStackInterface::startQuery2(options, queryString);
     if (!result)
@@ -546,8 +531,8 @@ ClusterCoordinator::handleClusterQuery (const HttpRequest & request,
 
 
 HttpResponse
-ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
-                                            const std::unordered_map<string, string> & params)
+ClusterCoordinator::handleClusterHeartbeat(const HttpRequest & request,
+                                           const std::unordered_map<string, string> & params)
 {
     // Accept heartbeat from a peer node via HTTP POST.
     // This supplements UDP beacon-based discovery.
@@ -560,8 +545,7 @@ ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
     ulong activeQueries = 0;
     ulong connectionCount = 0;
 
-    if (!reader.getString("nodeId", nodeId) ||
-        !reader.getString("host", host) ||
+    if (!reader.getString("nodeId", nodeId) || !reader.getString("host", host) ||
         !reader.getUlong("restPort", restPort)) {
         return HttpResponse::badRequest("Missing required heartbeat fields");
     }
@@ -578,32 +562,30 @@ ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
     {
         WriteLock lock(nodesMutex_s);
 
-        NodeInfo & node  = nodes_s[nodeId];
-        node.nodeId          = nodeId;
-        node.host            = host;
-        node.restPort        = static_cast<ushort>(restPort);
-        node.activeQueries   = static_cast<uint>(activeQueries);
+        NodeInfo & node = nodes_s[nodeId];
+        node.nodeId = nodeId;
+        node.host = host;
+        node.restPort = static_cast<ushort>(restPort);
+        node.activeQueries = static_cast<uint>(activeQueries);
         node.connectionCount = static_cast<uint>(connectionCount);
-        node.region          = peerRegion;
-        node.lastHeartbeat   = std::chrono::steady_clock::now();
+        node.region = peerRegion;
+        node.lastHeartbeat = std::chrono::steady_clock::now();
     }
 
     // Merge remote peer scores from gossip
     {
         nlohmann::json doc = nlohmann::json::parse(request.body, nullptr, false);
-        if (!doc.is_discarded() && doc.contains("peerScores") &&
-            doc["peerScores"].is_array()) {
+        if (!doc.is_discarded() && doc.contains("peerScores") && doc["peerScores"].is_array()) {
 
             vector<AlpineRatingEngine::t_ScoreEntry> remoteScores;
 
             for (const auto & se : doc["peerScores"]) {
-                if (!se.contains("peerId") || !se.contains("score") ||
-                    !se.contains("interactions"))
+                if (!se.contains("peerId") || !se.contains("score") || !se.contains("interactions"))
                     continue;
 
                 AlpineRatingEngine::t_ScoreEntry entry;
-                entry.peerId       = se["peerId"].get<ulong>();
-                entry.score        = se["score"].get<double>();
+                entry.peerId = se["peerId"].get<ulong>();
+                entry.score = se["score"].get<double>();
                 entry.interactions = se["interactions"].get<ulong>();
                 remoteScores.push_back(entry);
             }
@@ -624,8 +606,7 @@ ClusterCoordinator::handleClusterHeartbeat (const HttpRequest & request,
 
 
 HttpResponse
-ClusterCoordinator::handleClusterResults (const HttpRequest & request,
-                                          const std::unordered_map<string, string> & params)
+ClusterCoordinator::handleClusterResults(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // Federated result aggregation endpoint.
     // Returns local results for a query, plus fetches from other nodes that
@@ -715,8 +696,9 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
         int timeoutSec = computeAdaptiveTimeoutSec();
         for (const auto & [id, node] : nodes_s) {
             // Skip stale nodes
-            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-                std::chrono::steady_clock::now() - node.lastHeartbeat).count();
+            auto elapsed =
+                std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - node.lastHeartbeat)
+                    .count();
             if (elapsed > timeoutSec)
                 continue;
 
@@ -725,8 +707,7 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
             ReadLock dedupLock(shard.mutex);
             auto dedupIt = shard.entries.find(queryHash);
             if (dedupIt != shard.entries.end() && dedupIt->second.nodeId == id) {
-                string remoteJson = fetchRemoteResults(node.host, node.restPort,
-                                                       dedupIt->second.queryId);
+                string remoteJson = fetchRemoteResults(node.host, node.restPort, dedupIt->second.queryId);
                 if (!remoteJson.empty()) {
                     writer.beginObject();
                     writer.key("nodeId");
@@ -746,20 +727,19 @@ ClusterCoordinator::handleClusterResults (const HttpRequest & request,
 }
 
 
-
 // ============================================================================
 //  Internal helpers
 // ============================================================================
 
 size_t
-ClusterCoordinator::dedupShardIndex (const string & key)
+ClusterCoordinator::dedupShardIndex(const string & key)
 {
     return std::hash<string>{}(key) % DEDUP_SHARD_COUNT;
 }
 
 
 string
-ClusterCoordinator::generateNodeId ()
+ClusterCoordinator::generateNodeId()
 {
     char hostname[256];
     gethostname(hostname, sizeof(hostname));
@@ -774,16 +754,15 @@ ClusterCoordinator::generateNodeId ()
 
 
 void
-ClusterCoordinator::evictStaleNodes ()
+ClusterCoordinator::evictStaleNodes()
 {
     auto now = std::chrono::steady_clock::now();
     int timeoutSec = computeAdaptiveTimeoutSec();
 
     WriteLock lock(nodesMutex_s);
 
-    for (auto it = nodes_s.begin(); it != nodes_s.end(); ) {
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-            now - it->second.lastHeartbeat).count();
+    for (auto it = nodes_s.begin(); it != nodes_s.end();) {
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - it->second.lastHeartbeat).count();
 
         if (elapsed > timeoutSec) {
             Log::Debug("ClusterCoordinator: Evicting stale node "s + it->first);
@@ -797,9 +776,8 @@ ClusterCoordinator::evictStaleNodes ()
     for (auto & shard : dedupShards_s) {
         WriteLock dedupLock(shard.mutex);
 
-        for (auto it = shard.entries.begin(); it != shard.entries.end(); ) {
-            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-                now - it->second.registeredAt).count();
+        for (auto it = shard.entries.begin(); it != shard.entries.end();) {
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - it->second.registeredAt).count();
 
             if (elapsed > DEDUP_WINDOW_SEC) {
                 it = shard.entries.erase(it);
@@ -812,19 +790,19 @@ ClusterCoordinator::evictStaleNodes ()
 
 
 void
-ClusterCoordinator::broadcastHeartbeat ()
+ClusterCoordinator::broadcastHeartbeat()
 {
     // Send heartbeat via HTTP POST to all known cluster nodes.
     NodeInfo local = getLocalNodeInfo();
 
     nlohmann::json payload;
-    payload["nodeId"]          = local.nodeId;
-    payload["host"]            = local.host;
-    payload["restPort"]        = local.restPort;
-    payload["activeQueries"]   = local.activeQueries;
+    payload["nodeId"] = local.nodeId;
+    payload["host"] = local.host;
+    payload["restPort"] = local.restPort;
+    payload["activeQueries"] = local.activeQueries;
     payload["connectionCount"] = local.connectionCount;
-    payload["cpuLoad"]         = local.cpuLoadEstimate;
-    payload["region"]          = local.region;
+    payload["cpuLoad"] = local.cpuLoadEstimate;
+    payload["region"] = local.region;
 
     // Include capability vector
     payload["capabilities"] = nlohmann::json::array();
@@ -840,7 +818,7 @@ ClusterCoordinator::broadcastHeartbeat ()
             for (const auto & [hash, entry] : shard.entries) {
                 if (entry.nodeId == nodeId_s) {
                     nlohmann::json qe;
-                    qe["hash"]    = hash;
+                    qe["hash"] = hash;
                     qe["queryId"] = entry.queryId;
                     payload["activeQueryHashes"].push_back(qe);
                 }
@@ -855,8 +833,8 @@ ClusterCoordinator::broadcastHeartbeat ()
 
         for (const auto & entry : topScores) {
             nlohmann::json se;
-            se["peerId"]       = entry.peerId;
-            se["score"]        = entry.score;
+            se["peerId"] = entry.peerId;
+            se["score"] = entry.score;
             se["interactions"] = entry.interactions;
             payload["peerScores"].push_back(se);
         }
@@ -882,39 +860,45 @@ ClusterCoordinator::broadcastHeartbeat ()
 
     for (const auto & [id, node] : nodeSnapshot) {
         auto resolver = std::make_shared<asio::ip::tcp::resolver>(ioCtx);
-        auto sock     = std::make_shared<asio::ip::tcp::socket>(ioCtx);
-        auto rttStart = std::make_shared<std::chrono::steady_clock::time_point>(
-            std::chrono::steady_clock::now());
-        auto nodeId   = std::make_shared<string>(id);
+        auto sock = std::make_shared<asio::ip::tcp::socket>(ioCtx);
+        auto rttStart = std::make_shared<std::chrono::steady_clock::time_point>(std::chrono::steady_clock::now());
+        auto nodeId = std::make_shared<string>(id);
         auto nodeHost = node.host;
         auto nodePort = std::to_string(node.restPort);
 
         // Build the HTTP request string
-        auto httpReq = std::make_shared<string>(
-            "POST /cluster/heartbeat HTTP/1.1\r\n"s +
-            "Host: " + nodeHost + ":" + nodePort + "\r\n" +
-            "Content-Type: application/json\r\n" +
-            "Content-Length: " + std::to_string(body.length()) + "\r\n" +
-            "Connection: close\r\n\r\n" + body);
+        auto httpReq = std::make_shared<string>("POST /cluster/heartbeat HTTP/1.1\r\n"s + "Host: " + nodeHost + ":" +
+                                                nodePort + "\r\n" + "Content-Type: application/json\r\n" +
+                                                "Content-Length: " + std::to_string(body.length()) + "\r\n" +
+                                                "Connection: close\r\n\r\n" + body);
 
-        resolver->async_resolve(nodeHost, nodePort,
-            [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex]
-            (asio::error_code ec, asio::ip::tcp::resolver::results_type endpoints) {
-                if (ec) return;
-                asio::async_connect(*sock, endpoints,
-                    [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex]
-                    (asio::error_code ec, const asio::ip::tcp::endpoint &) {
-                        if (ec) return;
-                        asio::async_write(*sock, asio::buffer(*httpReq),
-                            [sock, rttStart, nodeId, &rttResults, &rttMutex]
-                            (asio::error_code ec, size_t) {
-                                if (ec) return;
+        resolver->async_resolve(
+            nodeHost,
+            nodePort,
+            [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex](asio::error_code ec,
+                                                                      asio::ip::tcp::resolver::results_type endpoints) {
+                if (ec)
+                    return;
+                asio::async_connect(
+                    *sock,
+                    endpoints,
+                    [sock, rttStart, nodeId, httpReq, &rttResults, &rttMutex](asio::error_code ec,
+                                                                              const asio::ip::tcp::endpoint &) {
+                        if (ec)
+                            return;
+                        asio::async_write(
+                            *sock,
+                            asio::buffer(*httpReq),
+                            [sock, rttStart, nodeId, &rttResults, &rttMutex](asio::error_code ec, size_t) {
+                                if (ec)
+                                    return;
                                 auto buf = std::make_shared<std::array<char, 1024>>();
-                                sock->async_read_some(asio::buffer(*buf),
-                                    [rttStart, nodeId, &rttResults, &rttMutex]
-                                    (asio::error_code, size_t) {
+                                sock->async_read_some(
+                                    asio::buffer(*buf),
+                                    [rttStart, nodeId, &rttResults, &rttMutex](asio::error_code, size_t) {
                                         auto rttMs = std::chrono::duration<double, std::milli>(
-                                            std::chrono::steady_clock::now() - *rttStart).count();
+                                                         std::chrono::steady_clock::now() - *rttStart)
+                                                         .count();
                                         std::lock_guard lock(rttMutex);
                                         rttResults[*nodeId] = rttMs;
                                     });
@@ -939,7 +923,7 @@ ClusterCoordinator::broadcastHeartbeat ()
 
 
 void
-ClusterCoordinator::gossipActiveQueries ()
+ClusterCoordinator::gossipActiveQueries()
 {
     // Gossip is embedded in the heartbeat payload (see broadcastHeartbeat).
     // This method handles incoming gossip from peers by updating the dedup index
@@ -949,7 +933,7 @@ ClusterCoordinator::gossipActiveQueries ()
 
 
 int
-ClusterCoordinator::computeAdaptiveTimeoutSec ()
+ClusterCoordinator::computeAdaptiveTimeoutSec()
 {
     // Adaptive timeout: max(35, avgRttMs * 10 / 1000) capped at 120s
     ReadLock lock(nodesMutex_s);
@@ -958,7 +942,7 @@ ClusterCoordinator::computeAdaptiveTimeoutSec ()
         return NODE_TIMEOUT_MIN_SEC;
 
     double totalRtt = 0.0;
-    int    count    = 0;
+    int count = 0;
 
     for (const auto & [id, node] : nodes_s) {
         if (node.rttMs > 0.0) {
@@ -972,13 +956,13 @@ ClusterCoordinator::computeAdaptiveTimeoutSec ()
 
     double avgRttMs = totalRtt / count;
     int rttBased = static_cast<int>(avgRttMs * 10.0 / 1000.0);
-    int timeout  = std::max(NODE_TIMEOUT_MIN_SEC, rttBased);
+    int timeout = std::max(NODE_TIMEOUT_MIN_SEC, rttBased);
     return std::min(timeout, NODE_TIMEOUT_MAX_SEC);
 }
 
 
 void
-ClusterCoordinator::checkSplitBrain ()
+ClusterCoordinator::checkSplitBrain()
 {
     auto now = std::chrono::steady_clock::now();
     int timeoutSec = computeAdaptiveTimeoutSec();
@@ -992,12 +976,11 @@ ClusterCoordinator::checkSplitBrain ()
         return;
     }
 
-    int totalPeers   = static_cast<int>(nodes_s.size());
-    int unreachable  = 0;
+    int totalPeers = static_cast<int>(nodes_s.size());
+    int unreachable = 0;
 
     for (const auto & [id, node] : nodes_s) {
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
-            now - node.lastHeartbeat).count();
+        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - node.lastHeartbeat).count();
 
         if (elapsed > splitBrainWindowSec)
             ++unreachable;
@@ -1008,9 +991,8 @@ ClusterCoordinator::checkSplitBrain ()
     if (unreachableRatio > SPLIT_BRAIN_THRESHOLD) {
         if (!isolated_s.load(std::memory_order_acquire)) {
             isolated_s.store(true, std::memory_order_release);
-            Log::Error("ClusterCoordinator: Split-brain detected — "s +
-                       std::to_string(unreachable) + "/" + std::to_string(totalPeers) +
-                       " peers unreachable. Entering isolated mode."s);
+            Log::Error("ClusterCoordinator: Split-brain detected — "s + std::to_string(unreachable) + "/" +
+                       std::to_string(totalPeers) + " peers unreachable. Entering isolated mode."s);
         }
     } else {
         if (isolated_s.load(std::memory_order_acquire)) {
@@ -1022,14 +1004,14 @@ ClusterCoordinator::checkSplitBrain ()
 
 
 bool
-ClusterCoordinator::isIsolated ()
+ClusterCoordinator::isIsolated()
 {
     return isolated_s.load(std::memory_order_acquire);
 }
 
 
 double
-ClusterCoordinator::measureRtt (const string & host, ushort port)
+ClusterCoordinator::measureRtt(const string & host, ushort port)
 {
     try {
         asio::io_context ioCtx;
@@ -1046,15 +1028,14 @@ ClusterCoordinator::measureRtt (const string & host, ushort port)
         socket.close(ec);
 
         return std::chrono::duration<double, std::milli>(end - start).count();
-    }
-    catch (const std::exception &) {
+    } catch (const std::exception &) {
         return -1.0;
     }
 }
 
 
 double
-ClusterCoordinator::estimateCpuLoad ()
+ClusterCoordinator::estimateCpuLoad()
 {
 #ifdef ALPINE_PLATFORM_DARWIN
     // Use sysctl to get load average on macOS/Darwin
@@ -1073,13 +1054,12 @@ ClusterCoordinator::estimateCpuLoad ()
 }
 
 
-
 // ============================================================================
 //  HeartbeatThread
 // ============================================================================
 
 void
-ClusterCoordinator::HeartbeatThread::threadMain ()
+ClusterCoordinator::HeartbeatThread::threadMain()
 {
     Log::Info("ClusterCoordinator: Heartbeat thread started.");
 
@@ -1096,8 +1076,7 @@ ClusterCoordinator::HeartbeatThread::threadMain ()
         // Wait for the next heartbeat interval, waking immediately on stop()
         {
             std::unique_lock lock(cvMutex_);
-            cv_.wait_for(lock, std::chrono::seconds(HEARTBEAT_INTERVAL_SEC),
-                         [this] { return !isActive(); });
+            cv_.wait_for(lock, std::chrono::seconds(HEARTBEAT_INTERVAL_SEC), [this] { return !isActive(); });
         }
     }
 
@@ -1106,12 +1085,11 @@ ClusterCoordinator::HeartbeatThread::threadMain ()
 
 
 bool
-ClusterCoordinator::HeartbeatThread::stop ()
+ClusterCoordinator::HeartbeatThread::stop()
 {
     cv_.notify_all();
     return SysThread::stop();
 }
-
 
 
 // ============================================================================
@@ -1119,7 +1097,7 @@ ClusterCoordinator::HeartbeatThread::stop ()
 // ============================================================================
 
 bool
-ClusterCoordinator::ListenerThread::initialize (ushort beaconPort)
+ClusterCoordinator::ListenerThread::initialize(ushort beaconPort)
 {
     beaconPort_ = beaconPort;
 
@@ -1130,51 +1108,49 @@ ClusterCoordinator::ListenerThread::initialize (ushort beaconPort)
 
     // Allow address reuse so we coexist with DiscoveryBeacon
     int reuseAddr = 1;
-    setsockopt(udpSocket_.getFd(), SOL_SOCKET, SO_REUSEADDR,
-               &reuseAddr, sizeof(reuseAddr));
+    setsockopt(udpSocket_.getFd(), SOL_SOCKET, SO_REUSEADDR, &reuseAddr, sizeof(reuseAddr));
 
 #ifdef SO_REUSEPORT
-    setsockopt(udpSocket_.getFd(), SOL_SOCKET, SO_REUSEPORT,
-               &reuseAddr, sizeof(reuseAddr));
+    setsockopt(udpSocket_.getFd(), SOL_SOCKET, SO_REUSEPORT, &reuseAddr, sizeof(reuseAddr));
 #endif
 
-    struct sockaddr_in bindAddr{};
-    bindAddr.sin_family      = AF_INET;
+    struct sockaddr_in bindAddr
+    {};
+    bindAddr.sin_family = AF_INET;
     bindAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bindAddr.sin_port        = htons(beaconPort_);
+    bindAddr.sin_port = htons(beaconPort_);
 
     if (bind(udpSocket_.getFd(), (struct sockaddr *)&bindAddr, sizeof(bindAddr)) < 0) {
-        Log::Error("ClusterCoordinator: Listener failed to bind on port "s +
-                   std::to_string(beaconPort_));
+        Log::Error("ClusterCoordinator: Listener failed to bind on port "s + std::to_string(beaconPort_));
         udpSocket_.close();
         return false;
     }
 
     // Set receive timeout so thread can check isActive() periodically
     struct timeval tv;
-    tv.tv_sec  = 1;
+    tv.tv_sec = 1;
     tv.tv_usec = 0;
     setsockopt(udpSocket_.getFd(), SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    Log::Info("ClusterCoordinator: Listener bound on beacon port "s +
-              std::to_string(beaconPort_));
+    Log::Info("ClusterCoordinator: Listener bound on beacon port "s + std::to_string(beaconPort_));
     return true;
 }
 
 
 void
-ClusterCoordinator::ListenerThread::threadMain ()
+ClusterCoordinator::ListenerThread::threadMain()
 {
     Log::Info("ClusterCoordinator: Listener thread started.");
 
     byte buffer[4096];
 
     while (isActive()) {
-        struct sockaddr_in senderAddr{};
+        struct sockaddr_in senderAddr
+        {};
         socklen_t addrLen = sizeof(senderAddr);
 
-        ssize_t received = recvfrom(udpSocket_.getFd(), buffer, sizeof(buffer) - 1,
-                                    0, (struct sockaddr *)&senderAddr, &addrLen);
+        ssize_t received =
+            recvfrom(udpSocket_.getFd(), buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&senderAddr, &addrLen);
 
         if (received <= 0)
             continue;
@@ -1183,10 +1159,10 @@ ClusterCoordinator::ListenerThread::threadMain ()
 
         // Parse beacon JSON
         try {
-            nlohmann::json doc = nlohmann::json::parse(
-                reinterpret_cast<const char *>(buffer),
-                reinterpret_cast<const char *>(buffer + received),
-                nullptr, false);
+            nlohmann::json doc = nlohmann::json::parse(reinterpret_cast<const char *>(buffer),
+                                                       reinterpret_cast<const char *>(buffer + received),
+                                                       nullptr,
+                                                       false);
 
             if (doc.is_discarded())
                 continue;
@@ -1208,26 +1184,25 @@ ClusterCoordinator::ListenerThread::threadMain ()
             string peerHost(senderIp);
 
             // Generate a stable node ID for beacon-discovered peers
-            string peerNodeId = "beacon-"s +
-                std::to_string(std::hash<string>{}(peerHost + ":" +
-                    std::to_string(peerRestPort)) & 0xFFFFFFFF);
+            string peerNodeId =
+                "beacon-"s +
+                std::to_string(std::hash<string>{}(peerHost + ":" + std::to_string(peerRestPort)) & 0xFFFFFFFF);
 
             // Don't add ourselves
             if (peerHost == localHost_s && peerRestPort == restPort_s)
                 continue;
 
             // Also skip localhost variations
-            if ((peerHost == "127.0.0.1"s || peerHost == "0.0.0.0"s) &&
-                peerRestPort == restPort_s)
+            if ((peerHost == "127.0.0.1"s || peerHost == "0.0.0.0"s) && peerRestPort == restPort_s)
                 continue;
 
             {
                 WriteLock lock(nodesMutex_s);
 
-                NodeInfo & node  = nodes_s[peerNodeId];
-                node.nodeId        = peerNodeId;
-                node.host          = peerHost;
-                node.restPort      = peerRestPort;
+                NodeInfo & node = nodes_s[peerNodeId];
+                node.nodeId = peerNodeId;
+                node.host = peerHost;
+                node.restPort = peerRestPort;
                 node.lastHeartbeat = std::chrono::steady_clock::now();
 
                 if (doc.contains("region") && doc["region"].is_string())
@@ -1239,8 +1214,7 @@ ClusterCoordinator::ListenerThread::threadMain ()
                         node.capabilities.push_back(cap.get<string>());
                 }
             }
-        }
-        catch (const std::exception & e) {
+        } catch (const std::exception & e) {
             Log::Debug("ClusterCoordinator: Failed to parse beacon: "s + e.what());
         }
     }

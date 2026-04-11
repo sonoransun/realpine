@@ -1,11 +1,11 @@
 /// Unit tests for ReadWriteSem
 
-#include <catch2/catch_test_macros.hpp>
 #include <ReadWriteSem.h>
-#include <thread>
 #include <atomic>
-#include <vector>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
+#include <thread>
+#include <vector>
 
 
 TEST_CASE("ReadWriteSem basic locking", "[ReadWriteSem]")
@@ -49,8 +49,7 @@ TEST_CASE("ReadWriteSem concurrent readers", "[ReadWriteSem]")
     constexpr int numReaders = 8;
 
     std::vector<std::thread> threads;
-    for (int i = 0; i < numReaders; ++i)
-    {
+    for (int i = 0; i < numReaders; ++i) {
         threads.emplace_back([&]() {
             sem.acquireRead();
             int current = ++readersInside;
@@ -66,7 +65,7 @@ TEST_CASE("ReadWriteSem concurrent readers", "[ReadWriteSem]")
         });
     }
 
-    for (auto& t : threads)
+    for (auto & t : threads)
         t.join();
 
     // Multiple readers should have been inside simultaneously
@@ -82,8 +81,7 @@ TEST_CASE("ReadWriteSem exclusive writer", "[ReadWriteSem]")
     constexpr int numWriters = 4;
 
     std::vector<std::thread> threads;
-    for (int i = 0; i < numWriters; ++i)
-    {
+    for (int i = 0; i < numWriters; ++i) {
         threads.emplace_back([&]() {
             sem.acquireWrite();
 
@@ -97,7 +95,7 @@ TEST_CASE("ReadWriteSem exclusive writer", "[ReadWriteSem]")
         });
     }
 
-    for (auto& t : threads)
+    for (auto & t : threads)
         t.join();
 
     REQUIRE_FALSE(exclusionViolated.load());

@@ -3,22 +3,22 @@
 
 #include <AlpineFuse.h>
 #include <FuseOps.h>
-#include <VfsNode.h>
-#include <QueryCache.h>
 #include <Log.h>
+#include <QueryCache.h>
+#include <VfsNode.h>
 
 #include <fuse.h>
 
 #include <filesystem>
 
 
-std::unique_ptr<VfsNode>                 AlpineFuse::root_s;
-std::unique_ptr<AlpineFuse::FuseThread>  AlpineFuse::fuseThread_s;
-string                                   AlpineFuse::mountPoint_s;
-ulong                                    AlpineFuse::cacheTtlSeconds_s   = 60;
-ulong                                    AlpineFuse::feedbackThreshold_s = 5;
-bool                                     AlpineFuse::running_s           = false;
-ReadWriteSem                             AlpineFuse::dataLock_s;
+std::unique_ptr<VfsNode> AlpineFuse::root_s;
+std::unique_ptr<AlpineFuse::FuseThread> AlpineFuse::fuseThread_s;
+string AlpineFuse::mountPoint_s;
+ulong AlpineFuse::cacheTtlSeconds_s = 60;
+ulong AlpineFuse::feedbackThreshold_s = 5;
+bool AlpineFuse::running_s = false;
+ReadWriteSem AlpineFuse::dataLock_s;
 
 
 // ---------------------------------------------------------------------------
@@ -26,14 +26,12 @@ ReadWriteSem                             AlpineFuse::dataLock_s;
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::initialize (const string &  mountPoint,
-                        ulong           cacheTtlSeconds,
-                        ulong           feedbackThresholdVal)
+AlpineFuse::initialize(const string & mountPoint, ulong cacheTtlSeconds, ulong feedbackThresholdVal)
 {
     dataLock_s.acquireWrite();
 
-    mountPoint_s        = mountPoint;
-    cacheTtlSeconds_s   = cacheTtlSeconds;
+    mountPoint_s = mountPoint;
+    cacheTtlSeconds_s = cacheTtlSeconds;
     feedbackThreshold_s = feedbackThresholdVal;
 
     dataLock_s.releaseWrite();
@@ -41,8 +39,7 @@ AlpineFuse::initialize (const string &  mountPoint,
     QueryCache::initialize(cacheTtlSeconds);
     buildRootTree();
 
-    if (!prepareMountPoint())
-    {
+    if (!prepareMountPoint()) {
         Log::Error("AlpineFuse: failed to prepare mount point: "s + mountPoint);
         return false;
     }
@@ -57,12 +54,11 @@ AlpineFuse::initialize (const string &  mountPoint,
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::run ()
+AlpineFuse::run()
 {
     dataLock_s.acquireWrite();
 
-    if (running_s)
-    {
+    if (running_s) {
         dataLock_s.releaseWrite();
         Log::Error("AlpineFuse: already running"s);
         return false;
@@ -70,8 +66,7 @@ AlpineFuse::run ()
 
     fuseThread_s = std::make_unique<FuseThread>();
 
-    if (!fuseThread_s->create())
-    {
+    if (!fuseThread_s->create()) {
         dataLock_s.releaseWrite();
         Log::Error("AlpineFuse: failed to create FUSE thread"s);
         return false;
@@ -90,12 +85,11 @@ AlpineFuse::run ()
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::shutdown ()
+AlpineFuse::shutdown()
 {
     dataLock_s.acquireWrite();
 
-    if (!running_s)
-    {
+    if (!running_s) {
         dataLock_s.releaseWrite();
         return true;
     }
@@ -103,8 +97,7 @@ AlpineFuse::shutdown ()
     running_s = false;
     dataLock_s.releaseWrite();
 
-    if (fuseThread_s)
-    {
+    if (fuseThread_s) {
         fuseThread_s->destroy();
         fuseThread_s.reset();
     }
@@ -119,7 +112,7 @@ AlpineFuse::shutdown ()
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::isRunning ()
+AlpineFuse::isRunning()
 {
     dataLock_s.acquireRead();
     bool result = running_s;
@@ -133,7 +126,7 @@ AlpineFuse::isRunning ()
 // ---------------------------------------------------------------------------
 
 const string &
-AlpineFuse::getMountPoint ()
+AlpineFuse::getMountPoint()
 {
     return mountPoint_s;
 }
@@ -144,7 +137,7 @@ AlpineFuse::getMountPoint ()
 // ---------------------------------------------------------------------------
 
 VfsNode *
-AlpineFuse::rootNode ()
+AlpineFuse::rootNode()
 {
     return root_s.get();
 }
@@ -155,7 +148,7 @@ AlpineFuse::rootNode ()
 // ---------------------------------------------------------------------------
 
 ulong
-AlpineFuse::feedbackThreshold ()
+AlpineFuse::feedbackThreshold()
 {
     dataLock_s.acquireRead();
     ulong result = feedbackThreshold_s;
@@ -169,22 +162,22 @@ AlpineFuse::feedbackThreshold ()
 // ---------------------------------------------------------------------------
 
 void
-AlpineFuse::buildRootTree ()
+AlpineFuse::buildRootTree()
 {
     root_s = std::make_unique<VfsNode>(""s, VfsNode::t_NodeType::Directory);
 
-    root_s->addChild("queries"s,    VfsNode::t_NodeType::Directory);
-    root_s->addChild("by-peer"s,    VfsNode::t_NodeType::Directory);
-    root_s->addChild("by-group"s,   VfsNode::t_NodeType::Directory);
+    root_s->addChild("queries"s, VfsNode::t_NodeType::Directory);
+    root_s->addChild("by-peer"s, VfsNode::t_NodeType::Directory);
+    root_s->addChild("by-group"s, VfsNode::t_NodeType::Directory);
     root_s->addChild("by-quality"s, VfsNode::t_NodeType::Directory);
-    root_s->addChild("recent"s,     VfsNode::t_NodeType::Directory);
-    root_s->addChild("popular"s,    VfsNode::t_NodeType::Directory);
+    root_s->addChild("recent"s, VfsNode::t_NodeType::Directory);
+    root_s->addChild("popular"s, VfsNode::t_NodeType::Directory);
 
     // Pre-create quality tier subdirectories
     auto * qualityDir = root_s->findChild("by-quality"s);
-    qualityDir->addChild("high"s,   VfsNode::t_NodeType::Directory);
+    qualityDir->addChild("high"s, VfsNode::t_NodeType::Directory);
     qualityDir->addChild("medium"s, VfsNode::t_NodeType::Directory);
-    qualityDir->addChild("low"s,    VfsNode::t_NodeType::Directory);
+    qualityDir->addChild("low"s, VfsNode::t_NodeType::Directory);
 
     root_s->addChild(".stats"s, VfsNode::t_NodeType::File);
 
@@ -197,13 +190,12 @@ AlpineFuse::buildRootTree ()
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::prepareMountPoint ()
+AlpineFuse::prepareMountPoint()
 {
     std::error_code ec;
     std::filesystem::create_directories(mountPoint_s, ec);
 
-    if (ec)
-    {
+    if (ec) {
         Log::Error("AlpineFuse: create_directories failed: "s + ec.message());
         return false;
     }
@@ -217,12 +209,12 @@ AlpineFuse::prepareMountPoint ()
 // ---------------------------------------------------------------------------
 
 void
-AlpineFuse::FuseThread::threadMain ()
+AlpineFuse::FuseThread::threadMain()
 {
     Log::Info("AlpineFuse: FUSE event loop starting"s);
 
     auto mountStr = mountPoint_s;
-    const char * argv[] = { "alpine_fuse", "-f", mountStr.c_str() };
+    const char * argv[] = {"alpine_fuse", "-f", mountStr.c_str()};
     int argc = 3;
 
     struct fuse_args args = FUSE_ARGS_INIT(argc, const_cast<char **>(argv));

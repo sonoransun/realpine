@@ -5,90 +5,72 @@
 #include <Common.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
-#include <unordered_map>
 #include <functional>
 #include <memory>
 #include <string_view>
+#include <unordered_map>
 
-using AuthMiddleware = std::function<bool(const HttpRequest&, HttpResponse&)>;
-
-
-using RouteHandler = HttpResponse (*)(const HttpRequest & request,
-                                      const std::unordered_map<string, string> & params);
+using AuthMiddleware = std::function<bool(const HttpRequest &, HttpResponse &)>;
 
 
-struct RouteInfo {
-    string  method;
-    string  pattern;
-    string  description;
-    string  tag;              // OpenAPI tag (e.g., "Query", "Peer", "Admin")
-    string  requestSchema;    // JSON Schema for request body (empty if none)
-    string  responseSchema;   // JSON Schema for 200 response body
-    string  permission;       // Required RBAC permission (e.g., "query:start")
+using RouteHandler = HttpResponse (*)(const HttpRequest & request, const std::unordered_map<string, string> & params);
+
+
+struct RouteInfo
+{
+    string method;
+    string pattern;
+    string description;
+    string tag;             // OpenAPI tag (e.g., "Query", "Peer", "Admin")
+    string requestSchema;   // JSON Schema for request body (empty if none)
+    string responseSchema;  // JSON Schema for 200 response body
+    string permission;      // Required RBAC permission (e.g., "query:start")
 };
 
 
 class HttpRouter
 {
   public:
+    HttpRouter() = default;
+    ~HttpRouter() = default;
 
-    HttpRouter () = default;
-    ~HttpRouter () = default;
+    void addRoute(const string & method, const string & pattern, RouteHandler handler);
 
-    void  addRoute (const string &  method,
-                    const string &  pattern,
-                    RouteHandler    handler);
+    void addRoute(const string & method, const string & pattern, RouteHandler handler, const string & description);
 
-    void  addRoute (const string &  method,
-                    const string &  pattern,
-                    RouteHandler    handler,
-                    const string &  description);
+    void addRoute(
+        const string & method, const string & pattern, RouteHandler handler, const string & description, bool slow);
 
-    void  addRoute (const string &  method,
-                    const string &  pattern,
-                    RouteHandler    handler,
-                    const string &  description,
-                    bool            slow);
+    HttpResponse dispatch(const HttpRequest & request);
 
-    HttpResponse  dispatch (const HttpRequest & request);
+    [[nodiscard]] bool isSlowRoute(const HttpRequest & request) const;
 
-    [[nodiscard]] bool  isSlowRoute (const HttpRequest & request) const;
+    void setAuthMiddleware(AuthMiddleware middleware);
 
-    void  setAuthMiddleware (AuthMiddleware middleware);
-
-    const vector<RouteInfo> &  getRoutes () const;
+    const vector<RouteInfo> & getRoutes() const;
 
 
   private:
+    enum class HttpMethod : uint8_t { GET, POST, PUT, DELETE_, PATCH, HEAD, OPTIONS, UNKNOWN };
 
-    enum class HttpMethod : uint8_t {
-        GET,
-        POST,
-        PUT,
-        DELETE_,
-        PATCH,
-        HEAD,
-        OPTIONS,
-        UNKNOWN
+    struct t_HandlerEntry
+    {
+        RouteHandler handler;
+        bool slow{false};
     };
 
-    struct t_HandlerEntry {
-        RouteHandler  handler;
-        bool          slow{false};
+    struct TrieNode
+    {
+        std::unordered_map<string, std::unique_ptr<TrieNode>> children;
+        std::unique_ptr<TrieNode> paramChild;
+        string paramName;
+        std::unordered_map<HttpMethod, t_HandlerEntry> handlers;
+        bool requiresAuth = true;
     };
 
-    struct TrieNode {
-        std::unordered_map<string, std::unique_ptr<TrieNode>>  children;
-        std::unique_ptr<TrieNode>                              paramChild;
-        string                                                 paramName;
-        std::unordered_map<HttpMethod, t_HandlerEntry>         handlers;
-        bool                                                   requiresAuth = true;
-    };
-
-    static HttpMethod  parseMethod (std::string_view method);
+    static HttpMethod parseMethod(std::string_view method);
 
     TrieNode root_;
     AuthMiddleware authMiddleware_;
     vector<RouteInfo> routes_;
-
 };

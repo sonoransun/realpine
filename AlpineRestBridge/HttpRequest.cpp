@@ -11,9 +11,7 @@
 
 
 bool
-HttpRequest::parse (const byte *  data,
-                    ulong         dataLength,
-                    HttpRequest & request)
+HttpRequest::parse(const byte * data, ulong dataLength, HttpRequest & request)
 {
     if (!data || dataLength == 0)
         return false;
@@ -44,14 +42,12 @@ HttpRequest::parse (const byte *  data,
 
     // Split path from query string
     ulong queryPos = fullPath.find('?');
-    if (queryPos != string::npos)
-    {
+    if (queryPos != string::npos) {
         request.path = fullPath.substr(0, queryPos);
 
         // Parse query parameters
         string queryString = fullPath.substr(queryPos + 1);
-        while (!queryString.empty())
-        {
+        while (!queryString.empty()) {
             ulong ampPos = queryString.find('&');
             string param = queryString.substr(0, ampPos);
 
@@ -65,9 +61,7 @@ HttpRequest::parse (const byte *  data,
                 break;
             queryString = queryString.substr(ampPos + 1);
         }
-    }
-    else
-    {
+    } else {
         request.path = fullPath;
     }
 
@@ -78,12 +72,24 @@ HttpRequest::parse (const byte *  data,
         if (std::isalnum(static_cast<unsigned char>(c)))
             return true;
         switch (c) {
-            case '!': case '#': case '$': case '%': case '&': case '\'':
-            case '*': case '+': case '-': case '.': case '^': case '_':
-            case '`': case '|': case '~':
-                return true;
-            default:
-                return false;
+        case '!':
+        case '#':
+        case '$':
+        case '%':
+        case '&':
+        case '\'':
+        case '*':
+        case '+':
+        case '-':
+        case '.':
+        case '^':
+        case '_':
+        case '`':
+        case '|':
+        case '~':
+            return true;
+        default:
+            return false;
         }
     };
 
@@ -91,15 +97,13 @@ HttpRequest::parse (const byte *  data,
     ulong pos = lineEnd + 2;  // skip past \r\n of request line
     int headerCount = 0;
 
-    while (pos < raw.length())
-    {
+    while (pos < raw.length()) {
         ulong headerEnd = raw.find("\r\n", pos);
         if (headerEnd == string::npos)
             break;
 
         // Empty line marks end of headers
-        if (headerEnd == pos)
-        {
+        if (headerEnd == pos) {
             pos = headerEnd + 2;
             break;
         }
@@ -111,14 +115,12 @@ HttpRequest::parse (const byte *  data,
         string headerLine = raw.substr(pos, headerEnd - pos);
 
         ulong colonPos = headerLine.find(':');
-        if (headerLine.contains(':'))
-        {
+        if (headerLine.contains(':')) {
             string name = headerLine.substr(0, colonPos);
-            string val  = headerLine.substr(colonPos + 1);
+            string val = headerLine.substr(colonPos + 1);
 
             // Reject oversized header names or values
-            if (name.length() > MAX_HEADER_NAME_LENGTH ||
-                val.length() > MAX_HEADER_VALUE_LENGTH)
+            if (name.length() > MAX_HEADER_NAME_LENGTH || val.length() > MAX_HEADER_VALUE_LENGTH)
                 return false;
 
             // Validate header name characters per RFC 7230

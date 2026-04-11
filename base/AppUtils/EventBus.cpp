@@ -5,15 +5,13 @@
 #include "Log.h"
 
 
-std::mutex                                             EventBus::mutex_s;
-std::unordered_map<t_Event, vector<EventBus::Subscriber>>  EventBus::subscribers_s;
-EventBus::t_SubscriberId                               EventBus::nextId_s = 0;
-
+std::mutex EventBus::mutex_s;
+std::unordered_map<t_Event, vector<EventBus::Subscriber>> EventBus::subscribers_s;
+EventBus::t_SubscriberId EventBus::nextId_s = 0;
 
 
 EventBus::t_SubscriberId
-EventBus::subscribe (t_Event     event,
-                     t_Callback  callback)
+EventBus::subscribe(t_Event event, t_Callback callback)
 {
     std::lock_guard<std::mutex> lock(mutex_s);
 
@@ -24,24 +22,19 @@ EventBus::subscribe (t_Event     event,
 }
 
 
-
 void
-EventBus::unsubscribe (t_SubscriberId subscriberId)
+EventBus::unsubscribe(t_SubscriberId subscriberId)
 {
     std::lock_guard<std::mutex> lock(mutex_s);
 
     for (auto & [event, subs] : subscribers_s) {
-        std::erase_if(subs, [subscriberId](const Subscriber & s) {
-            return s.id == subscriberId;
-        });
+        std::erase_if(subs, [subscriberId](const Subscriber & s) { return s.id == subscriberId; });
     }
 }
 
 
-
 void
-EventBus::publish (t_Event         event,
-                   const string &  data)
+EventBus::publish(t_Event event, const string & data)
 {
     vector<t_Callback> callbacks;
 
@@ -66,9 +59,8 @@ EventBus::publish (t_Event         event,
 }
 
 
-
 void
-EventBus::clear ()
+EventBus::clear()
 {
     std::lock_guard<std::mutex> lock(mutex_s);
     subscribers_s.clear();

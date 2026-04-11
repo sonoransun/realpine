@@ -1,12 +1,12 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AuthHandler.h>
 #include <ApiKeyAuth.h>
+#include <AuthHandler.h>
+#include <Error.h>
 #include <JsonReader.h>
 #include <JsonWriter.h>
 #include <Log.h>
-#include <Error.h>
 #include <Platform.h>
 #include <ReadLock.h>
 #include <WriteLock.h>
@@ -15,15 +15,15 @@
 #include <sstream>
 
 #ifdef ALPINE_TLS_ENABLED
-#include <openssl/evp.h>
 #include <openssl/ec.h>
+#include <openssl/evp.h>
 #include <openssl/pem.h>
 #endif
 
 
-std::unordered_map<string, AuthHandler::t_PendingChallenge>  AuthHandler::pendingChallenges_s;
-std::unordered_map<string, AuthHandler::t_EnrolledDevice>    AuthHandler::enrolledDevices_s;
-ReadWriteSem                                                  AuthHandler::dataLock_s;
+std::unordered_map<string, AuthHandler::t_PendingChallenge> AuthHandler::pendingChallenges_s;
+std::unordered_map<string, AuthHandler::t_EnrolledDevice> AuthHandler::enrolledDevices_s;
+ReadWriteSem AuthHandler::dataLock_s;
 
 
 // ---------------------------------------------------------------------------
@@ -31,11 +31,11 @@ ReadWriteSem                                                  AuthHandler::dataL
 // ---------------------------------------------------------------------------
 
 void
-AuthHandler::registerRoutes (HttpRouter & router)
+AuthHandler::registerRoutes(HttpRouter & router)
 {
     router.addRoute("POST", "/auth/enroll-device", enrollDevice);
-    router.addRoute("GET",  "/auth/challenge",     getChallenge);
-    router.addRoute("POST", "/auth/verify",        verifySignature);
+    router.addRoute("GET", "/auth/challenge", getChallenge);
+    router.addRoute("POST", "/auth/verify", verifySignature);
 }
 
 
@@ -44,8 +44,7 @@ AuthHandler::registerRoutes (HttpRouter & router)
 // ---------------------------------------------------------------------------
 
 HttpResponse
-AuthHandler::enrollDevice (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+AuthHandler::enrollDevice(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     JsonReader reader(request.body);
 
@@ -65,18 +64,17 @@ AuthHandler::enrollDevice (const HttpRequest & request,
     auto deviceId = generateId();
 
     t_EnrolledDevice device;
-    device.publicKey     = publicKey;
-    device.deviceName    = deviceName;
+    device.publicKey = publicKey;
+    device.deviceName = deviceName;
     device.biometricType = biometricType;
-    device.enrolledAt    = std::chrono::system_clock::now();
+    device.enrolledAt = std::chrono::system_clock::now();
 
     {
         WriteLock guard(dataLock_s);
         enrolledDevices_s[deviceId] = std::move(device);
     }
 
-    Log::Info("AuthHandler: device enrolled: "s + deviceId
-              + " ("s + deviceName + ", "s + biometricType + ")"s);
+    Log::Info("AuthHandler: device enrolled: "s + deviceId + " ("s + deviceName + ", "s + biometricType + ")"s);
 
     JsonWriter writer;
     writer.beginObject();
@@ -95,25 +93,23 @@ AuthHandler::enrollDevice (const HttpRequest & request,
 // ---------------------------------------------------------------------------
 
 HttpResponse
-AuthHandler::getChallenge (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+AuthHandler::getChallenge(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     evictExpiredChallenges();
 
     auto challengeId = generateId();
-    auto nonce       = generateNonce();
+    auto nonce = generateNonce();
 
     {
         WriteLock guard(dataLock_s);
 
-        if (pendingChallenges_s.size() >= MAX_PENDING_CHALLENGES)
-        {
+        if (pendingChallenges_s.size() >= MAX_PENDING_CHALLENGES) {
             Log::Error("AuthHandler: pending challenge limit reached"s);
             return HttpResponse::tooManyRequests("Too many pending challenges");
         }
 
         t_PendingChallenge challenge;
-        challenge.nonce     = nonce;
+        challenge.nonce = nonce;
         challenge.createdAt = std::chrono::steady_clock::now();
 
         pendingChallenges_s[challengeId] = std::move(challenge);
@@ -136,8 +132,7 @@ AuthHandler::getChallenge (const HttpRequest & request,
 // ---------------------------------------------------------------------------
 
 HttpResponse
-AuthHandler::verifySignature (const HttpRequest & request,
-                              const std::unordered_map<string, string> & params)
+AuthHandler::verifySignature(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     JsonReader reader(request.body);
 
@@ -166,8 +161,7 @@ AuthHandler::verifySignature (const HttpRequest & request,
         auto elapsed = std::chrono::steady_clock::now() - it->second.createdAt;
         auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(elapsed).count();
 
-        if (static_cast<ulong>(elapsedSeconds) > CHALLENGE_TTL_SECONDS)
-        {
+        if (static_cast<ulong>(elapsedSeconds) > CHALLENGE_TTL_SECONDS) {
             pendingChallenges_s.erase(it);
             return HttpResponse::badRequest("Challenge expired");
         }
@@ -184,18 +178,15 @@ AuthHandler::verifySignature (const HttpRequest & request,
 
     {
         ReadLock guard(dataLock_s);
-        for (const auto & [id, device] : enrolledDevices_s)
-        {
-            if (device.publicKey == publicKey)
-            {
+        for (const auto & [id, device] : enrolledDevices_s) {
+            if (device.publicKey == publicKey) {
                 enrolled = true;
                 break;
             }
         }
     }
 
-    if (!enrolled)
-    {
+    if (!enrolled) {
         Log::Error("AuthHandler: verify failed — public key not enrolled"s);
         return HttpResponse::badRequest("Device not enrolled");
     }
@@ -203,10 +194,8 @@ AuthHandler::verifySignature (const HttpRequest & request,
 #ifdef ALPINE_TLS_ENABLED
     // ECDSA signature verification using OpenSSL EVP API
     {
-        auto * bio = BIO_new_mem_buf(publicKey.data(),
-                                     static_cast<int>(publicKey.size()));
-        if (!bio)
-        {
+        auto * bio = BIO_new_mem_buf(publicKey.data(), static_cast<int>(publicKey.size()));
+        if (!bio) {
             Log::Error("AuthHandler: BIO_new_mem_buf failed"s);
             return HttpResponse::serverError("Signature verification failed");
         }
@@ -214,15 +203,13 @@ AuthHandler::verifySignature (const HttpRequest & request,
         auto * pkey = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
         BIO_free(bio);
 
-        if (!pkey)
-        {
+        if (!pkey) {
             Log::Error("AuthHandler: failed to parse public key"s);
             return HttpResponse::badRequest("Invalid public key format");
         }
 
         auto * mdCtx = EVP_MD_CTX_new();
-        if (!mdCtx)
-        {
+        if (!mdCtx) {
             EVP_PKEY_free(pkey);
             Log::Error("AuthHandler: EVP_MD_CTX_new failed"s);
             return HttpResponse::serverError("Signature verification failed");
@@ -230,34 +217,25 @@ AuthHandler::verifySignature (const HttpRequest & request,
 
         bool verified = false;
 
-        if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr, pkey) == 1)
-        {
-            if (EVP_DigestVerifyUpdate(mdCtx,
-                                       challengeNonce.data(),
-                                       challengeNonce.size()) == 1)
-            {
+        if (EVP_DigestVerifyInit(mdCtx, nullptr, EVP_sha256(), nullptr, pkey) == 1) {
+            if (EVP_DigestVerifyUpdate(mdCtx, challengeNonce.data(), challengeNonce.size()) == 1) {
                 // Decode hex signature to binary
                 string sigBytes;
                 sigBytes.reserve(signature.size() / 2);
-                for (ulong i = 0; i + 1 < signature.size(); i += 2)
-                {
-                    auto byte_val = static_cast<unsigned char>(
-                        std::stoi(signature.substr(i, 2), nullptr, 16));
+                for (ulong i = 0; i + 1 < signature.size(); i += 2) {
+                    auto byte_val = static_cast<unsigned char>(std::stoi(signature.substr(i, 2), nullptr, 16));
                     sigBytes += static_cast<char>(byte_val);
                 }
 
                 verified = EVP_DigestVerifyFinal(
-                    mdCtx,
-                    reinterpret_cast<const unsigned char *>(sigBytes.data()),
-                    sigBytes.size()) == 1;
+                               mdCtx, reinterpret_cast<const unsigned char *>(sigBytes.data()), sigBytes.size()) == 1;
             }
         }
 
         EVP_MD_CTX_free(mdCtx);
         EVP_PKEY_free(pkey);
 
-        if (!verified)
-        {
+        if (!verified) {
             Log::Error("AuthHandler: ECDSA signature verification failed"s);
             return HttpResponse::badRequest("Signature verification failed");
         }
@@ -290,11 +268,10 @@ AuthHandler::verifySignature (const HttpRequest & request,
 // ---------------------------------------------------------------------------
 
 string
-AuthHandler::readUrandom (ulong numBytes)
+AuthHandler::readUrandom(ulong numBytes)
 {
     std::vector<byte> buf(numBytes);
-    if (!alpine_random_bytes(buf.data(), static_cast<unsigned long>(numBytes)))
-    {
+    if (!alpine_random_bytes(buf.data(), static_cast<unsigned long>(numBytes))) {
         Log::Error("AuthHandler: failed to generate random bytes"s);
         return {};
     }
@@ -302,8 +279,7 @@ AuthHandler::readUrandom (ulong numBytes)
     static const char hexChars[] = "0123456789abcdef";
     string result;
     result.reserve(numBytes * 2);
-    for (auto b : buf)
-    {
+    for (auto b : buf) {
         result += hexChars[(b >> 4) & 0x0F];
         result += hexChars[b & 0x0F];
     }
@@ -317,7 +293,7 @@ AuthHandler::readUrandom (ulong numBytes)
 // ---------------------------------------------------------------------------
 
 string
-AuthHandler::generateNonce ()
+AuthHandler::generateNonce()
 {
     return readUrandom(32);
 }
@@ -328,7 +304,7 @@ AuthHandler::generateNonce ()
 // ---------------------------------------------------------------------------
 
 string
-AuthHandler::generateId ()
+AuthHandler::generateId()
 {
     return readUrandom(16);
 }
@@ -339,14 +315,13 @@ AuthHandler::generateId ()
 // ---------------------------------------------------------------------------
 
 void
-AuthHandler::evictExpiredChallenges ()
+AuthHandler::evictExpiredChallenges()
 {
     auto now = std::chrono::steady_clock::now();
 
     WriteLock guard(dataLock_s);
 
-    for (auto it = pendingChallenges_s.begin(); it != pendingChallenges_s.end(); )
-    {
+    for (auto it = pendingChallenges_s.begin(); it != pendingChallenges_s.end();) {
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - it->second.createdAt).count();
 
         if (static_cast<ulong>(elapsed) > CHALLENGE_TTL_SECONDS)

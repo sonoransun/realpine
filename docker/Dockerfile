@@ -65,7 +65,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         iproute2 \
         curl \
         libstdc++6 \
+        tini \
+        libfuse3-3 \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user/group (uid/gid 10001, no home directory, nologin shell)
+RUN groupadd -g 10001 alpine \
+    && useradd -u 10001 -g 10001 -s /sbin/nologin -M alpine
 
 # Copy built binary and shared libraries
 COPY --from=builder /src/_build/bin/AlpineRestBridge /usr/local/bin/
@@ -73,12 +80,18 @@ COPY --from=builder /src/_build/lib/*.so* /usr/local/lib/
 
 RUN ldconfig
 
-COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Install entrypoint under /app and make the directory world-readable / owned
+# by the non-root runtime user.
+RUN mkdir -p /app
+COPY docker/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh \
+    && chown -R 10001:10001 /app
 
 EXPOSE 8080 8089 8090 9000
 
 HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 \
     CMD curl -sf http://localhost:${REST_PORT:-8080}/status || exit 1
 
-ENTRYPOINT ["/entrypoint.sh"]
+USER 10001
+
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/entrypoint.sh"]

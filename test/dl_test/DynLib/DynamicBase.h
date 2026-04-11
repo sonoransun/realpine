@@ -8,11 +8,8 @@
 class DynamicBase
 {
   public:
+    DynamicBase(){};
+    virtual ~DynamicBase(){};
 
-    DynamicBase () {};
-    virtual ~DynamicBase () {};
-
-    virtual void testMethod () = 0;
-
+    virtual void testMethod() = 0;
 };
-

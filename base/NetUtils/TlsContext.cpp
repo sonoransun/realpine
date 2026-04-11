@@ -1,14 +1,14 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TlsContext.h>
 #include <Log.h>
+#include <TlsContext.h>
 
-#include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
 
 
-TlsContext::~TlsContext ()
+TlsContext::~TlsContext()
 {
     if (ctx_) {
         SSL_CTX_free(ctx_);
@@ -18,7 +18,7 @@ TlsContext::~TlsContext ()
 
 
 bool
-TlsContext::initialize (t_Mode mode)
+TlsContext::initialize(t_Mode mode)
 {
     if (initialized_)
         return true;
@@ -42,13 +42,13 @@ TlsContext::initialize (t_Mode mode)
 
     // Harden cipher suites: modern AEAD ciphers only
     SSL_CTX_set_ciphersuites(ctx_,
-        "TLS_AES_256_GCM_SHA384:"
-        "TLS_AES_128_GCM_SHA256:"
-        "TLS_CHACHA20_POLY1305_SHA256");
+                             "TLS_AES_256_GCM_SHA384:"
+                             "TLS_AES_128_GCM_SHA256:"
+                             "TLS_CHACHA20_POLY1305_SHA256");
 
     SSL_CTX_set_cipher_list(ctx_,
-        "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:"
-        "!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
+                            "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:"
+                            "!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
 
     SSL_CTX_set_options(ctx_, SSL_OP_CIPHER_SERVER_PREFERENCE);
 
@@ -58,7 +58,7 @@ TlsContext::initialize (t_Mode mode)
 
 
 bool
-TlsContext::loadCertificate (const string & certPath)
+TlsContext::loadCertificate(const string & certPath)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
@@ -75,7 +75,7 @@ TlsContext::loadCertificate (const string & certPath)
 
 
 bool
-TlsContext::loadPrivateKey (const string & keyPath)
+TlsContext::loadPrivateKey(const string & keyPath)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
@@ -97,7 +97,7 @@ TlsContext::loadPrivateKey (const string & keyPath)
 
 
 bool
-TlsContext::loadCaCertificate (const string & caPath)
+TlsContext::loadCaCertificate(const string & caPath)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
@@ -114,22 +114,21 @@ TlsContext::loadCaCertificate (const string & caPath)
 
 
 bool
-TlsContext::setVerifyPeer (bool require)
+TlsContext::setVerifyPeer(bool require)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
         return false;
     }
 
-    int mode = require ? (SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT)
-                       : SSL_VERIFY_NONE;
+    int mode = require ? (SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT) : SSL_VERIFY_NONE;
     SSL_CTX_set_verify(ctx_, mode, nullptr);
     return true;
 }
 
 
 bool
-TlsContext::setMinVersion (int version)
+TlsContext::setMinVersion(int version)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
@@ -146,15 +145,14 @@ TlsContext::setMinVersion (int version)
 
 
 SSL_CTX *
-TlsContext::context ()
+TlsContext::context()
 {
     return ctx_;
 }
 
 
 bool
-TlsContext::setCipherSuites (const string & tls13Ciphers,
-                              const string & tls12Ciphers)
+TlsContext::setCipherSuites(const string & tls13Ciphers, const string & tls12Ciphers)
 {
     if (!ctx_) {
         Log::Error("TlsContext: not initialized");
@@ -180,7 +178,7 @@ TlsContext::setCipherSuites (const string & tls13Ciphers,
 
 
 bool
-TlsContext::isInitialized () const
+TlsContext::isInitialized() const
 {
     return initialized_;
 }

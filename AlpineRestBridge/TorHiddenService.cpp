@@ -1,34 +1,32 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TorHiddenService.h>
+#include <Log.h>
 #include <TcpConnector.h>
 #include <TcpTransport.h>
-#include <Log.h>
+#include <TorHiddenService.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
-TorHiddenService::~TorHiddenService ()
+TorHiddenService::~TorHiddenService()
 {
     shutdown();
 }
 
 
-
 bool
-TorHiddenService::initialize (ushort localTargetPort,
-                              ushort torControlPort,
-                              ushort onionVirtualPort,
-                              const string & controlAuth)
+TorHiddenService::initialize(ushort localTargetPort,
+                             ushort torControlPort,
+                             ushort onionVirtualPort,
+                             const string & controlAuth)
 {
     TcpConnector connector;
     connector.setDestination(htonl(INADDR_LOOPBACK), htons(torControlPort));
 
     if (!connector.connect(controlConn_)) {
-        Log::Error("TorHiddenService: Failed to connect to Tor control port "s +
-                   std::to_string(torControlPort));
+        Log::Error("TorHiddenService: Failed to connect to Tor control port "s + std::to_string(torControlPort));
         return false;
     }
 
@@ -53,9 +51,8 @@ TorHiddenService::initialize (ushort localTargetPort,
 }
 
 
-
 void
-TorHiddenService::shutdown ()
+TorHiddenService::shutdown()
 {
     if (!active_)
         return;
@@ -75,25 +72,22 @@ TorHiddenService::shutdown ()
 }
 
 
-
 const string &
-TorHiddenService::onionAddress () const
+TorHiddenService::onionAddress() const
 {
     return onionAddress_;
 }
 
 
-
 bool
-TorHiddenService::isActive () const
+TorHiddenService::isActive() const
 {
     return active_;
 }
 
 
-
 bool
-TorHiddenService::authenticate (const string & auth)
+TorHiddenService::authenticate(const string & auth)
 {
     string command;
 
@@ -110,13 +104,11 @@ TorHiddenService::authenticate (const string & auth)
 }
 
 
-
 bool
-TorHiddenService::createHiddenService (ushort virtualPort, ushort targetPort)
+TorHiddenService::createHiddenService(ushort virtualPort, ushort targetPort)
 {
-    string command = "ADD_ONION NEW:BEST Port="s +
-                     std::to_string(virtualPort) + ",127.0.0.1:" +
-                     std::to_string(targetPort) + "\r\n";
+    string command =
+        "ADD_ONION NEW:BEST Port="s + std::to_string(virtualPort) + ",127.0.0.1:" + std::to_string(targetPort) + "\r\n";
 
     string response;
     if (!sendCommand(command, response))
@@ -141,15 +133,13 @@ TorHiddenService::createHiddenService (ushort virtualPort, ushort targetPort)
 }
 
 
-
 bool
-TorHiddenService::sendCommand (const string & command, string & response)
+TorHiddenService::sendCommand(const string & command, string & response)
 {
     if (!controlConn_)
         return false;
 
-    if (!controlConn_->send(reinterpret_cast<const byte *>(command.data()),
-                            command.size())) {
+    if (!controlConn_->send(reinterpret_cast<const byte *>(command.data()), command.size())) {
         Log::Error("TorHiddenService: Failed to send command to control port.");
         return false;
     }
@@ -158,9 +148,8 @@ TorHiddenService::sendCommand (const string & command, string & response)
 }
 
 
-
 bool
-TorHiddenService::readResponse (string & response)
+TorHiddenService::readResponse(string & response)
 {
     response.clear();
 
@@ -189,8 +178,7 @@ TorHiddenService::readResponse (string & response)
             if (prevNewline == string::npos)
                 lastLine = response.substr(0, lastNewline);
             else
-                lastLine = response.substr(prevNewline + 1,
-                                           lastNewline - prevNewline - 1);
+                lastLine = response.substr(prevNewline + 1, lastNewline - prevNewline - 1);
         } else {
             lastLine = response;
         }
@@ -200,9 +188,7 @@ TorHiddenService::readResponse (string & response)
             lastLine.pop_back();
 
         // "250 " means final success line; 5xx/4xx means error
-        if (lastLine.starts_with("250 ") ||
-            lastLine.starts_with("5") ||
-            lastLine.starts_with("4"))
+        if (lastLine.starts_with("250 ") || lastLine.starts_with("5") || lastLine.starts_with("4"))
             break;
     }
 

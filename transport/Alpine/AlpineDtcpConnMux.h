@@ -8,16 +8,12 @@
 class AlpineDtcpConnMux : public DtcpBaseConnMux
 {
   public:
+    AlpineDtcpConnMux();
 
-    AlpineDtcpConnMux ();
-    
-    virtual ~AlpineDtcpConnMux ();
-
+    virtual ~AlpineDtcpConnMux();
 
 
-    virtual bool createAcceptor (DtcpBaseConnAcceptor *&  acceptor);
+    virtual bool createAcceptor(DtcpBaseConnAcceptor *& acceptor);
 
-    virtual bool createConnector (DtcpBaseConnConnector *&  connector);
-
+    virtual bool createConnector(DtcpBaseConnConnector *& connector);
 };
-

@@ -1,38 +1,37 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <QueryHandler.h>
 #include <AlpineStackInterface.h>
 #include <JsonReader.h>
 #include <JsonWriter.h>
-#include <WebhookDispatcher.h>
-#include <MutexLock.h>
 #include <Log.h>
+#include <MutexLock.h>
+#include <QueryHandler.h>
 #include <SafeParse.h>
+#include <WebhookDispatcher.h>
 
 #ifdef ALPINE_TRACING_ENABLED
 #include <Tracing.h>
 #endif
 
 
-std::unordered_map<ulong, string, OptHash<ulong>>  QueryHandler::callbackUrls_s;
-Mutex                                                QueryHandler::callbackUrlsMutex_s;
+std::unordered_map<ulong, string, OptHash<ulong>> QueryHandler::callbackUrls_s;
+Mutex QueryHandler::callbackUrlsMutex_s;
 
 
 void
-QueryHandler::registerRoutes (HttpRouter & router)
+QueryHandler::registerRoutes(HttpRouter & router)
 {
-    router.addRoute("POST",   "/query",              startQuery,         "Start query"s,          true);
-    router.addRoute("GET",    "/query/:id",          getQuery,           "Get query status"s,     false);
-    router.addRoute("GET",    "/query/:id/results",  getQueryResults,    "Get query results"s,    true);
-    router.addRoute("GET",    "/query/:id/stream",   streamQueryResults, "Stream query results"s, true);
-    router.addRoute("DELETE", "/query/:id",          cancelQuery,        "Cancel query"s,         false);
+    router.addRoute("POST", "/query", startQuery, "Start query"s, true);
+    router.addRoute("GET", "/query/:id", getQuery, "Get query status"s, false);
+    router.addRoute("GET", "/query/:id/results", getQueryResults, "Get query results"s, true);
+    router.addRoute("GET", "/query/:id/stream", streamQueryResults, "Stream query results"s, true);
+    router.addRoute("DELETE", "/query/:id", cancelQuery, "Cancel query"s, false);
 }
 
 
 HttpResponse
-QueryHandler::startQuery (const HttpRequest & request,
-                          const std::unordered_map<string, string> & params)
+QueryHandler::startQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("query.start"s);
@@ -86,9 +85,7 @@ QueryHandler::startQuery (const HttpRequest & request,
         registerWebhookCallback(queryId, callbackUrl);
 
         AlpineStackInterface::registerQueryResultCallback(queryId,
-            [](ulong qId, ulong pId) {
-                onQueryCompleted(qId, pId);
-            });
+                                                          [](ulong qId, ulong pId) { onQueryCompleted(qId, pId); });
     }
 
     JsonWriter writer;
@@ -110,8 +107,7 @@ QueryHandler::startQuery (const HttpRequest & request,
 
 
 HttpResponse
-QueryHandler::getQuery (const HttpRequest & request,
-                        const std::unordered_map<string, string> & params)
+QueryHandler::getQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("query.get"s);
@@ -153,8 +149,7 @@ QueryHandler::getQuery (const HttpRequest & request,
 
 
 HttpResponse
-QueryHandler::getQueryResults (const HttpRequest & request,
-                               const std::unordered_map<string, string> & params)
+QueryHandler::getQueryResults(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("query.getResults"s);
@@ -170,7 +165,7 @@ QueryHandler::getQueryResults (const HttpRequest & request,
     ulong queryId = *parsedId;
 
     // Parse pagination parameters
-    ulong limit  = 100;
+    ulong limit = 100;
     ulong offset = 0;
 
     auto limitIt = request.queryParams.find("limit");
@@ -192,20 +187,21 @@ QueryHandler::getQueryResults (const HttpRequest & request,
         return HttpResponse::notFound();
 
     // Flatten all resources across peers for pagination
-    struct FlatResult {
-        ulong   peerId;
+    struct FlatResult
+    {
+        ulong peerId;
         const AlpineStackInterface::t_ResourceDesc * res;
     };
 
     vector<FlatResult> allResults;
-    for (const auto& result : results)
-        for (const auto& res : result.second.resourceDescList)
+    for (const auto & result : results)
+        for (const auto & res : result.second.resourceDescList)
             allResults.push_back({result.first, &res});
 
     ulong total = allResults.size();
     ulong startIdx = std::min(offset, total);
-    ulong endIdx   = std::min(startIdx + limit, total);
-    bool  hasMore  = endIdx < total;
+    ulong endIdx = std::min(startIdx + limit, total);
+    bool hasMore = endIdx < total;
 
     JsonWriter writer;
     writer.beginObject();
@@ -214,9 +210,8 @@ QueryHandler::getQueryResults (const HttpRequest & request,
     writer.key("data");
     writer.beginArray();
 
-    for (ulong i = startIdx; i < endIdx; ++i)
-    {
-        const auto& entry = allResults[i];
+    for (ulong i = startIdx; i < endIdx; ++i) {
+        const auto & entry = allResults[i];
 
         writer.beginObject();
         writer.key("peerId");
@@ -230,7 +225,7 @@ QueryHandler::getQueryResults (const HttpRequest & request,
         writer.key("locators");
         writer.beginArray();
 
-        for (const auto& loc : entry.res->locators)
+        for (const auto & loc : entry.res->locators)
             writer.value(loc);
 
         writer.endArray();
@@ -253,8 +248,7 @@ QueryHandler::getQueryResults (const HttpRequest & request,
 
 
 HttpResponse
-QueryHandler::cancelQuery (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+QueryHandler::cancelQuery(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("query.cancel"s);
@@ -284,10 +278,8 @@ QueryHandler::cancelQuery (const HttpRequest & request,
 }
 
 
-
 HttpResponse
-QueryHandler::streamQueryResults (const HttpRequest & request,
-                                   const std::unordered_map<string, string> & params)
+QueryHandler::streamQueryResults(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -310,7 +302,7 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
     //
     string sseBody;
 
-    for (const auto& [peerId, peerRes] : results) {
+    for (const auto & [peerId, peerRes] : results) {
         JsonWriter peerWriter;
         peerWriter.beginObject();
         peerWriter.key("queryId");
@@ -320,7 +312,7 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
         peerWriter.key("resources");
         peerWriter.beginArray();
 
-        for (const auto& res : peerRes.resourceDescList) {
+        for (const auto & res : peerRes.resourceDescList) {
             peerWriter.beginObject();
             peerWriter.key("resourceId");
             peerWriter.value(res.resourceId);
@@ -330,7 +322,7 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
             peerWriter.value(res.description);
             peerWriter.key("locators");
             peerWriter.beginArray();
-            for (const auto& loc : res.locators) {
+            for (const auto & loc : res.locators) {
                 peerWriter.value(loc);
             }
             peerWriter.endArray();
@@ -364,8 +356,7 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
         statusWriter.endObject();
 
         sseBody += "event: progress\ndata: "s + statusWriter.result() + "\n\n"s;
-    }
-    else {
+    } else {
         JsonWriter completeWriter;
         completeWriter.beginObject();
         completeWriter.key("queryId");
@@ -386,18 +377,16 @@ QueryHandler::streamQueryResults (const HttpRequest & request,
 }
 
 
-
 void
-QueryHandler::registerWebhookCallback (ulong queryId, const string & callbackUrl)
+QueryHandler::registerWebhookCallback(ulong queryId, const string & callbackUrl)
 {
     MutexLock lock(callbackUrlsMutex_s);
     callbackUrls_s[queryId] = callbackUrl;
 }
 
 
-
 void
-QueryHandler::onQueryCompleted (ulong queryId, ulong /* peerId */)
+QueryHandler::onQueryCompleted(ulong queryId, ulong /* peerId */)
 {
     // Check if the query is still in progress — only fire webhook when complete
     if (AlpineStackInterface::queryInProgress(queryId))
@@ -431,7 +420,7 @@ QueryHandler::onQueryCompleted (ulong queryId, ulong /* peerId */)
         writer.value(static_cast<ulong>(results.size()));
 
         ulong totalHits = 0;
-        for (const auto& [pid, peerRes] : results)
+        for (const auto & [pid, peerRes] : results)
             totalHits += peerRes.resourceDescList.size();
 
         writer.key("totalHits");
@@ -440,8 +429,8 @@ QueryHandler::onQueryCompleted (ulong queryId, ulong /* peerId */)
         writer.key("data");
         writer.beginArray();
 
-        for (const auto& [pid, peerRes] : results) {
-            for (const auto& res : peerRes.resourceDescList) {
+        for (const auto & [pid, peerRes] : results) {
+            for (const auto & res : peerRes.resourceDescList) {
                 writer.beginObject();
                 writer.key("peerId");
                 writer.value(pid);
@@ -453,7 +442,7 @@ QueryHandler::onQueryCompleted (ulong queryId, ulong /* peerId */)
                 writer.value(res.description);
                 writer.key("locators");
                 writer.beginArray();
-                for (const auto& loc : res.locators)
+                for (const auto & loc : res.locators)
                     writer.value(loc);
                 writer.endArray();
                 writer.endObject();

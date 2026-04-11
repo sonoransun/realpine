@@ -1,49 +1,48 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
-#include <stdlib.h>
 #include <Platform.h>
+#include <stdlib.h>
 
-#include <SafeParse.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <SafeParse.h>
+#include <StringUtils.h>
 
 #include <ApplCore.h>
 #include <Configuration.h>
 
-#include <RestBridgeConfig.h>
-#include <AlpineStackConfig.h>
 #include <AlpineStack.h>
+#include <AlpineStackConfig.h>
+#include <RestBridgeConfig.h>
 
+#include <AdminHandler.h>
+#include <ApiDocsHandler.h>
+#include <ApiKeyAuth.h>
+#include <AuthHandler.h>
+#include <BroadcastQueryHandler.h>
+#include <ClusterCoordinator.h>
+#include <ContentStore.h>
+#include <DiscoveryBeacon.h>
+#include <DlnaServer.h>
+#include <HttpResponse.h>
 #include <HttpRouter.h>
 #include <HttpServer.h>
-#include <HttpResponse.h>
-#include <ApiKeyAuth.h>
-#include <QueryHandler.h>
+#include <InterfaceEnumerator.h>
+#include <MdnsService.h>
+#include <MetricsHandler.h>
 #include <PeerHandler.h>
+#include <QueryHandler.h>
+#include <SsdpService.h>
 #include <StatusHandler.h>
-#include <DiscoveryBeacon.h>
-#include <BroadcastQueryHandler.h>
 #include <TorService.h>
 #include <TorSocksProxy.h>
 #include <TorTunnel.h>
 #include <UpnpPortMapper.h>
-#include <InterfaceEnumerator.h>
-#include <ContentStore.h>
-#include <DlnaServer.h>
-#include <SsdpService.h>
-#include <MdnsService.h>
-#include <WifiDiscovery.h>
-#include <AuthHandler.h>
-#include <MetricsHandler.h>
-#include <ApiDocsHandler.h>
-#include <AdminHandler.h>
-#include <ClusterCoordinator.h>
 #include <WebhookDispatcher.h>
-#include <thread>
+#include <WifiDiscovery.h>
 #include <chrono>
+#include <thread>
 
 #ifdef ALPINE_FUSE_ENABLED
 #include <AlpineFuse.h>
@@ -54,11 +53,13 @@
 #include <Tracing.h>
 #endif
 
-
+#ifdef __linux__
+#include <sys/prctl.h>
+#endif
 
 
 int
-main (int argc, char *argv[])
+main(int argc, char * argv[])
 {
     bool status;
 
@@ -79,10 +80,7 @@ main (int argc, char *argv[])
     RestBridgeConfig::createConfigElements();
     RestBridgeConfig::getConfigElements(configElements);
 
-    status = Configuration::initialize(argc,
-                                       argv,
-                                       *configElements,
-                                       RestBridgeConfig::configFile_s);
+    status = Configuration::initialize(argc, argv, *configElements, RestBridgeConfig::configFile_s);
 
     if (!status) {
         Log::Error("Error initializing configuration.  Exiting.");
@@ -90,12 +88,40 @@ main (int argc, char *argv[])
     }
 
 
+    // Apply PR_SET_NO_NEW_PRIVS very early — before any plugins, dynamic
+    // libraries, or sub-processes are spawned. Once set, the bit is
+    // inherited and cannot be cleared, so set-uid binaries lose their
+    // privileges across exec(). Linux-only and opt-in via configuration.
+    //
+#ifdef __linux__
+    {
+        string noNewPrivsStr;
+        bool noNewPrivs = false;
+
+        if (Configuration::getValue("No New Privs", noNewPrivsStr) &&
+            (noNewPrivsStr == "true" || noNewPrivsStr == "1")) {
+            noNewPrivs = true;
+        }
+
+        if (noNewPrivs) {
+            if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) == 0) {
+                Log::Info("PR_SET_NO_NEW_PRIVS enabled — privileged exec disabled for this process tree.");
+            } else {
+                Log::Error("PR_SET_NO_NEW_PRIVS requested but prctl() failed (continuing).");
+            }
+        } else {
+            Log::Info("PR_SET_NO_NEW_PRIVS disabled by configuration.");
+        }
+    }
+#endif
+
+
     // Load configuration settings
     //
-    string  ipAddressStr;
-    string  portStr;
-    ulong   ipAddress;
-    int     port;
+    string ipAddressStr;
+    string portStr;
+    ulong ipAddress;
+    int port;
 
     status = Configuration::getValue("IP Address", ipAddressStr);
 
@@ -129,7 +155,7 @@ main (int argc, char *argv[])
     string restPortStr;
     string restBindStr;
     ushort restPort = 8080;
-    ulong  restBindAddress = 0;  // 0 == all interfaces
+    ulong restBindAddress = 0;  // 0 == all interfaces
 
     status = Configuration::getValue("REST Port", restPortStr);
 
@@ -142,13 +168,13 @@ main (int argc, char *argv[])
         NetUtils::stringIpToLong(restBindStr, restBindAddress);
 
 
-    Log::Info("Starting ALPINE REST Bridge-\nIP: "s + ipAddressStr +
-              "\nPort: " + portStr + "\nREST Port: " + restPortStr + "\n");
+    Log::Info("Starting ALPINE REST Bridge-\nIP: "s + ipAddressStr + "\nPort: " + portStr +
+              "\nREST Port: " + restPortStr + "\n");
 
 
     // Initialize Alpine stack
     //
-    AlpineStackConfig  config;
+    AlpineStackConfig config;
     config.setLocalEndpoint(ipAddress, port);
     config.setMaxConcurrentQueries(10);
 
@@ -197,7 +223,7 @@ main (int argc, char *argv[])
 #ifdef ALPINE_TRACING_ENABLED
     string tracingEnabledStr;
     string otlpEndpoint;
-    bool   tracingEnabled = false;
+    bool tracingEnabled = false;
 
     status = Configuration::getValue("Tracing Enabled", tracingEnabledStr);
     if (status && (tracingEnabledStr == "true" || tracingEnabledStr == "1"))
@@ -226,22 +252,20 @@ main (int argc, char *argv[])
     string fuseMountPointStr;
     string fuseCacheTtlStr;
     string fuseFeedbackThresholdStr;
-    bool   fuseEnabled = false;
+    bool fuseEnabled = false;
     string fuseMountPoint = alpine_temp_dir() + "/alpine"s;
-    ulong  fuseCacheTtl = 60;
-    ulong  fuseFeedbackThreshold = 5;
+    ulong fuseCacheTtl = 60;
+    ulong fuseFeedbackThreshold = 5;
 
     status = Configuration::getValue("FUSE Enabled", fuseEnabledStr);
     if (status && (fuseEnabledStr == "true" || fuseEnabledStr == "1"))
         fuseEnabled = true;
 
     if (fuseEnabled) {
-        if (Configuration::getValue("FUSE Mount Point", fuseMountPointStr) &&
-            !fuseMountPointStr.empty())
+        if (Configuration::getValue("FUSE Mount Point", fuseMountPointStr) && !fuseMountPointStr.empty())
             fuseMountPoint = fuseMountPointStr;
 
-        if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) &&
-            !fuseCacheTtlStr.empty())
+        if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) && !fuseCacheTtlStr.empty())
             fuseCacheTtl = parseUlong(fuseCacheTtlStr).value_or(fuseCacheTtl);
 
         if (Configuration::getValue("FUSE Feedback Threshold", fuseFeedbackThresholdStr) &&
@@ -269,7 +293,7 @@ main (int argc, char *argv[])
     string beaconPortStr;
     string beaconEnabledStr;
     ushort beaconPort = 8089;
-    bool   beaconEnabled = true;
+    bool beaconEnabled = true;
 
     status = Configuration::getValue("Beacon Port", beaconPortStr);
     if (status && !beaconPortStr.empty())
@@ -286,8 +310,7 @@ main (int argc, char *argv[])
 
         if (beacon->initialize(restPort, beaconPort)) {
             beacon->run();
-            Log::Info("Discovery beacon broadcasting on port "s +
-                      std::to_string(beaconPort));
+            Log::Info("Discovery beacon broadcasting on port "s + std::to_string(beaconPort));
         } else {
             Log::Error("Discovery beacon failed to initialize (continuing without discovery).");
             delete beacon;
@@ -302,8 +325,7 @@ main (int argc, char *argv[])
     //
     if (beaconEnabled && beacon) {
         if (ClusterCoordinator::initialize(restPort, beaconPort)) {
-            Log::Info("Cluster coordinator started (nodeId: "s +
-                      ClusterCoordinator::getLocalNodeInfo().nodeId + ")");
+            Log::Info("Cluster coordinator started (nodeId: "s + ClusterCoordinator::getLocalNodeInfo().nodeId + ")");
         } else {
             Log::Error("Cluster coordinator failed to initialize (continuing without cluster).");
         }
@@ -317,7 +339,7 @@ main (int argc, char *argv[])
     string broadcastPortStr;
     string broadcastEnabledStr;
     ushort broadcastPort = 8090;
-    bool   broadcastEnabled = true;
+    bool broadcastEnabled = true;
 
     status = Configuration::getValue("Broadcast Port", broadcastPortStr);
     if (status && !broadcastPortStr.empty())
@@ -334,8 +356,7 @@ main (int argc, char *argv[])
 
         if (broadcastHandler->initialize(broadcastPort)) {
             broadcastHandler->run();
-            Log::Info("Broadcast query handler listening on port "s +
-                      std::to_string(broadcastPort));
+            Log::Info("Broadcast query handler listening on port "s + std::to_string(broadcastPort));
         } else {
             Log::Error("Broadcast query handler failed to initialize (continuing without broadcast).");
             delete broadcastHandler;
@@ -355,7 +376,7 @@ main (int argc, char *argv[])
     string wifiPeerTimeoutStr;
     string wifiInterfaceStr;
     string wifiBeaconIntervalStr;
-    bool   wifiDiscoveryEnabled = true;
+    bool wifiDiscoveryEnabled = true;
 
     status = Configuration::getValue("WiFi Discovery Enabled", wifiDiscoveryEnabledStr);
     if (status && (wifiDiscoveryEnabledStr == "false" || wifiDiscoveryEnabledStr == "0"))
@@ -389,13 +410,11 @@ main (int argc, char *argv[])
         // Generate peer ID matching BroadcastQueryHandler pattern
         char hostname[256];
         gethostname(hostname, sizeof(hostname));
-        string peerId = "bridge-"s +
-            std::to_string(std::hash<string>{}(string(hostname)) & 0xFFFFFF);
+        string peerId = "bridge-"s + std::to_string(std::hash<string>{}(string(hostname)) & 0xFFFFFF);
 
         uint wifiCaps = WifiDiscovery::CAP_QUERY | WifiDiscovery::CAP_TRANSFER;
 
-        if (WifiDiscovery::initialize(peerId, ipAddressStr, ntohs(port),
-                                      restPort, wifiCaps)) {
+        if (WifiDiscovery::initialize(peerId, ipAddressStr, ntohs(port), restPort, wifiCaps)) {
             Log::Info("WiFi discovery started (peerId: "s + peerId + ").");
         } else {
             Log::Error("WiFi discovery failed to initialize (continuing without WiFi discovery).");
@@ -409,16 +428,12 @@ main (int argc, char *argv[])
     //
     if (UpnpPortMapper::initialize()) {
         UpnpPortMapper::addMapping(restPort, restPort, "TCP", "Alpine REST API");
-        UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
-                                   "UDP", "Alpine Protocol UDP");
-        UpnpPortMapper::addMapping(ntohs(port), ntohs(port),
-                                   "TCP", "Alpine Protocol TCP");
+        UpnpPortMapper::addMapping(ntohs(port), ntohs(port), "UDP", "Alpine Protocol UDP");
+        UpnpPortMapper::addMapping(ntohs(port), ntohs(port), "TCP", "Alpine Protocol TCP");
         if (beaconEnabled)
-            UpnpPortMapper::addMapping(beaconPort, beaconPort,
-                                       "UDP", "Alpine Beacon");
+            UpnpPortMapper::addMapping(beaconPort, beaconPort, "UDP", "Alpine Beacon");
         if (broadcastEnabled)
-            UpnpPortMapper::addMapping(broadcastPort, broadcastPort,
-                                       "UDP", "Alpine Broadcast");
+            UpnpPortMapper::addMapping(broadcastPort, broadcastPort, "UDP", "Alpine Broadcast");
 
         string externalIp = UpnpPortMapper::getExternalIpAddress();
         if (!externalIp.empty())
@@ -434,10 +449,10 @@ main (int argc, char *argv[])
     string torControlAuthStr;
     string torListenPortStr;
     string torPeersStr;
-    bool   torEnabled = false;
+    bool torEnabled = false;
     ushort torControlPort = 9051;
-    ushort torSocksPort   = 9050;
-    ushort torListenPort  = 8091;
+    ushort torSocksPort = 9050;
+    ushort torListenPort = 8091;
 
     status = Configuration::getValue("Tor Enabled", torEnabledStr);
     if (status && (torEnabledStr == "true" || torEnabledStr == "1"))
@@ -460,7 +475,7 @@ main (int argc, char *argv[])
     Configuration::getValue("Tor Peers", torPeersStr);
 
     TorService * torService = nullptr;
-    TorTunnel *  torTunnel  = nullptr;
+    TorTunnel * torTunnel = nullptr;
 
     if (torEnabled) {
         torService = new TorService();
@@ -472,12 +487,10 @@ main (int argc, char *argv[])
             if (torService->createService()) {
                 torTunnel = new TorTunnel();
 
-                if (torTunnel->initialize(torListenPort, torSocksPort,
-                                          torPeersStr,
-                                          torService->onionAddress(), restPort)) {
+                if (torTunnel->initialize(
+                        torListenPort, torSocksPort, torPeersStr, torService->onionAddress(), restPort)) {
                     torTunnel->run();
-                    Log::Info("Tor tunnel started, hidden service at "s +
-                              torService->onionAddress());
+                    Log::Info("Tor tunnel started, hidden service at "s + torService->onionAddress());
                 } else {
                     Log::Error("Tor tunnel failed to initialize (continuing without Tor tunnel).");
                     delete torTunnel;
@@ -507,8 +520,8 @@ main (int argc, char *argv[])
     string transcodeEnabledStr;
     string dlnaHostStr;
     ushort dlnaPort = 9090;
-    bool   dlnaEnabled = true;
-    bool   transcodeEnabled = true;
+    bool dlnaEnabled = true;
+    bool transcodeEnabled = true;
 
     status = Configuration::getValue("DLNA Enabled", dlnaEnabledStr);
     if (status && (dlnaEnabledStr == "false" || dlnaEnabledStr == "0"))
@@ -532,10 +545,10 @@ main (int argc, char *argv[])
     if (dlnaServerNameStr.empty())
         dlnaServerNameStr = "Alpine Media Server";
 
-    ContentStore *  contentStore = nullptr;
-    DlnaServer *    dlnaServer   = nullptr;
-    SsdpService *   ssdpService  = nullptr;
-    MdnsService *   mdnsService  = nullptr;
+    ContentStore * contentStore = nullptr;
+    DlnaServer * dlnaServer = nullptr;
+    SsdpService * ssdpService = nullptr;
+    MdnsService * mdnsService = nullptr;
 
     if (dlnaEnabled && !mediaDirStr.empty()) {
         contentStore = new ContentStore();
@@ -550,8 +563,7 @@ main (int argc, char *argv[])
                 string serverString = "Linux/1.0 UPnP/1.0 Alpine/1.0";
 
                 ssdpService = new SsdpService();
-                if (ssdpService->initialize(dlnaServer->getDeviceUuid(),
-                                            locationUrl, serverString)) {
+                if (ssdpService->initialize(dlnaServer->getDeviceUuid(), locationUrl, serverString)) {
                     ssdpService->run();
                     Log::Info(string("SSDP service started."));
                 } else {
@@ -561,8 +573,7 @@ main (int argc, char *argv[])
                 }
 
                 mdnsService = new MdnsService();
-                if (mdnsService->initialize(string("alpine-host"),
-                                            dlnaHostStr, dlnaPort)) {
+                if (mdnsService->initialize(string("alpine-host"), dlnaHostStr, dlnaPort)) {
                     mdnsService->run();
                     Log::Info(string("mDNS service started."));
                 } else {
@@ -571,8 +582,7 @@ main (int argc, char *argv[])
                     mdnsService = nullptr;
                 }
 
-                Log::Info("DLNA server started on port "s +
-                          std::to_string(dlnaPort) + " serving " + mediaDirStr);
+                Log::Info("DLNA server started on port "s + std::to_string(dlnaPort) + " serving " + mediaDirStr);
             } else {
                 Log::Error(string("DLNA server failed to initialize (continuing without DLNA)."));
                 delete dlnaServer;
@@ -603,30 +613,52 @@ main (int argc, char *argv[])
             AlpineFuse::shutdown();
 #endif
         WifiDiscovery::shutdown();
-        if (mdnsService)  { mdnsService->stop(); delete mdnsService; }
-        if (ssdpService)  { ssdpService->stop(); delete ssdpService; }
-        if (dlnaServer)   { dlnaServer->stop(); delete dlnaServer; }
-        if (contentStore) { delete contentStore; }
-        if (torTunnel)  { torTunnel->stop(); delete torTunnel; }
-        if (torService) { torService->shutdown(); delete torService; }
+        if (mdnsService) {
+            mdnsService->stop();
+            delete mdnsService;
+        }
+        if (ssdpService) {
+            ssdpService->stop();
+            delete ssdpService;
+        }
+        if (dlnaServer) {
+            dlnaServer->stop();
+            delete dlnaServer;
+        }
+        if (contentStore) {
+            delete contentStore;
+        }
+        if (torTunnel) {
+            torTunnel->stop();
+            delete torTunnel;
+        }
+        if (torService) {
+            torService->shutdown();
+            delete torService;
+        }
         UpnpPortMapper::shutdown();
         ClusterCoordinator::shutdown();
-        if (beacon) { beacon->stop(); delete beacon; }
-        if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
+        if (beacon) {
+            beacon->stop();
+            delete beacon;
+        }
+        if (broadcastHandler) {
+            broadcastHandler->stop();
+            delete broadcastHandler;
+        }
         return 1;
     }
 
     // Wait for shutdown signal
     //
-    Log::Info ("REST Bridge running.  Waiting for shutdown signal..."s);
+    Log::Info("REST Bridge running.  Waiting for shutdown signal..."s);
 
     while (!ApplCore::isShutdownRequested()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 
-    Log::Info ("Shutdown requested (signal "s +
-               std::to_string(ApplCore::getShutdownSignal()) +
-               "), beginning graceful shutdown..."s);
+    Log::Info("Shutdown requested (signal "s + std::to_string(ApplCore::getShutdownSignal()) +
+              "), beginning graceful shutdown..."s);
 
 
     // Stop accepting new HTTP connections
@@ -639,7 +671,8 @@ main (int argc, char *argv[])
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     if (server.getActiveConnections() > 0) {
-        Log::Info("Drain timeout reached with "s + std::to_string(server.getActiveConnections()) + " connections still active"s);
+        Log::Info("Drain timeout reached with "s + std::to_string(server.getActiveConnections()) +
+                  " connections still active"s);
     }
 
     // Shutdown webhook dispatcher (drain pending deliveries)
@@ -660,15 +693,38 @@ main (int argc, char *argv[])
 #endif
 
     WifiDiscovery::shutdown();
-    if (torTunnel)  { torTunnel->stop(); delete torTunnel; }
-    if (torService) { torService->shutdown(); delete torService; }
+    if (torTunnel) {
+        torTunnel->stop();
+        delete torTunnel;
+    }
+    if (torService) {
+        torService->shutdown();
+        delete torService;
+    }
     UpnpPortMapper::shutdown();
-    if (mdnsService)  { mdnsService->stop(); delete mdnsService; }
-    if (ssdpService)  { ssdpService->stop(); delete ssdpService; }
-    if (dlnaServer)   { dlnaServer->stop(); delete dlnaServer; }
-    if (contentStore) { delete contentStore; }
-    if (beacon) { beacon->stop(); delete beacon; }
-    if (broadcastHandler) { broadcastHandler->stop(); delete broadcastHandler; }
+    if (mdnsService) {
+        mdnsService->stop();
+        delete mdnsService;
+    }
+    if (ssdpService) {
+        ssdpService->stop();
+        delete ssdpService;
+    }
+    if (dlnaServer) {
+        dlnaServer->stop();
+        delete dlnaServer;
+    }
+    if (contentStore) {
+        delete contentStore;
+    }
+    if (beacon) {
+        beacon->stop();
+        delete beacon;
+    }
+    if (broadcastHandler) {
+        broadcastHandler->stop();
+        delete broadcastHandler;
+    }
 
 #ifdef ALPINE_TRACING_ENABLED
     Tracing::shutdown();

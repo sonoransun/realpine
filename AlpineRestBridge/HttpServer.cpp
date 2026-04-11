@@ -1,18 +1,18 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <HttpServer.h>
+#include <Compression.h>
 #include <HttpRequest.h>
 #include <HttpResponse.h>
-#include <Compression.h>
-#include <SafeParse.h>
-#include <WebSocketSession.h>
+#include <HttpServer.h>
+#include <Log.h>
+#include <MetricsHandler.h>
+#include <Platform.h>
 #include <RateLimiter.h>
 #include <RestBridgeConfig.h>
-#include <MetricsHandler.h>
+#include <SafeParse.h>
 #include <StringUtils.h>
-#include <Log.h>
-#include <Platform.h>
+#include <WebSocketSession.h>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <TlsContext.h>
@@ -28,7 +28,7 @@ static constexpr ulong READ_BUFFER_SIZE = 65536;
 
 
 static string
-generateRequestId ()
+generateRequestId()
 {
     byte buf[8];
     if (!alpine_random_bytes(buf, sizeof(buf)))
@@ -45,33 +45,32 @@ generateRequestId ()
 }
 
 
-HttpServer::HttpServer (HttpRouter & router)
+HttpServer::HttpServer(HttpRouter & router)
     : router_(router)
-{
-}
+{}
 
 
-HttpServer::~HttpServer ()
+HttpServer::~HttpServer()
 {
     stop();
 }
 
 
 bool
-HttpServer::start (ulong   ipAddress,
-                   ushort  port)
+HttpServer::start(ulong ipAddress, ushort port)
 {
     // Load configurable limits
-    minThreads_            = RestBridgeConfig::getHttpMinThreads();
-    maxThreads_            = RestBridgeConfig::getHttpMaxThreads();
-    maxConnections_        = RestBridgeConfig::getHttpMaxConnections();
-    maxConnectionsPerIp_   = RestBridgeConfig::getHttpMaxConnectionsPerIp();
-    idleTimeoutSeconds_    = RestBridgeConfig::getHttpIdleTimeoutSeconds();
-    keepAliveMaxRequests_  = RestBridgeConfig::getHttpKeepAliveMaxRequests();
-    writeTimeoutSeconds_   = RestBridgeConfig::getHttpWriteTimeoutSeconds();
+    minThreads_ = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_ = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_ = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_ = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    keepAliveMaxRequests_ = RestBridgeConfig::getHttpKeepAliveMaxRequests();
+    writeTimeoutSeconds_ = RestBridgeConfig::getHttpWriteTimeoutSeconds();
 
     if (minThreads_ > maxThreads_) {
-        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s + std::to_string(maxThreads_) + "). Adjusting max to match min."s);
+        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s +
+                   std::to_string(maxThreads_) + "). Adjusting max to match min."s);
         maxThreads_ = minThreads_;
     }
 
@@ -101,9 +100,8 @@ HttpServer::start (ulong   ipAddress,
         for (int i = 0; i < minThreads_; ++i)
             spawnWorker();
 
-        Log::Info("HttpServer started on port "s + std::to_string(port)
-                  + " (threads "s + std::to_string(minThreads_) + "-"s + std::to_string(maxThreads_)
-                  + ", max connections "s + std::to_string(maxConnections_) + ")"s);
+        Log::Info("HttpServer started on port "s + std::to_string(port) + " (threads "s + std::to_string(minThreads_) +
+                  "-"s + std::to_string(maxThreads_) + ", max connections "s + std::to_string(maxConnections_) + ")"s);
         return true;
     } catch (const std::exception & e) {
         Log::Error("HttpServer::start failed: "s + e.what());
@@ -114,9 +112,7 @@ HttpServer::start (ulong   ipAddress,
 
 #ifdef ALPINE_TLS_ENABLED
 bool
-HttpServer::startTls (ulong         ipAddress,
-                      ushort        port,
-                      TlsContext &  tlsCtx)
+HttpServer::startTls(ulong ipAddress, ushort port, TlsContext & tlsCtx)
 {
     if (!tlsCtx.isInitialized()) {
         Log::Error("HttpServer::startTls: TlsContext not initialized");
@@ -124,16 +120,17 @@ HttpServer::startTls (ulong         ipAddress,
     }
 
     // Load configurable limits
-    minThreads_            = RestBridgeConfig::getHttpMinThreads();
-    maxThreads_            = RestBridgeConfig::getHttpMaxThreads();
-    maxConnections_        = RestBridgeConfig::getHttpMaxConnections();
-    maxConnectionsPerIp_   = RestBridgeConfig::getHttpMaxConnectionsPerIp();
-    idleTimeoutSeconds_    = RestBridgeConfig::getHttpIdleTimeoutSeconds();
-    keepAliveMaxRequests_  = RestBridgeConfig::getHttpKeepAliveMaxRequests();
-    writeTimeoutSeconds_   = RestBridgeConfig::getHttpWriteTimeoutSeconds();
+    minThreads_ = RestBridgeConfig::getHttpMinThreads();
+    maxThreads_ = RestBridgeConfig::getHttpMaxThreads();
+    maxConnections_ = RestBridgeConfig::getHttpMaxConnections();
+    maxConnectionsPerIp_ = RestBridgeConfig::getHttpMaxConnectionsPerIp();
+    idleTimeoutSeconds_ = RestBridgeConfig::getHttpIdleTimeoutSeconds();
+    keepAliveMaxRequests_ = RestBridgeConfig::getHttpKeepAliveMaxRequests();
+    writeTimeoutSeconds_ = RestBridgeConfig::getHttpWriteTimeoutSeconds();
 
     if (minThreads_ > maxThreads_) {
-        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s + std::to_string(maxThreads_) + "). Adjusting max to match min."s);
+        Log::Error("HTTP Min Threads ("s + std::to_string(minThreads_) + ") > Max Threads ("s +
+                   std::to_string(maxThreads_) + "). Adjusting max to match min."s);
         maxThreads_ = minThreads_;
     }
 
@@ -153,15 +150,14 @@ HttpServer::startTls (ulong         ipAddress,
         if (pkey)
             SSL_CTX_use_PrivateKey(nativeCtx, pkey);
 
-        sslContext_->set_options(asio::ssl::context::default_workarounds |
-                                asio::ssl::context::no_sslv2 |
-                                asio::ssl::context::no_sslv3);
+        sslContext_->set_options(asio::ssl::context::default_workarounds | asio::ssl::context::no_sslv2 |
+                                 asio::ssl::context::no_sslv3);
 
         // Harden cipher suites: modern AEAD ciphers only
         SSL_CTX_set_ciphersuites(nativeCtx,
-            "TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256");
+                                 "TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256");
         SSL_CTX_set_cipher_list(nativeCtx,
-            "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
+                                "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:!RC4:!DES:!3DES:!MD5:!aNULL:!eNULL:!EXPORT");
         SSL_CTX_set_options(nativeCtx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 
         asio::ip::address addr;
@@ -189,9 +185,9 @@ HttpServer::startTls (ulong         ipAddress,
         for (int i = 0; i < minThreads_; ++i)
             spawnWorker();
 
-        Log::Info("HttpServer (TLS) started on port "s + std::to_string(port)
-                  + " (threads "s + std::to_string(minThreads_) + "-"s + std::to_string(maxThreads_)
-                  + ", max connections "s + std::to_string(maxConnections_) + ")"s);
+        Log::Info("HttpServer (TLS) started on port "s + std::to_string(port) + " (threads "s +
+                  std::to_string(minThreads_) + "-"s + std::to_string(maxThreads_) + ", max connections "s +
+                  std::to_string(maxConnections_) + ")"s);
         return true;
     } catch (const std::exception & e) {
         Log::Error("HttpServer::startTls failed: "s + e.what());
@@ -202,7 +198,7 @@ HttpServer::startTls (ulong         ipAddress,
 
 
 void
-HttpServer::stop ()
+HttpServer::stop()
 {
     if (!running_)
         return;
@@ -237,7 +233,7 @@ HttpServer::stop ()
 
 
 void
-HttpServer::spawnWorker ()
+HttpServer::spawnWorker()
 {
     std::lock_guard lock(workerMutex_);
     if (activeWorkers_ >= maxThreads_)
@@ -267,7 +263,7 @@ HttpServer::spawnWorker ()
 
 
 void
-HttpServer::monitorPool ()
+HttpServer::monitorPool()
 {
     if (!running_)
         return;
@@ -279,7 +275,7 @@ HttpServer::monitorPool ()
 
         // If busy workers approach thread count, spawn more
         int current = activeWorkers_.load();
-        int busy    = busyWorkers_.load();
+        int busy = busyWorkers_.load();
         if (busy > 0 && busy >= current - 1 && current < maxThreads_) {
             int toSpawn = std::min(2, maxThreads_ - current);
             for (int i = 0; i < toSpawn; ++i)
@@ -296,7 +292,7 @@ HttpServer::monitorPool ()
 
 
 void
-HttpServer::sendServiceUnavailable (asio::ip::tcp::socket & socket)
+HttpServer::sendServiceUnavailable(asio::ip::tcp::socket & socket)
 {
     auto resp = HttpResponse(503, "Service Unavailable");
     resp.setHeader("Retry-After"s, "5"s);
@@ -308,21 +304,34 @@ HttpServer::sendServiceUnavailable (asio::ip::tcp::socket & socket)
 
 
 int
-HttpServer::getActiveConnections () const
+HttpServer::getActiveConnections() const
 {
     return activeConnections_.load();
 }
 
 
+ushort
+HttpServer::getBoundPort() const
+{
+    if (!acceptor_ || !acceptor_->is_open())
+        return 0;
+    asio::error_code ec;
+    auto endpoint = acceptor_->local_endpoint(ec);
+    if (ec)
+        return 0;
+    return endpoint.port();
+}
+
+
 size_t
-HttpServer::ipShardIndex (const string & ip) const
+HttpServer::ipShardIndex(const string & ip) const
 {
     return std::hash<string>{}(ip) % IP_SHARD_COUNT;
 }
 
 
 bool
-HttpServer::acquireConnectionSlot (const string & ip)
+HttpServer::acquireConnectionSlot(const string & ip)
 {
     auto & shard = ipShards_[ipShardIndex(ip)];
     std::lock_guard lock(shard.mutex);
@@ -336,7 +345,7 @@ HttpServer::acquireConnectionSlot (const string & ip)
 
 
 void
-HttpServer::releaseConnectionSlot (const string & ip)
+HttpServer::releaseConnectionSlot(const string & ip)
 {
     auto & shard = ipShards_[ipShardIndex(ip)];
     std::lock_guard lock(shard.mutex);
@@ -352,14 +361,13 @@ HttpServer::releaseConnectionSlot (const string & ip)
 
 // --- ConnectionGuard RAII ---
 
-HttpServer::ConnectionGuard::ConnectionGuard (HttpServer & server, string clientIp)
+HttpServer::ConnectionGuard::ConnectionGuard(HttpServer & server, string clientIp)
     : server_(server),
       clientIp_(std::move(clientIp))
-{
-}
+{}
 
 
-HttpServer::ConnectionGuard::~ConnectionGuard ()
+HttpServer::ConnectionGuard::~ConnectionGuard()
 {
     if (busy_) {
         --server_.busyWorkers_;
@@ -372,7 +380,7 @@ HttpServer::ConnectionGuard::~ConnectionGuard ()
 
 
 void
-HttpServer::ConnectionGuard::setBusy ()
+HttpServer::ConnectionGuard::setBusy()
 {
     if (!busy_) {
         ++server_.busyWorkers_;
@@ -382,7 +390,7 @@ HttpServer::ConnectionGuard::setBusy ()
 
 
 void
-HttpServer::ConnectionGuard::clearBusy ()
+HttpServer::ConnectionGuard::clearBusy()
 {
     if (busy_) {
         --server_.busyWorkers_;
@@ -392,29 +400,27 @@ HttpServer::ConnectionGuard::clearBusy ()
 
 
 void
-HttpServer::ConnectionGuard::setSlotAcquired ()
+HttpServer::ConnectionGuard::setSlotAcquired()
 {
     slotAcquired_ = true;
 }
 
 
 void
-HttpServer::drainQueue ()
+HttpServer::drainQueue()
 {
     std::lock_guard lock(queueMutex_);
     while (!connectionQueue_.empty() && activeConnections_ < maxConnections_) {
         auto socket = std::move(connectionQueue_.front());
         connectionQueue_.pop();
         ++activeConnections_;
-        asio::post(ioContext_, [this, sock = std::move(socket)]() mutable {
-            handleConnection(std::move(sock));
-        });
+        asio::post(ioContext_, [this, sock = std::move(socket)]() mutable { handleConnection(std::move(sock)); });
     }
 }
 
 
 void
-HttpServer::doAccept ()
+HttpServer::doAccept()
 {
     if (!running_)
         return;
@@ -422,9 +428,8 @@ HttpServer::doAccept ()
         if (!ec && running_) {
             if (activeConnections_ < maxConnections_) {
                 ++activeConnections_;
-                asio::post(ioContext_, [this, sock = std::move(socket)]() mutable {
-                    handleConnection(std::move(sock));
-                });
+                asio::post(ioContext_,
+                           [this, sock = std::move(socket)]() mutable { handleConnection(std::move(sock)); });
             } else {
                 // Try to queue the connection; if queue full, reject with 503
                 bool queued = false;
@@ -449,7 +454,7 @@ HttpServer::doAccept ()
 
 #ifdef ALPINE_TLS_ENABLED
 void
-HttpServer::doAcceptTls ()
+HttpServer::doAcceptTls()
 {
     if (!running_)
         return;
@@ -457,11 +462,9 @@ HttpServer::doAcceptTls ()
         if (!ec && running_) {
             if (activeConnections_ < maxConnections_) {
                 ++activeConnections_;
-                auto stream = std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(
-                    std::move(socket), *sslContext_);
-                asio::post(ioContext_, [this, stream]() mutable {
-                    handleTlsConnection(std::move(*stream));
-                });
+                auto stream =
+                    std::make_shared<asio::ssl::stream<asio::ip::tcp::socket>>(std::move(socket), *sslContext_);
+                asio::post(ioContext_, [this, stream]() mutable { handleTlsConnection(std::move(*stream)); });
             } else {
                 bool queued = false;
                 {
@@ -485,7 +488,7 @@ HttpServer::doAcceptTls ()
 
 
 void
-HttpServer::handleConnection (asio::ip::tcp::socket socket)
+HttpServer::handleConnection(asio::ip::tcp::socket socket)
 {
     string clientIp;
     try {
@@ -532,10 +535,11 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             asio::socket_base::linger lingerOpt(true, idleTimeoutSeconds_);
             socket.set_option(lingerOpt);
             struct timeval tv;
-            tv.tv_sec  = idleTimeoutSeconds_;
+            tv.tv_sec = idleTimeoutSeconds_;
             tv.tv_usec = 0;
-            if (setsockopt(socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO,
-                           reinterpret_cast<const char *>(&tv), sizeof(tv)) < 0) {
+            if (setsockopt(
+                    socket.native_handle(), SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<const char *>(&tv), sizeof(tv)) <
+                0) {
                 Log::Error("HttpServer: setsockopt SO_RCVTIMEO failed"s);
             }
         }
@@ -543,10 +547,13 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
         // Set write timeout on the socket
         if (writeTimeoutSeconds_ > 0) {
             struct timeval sendTv;
-            sendTv.tv_sec  = writeTimeoutSeconds_;
+            sendTv.tv_sec = writeTimeoutSeconds_;
             sendTv.tv_usec = 0;
-            if (setsockopt(socket.native_handle(), SOL_SOCKET, SO_SNDTIMEO,
-                           reinterpret_cast<const char *>(&sendTv), sizeof(sendTv)) < 0) {
+            if (setsockopt(socket.native_handle(),
+                           SOL_SOCKET,
+                           SO_SNDTIMEO,
+                           reinterpret_cast<const char *>(&sendTv),
+                           sizeof(sendTv)) < 0) {
                 Log::Error("HttpServer: setsockopt SO_SNDTIMEO failed"s);
             }
         }
@@ -609,26 +616,23 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             // Determine whether to close after this response
             ++requestCount;
             auto connIt = request.headers.find("connection"s);
-            bool clientRequestedClose = (connIt != request.headers.end() &&
-                                         connIt->second.contains("close"s));
-            bool lastRequest = clientRequestedClose ||
-                               requestCount >= keepAliveMaxRequests_;
+            bool clientRequestedClose = (connIt != request.headers.end() && connIt->second.contains("close"s));
+            bool lastRequest = clientRequestedClose || requestCount >= keepAliveMaxRequests_;
 
             if (lastRequest) {
                 response.setConnectionClose();
             } else {
-                response.setKeepAliveParams(idleTimeoutSeconds_,
-                                            keepAliveMaxRequests_ - requestCount);
+                response.setKeepAliveParams(idleTimeoutSeconds_, keepAliveMaxRequests_ - requestCount);
             }
 
             auto responseStr = response.build();
             asio::write(socket, asio::buffer(responseStr), ec);
 
-            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now() - startTime).count();
+            auto elapsed =
+                std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime)
+                    .count();
 
-            MetricsRegistry::recordHistogram("http_request_duration_seconds"s,
-                                             elapsed / 1000.0);
+            MetricsRegistry::recordHistogram("http_request_duration_seconds"s, elapsed / 1000.0);
 
 #ifdef ALPINE_TRACING_ENABLED
             rootSpan.addAttribute("http.status_code"s, std::to_string(response.statusCode()));
@@ -636,15 +640,14 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
             rootSpan.setStatus(response.statusCode() < 400);
 #endif
 
-            Log::Info("request"s, {
-                {"method"s,     StringUtils::sanitizeForLog(request.method)},
-                {"path"s,       StringUtils::sanitizeForLog(request.path)},
-                {"client_ip"s,  clientIp},
-                {"status"s,     std::to_string(response.statusCode())},
-                {"latency_ms"s, std::to_string(elapsed)},
-                {"size"s,       std::to_string(responseStr.size())},
-                {"request_id"s, requestId}
-            });
+            Log::Info("request"s,
+                      {{"method"s, StringUtils::sanitizeForLog(request.method)},
+                       {"path"s, StringUtils::sanitizeForLog(request.path)},
+                       {"client_ip"s, clientIp},
+                       {"status"s, std::to_string(response.statusCode())},
+                       {"latency_ms"s, std::to_string(elapsed)},
+                       {"size"s, std::to_string(responseStr.size())},
+                       {"request_id"s, requestId}});
 
             Log::clearCorrelationId();
 
@@ -663,7 +666,7 @@ HttpServer::handleConnection (asio::ip::tcp::socket socket)
 
 #ifdef ALPINE_TLS_ENABLED
 void
-HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream)
+HttpServer::handleTlsConnection(asio::ssl::stream<asio::ip::tcp::socket> stream)
 {
     string clientIp;
 
@@ -718,10 +721,13 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
         // Set write timeout on the underlying socket
         if (writeTimeoutSeconds_ > 0) {
             struct timeval sendTv;
-            sendTv.tv_sec  = writeTimeoutSeconds_;
+            sendTv.tv_sec = writeTimeoutSeconds_;
             sendTv.tv_usec = 0;
-            if (setsockopt(stream.lowest_layer().native_handle(), SOL_SOCKET, SO_SNDTIMEO,
-                           reinterpret_cast<const char *>(&sendTv), sizeof(sendTv)) < 0) {
+            if (setsockopt(stream.lowest_layer().native_handle(),
+                           SOL_SOCKET,
+                           SO_SNDTIMEO,
+                           reinterpret_cast<const char *>(&sendTv),
+                           sizeof(sendTv)) < 0) {
                 Log::Error("HttpServer: setsockopt SO_SNDTIMEO failed"s);
             }
         }
@@ -740,8 +746,7 @@ HttpServer::handleTlsConnection (asio::ssl::stream<asio::ip::tcp::socket> stream
 
 
 void
-HttpServer::upgradeToWebSocket (asio::ip::tcp::socket  socket,
-                                const HttpRequest &    request)
+HttpServer::upgradeToWebSocket(asio::ip::tcp::socket socket, const HttpRequest & request)
 {
     auto keyIt = request.headers.find("sec-websocket-key");
     if (keyIt == request.headers.end()) {
@@ -772,9 +777,7 @@ HttpServer::upgradeToWebSocket (asio::ip::tcp::socket  socket,
 
 template <typename Stream>
 void
-HttpServer::processRequest (Stream &          stream,
-                            const string &    clientIp,
-                            ConnectionGuard & guard)
+HttpServer::processRequest(Stream & stream, const string & clientIp, ConnectionGuard & guard)
 {
     // Reuse thread-local buffer to avoid per-connection allocation
     thread_local std::vector<byte> buffer(READ_BUFFER_SIZE);
@@ -861,36 +864,31 @@ HttpServer::processRequest (Stream &          stream,
         // Determine whether to close after this response
         ++requestCount;
         auto connIt = request.headers.find("connection"s);
-        bool clientRequestedClose = (connIt != request.headers.end() &&
-                                     connIt->second.contains("close"s));
-        bool lastRequest = clientRequestedClose ||
-                           requestCount >= keepAliveMaxRequests_;
+        bool clientRequestedClose = (connIt != request.headers.end() && connIt->second.contains("close"s));
+        bool lastRequest = clientRequestedClose || requestCount >= keepAliveMaxRequests_;
 
         if (lastRequest) {
             response.setConnectionClose();
         } else {
-            response.setKeepAliveParams(idleTimeoutSeconds_,
-                                        keepAliveMaxRequests_ - requestCount);
+            response.setKeepAliveParams(idleTimeoutSeconds_, keepAliveMaxRequests_ - requestCount);
         }
 
         auto responseStr = response.build();
         asio::write(stream, asio::buffer(responseStr), ec);
 
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - startTime).count();
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count();
 
-        MetricsRegistry::recordHistogram("http_request_duration_seconds"s,
-                                         elapsed / 1000.0);
+        MetricsRegistry::recordHistogram("http_request_duration_seconds"s, elapsed / 1000.0);
 
-        Log::Info("request"s, {
-            {"method"s,     StringUtils::sanitizeForLog(request.method)},
-            {"path"s,       StringUtils::sanitizeForLog(request.path)},
-            {"client_ip"s,  clientIp},
-            {"status"s,     std::to_string(response.statusCode())},
-            {"latency_ms"s, std::to_string(elapsed)},
-            {"size"s,       std::to_string(responseStr.size())},
-            {"request_id"s, requestId}
-        });
+        Log::Info("request"s,
+                  {{"method"s, StringUtils::sanitizeForLog(request.method)},
+                   {"path"s, StringUtils::sanitizeForLog(request.path)},
+                   {"client_ip"s, clientIp},
+                   {"status"s, std::to_string(response.statusCode())},
+                   {"latency_ms"s, std::to_string(elapsed)},
+                   {"size"s, std::to_string(responseStr.size())},
+                   {"request_id"s, requestId}});
 
         Log::clearCorrelationId();
 

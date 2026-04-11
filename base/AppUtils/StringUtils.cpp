@@ -5,13 +5,13 @@
 #include <cstdio>
 
 
-string StringUtils::sanitizeForLog(std::string_view input)
+string
+StringUtils::sanitizeForLog(std::string_view input)
 {
     string result;
     result.reserve(input.size());
 
-    for (auto ch : input)
-    {
+    for (auto ch : input) {
         auto uch = static_cast<uchar>(ch);
 
         if ((uch >= 0x20 && uch != 0x7F) || ch == '\n' || ch == '\r' || ch == '\t') {
@@ -25,4 +25,3 @@ string StringUtils::sanitizeForLog(std::string_view input)
 
     return result;
 }
-

@@ -1,61 +1,54 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
 #include <AlpineDtcpConnAcceptor.h>
 #include <AlpineDtcpConnTransport.h>
 #include <AlpineStack.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <StringUtils.h>
 
 
-
-AlpineDtcpConnAcceptor::AlpineDtcpConnAcceptor ()
+AlpineDtcpConnAcceptor::AlpineDtcpConnAcceptor()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnAcceptor constructor invoked.");
+    Log::Debug("AlpineDtcpConnAcceptor constructor invoked.");
 #endif
 }
 
 
-
-AlpineDtcpConnAcceptor::~AlpineDtcpConnAcceptor ()
+AlpineDtcpConnAcceptor::~AlpineDtcpConnAcceptor()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnAcceptor destructor invoked.");
+    Log::Debug("AlpineDtcpConnAcceptor destructor invoked.");
 #endif
 }
 
 
-
-bool 
-AlpineDtcpConnAcceptor::acceptConnection (ulong   ipAddress,
-                                          ushort  port)
+bool
+AlpineDtcpConnAcceptor::acceptConnection(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    string  ipAddressStr;
-    NetUtils::longIpToString (ipAddress, ipAddressStr);
+    string ipAddressStr;
+    NetUtils::longIpToString(ipAddress, ipAddressStr);
 
-    Log::Debug ("AlpineDtcpConnAcceptor::acceptConnection invoked.  Parameters:"s +
-                "\nIP Address: "s + ipAddressStr +
-                "\nPort: "s + std::to_string (ntohs(port)) );
+    Log::Debug("AlpineDtcpConnAcceptor::acceptConnection invoked.  Parameters:"s + "\nIP Address: "s + ipAddressStr +
+               "\nPort: "s + std::to_string(ntohs(port)));
 #endif
 
     return true;
 }
 
 
-
-bool 
-AlpineDtcpConnAcceptor::createTransport (DtcpBaseConnTransport *& transport)
+bool
+AlpineDtcpConnAcceptor::createTransport(DtcpBaseConnTransport *& transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnAcceptor::createTransport invoked.");
+    Log::Debug("AlpineDtcpConnAcceptor::createTransport invoked.");
 #endif
 
     AlpineDtcpConnTransport * alpineTransport;
-    alpineTransport =  new AlpineDtcpConnTransport ();
+    alpineTransport = new AlpineDtcpConnTransport();
 
     transport = static_cast<DtcpBaseConnTransport *>(alpineTransport);
 
@@ -64,41 +57,37 @@ AlpineDtcpConnAcceptor::createTransport (DtcpBaseConnTransport *& transport)
 }
 
 
-
-bool 
-AlpineDtcpConnAcceptor::receiveTransport (DtcpBaseConnTransport * transport)
+bool
+AlpineDtcpConnAcceptor::receiveTransport(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnAcceptor::receiveTransport invoked.");
+    Log::Debug("AlpineDtcpConnAcceptor::receiveTransport invoked.");
 #endif
 
 
     // downcast to AlpineDtcpConnTransport type.
     AlpineDtcpConnTransport * alpineTransport;
-    alpineTransport =  dynamic_cast<AlpineDtcpConnTransport *>(transport);
+    alpineTransport = dynamic_cast<AlpineDtcpConnTransport *>(transport);
 
     if (!alpineTransport) {
         // Invalid transport type???
         //
-        Log::Error ("Invalid transport type passed to AlpineDtcpConnAcceptor::receiveTransport.");
+        Log::Error("Invalid transport type passed to AlpineDtcpConnAcceptor::receiveTransport.");
         return false;
     }
 
-    bool   status;
-    ulong  peerId;
+    bool status;
+    ulong peerId;
 
-    transport->getTransportId (peerId);
+    transport->getTransportId(peerId);
 
-    status = AlpineStack::registerTransport (peerId, alpineTransport);
+    status = AlpineStack::registerTransport(peerId, alpineTransport);
 
     if (!status) {
-        Log::Error ("Register transport failed in AlpineDtcpConnAcceptor::receiveTransport!");
+        Log::Error("Register transport failed in AlpineDtcpConnAcceptor::receiveTransport!");
         return false;
     }
 
 
     return true;
 }
-
-
-

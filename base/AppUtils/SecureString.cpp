@@ -1,35 +1,33 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <SecureString.h>
 #include <Platform.h>
-#include <cstring>
+#include <SecureString.h>
 #include <algorithm>
+#include <cstring>
 
 #ifdef ALPINE_PLATFORM_POSIX
 #include <strings.h>
 #endif
 
 
-SecureString::SecureString (const string & s)
+SecureString::SecureString(const string & s)
     : data_(s)
-{
-}
+{}
 
 
-SecureString::SecureString (string && s)
+SecureString::SecureString(string && s)
     : data_(std::move(s))
-{
-}
+{}
 
 
-SecureString::~SecureString ()
+SecureString::~SecureString()
 {
     secureErase();
 }
 
 
-SecureString::SecureString (SecureString && other) noexcept
+SecureString::SecureString(SecureString && other) noexcept
     : data_(std::move(other.data_))
 {
     other.secureErase();
@@ -37,7 +35,7 @@ SecureString::SecureString (SecureString && other) noexcept
 
 
 SecureString &
-SecureString::operator= (SecureString && other) noexcept
+SecureString::operator=(SecureString && other) noexcept
 {
     if (this != &other) {
         secureErase();
@@ -49,7 +47,7 @@ SecureString::operator= (SecureString && other) noexcept
 
 
 void
-SecureString::assign (const string & s)
+SecureString::assign(const string & s)
 {
     secureErase();
     data_ = s;
@@ -57,7 +55,7 @@ SecureString::assign (const string & s)
 
 
 void
-SecureString::assign (string && s)
+SecureString::assign(string && s)
 {
     secureErase();
     data_ = std::move(s);
@@ -65,28 +63,28 @@ SecureString::assign (string && s)
 
 
 void
-SecureString::clear ()
+SecureString::clear()
 {
     secureErase();
 }
 
 
 const string &
-SecureString::value () const
+SecureString::value() const
 {
     return data_;
 }
 
 
 bool
-SecureString::empty () const
+SecureString::empty() const
 {
     return data_.empty();
 }
 
 
 bool
-SecureString::equals (const string & other) const
+SecureString::equals(const string & other) const
 {
     // Constant-time comparison: always iterate the longer length to avoid
     // leaking length information through timing side channels.
@@ -112,15 +110,20 @@ SecureString::equals (const string & other) const
 
 
 void
-SecureString::secureErase ()
+SecureString::secureErase()
 {
     if (!data_.empty()) {
 #ifdef ALPINE_PLATFORM_WINDOWS
         SecureZeroMemory(data_.data(), data_.size());
 #elif defined(ALPINE_PLATFORM_POSIX)
-        // bzero is available on all POSIX platforms; volatile prevents optimization
-        volatile void *p = data_.data();
+#ifdef ALPINE_HAVE_EXPLICIT_BZERO
+        // explicit_bzero is guaranteed by the libc to not be optimized away.
+        explicit_bzero(data_.data(), data_.size());
+#else
+        // Fallback: volatile pointer prevents the compiler from eliding memset.
+        volatile void * p = data_.data();
         memset(const_cast<void *>(p), 0, data_.size());
+#endif
 #endif
         data_.clear();
     }

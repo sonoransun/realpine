@@ -2,10 +2,10 @@
 
 /// Unit tests for WebhookDispatcher
 
-#include <catch2/catch_test_macros.hpp>
 #include <WebhookDispatcher.h>
-#include <thread>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
+#include <thread>
 
 
 TEST_CASE("WebhookDispatcher URL parsing", "[WebhookDispatcher]")
@@ -127,8 +127,8 @@ TEST_CASE("WebhookDispatcher configuration", "[WebhookDispatcher]")
         // No direct getter, but verify no crash for boundary values
         WebhookDispatcher::setMaxRetries(0);
         WebhookDispatcher::setMaxRetries(20);
-        WebhookDispatcher::setMaxRetries(-1);    // should be ignored
-        WebhookDispatcher::setMaxRetries(100);   // should be ignored
+        WebhookDispatcher::setMaxRetries(-1);   // should be ignored
+        WebhookDispatcher::setMaxRetries(100);  // should be ignored
     }
 
     SECTION("setTimeoutSeconds clamps to valid range")
@@ -137,7 +137,7 @@ TEST_CASE("WebhookDispatcher configuration", "[WebhookDispatcher]")
         WebhookDispatcher::setTimeoutSeconds(1);
         WebhookDispatcher::setTimeoutSeconds(120);
         WebhookDispatcher::setTimeoutSeconds(0);    // should be ignored
-        WebhookDispatcher::setTimeoutSeconds(200);   // should be ignored
+        WebhookDispatcher::setTimeoutSeconds(200);  // should be ignored
     }
 }
 
@@ -149,20 +149,19 @@ TEST_CASE("WebhookDispatcher dispatch queues work", "[WebhookDispatcher]")
 
     SECTION("dispatch before initialize does not crash")
     {
-        WebhookDispatcher::dispatch("http://localhost:9999/hook"s,
-                                    "{\"test\":true}"s,
-                                    "query.completed"s);
+        WebhookDispatcher::dispatch("http://localhost:9999/hook"s, "{\"test\":true}"s, "query.completed"s);
     }
 
     SECTION("initialize and shutdown lifecycle")
     {
         WebhookDispatcher::initialize();
 
-        // Dispatch a webhook to an unreachable host (delivery will fail, but queueing should work)
+        // Dispatch a webhook to a loopback port where nothing is listening.
+        // Kernel returns ECONNREFUSED quickly (rather than waiting for a
+        // multi-second TCP handshake timeout as with TEST-NET 192.0.2.1).
         WebhookDispatcher::setMaxRetries(0);
-        WebhookDispatcher::dispatch("http://192.0.2.1:1/hook"s,
-                                    "{\"queryId\":42}"s,
-                                    "query.completed"s);
+        WebhookDispatcher::setTimeoutSeconds(1);
+        WebhookDispatcher::dispatch("http://127.0.0.1:1/hook"s, "{\"queryId\":42}"s, "query.completed"s);
 
         // Give the worker thread a moment to process
         std::this_thread::sleep_for(std::chrono::milliseconds(100));

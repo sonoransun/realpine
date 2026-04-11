@@ -8,14 +8,9 @@
 class OutputFormatter
 {
   public:
+    static string formatTable(const vector<string> & headers, const vector<vector<string>> & rows);
 
-    static string  formatTable (const vector<string> &          headers,
-                                const vector<vector<string>> &  rows);
+    static string formatCsv(const vector<string> & headers, const vector<vector<string>> & rows);
 
-    static string  formatCsv (const vector<string> &          headers,
-                              const vector<vector<string>> &  rows);
-
-    static string  formatYaml (const vector<string> &          headers,
-                               const vector<vector<string>> &  rows);
-
+    static string formatYaml(const vector<string> & headers, const vector<vector<string>> & rows);
 };

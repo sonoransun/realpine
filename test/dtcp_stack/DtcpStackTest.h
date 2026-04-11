@@ -2,35 +2,32 @@
 
 
 #pragma once
-#include <Common.h>
-#include <Log.h>
-#include <StringUtils.h>
-#include <ApplCore.h>
-#include <AlpineDtcpUdpTransport.h>
-#include <DtcpPacket.h>
-#include <DtcpBaseConnMux.h>
 #include <AlpineDtcpConnAcceptor.h>
 #include <AlpineDtcpConnTransport.h>
+#include <AlpineDtcpUdpTransport.h>
+#include <ApplCore.h>
+#include <Common.h>
+#include <DtcpBaseConnMux.h>
+#include <DtcpPacket.h>
+#include <Log.h>
+#include <StringUtils.h>
 
 
-class DtcpStackTest 
+class DtcpStackTest
 {
   public:
+    DtcpStackTest() = default;
+    ~DtcpStackTest() = default;
 
-    DtcpStackTest () = default;
-    ~DtcpStackTest () = default;
 
+    static void initialize();
 
-    static void  initialize ();
+    static void sendWelcomeMessage();
 
-    static void  sendWelcomeMessage ();
+    static void sendHelloMessage();
 
-    static void  sendHelloMessage ();
-
-    static void  sendStringMessages (const string &  message);
+    static void sendStringMessages(const string & message);
 
 
   private:
-
 };
-

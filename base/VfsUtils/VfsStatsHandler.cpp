@@ -1,34 +1,32 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <VfsStatsHandler.h>
 #include <AccessTracker.h>
 #include <AlpineFuse.h>
+#include <VfsStatsHandler.h>
 #include <nlohmann/json.hpp>
 
 
 void
-VfsStatsHandler::registerRoutes (HttpRouter & router)
+VfsStatsHandler::registerRoutes(HttpRouter & router)
 {
-    router.addRoute("GET", "/vfs/stats",          getStats);
-    router.addRoute("GET", "/vfs/stats/popular",  getPopular);
-    router.addRoute("GET", "/vfs/stats/recent",   getRecent);
+    router.addRoute("GET", "/vfs/stats", getStats);
+    router.addRoute("GET", "/vfs/stats/popular", getPopular);
+    router.addRoute("GET", "/vfs/stats/recent", getRecent);
     router.addRoute("GET", "/vfs/stats/peer/{id}", getPeerStats);
-    router.addRoute("GET", "/vfs/status",         getVfsStatus);
+    router.addRoute("GET", "/vfs/status", getVfsStatus);
 }
 
 
 HttpResponse
-VfsStatsHandler::getStats (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+VfsStatsHandler::getStats(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     return HttpResponse::ok(AccessTracker::serializeJson());
 }
 
 
 HttpResponse
-VfsStatsHandler::getPopular (const HttpRequest & request,
-                             const std::unordered_map<string, string> & params)
+VfsStatsHandler::getPopular(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     vector<AccessTracker::t_ResourceStats> resources;
     AccessTracker::getMostAccessedResources(resources, 50);
@@ -37,10 +35,10 @@ VfsStatsHandler::getPopular (const HttpRequest & request,
 
     for (const auto & r : resources) {
         nlohmann::json obj;
-        obj["resourceId"]   = r.resourceId;
-        obj["peerId"]       = r.peerId;
-        obj["description"]  = r.description;
-        obj["accessCount"]  = r.accessCount;
+        obj["resourceId"] = r.resourceId;
+        obj["peerId"] = r.peerId;
+        obj["description"] = r.description;
+        obj["accessCount"] = r.accessCount;
         obj["totalBytesRead"] = r.totalBytesRead;
         arr.push_back(obj);
     }
@@ -53,8 +51,7 @@ VfsStatsHandler::getPopular (const HttpRequest & request,
 
 
 HttpResponse
-VfsStatsHandler::getRecent (const HttpRequest & request,
-                            const std::unordered_map<string, string> & params)
+VfsStatsHandler::getRecent(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     vector<AccessTracker::t_ResourceStats> resources;
     AccessTracker::getMostRecentResources(resources, 50);
@@ -63,10 +60,10 @@ VfsStatsHandler::getRecent (const HttpRequest & request,
 
     for (const auto & r : resources) {
         nlohmann::json obj;
-        obj["resourceId"]   = r.resourceId;
-        obj["peerId"]       = r.peerId;
-        obj["description"]  = r.description;
-        obj["accessCount"]  = r.accessCount;
+        obj["resourceId"] = r.resourceId;
+        obj["peerId"] = r.peerId;
+        obj["description"] = r.description;
+        obj["accessCount"] = r.accessCount;
         obj["totalBytesRead"] = r.totalBytesRead;
         arr.push_back(obj);
     }
@@ -79,8 +76,7 @@ VfsStatsHandler::getRecent (const HttpRequest & request,
 
 
 HttpResponse
-VfsStatsHandler::getPeerStats (const HttpRequest & request,
-                               const std::unordered_map<string, string> & params)
+VfsStatsHandler::getPeerStats(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
 
@@ -95,9 +91,9 @@ VfsStatsHandler::getPeerStats (const HttpRequest & request,
         return HttpResponse::notFound();
 
     nlohmann::json obj;
-    obj["peerId"]                   = stats.peerId;
-    obj["aggregateAccessCount"]     = stats.aggregateAccessCount;
-    obj["aggregateBytesRead"]       = stats.aggregateBytesRead;
+    obj["peerId"] = stats.peerId;
+    obj["aggregateAccessCount"] = stats.aggregateAccessCount;
+    obj["aggregateBytesRead"] = stats.aggregateBytesRead;
     obj["distinctResourcesAccessed"] = stats.distinctResourcesAccessed;
 
     return HttpResponse::ok(obj.dump());
@@ -105,11 +101,10 @@ VfsStatsHandler::getPeerStats (const HttpRequest & request,
 
 
 HttpResponse
-VfsStatsHandler::getVfsStatus (const HttpRequest & request,
-                               const std::unordered_map<string, string> & params)
+VfsStatsHandler::getVfsStatus(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     nlohmann::json obj;
-    obj["mounted"]    = AlpineFuse::isRunning();
+    obj["mounted"] = AlpineFuse::isRunning();
     obj["mountPoint"] = AlpineFuse::getMountPoint();
 
     return HttpResponse::ok(obj.dump());

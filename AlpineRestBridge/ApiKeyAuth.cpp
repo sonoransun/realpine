@@ -2,34 +2,34 @@
 
 
 #include <ApiKeyAuth.h>
-#include <MutexLock.h>
 #include <Log.h>
+#include <MutexLock.h>
 #include <Platform.h>
 #include <StringUtils.h>
-#include <fstream>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <jwt-cpp/jwt.h>
 #endif
 
 
-SecureString             ApiKeyAuth::apiKey_s;
-bool                     ApiKeyAuth::initialized_s = false;
-vector<ApiKeyAuth::t_ApiKeyEntry>  ApiKeyAuth::keys_s;
-Mutex                    ApiKeyAuth::keysMutex_s;
+SecureString ApiKeyAuth::apiKey_s;
+bool ApiKeyAuth::initialized_s = false;
+vector<ApiKeyAuth::t_ApiKeyEntry> ApiKeyAuth::keys_s;
+Mutex ApiKeyAuth::keysMutex_s;
 
 #ifdef ALPINE_TLS_ENABLED
 SecureString ApiKeyAuth::jwtSecret_s;
-string       ApiKeyAuth::jwtIssuer_s;
-string       ApiKeyAuth::jwtAudience_s;
-bool         ApiKeyAuth::jwtConfigured_s = false;
+string ApiKeyAuth::jwtIssuer_s;
+string ApiKeyAuth::jwtAudience_s;
+bool ApiKeyAuth::jwtConfigured_s = false;
 #endif
 
 
 void
-ApiKeyAuth::initialize ()
+ApiKeyAuth::initialize()
 {
     if (initialized_s)
         return;
@@ -55,7 +55,7 @@ ApiKeyAuth::initialize ()
     // Try to read from file
     string homeDir = alpine_home_dir();
 
-    string keyDir  = homeDir + "/.alpine";
+    string keyDir = homeDir + "/.alpine";
     string keyFile = keyDir + "/api.key";
 
     std::ifstream ifs(keyFile);
@@ -130,15 +130,14 @@ ApiKeyAuth::initialize ()
 
 
 bool
-ApiKeyAuth::validate (const HttpRequest & request, HttpResponse & response)
+ApiKeyAuth::validate(const HttpRequest & request, HttpResponse & response)
 {
     // Exempt GET requests to /status paths
     if (request.method == "GET" && request.path.starts_with("/status"))
         return true;
 
     // If no API key was generated (urandom failure), reject all requests
-    if (apiKey_s.empty())
-    {
+    if (apiKey_s.empty()) {
         Log::Error("ApiKeyAuth: rejecting request — no API key available"s);
         response.setJsonBody("{\"error\":\"Service unavailable — authentication not configured\"}");
         return false;
@@ -187,14 +186,14 @@ ApiKeyAuth::validate (const HttpRequest & request, HttpResponse & response)
 
 
 string
-ApiKeyAuth::getKey ()
+ApiKeyAuth::getKey()
 {
     return apiKey_s.value();
 }
 
 
 string
-ApiKeyAuth::rotateKey (std::chrono::seconds gracePeriod)
+ApiKeyAuth::rotateKey(std::chrono::seconds gracePeriod)
 {
     // Generate new 32-byte random key
     byte randomBytes[32];
@@ -247,17 +246,15 @@ ApiKeyAuth::rotateKey (std::chrono::seconds gracePeriod)
 
 
 void
-ApiKeyAuth::purgeExpiredKeys ()
+ApiKeyAuth::purgeExpiredKeys()
 {
     auto now = std::chrono::steady_clock::now();
-    std::erase_if(keys_s, [&now](const t_ApiKeyEntry & entry) {
-        return entry.deprecated && entry.expiresAt <= now;
-    });
+    std::erase_if(keys_s, [&now](const t_ApiKeyEntry & entry) { return entry.deprecated && entry.expiresAt <= now; });
 }
 
 
 ulong
-ApiKeyAuth::activeKeyCount ()
+ApiKeyAuth::activeKeyCount()
 {
     MutexLock lock(keysMutex_s);
     auto now = std::chrono::steady_clock::now();
@@ -273,9 +270,7 @@ ApiKeyAuth::activeKeyCount ()
 #ifdef ALPINE_TLS_ENABLED
 
 void
-ApiKeyAuth::configureJwt (const string & secret,
-                          const string & issuer,
-                          const string & audience)
+ApiKeyAuth::configureJwt(const string & secret, const string & issuer, const string & audience)
 {
     jwtSecret_s.assign(secret);
     jwtIssuer_s = issuer;
@@ -286,14 +281,13 @@ ApiKeyAuth::configureJwt (const string & secret,
 
 
 bool
-ApiKeyAuth::validateJwt (const string & token)
+ApiKeyAuth::validateJwt(const string & token)
 {
     try {
         auto decoded = jwt::decode(token);
 
-        auto verifier = jwt::verify()
-            .allow_algorithm(jwt::algorithm::hs256{jwtSecret_s.value()})
-            .with_issuer(jwtIssuer_s);
+        auto verifier =
+            jwt::verify().allow_algorithm(jwt::algorithm::hs256{jwtSecret_s.value()}).with_issuer(jwtIssuer_s);
 
         if (!jwtAudience_s.empty())
             verifier.with_audience({jwtAudience_s});
@@ -312,7 +306,7 @@ ApiKeyAuth::validateJwt (const string & token)
 
 
 bool
-ApiKeyAuth::extractJwtScopes (const string & token, std::vector<string> & scopes)
+ApiKeyAuth::extractJwtScopes(const string & token, std::vector<string> & scopes)
 {
     try {
         auto decoded = jwt::decode(token);
@@ -347,7 +341,7 @@ ApiKeyAuth::extractJwtScopes (const string & token, std::vector<string> & scopes
 
 
 bool
-ApiKeyAuth::hasScope (const HttpRequest & request, const string & scope)
+ApiKeyAuth::hasScope(const HttpRequest & request, const string & scope)
 {
     // Extract Bearer token
     string authHeader;

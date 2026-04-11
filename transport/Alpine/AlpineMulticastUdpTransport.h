@@ -8,27 +8,22 @@
 class AlpineMulticastUdpTransport : public DtcpBaseUdpTransport
 {
   public:
+    AlpineMulticastUdpTransport(const ulong ipAddress,
+                                const int port,
+                                const string & multicastGroup,
+                                ushort multicastPort);
 
-    AlpineMulticastUdpTransport (const ulong   ipAddress,
-                                 const int     port,
-                                 const string & multicastGroup,
-                                 ushort         multicastPort);
-
-    ~AlpineMulticastUdpTransport () override;
+    ~AlpineMulticastUdpTransport() override;
 
 
-    bool createMux (DtcpBaseConnMux *& connMux) override;
+    bool createMux(DtcpBaseConnMux *& connMux) override;
 
-    bool handleData (const byte * data,
-                     uint         dataLength) override;
+    bool handleData(const byte * data, uint dataLength) override;
 
   protected:
-
-    UdpConnection * createConnection () override;
+    UdpConnection * createConnection() override;
 
   private:
-
-    string  multicastGroup_;
-    ushort  multicastPort_;
-
+    string multicastGroup_;
+    ushort multicastPort_;
 };

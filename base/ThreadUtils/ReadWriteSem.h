@@ -8,24 +8,49 @@
 class ReadWriteSem
 {
   public:
+    void
+    acquireRead()
+    {
+        mutex_.lock_shared();
+    }
 
-    void  acquireRead ()        { mutex_.lock_shared(); }
+    void
+    acquireWrite()
+    {
+        mutex_.lock();
+    }
 
-    void  acquireWrite ()       { mutex_.lock(); }
+    bool
+    tryAcquireRead()
+    {
+        return mutex_.try_lock_shared();
+    }
 
-    bool  tryAcquireRead ()     { return mutex_.try_lock_shared(); }
+    bool
+    tryAcquireWrite()
+    {
+        return mutex_.try_lock();
+    }
 
-    bool  tryAcquireWrite ()    { return mutex_.try_lock(); }
+    void
+    releaseRead()
+    {
+        mutex_.unlock_shared();
+    }
 
-    void  releaseRead ()        { mutex_.unlock_shared(); }
+    void
+    releaseWrite()
+    {
+        mutex_.unlock();
+    }
 
-    void  releaseWrite ()       { mutex_.unlock(); }
-
-    std::shared_mutex &  native ()  { return mutex_; }
+    std::shared_mutex &
+    native()
+    {
+        return mutex_;
+    }
 
 
   private:
-
-    std::shared_mutex  mutex_;
-
+    std::shared_mutex mutex_;
 };

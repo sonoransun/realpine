@@ -9,18 +9,13 @@
 class AlpineDtcpConnAcceptor : public DtcpBaseConnAcceptor
 {
   public:
+    AlpineDtcpConnAcceptor();
+    virtual ~AlpineDtcpConnAcceptor();
 
-    AlpineDtcpConnAcceptor ();
-    virtual ~AlpineDtcpConnAcceptor ();
 
+    virtual bool acceptConnection(ulong ipAddress, ushort port);
 
-    virtual bool acceptConnection (ulong   ipAddress,
-                                   ushort  port);
+    virtual bool createTransport(DtcpBaseConnTransport *& transport);
 
-    virtual bool createTransport (DtcpBaseConnTransport *& transport);
-
-    virtual bool receiveTransport (DtcpBaseConnTransport * transport);
-
+    virtual bool receiveTransport(DtcpBaseConnTransport * transport);
 };
-
-

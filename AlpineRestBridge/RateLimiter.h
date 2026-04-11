@@ -3,51 +3,49 @@
 
 #pragma once
 #include <Common.h>
-#include <asio.hpp>
 #include <array>
-#include <unordered_map>
-#include <shared_mutex>
+#include <asio.hpp>
 #include <chrono>
 #include <functional>
+#include <shared_mutex>
+#include <unordered_map>
 
 
 class RateLimiter
 {
   public:
+    static void initialize(double requestsPerSecond, uint burstSize);
 
-    static void    initialize (double  requestsPerSecond,
-                               uint    burstSize);
+    static bool allowRequest(const string & clientIp);
 
-    static bool    allowRequest (const string & clientIp);
+    static bool allowRequestNormalized(const string & normalizedIp);
 
-    static bool    allowRequestNormalized (const string & normalizedIp);
+    static string normalizeIp(const string & ip);
 
-    static string  normalizeIp (const string & ip);
-
-    static void    cleanup ();
+    static void cleanup();
 
 
   private:
+    static constexpr size_t SHARD_COUNT = 16;
+    static constexpr auto STALE_TIMEOUT = std::chrono::minutes(5);
 
-    static constexpr size_t SHARD_COUNT   = 16;
-    static constexpr auto   STALE_TIMEOUT = std::chrono::minutes(5);
-
-    struct t_TokenBucket {
-        double  tokens;
-        std::chrono::steady_clock::time_point  lastRefill;
+    struct t_TokenBucket
+    {
+        double tokens;
+        std::chrono::steady_clock::time_point lastRefill;
     };
 
-    struct t_Shard {
-        std::shared_mutex                              mutex;
-        std::unordered_map<string, t_TokenBucket>      buckets;
+    struct t_Shard
+    {
+        std::shared_mutex mutex;
+        std::unordered_map<string, t_TokenBucket> buckets;
     };
 
-    static void    refillBucket (t_TokenBucket & bucket);
-    static size_t  shardIndex   (const string & clientIp);
+    static void refillBucket(t_TokenBucket & bucket);
+    static size_t shardIndex(const string & clientIp);
 
-    static double                              rate_s;
-    static uint                                burst_s;
-    static std::array<t_Shard, SHARD_COUNT>    shards_s;
-    static bool                                initialized_s;
-
+    static double rate_s;
+    static uint burst_s;
+    static std::array<t_Shard, SHARD_COUNT> shards_s;
+    static bool initialized_s;
 };

@@ -2,35 +2,30 @@
 
 
 #pragma once
-#include <Common.h>
-#include <Log.h>
-#include <StringUtils.h>
-#include <ApplCore.h>
-#include <AlpineDtcpUdpTransport.h>
-#include <DtcpPacket.h>
-#include <DtcpBaseConnMux.h>
 #include <AlpineDtcpConnAcceptor.h>
 #include <AlpineDtcpConnTransport.h>
+#include <AlpineDtcpUdpTransport.h>
+#include <ApplCore.h>
+#include <Common.h>
+#include <DtcpBaseConnMux.h>
+#include <DtcpPacket.h>
+#include <Log.h>
+#include <StringUtils.h>
 
 
-class ServerSigMethods 
+class ServerSigMethods
 {
   public:
+    ServerSigMethods() = default;
+    ~ServerSigMethods() = default;
 
-    ServerSigMethods () = default;
-    ~ServerSigMethods () = default;
 
+    static void initialize();
 
-    static void  initialize ();
+    static void sendWelcomeMessage();
 
-    static void  sendWelcomeMessage ();
-
-    static void  sendHelloMessage ();
+    static void sendHelloMessage();
 
   private:
-
-    static void  sendStringMessages (const string &  message,
-                                     bool            reliable);
-
+    static void sendStringMessages(const string & message, bool reliable);
 };
-

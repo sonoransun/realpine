@@ -5,77 +5,69 @@
 #include <AlpinePeerProfileIndex.h>
 #include <AlpineQuery.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
 #include <WriteLock.h>
-#include <ReadLock.h>
 
 
-
-AlpineGroup::AlpineGroup (ulong           groupId,
-                          const string &  name,
-                          const string &  description)
+AlpineGroup::AlpineGroup(ulong groupId, const string & name, const string & description)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup constructor invoked.");
+    Log::Debug("AlpineGroup constructor invoked.");
 #endif
 
-    WriteLock  lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    groupId_       = groupId;
-    name_          = name;
-    description_   = description;
-    profileIndex_  = new AlpinePeerProfileIndex ();
-    queryList_     = new t_QueryList;
-    numQueries_    = 0;
-    numResponses_  = 0;
+    groupId_ = groupId;
+    name_ = name;
+    description_ = description;
+    profileIndex_ = new AlpinePeerProfileIndex();
+    queryList_ = new t_QueryList;
+    numQueries_ = 0;
+    numResponses_ = 0;
 }
 
 
-
-AlpineGroup::AlpineGroup (AlpineGroup *   copy,
-                          ulong           groupId, 
-                          const string &  name, 
-                          const string &  description)
+AlpineGroup::AlpineGroup(AlpineGroup * copy, ulong groupId, const string & name, const string & description)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup copy constructor invoked.");
+    Log::Debug("AlpineGroup copy constructor invoked.");
 #endif
 
-    WriteLock  lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    groupId_       = groupId;
-    name_          = name;
-    description_   = description;
-    profileIndex_  = new AlpinePeerProfileIndex ();
-    queryList_     = new t_QueryList;
-    numQueries_    = 0;
-    numResponses_  = 0;
+    groupId_ = groupId;
+    name_ = name;
+    description_ = description;
+    profileIndex_ = new AlpinePeerProfileIndex();
+    queryList_ = new t_QueryList;
+    numQueries_ = 0;
+    numResponses_ = 0;
 
     // Copy peers from source group into our local profile index.
     //
-    AlpinePeerProfileIndex::t_PeerIdList  idList;
+    AlpinePeerProfileIndex::t_PeerIdList idList;
 
     {
-        ReadLock  copyLock(copy->dataLock_);
-        copy->profileIndex_->getAllPeers (idList);
+        ReadLock copyLock(copy->dataLock_);
+        copy->profileIndex_->getAllPeers(idList);
     }
 
-    for (auto& item : idList) {
-        profileIndex_->create (item);
+    for (auto & item : idList) {
+        profileIndex_->create(item);
     }
 }
 
 
-
-AlpineGroup::~AlpineGroup ()
+AlpineGroup::~AlpineGroup()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup destructor invoked.");
+    Log::Debug("AlpineGroup destructor invoked.");
 #endif
 
-    cancelAll ();
+    cancelAll();
 
-    WriteLock  lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     delete profileIndex_;
 
@@ -83,11 +75,10 @@ AlpineGroup::~AlpineGroup ()
 }
 
 
-
-bool  
-AlpineGroup::getId (ulong &  id)
+bool
+AlpineGroup::getId(ulong & id)
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     id = groupId_;
 
@@ -95,11 +86,10 @@ AlpineGroup::getId (ulong &  id)
 }
 
 
-
-bool  
-AlpineGroup::getName (string &  name)
+bool
+AlpineGroup::getName(string & name)
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     name = name_;
 
@@ -107,11 +97,10 @@ AlpineGroup::getName (string &  name)
 }
 
 
-
-bool  
-AlpineGroup::getDescription (string & description)
+bool
+AlpineGroup::getDescription(string & description)
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     description = description_;
 
@@ -119,45 +108,41 @@ AlpineGroup::getDescription (string & description)
 }
 
 
-
-ulong  
-AlpineGroup::size ()
+ulong
+AlpineGroup::size()
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
-    ulong  size;
-    size = profileIndex_->size ();
+    ulong size;
+    size = profileIndex_->size();
 
     return size;
 }
 
 
-
-ulong  
-AlpineGroup::totalQueries ()
+ulong
+AlpineGroup::totalQueries()
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     return numQueries_;
 }
 
 
-
-ulong  
-AlpineGroup::totalResponses ()
+ulong
+AlpineGroup::totalResponses()
 {
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     return numResponses_;
 }
 
 
-
-bool  
-AlpineGroup::addPeer (ulong peerId)
+bool
+AlpineGroup::addPeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::addPeer invoked.");
+    Log::Debug("AlpineGroup::addPeer invoked.");
 #endif
 
 
@@ -165,12 +150,11 @@ AlpineGroup::addPeer (ulong peerId)
 }
 
 
-
-bool  
-AlpineGroup::removePeer (ulong  peerId)
+bool
+AlpineGroup::removePeer(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::removePeer invoked.");
+    Log::Debug("AlpineGroup::removePeer invoked.");
 #endif
 
 
@@ -178,13 +162,11 @@ AlpineGroup::removePeer (ulong  peerId)
 }
 
 
-
-bool  
-AlpineGroup::getPeerProfile (ulong                 peerId,
-                             AlpinePeerProfile *&  profile)
+bool
+AlpineGroup::getPeerProfile(ulong peerId, AlpinePeerProfile *& profile)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::getPeerProfile invoked.");
+    Log::Debug("AlpineGroup::getPeerProfile invoked.");
 #endif
 
 
@@ -192,12 +174,11 @@ AlpineGroup::getPeerProfile (ulong                 peerId,
 }
 
 
-
-bool  
-AlpineGroup::createPeerList (t_PeerIdList &  peerList)
+bool
+AlpineGroup::createPeerList(t_PeerIdList & peerList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::createPeerList invoked.");
+    Log::Debug("AlpineGroup::createPeerList invoked.");
 #endif
 
 
@@ -205,12 +186,11 @@ AlpineGroup::createPeerList (t_PeerIdList &  peerList)
 }
 
 
-
-bool  
-AlpineGroup::adjustPeerQuality (int  delta)
+bool
+AlpineGroup::adjustPeerQuality(int delta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::adjustPeerQuality invoked.");
+    Log::Debug("AlpineGroup::adjustPeerQuality invoked.");
 #endif
 
 
@@ -218,12 +198,11 @@ AlpineGroup::adjustPeerQuality (int  delta)
 }
 
 
-
-bool  
-AlpineGroup::queryStart (AlpineQuery *  query)
+bool
+AlpineGroup::queryStart(AlpineQuery * query)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::queryStart invoked.");
+    Log::Debug("AlpineGroup::queryStart invoked.");
 #endif
 
 
@@ -231,12 +210,11 @@ AlpineGroup::queryStart (AlpineQuery *  query)
 }
 
 
-
-bool  
-AlpineGroup::queryEnd (AlpineQuery *  query)
+bool
+AlpineGroup::queryEnd(AlpineQuery * query)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::queryEnd invoked.");
+    Log::Debug("AlpineGroup::queryEnd invoked.");
 #endif
 
 
@@ -244,22 +222,20 @@ AlpineGroup::queryEnd (AlpineQuery *  query)
 }
 
 
-
-void  
-AlpineGroup::querySent (ulong  peerId)
+void
+AlpineGroup::querySent(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::queryEnd invoked.");
+    Log::Debug("AlpineGroup::queryEnd invoked.");
 #endif
 }
 
 
-
-bool  
-AlpineGroup::cancelAll ()
+bool
+AlpineGroup::cancelAll()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::cancelAll invoked.");
+    Log::Debug("AlpineGroup::cancelAll invoked.");
 #endif
 
 
@@ -267,13 +243,11 @@ AlpineGroup::cancelAll ()
 }
 
 
-
-bool  
-AlpineGroup::responseReceived (ulong  peerId)
+bool
+AlpineGroup::responseReceived(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::responseReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineGroup::responseReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
 
@@ -281,13 +255,11 @@ AlpineGroup::responseReceived (ulong  peerId)
 }
 
 
-
-bool  
-AlpineGroup::badPacketReceived (ulong  peerId)
+bool
+AlpineGroup::badPacketReceived(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::badPacketReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineGroup::badPacketReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
 
@@ -295,19 +267,13 @@ AlpineGroup::badPacketReceived (ulong  peerId)
 }
 
 
-
-bool  
-AlpineGroup::adjustQuality (ulong  peerId,
-                            short  delta)
+bool
+AlpineGroup::adjustQuality(ulong peerId, short delta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineGroup::adjustQuality invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineGroup::adjustQuality invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
 
     return true;
 }
-
-
-

@@ -2,13 +2,12 @@
 
 
 #include <HttpRequest.h>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 
 extern "C" int
-LLVMFuzzerTestOneInput (const uint8_t * data,
-                        size_t          size)
+LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
     HttpRequest request;
     HttpRequest::parse(data, static_cast<ulong>(size), request);

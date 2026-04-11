@@ -2,28 +2,28 @@
 
 
 #include <iostream>
-using std::cout; using std::endl; using std::cerr;
+using std::cerr;
+using std::cout;
+using std::endl;
+#include <Log.h>
+#include <StringUtils.h>
+#include <UdpConnection.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <sys/poll.h>
 #include <sys/time.h>
+#include <unistd.h>
 #include <vector>
-#include <Log.h>
-#include <UdpConnection.h>
-#include <StringUtils.h>
 
-ulong
-usecTimeDiff (const struct timeval &  beginTime,
-              const struct timeval &  endTime);
+ulong usecTimeDiff(const struct timeval & beginTime, const struct timeval & endTime);
 
 
-int 
-main (int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
-    string  ipAddressStr;
-    string  portStr;
+    string ipAddressStr;
+    string portStr;
 
-    ulong  ipAddress;
+    ulong ipAddress;
     int port;
 
     int debugLevel;
@@ -35,56 +35,51 @@ main (int argc, char *argv[])
     ipAddressStr = argv[2];
     portStr = argv[3];
 
-    if (!NetUtils::stringIpToLong (ipAddressStr, ipAddress)) {
+    if (!NetUtils::stringIpToLong(ipAddressStr, ipAddress)) {
         cerr << "Invalid IP Address.  Exiting." << endl;
         return 1;
     }
-    port = atoi (portStr.c_str());
+    port = atoi(portStr.c_str());
     port = htons(port);
-    debugLevel = atoi (argv[1]);
+    debugLevel = atoi(argv[1]);
 
     const string logFile("Server.log");
 
     if (debugLevel == 1) {
-        Log::initialize (logFile, Log::t_LogLevel::Silent);
-    }
-    else if (debugLevel == 2) {
-        Log::initialize (logFile, Log::t_LogLevel::Error);
-    }
-    else if (debugLevel == 3) {
-        Log::initialize (logFile, Log::t_LogLevel::Info);
-    }
-    else if (debugLevel == 4) {
-        Log::initialize (logFile, Log::t_LogLevel::Debug);
-    }
-    else {
+        Log::initialize(logFile, Log::t_LogLevel::Silent);
+    } else if (debugLevel == 2) {
+        Log::initialize(logFile, Log::t_LogLevel::Error);
+    } else if (debugLevel == 3) {
+        Log::initialize(logFile, Log::t_LogLevel::Info);
+    } else if (debugLevel == 4) {
+        Log::initialize(logFile, Log::t_LogLevel::Debug);
+    } else {
         cout << "Invalid log level." << endl;
         return 1;
     }
     // Update nice value
     //
-    nice (-20);
+    nice(-20);
 
 
-    Log::Info ("Starting server at IP: "s + ipAddressStr +
-               " and Port: "s + portStr);
+    Log::Info("Starting server at IP: "s + ipAddressStr + " and Port: "s + portStr);
 
- 
+
     // Create socket...
-    UdpConnection  udpConnection;
-    if (!udpConnection.create (ipAddress, port)) {
-        Log::Error ("Creating connection failed.  Exiting.");
+    UdpConnection udpConnection;
+    if (!udpConnection.create(ipAddress, port)) {
+        Log::Error("Creating connection failed.  Exiting.");
         return 1;
     }
     int fd;
 
-    fd = udpConnection.getFd ();
+    fd = udpConnection.getFd();
 
-    Log::Debug ("Active FD: "s + std::to_string(fd));
-    Log::Debug ("Server started.");
+    Log::Debug("Active FD: "s + std::to_string(fd));
+    Log::Debug("Server started.");
 
-   
-    struct pollfd  pollData;
+
+    struct pollfd pollData;
     pollData.fd = fd;
     pollData.events = POLLIN;
 
@@ -95,58 +90,54 @@ main (int argc, char *argv[])
     // Receive information...
     //
     bool receiveOk;
-    const uint maxDataSize = 65536; // 64k
+    const uint maxDataSize = 65536;  // 64k
     byte * dataBuffer = new byte[maxDataSize];
-    ulong  sourceIpAddress;
+    ulong sourceIpAddress;
     ushort sourcePort;
-    uint   receivedLength;
+    uint receivedLength;
 
     ulong totalReceived = 0;
     ulong totalData = 0;
-    bool  first = true;
+    bool first = true;
 
-    struct timeval  start, end;
+    struct timeval start, end;
 
     while (!done) {
 
         // Check reason for poll return...
         //
-        retVal = poll (&pollData, 1, timeout);
+        retVal = poll(&pollData, 1, timeout);
 
         if (retVal == 0) {
-            Log::Debug ("Poll timeout...");
+            Log::Debug("Poll timeout...");
             continue;
         }
 
         if (retVal < 0) {
-            Log::Error ("Poll failed!");
+            Log::Error("Poll failed!");
             done = true;
             continue;
         }
 
 
         // Receive data...
-        receiveOk = udpConnection.receiveData (dataBuffer,
-                                               maxDataSize,
-					       sourceIpAddress,
-                                               sourcePort,
-                                               receivedLength);
+        receiveOk = udpConnection.receiveData(dataBuffer, maxDataSize, sourceIpAddress, sourcePort, receivedLength);
 
         if (!receiveOk) {
-            Log::Error ("Receive Data failed!");
+            Log::Error("Receive Data failed!");
             continue;
         }
 
         // Catch backdoor exit... ;)
         if (receivedLength == 0) {
-            Log::Info ("Transfer complete...");
+            Log::Info("Transfer complete...");
             done = true;
             continue;
         }
 
         if (first) {
-            gettimeofday (&start, 0);
-            Log::Info ("Transfer started...");
+            gettimeofday(&start, 0);
+            Log::Info("Transfer started...");
             first = false;
         }
 
@@ -165,32 +156,30 @@ main (int argc, char *argv[])
         totalData += receivedLength;
     }
 
-    gettimeofday (&end, 0);
+    gettimeofday(&end, 0);
     ulong totalTime;
-    totalTime = usecTimeDiff (start, end);
+    totalTime = usecTimeDiff(start, end);
 
     double totalBits;
     double totalUsecTime;
-    float  rate;
+    float rate;
 
     totalBits = totalData * 8;
     totalUsecTime = (totalTime / 1000);
-    rate =  totalBits /  totalUsecTime;
+    rate = totalBits / totalUsecTime;
     rate *= 1000;
     rate /= 1024;
 
     string message;
-    message = "TOTALS:  \n - PacketsRecv .: " + std::to_string(totalReceived) +
-              "\n - DataRecv ....: "s + std::to_string(totalData) +
-              "\n - Total Time ..: "s + std::to_string(totalTime) + " microseconds" +
-              "\n - Xfer Rate ...: "s + std::to_string(rate) + " kbps" +
-              "\n";
+    message = "TOTALS:  \n - PacketsRecv .: " + std::to_string(totalReceived) + "\n - DataRecv ....: "s +
+              std::to_string(totalData) + "\n - Total Time ..: "s + std::to_string(totalTime) + " microseconds" +
+              "\n - Xfer Rate ...: "s + std::to_string(rate) + " kbps" + "\n";
 
     // cleanup
-    delete [] dataBuffer;
- 
-    Log::Info (message);
-    Log::Info ("Server finished.  Exiting.");
+    delete[] dataBuffer;
+
+    Log::Info(message);
+    Log::Info("Server finished.  Exiting.");
     cout << "Finished." << endl;
     cout << message;
 
@@ -200,8 +189,7 @@ main (int argc, char *argv[])
 
 
 ulong
-usecTimeDiff (const struct timeval &  beginTime,
-              const struct timeval &  endTime)
+usecTimeDiff(const struct timeval & beginTime, const struct timeval & endTime)
 {
     ulong diff = 0;
 
@@ -210,8 +198,7 @@ usecTimeDiff (const struct timeval &  beginTime,
 
     if (endTime.tv_usec > beginTime.tv_usec) {
         diff += (endTime.tv_usec - beginTime.tv_usec);
-    }
-    else {
+    } else {
         diff -= 1000000;
         diff += ((1000000 - beginTime.tv_usec) + endTime.tv_usec);
     }
@@ -219,4 +206,3 @@ usecTimeDiff (const struct timeval &  beginTime,
 
     return diff;
 }
-

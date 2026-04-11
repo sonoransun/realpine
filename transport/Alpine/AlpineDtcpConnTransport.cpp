@@ -2,112 +2,111 @@
 
 
 #include <AlpineDtcpConnTransport.h>
-#include <AlpineStack.h>
 #include <AlpinePacket.h>
-#include <AlpineQueryPacket.h>
 #include <AlpinePeerPacket.h>
 #include <AlpineProxyPacket.h>
 #include <AlpineQueryMgr.h>
-#include <DataBuffer.h>
+#include <AlpineQueryPacket.h>
+#include <AlpineStack.h>
 #include <DataBlock.h>
+#include <DataBuffer.h>
 #include <Log.h>
 #include <StringUtils.h>
 
+#include <cstring>
 
-AlpineDtcpConnTransport::AlpineDtcpConnTransport ()
+
+AlpineDtcpConnTransport::AlpineDtcpConnTransport()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport constructor invoked.");
+    Log::Debug("AlpineDtcpConnTransport constructor invoked.");
 #endif
 
     pendingIndex_ = nullptr;
 }
 
 
-    
-AlpineDtcpConnTransport::~AlpineDtcpConnTransport ()
+AlpineDtcpConnTransport::~AlpineDtcpConnTransport()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport destructor invoked.");
+    Log::Debug("AlpineDtcpConnTransport destructor invoked.");
 #endif
 
-    cleanUp ();
+    cleanUp();
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::handleData (const byte * data,
-                                     uint         dataLength)
+bool
+AlpineDtcpConnTransport::handleData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::handleData invoked.");
+    Log::Debug("AlpineDtcpConnTransport::handleData invoked.");
 #endif
 
     // Attempt to marshal an AlpinePacket from received data
     //
-    DataBuffer * buffer = new DataBuffer (data, dataLength);
-    buffer->readReset ();
+    DataBuffer * buffer = new DataBuffer(data, dataLength);
+    buffer->readReset();
 
-    bool  status;
-    AlpinePacket  packet;
+    bool status;
+    AlpinePacket packet;
 
-    status = packet.readData (buffer);
+    status = packet.readData(buffer);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Invalid packet data received in AlpineDtcpConnTransport::handleData.");
+        Log::Debug("Invalid packet data received in AlpineDtcpConnTransport::handleData.");
 #endif
         delete buffer;
         return true;
     }
     // Determine what kind packet this is, and process accordingly.
     //
-    AlpinePacket::t_PacketType  packetType;
-    packetType = packet.getPacketType ();
+    AlpinePacket::t_PacketType packetType;
+    packetType = packet.getPacketType();
 
     switch (packetType) {
 
-      // Query Packet
-      //
-      case AlpinePacket::t_PacketType::queryDiscover  :
-      case AlpinePacket::t_PacketType::queryOffer  :
-      case AlpinePacket::t_PacketType::queryRequest  :
-      case AlpinePacket::t_PacketType::queryReply  :
+    // Query Packet
+    //
+    case AlpinePacket::t_PacketType::queryDiscover:
+    case AlpinePacket::t_PacketType::queryOffer:
+    case AlpinePacket::t_PacketType::queryRequest:
+    case AlpinePacket::t_PacketType::queryReply:
 
-          status = processAlpineQueryPacket (&packet, buffer);
-          break;
-
-
-      // Peer Packet
-      //
-      case AlpinePacket::t_PacketType::peerListRequest  :
-      case AlpinePacket::t_PacketType::peerListOffer  :
-      case AlpinePacket::t_PacketType::peerListGet  :
-      case AlpinePacket::t_PacketType::peerListData  :
-
-          status = processAlpinePeerPacket (&packet, buffer);
-          break;
+        status = processAlpineQueryPacket(&packet, buffer);
+        break;
 
 
-      // Proxy Packet
-      //
-      case AlpinePacket::t_PacketType::proxyRequest  :
-      case AlpinePacket::t_PacketType::proxyAccepted  :
-      case AlpinePacket::t_PacketType::proxyHalt  :
+    // Peer Packet
+    //
+    case AlpinePacket::t_PacketType::peerListRequest:
+    case AlpinePacket::t_PacketType::peerListOffer:
+    case AlpinePacket::t_PacketType::peerListGet:
+    case AlpinePacket::t_PacketType::peerListData:
 
-          status = processAlpineProxyPacket (&packet, buffer);
-          break;
+        status = processAlpinePeerPacket(&packet, buffer);
+        break;
 
 
-      // Invalid type
-      case AlpinePacket::t_PacketType::none :
-      default :
+    // Proxy Packet
+    //
+    case AlpinePacket::t_PacketType::proxyRequest:
+    case AlpinePacket::t_PacketType::proxyAccepted:
+    case AlpinePacket::t_PacketType::proxyHalt:
+
+        status = processAlpineProxyPacket(&packet, buffer);
+        break;
+
+
+    // Invalid type
+    case AlpinePacket::t_PacketType::none:
+    default:
 
 #ifdef _VERBOSE
-          Log::Debug ("Invalid packet type received in AlpineDtcpConnTransport::handleData.");
+        Log::Debug("Invalid packet type received in AlpineDtcpConnTransport::handleData.");
 #endif
-          break;
+        break;
     }
 
     delete buffer;
@@ -117,148 +116,146 @@ AlpineDtcpConnTransport::handleData (const byte * data,
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::handleConnectionClose ()
+bool
+AlpineDtcpConnTransport::handleConnectionClose()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::handleConnectionClose invoked.");
+    Log::Debug("AlpineDtcpConnTransport::handleConnectionClose invoked.");
 #endif
 
-    bool   status;
-    ulong  peerId;
+    bool status;
+    ulong peerId;
 
-    getTransportId (peerId);
+    getTransportId(peerId);
 
-    status = AlpineStack::handleConnectionClose (peerId);
+    status = AlpineStack::handleConnectionClose(peerId);
 
     if (!status) {
-        Log::Error ("DtcpStack handleConnectionClose failed in "
-                             "AlpineDtcpConnTransport::handleConnectionClose!");
+        Log::Error("DtcpStack handleConnectionClose failed in "
+                   "AlpineDtcpConnTransport::handleConnectionClose!");
         return false;
     }
-    cleanUp ();
+    cleanUp();
 
 
     return true;
 }
-
 
 
 bool
-AlpineDtcpConnTransport::handleSendReceived ()
+AlpineDtcpConnTransport::handleSendReceived()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::handleSendReceived invoked.");
+    Log::Debug("AlpineDtcpConnTransport::handleSendReceived invoked.");
 #endif
 
     // Send pending transfer if present
     //
-    checkPendingRequests ();
+    checkPendingRequests();
 
 
-    bool   status;
-    ulong  peerId;
+    bool status;
+    ulong peerId;
 
-    getTransportId (peerId);
+    getTransportId(peerId);
 
-    status = AlpineStack::handleSendReceived (peerId, requestId_);
+    status = AlpineStack::handleSendReceived(peerId, requestId_);
 
     if (!status) {
-        Log::Error ("DtcpStack handleSendReceived failed in "
-                             "AlpineDtcpConnTransport::handleSendReceived!");
+        Log::Error("DtcpStack handleSendReceived failed in "
+                   "AlpineDtcpConnTransport::handleSendReceived!");
         return false;
     }
     // If there are pending reliable transfers, send them now.
     //
-    checkPendingRequests ();
+    checkPendingRequests();
 
 
     return true;
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::handleSendFailure ()
+bool
+AlpineDtcpConnTransport::handleSendFailure()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::handleSendFailure invoked.");
+    Log::Debug("AlpineDtcpConnTransport::handleSendFailure invoked.");
 #endif
 
     // Send pending transfer if present
     //
-    checkPendingRequests ();
+    checkPendingRequests();
 
 
-    bool   status;
-    ulong  peerId;
+    bool status;
+    ulong peerId;
 
-    getTransportId (peerId);
+    getTransportId(peerId);
 
-    status = AlpineStack::handleSendFailure (peerId, requestId_);
+    status = AlpineStack::handleSendFailure(peerId, requestId_);
 
     if (!status) {
-        Log::Error ("DtcpStack handleSendFailure failed in "
-                             "AlpineDtcpConnTransport::handleSendFailure!");
+        Log::Error("DtcpStack handleSendFailure failed in "
+                   "AlpineDtcpConnTransport::handleSendFailure!");
         return false;
     }
     // If there are pending reliable transfers, send them now.
     //
-    checkPendingRequests ();
+    checkPendingRequests();
 
 
     return true;
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::handleConnectionDeactivate ()
+bool
+AlpineDtcpConnTransport::handleConnectionDeactivate()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::handleConnectionDeactivate invoked.");
+    Log::Debug("AlpineDtcpConnTransport::handleConnectionDeactivate invoked.");
 #endif
 
-    bool   status;
-    ulong  peerId;
+    bool status;
+    ulong peerId;
 
-    getTransportId (peerId);
+    getTransportId(peerId);
 
-    status = AlpineStack::handleConnectionDeactivate (peerId);
+    status = AlpineStack::handleConnectionDeactivate(peerId);
 
     if (!status) {
-        Log::Error ("DtcpStack handleConnectionDeactivate failed in "
-                             "AlpineDtcpConnTransport::handleConnectionDeactivate!");
+        Log::Error("DtcpStack handleConnectionDeactivate failed in "
+                   "AlpineDtcpConnTransport::handleConnectionDeactivate!");
         return false;
     }
     return true;
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::sendReliableData (const byte * data,
-                                           uint         dataLength,
-                                           ulong        requestId)
+bool
+AlpineDtcpConnTransport::sendReliableData(const byte * data, uint dataLength, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::sendReliableData invoked.");
+    Log::Debug("AlpineDtcpConnTransport::sendReliableData invoked.");
 #endif
+
+    // The `requestId` out-parameter is pass-by-value here (pre-existing API),
+    // so writes to it are not observed by the caller.  The writes below are
+    // preserved to match the original intent; a future cleanup should change
+    // the signature to `ulong & requestId` in the interface hierarchy.
+    (void)requestId;
 
     // If there is already a pending transfer, we have to queue this request.
     // Check for the easy case first: nothing pending.
     //
-    if (!pendingAck ()) {
+    if (!pendingAck()) {
         // Nothing pending, send straight away...
         //
         bool status;
-        status = DtcpBaseConnTransport::sendReliableData (data,
-                                                          dataLength);
+        status = DtcpBaseConnTransport::sendReliableData(data, dataLength);
 
         if (!status) {
-            Log::Error ("sendReliableData failed in call to "
-                                 "AlpineDtcpConnTransport::sendReliableData!");
+            Log::Error("sendReliableData failed in call to "
+                       "AlpineDtcpConnTransport::sendReliableData!");
             return false;
         }
         requestId_++;
@@ -267,126 +264,122 @@ AlpineDtcpConnTransport::sendReliableData (const byte * data,
         return true;
     }
     // If the pending request index has not been allocated, initialized and set current ID
-    // 
+    //
     if (!pendingIndex_) {
         pendingIndex_ = new t_RequestStateIndex;
-        pendingIndex_->currRequestId = requestId_ + 1; // start with next ID
+        pendingIndex_->currRequestId = requestId_ + 1;  // start with next ID
     }
 
-    DataBlock *  requestData;
-    requestData = new DataBlock (dataLength);
-    memcpy (requestData->buffer_.get(), data, dataLength);
+    DataBlock * requestData;
+    requestData = new DataBlock(dataLength);
+    memcpy(requestData->buffer_.get(), data, dataLength);
 
-    t_ReliableRequest *  newRequest;
+    t_ReliableRequest * newRequest;
     newRequest = new t_ReliableRequest;
 
     newRequest->requestId = pendingIndex_->currRequestId++;
-    newRequest->data      = requestData;
-    requestId             = newRequest->requestId;
+    newRequest->data = requestData;
+    requestId = newRequest->requestId;
 
-    pendingIndex_->pendingRequests.push_back (newRequest);
+    pendingIndex_->pendingRequests.push_back(newRequest);
 
 
     return true;
 }
 
 
-
-bool 
-AlpineDtcpConnTransport::acknowledgeTransfer (ulong  requestId)
+bool
+AlpineDtcpConnTransport::acknowledgeTransfer(ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::acknowledgeTransfer invoked.  Request ID: "s +
-                std::to_string (requestId));
+    Log::Debug("AlpineDtcpConnTransport::acknowledgeTransfer invoked.  Request ID: "s + std::to_string(requestId));
 #endif
 
     // Verify two things before telling the DtcpBaseConnTransport to remove pending ACK
     // state.  First, verify that we have soemthing pending, and second verify that the
     // requestID being acknowledged is what is currently in progress.
     //
-    if ( !pendingAck () || (requestId != requestId_) ) {
+    if (!pendingAck() || (requestId != requestId_)) {
 #ifdef _VERBOSE
-        Log::Debug ("acknowledgeTransfer invoked on non-active request.  Ignoring.");
+        Log::Debug("acknowledgeTransfer invoked on non-active request.  Ignoring.");
 #endif
         return false;
     }
     // Acknowledge transfer in DTCP transport, then check our pending list to see if
     // anything should be sent.
     //
-    DtcpBaseConnTransport::acknowledgeTransfer ();
+    DtcpBaseConnTransport::acknowledgeTransfer();
 
-    checkPendingRequests ();
-   
+    checkPendingRequests();
+
 
     return true;
 }
 
 
-
-bool  
-AlpineDtcpConnTransport::processAlpineQueryPacket (AlpinePacket *  packet,
-                                                   DataBuffer *    buffer)
+bool
+AlpineDtcpConnTransport::processAlpineQueryPacket(AlpinePacket * packet, DataBuffer * buffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::processAlpineQueryPacket invoked.");
+    Log::Debug("AlpineDtcpConnTransport::processAlpineQueryPacket invoked.");
 #endif
 
-    bool  status;
-    AlpinePacket::t_PacketType  packetType;
-    AlpineQueryPacket  queryPacket;
+    bool status;
+    AlpinePacket::t_PacketType packetType;
+    AlpineQueryPacket queryPacket;
 
 
     // Marshall query packet data
     //
     packetType = packet->getPacketType();
-    queryPacket.setPacketType (packetType);
+    queryPacket.setPacketType(packetType);
 
-    status = queryPacket.readData (buffer);
+    status = queryPacket.readData(buffer);
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Invalid query packet data received in call to "
-                             "AlpineDtcpConnTransport::processAlpineQueryPacket.");
+        Log::Debug("Invalid query packet data received in call to "
+                   "AlpineDtcpConnTransport::processAlpineQueryPacket.");
 #endif
         return false;
     }
-    ulong  peerId;
-    getTransportId (peerId);
+    ulong peerId;
+    getTransportId(peerId);
 
 
     // Dispatch packet to the AlpineQueryMgr for the appropriate query packet type
     //
     switch (packetType) {
 
-      case AlpinePacket::t_PacketType::queryDiscover  :
-          AlpineQueryMgr::handleQueryDiscover (peerId, &queryPacket);
-          break;
+    case AlpinePacket::t_PacketType::queryDiscover:
+        AlpineQueryMgr::handleQueryDiscover(peerId, &queryPacket);
+        break;
 
-      case AlpinePacket::t_PacketType::queryOffer  :
-          AlpineQueryMgr::handleQueryOffer (peerId, &queryPacket);
-          break;
+    case AlpinePacket::t_PacketType::queryOffer:
+        AlpineQueryMgr::handleQueryOffer(peerId, &queryPacket);
+        break;
 
-      case AlpinePacket::t_PacketType::queryRequest  :
-          AlpineQueryMgr::handleQueryRequest (peerId, &queryPacket);
-          break;
+    case AlpinePacket::t_PacketType::queryRequest:
+        AlpineQueryMgr::handleQueryRequest(peerId, &queryPacket);
+        break;
 
-      case AlpinePacket::t_PacketType::queryReply  :
-          AlpineQueryMgr::handleQueryReply (peerId, &queryPacket);
-          break;
+    case AlpinePacket::t_PacketType::queryReply:
+        AlpineQueryMgr::handleQueryReply(peerId, &queryPacket);
+        break;
 
 
-      // GNU g++ is very annoyed if you do not handle ALL enum values :/
-      //
-      case AlpinePacket::t_PacketType::peerListRequest  :
-      case AlpinePacket::t_PacketType::peerListOffer  :
-      case AlpinePacket::t_PacketType::peerListGet  :
-      case AlpinePacket::t_PacketType::peerListData  :
-      case AlpinePacket::t_PacketType::proxyRequest  :
-      case AlpinePacket::t_PacketType::proxyAccepted  :
-      case AlpinePacket::t_PacketType::proxyHalt  :
-      default :
-          Log::Error ("Invalid packet type passed in call to "
-                               "AlpineDtcpConnTransport::processAlpineQueryPacket.");
-          break;
+    // GNU g++ is very annoyed if you do not handle ALL enum values :/
+    //
+    case AlpinePacket::t_PacketType::peerListRequest:
+    case AlpinePacket::t_PacketType::peerListOffer:
+    case AlpinePacket::t_PacketType::peerListGet:
+    case AlpinePacket::t_PacketType::peerListData:
+    case AlpinePacket::t_PacketType::proxyRequest:
+    case AlpinePacket::t_PacketType::proxyAccepted:
+    case AlpinePacket::t_PacketType::proxyHalt:
+    default:
+        Log::Error("Invalid packet type passed in call to "
+                   "AlpineDtcpConnTransport::processAlpineQueryPacket.");
+        break;
     }
 
 
@@ -394,23 +387,21 @@ AlpineDtcpConnTransport::processAlpineQueryPacket (AlpinePacket *  packet,
 }
 
 
-
-bool  
-AlpineDtcpConnTransport::processAlpinePeerPacket (AlpinePacket *  packet,
-                                                  DataBuffer *    buffer)
+bool
+AlpineDtcpConnTransport::processAlpinePeerPacket(AlpinePacket * packet, DataBuffer * buffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::processAlpinePeerPacket invoked.");
+    Log::Debug("AlpineDtcpConnTransport::processAlpinePeerPacket invoked.");
 #endif
 
-    bool  status;
-    AlpinePeerPacket  peerPacket;
-    peerPacket.setPacketType (packet->getPacketType());
+    bool status;
+    AlpinePeerPacket peerPacket;
+    peerPacket.setPacketType(packet->getPacketType());
 
-    status = peerPacket.readData (buffer);
+    status = peerPacket.readData(buffer);
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Invalid peer packet data received in AlpineDtcpConnTransport::handleData.");
+        Log::Debug("Invalid peer packet data received in AlpineDtcpConnTransport::handleData.");
 #endif
         return false;
     }
@@ -418,24 +409,22 @@ AlpineDtcpConnTransport::processAlpinePeerPacket (AlpinePacket *  packet,
 }
 
 
-
-bool  
-AlpineDtcpConnTransport::processAlpineProxyPacket (AlpinePacket *  packet,
-                                                   DataBuffer *    buffer)
+bool
+AlpineDtcpConnTransport::processAlpineProxyPacket(AlpinePacket * packet, DataBuffer * buffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::processAlpineProxyPacket invoked.");
+    Log::Debug("AlpineDtcpConnTransport::processAlpineProxyPacket invoked.");
 #endif
 
-    bool  status;
-    AlpineProxyPacket  proxyPacket;
-    proxyPacket.setPacketType (packet->getPacketType());
+    bool status;
+    AlpineProxyPacket proxyPacket;
+    proxyPacket.setPacketType(packet->getPacketType());
 
-    status = proxyPacket.readData (buffer);
+    status = proxyPacket.readData(buffer);
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Invalid proxy packet data received in "
-                             "AlpineDtcpConnTransport::handleData.");
+        Log::Debug("Invalid proxy packet data received in "
+                   "AlpineDtcpConnTransport::handleData.");
 #endif
         return false;
     }
@@ -443,41 +432,39 @@ AlpineDtcpConnTransport::processAlpineProxyPacket (AlpinePacket *  packet,
 }
 
 
-
-void  
-AlpineDtcpConnTransport::checkPendingRequests ()
+void
+AlpineDtcpConnTransport::checkPendingRequests()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::checkPendingRequests invoked.");
+    Log::Debug("AlpineDtcpConnTransport::checkPendingRequests invoked.");
 #endif
 
     // Before proceeding, verify that there is no request currently in progress.
     //
-    if (pendingAck ())
+    if (pendingAck())
         return;
 
     if (pendingIndex_) {
 
-        t_ReliableRequest *  currRequest;
-        currRequest = pendingIndex_->pendingRequests.front ();
-        pendingIndex_->pendingRequests.pop_front ();
-        
+        t_ReliableRequest * currRequest;
+        currRequest = pendingIndex_->pendingRequests.front();
+        pendingIndex_->pendingRequests.pop_front();
+
         requestId_ = currRequest->requestId;
 
         bool status;
-        status = DtcpBaseConnTransport::sendReliableData (currRequest->data->buffer_.get(),
-                                                         currRequest->data->length_);
+        status = DtcpBaseConnTransport::sendReliableData(currRequest->data->buffer_.get(), currRequest->data->length_);
 
         delete currRequest->data;
         delete currRequest;
 
         if (!status) {
-            Log::Error ("sendReliableData failed in call to "
-                                 "AlpineDtcpConnTransport::checkPendingRequests!");
+            Log::Error("sendReliableData failed in call to "
+                       "AlpineDtcpConnTransport::checkPendingRequests!");
 
             // remove all other pending transfer, as this should only occur with a transport error.
             //
-            cleanUp ();
+            cleanUp();
             return;
         }
 
@@ -492,16 +479,15 @@ AlpineDtcpConnTransport::checkPendingRequests ()
 }
 
 
-
-void  
-AlpineDtcpConnTransport::cleanUp ()
+void
+AlpineDtcpConnTransport::cleanUp()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnTransport::cleanUp invoked.");
+    Log::Debug("AlpineDtcpConnTransport::cleanUp invoked.");
 #endif
 
     if (pendingIndex_) {
-        for (const auto& item : pendingIndex_->pendingRequests) {
+        for (const auto & item : pendingIndex_->pendingRequests) {
             delete item->data;
             delete item;
         }
@@ -510,6 +496,3 @@ AlpineDtcpConnTransport::cleanUp ()
         pendingIndex_ = nullptr;
     }
 }
-
-
-

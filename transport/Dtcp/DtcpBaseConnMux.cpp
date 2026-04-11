@@ -1,48 +1,45 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
-#include <DtcpBaseConnMux.h>
-#include <DtcpBaseUdpTransport.h>
-#include <DtcpBaseConnTransport.h>
+#include <DataBuffer.h>
 #include <DtcpBaseConnAcceptor.h>
 #include <DtcpBaseConnConnector.h>
-#include <DtcpConnectionMap.h>
+#include <DtcpBaseConnMux.h>
+#include <DtcpBaseConnTransport.h>
+#include <DtcpBaseUdpTransport.h>
 #include <DtcpConnPacket.h>
+#include <DtcpConnectionMap.h>
 #include <DtcpPacket.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
-#include <TransportInterface.h>
-#include <DataBuffer.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
+#include <TransportInterface.h>
+#include <WriteLock.h>
 
 
-
-DtcpBaseConnMux::DtcpBaseConnMux ()
+DtcpBaseConnMux::DtcpBaseConnMux()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux constructor invoked.");
+    Log::Debug("DtcpBaseConnMux constructor invoked.");
 #endif
 
-    connectionMap_         = new DtcpConnectionMap;
-    connRequestIndex_      = new t_ConnRequestIndex;
-    pendingAcceptIndex_    = new t_PendingAcceptIndex;
+    connectionMap_ = new DtcpConnectionMap;
+    connRequestIndex_ = new t_ConnRequestIndex;
+    pendingAcceptIndex_ = new t_PendingAcceptIndex;
     pendingTransportIndex_ = new t_PendingTransportIndex;
-    pendingAckIndex_       = new t_PendingAckRecordIndex;
+    pendingAckIndex_ = new t_PendingAckRecordIndex;
 
-    parentTransport_       = nullptr;
-    acceptor_              = nullptr;
+    parentTransport_ = nullptr;
+    acceptor_ = nullptr;
 
-    initialized_           = false;
+    initialized_ = false;
 }
 
 
-
-DtcpBaseConnMux::~DtcpBaseConnMux ()
+DtcpBaseConnMux::~DtcpBaseConnMux()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux destructor invoked.");
+    Log::Debug("DtcpBaseConnMux destructor invoked.");
 #endif
 
     delete connectionMap_;
@@ -56,55 +53,52 @@ DtcpBaseConnMux::~DtcpBaseConnMux ()
     delete acceptor_;
 
     delete pendingAckIndex_;
-
 }
 
 
- 
-bool 
-DtcpBaseConnMux::initialize (TransportInterface *  parentTransport)
+bool
+DtcpBaseConnMux::initialize(TransportInterface * parentTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::initialize invoked.");
+    Log::Debug("DtcpBaseConnMux::initialize invoked.");
 #endif
 
-    parentTransport_  = dynamic_cast<DtcpBaseUdpTransport *>(parentTransport);
+    parentTransport_ = dynamic_cast<DtcpBaseUdpTransport *>(parentTransport);
 
     if (!parentTransport_) {
         // Invalid transport type...
         //
-        Log::Error ("Invalid transport type passed to DtcpBaseConnMux::initialize.");
+        Log::Error("Invalid transport type passed to DtcpBaseConnMux::initialize.");
         return false;
     }
     bool status;
-    status = createAcceptor (acceptor_);
+    status = createAcceptor(acceptor_);
 
     if (!status) {
-        Log::Error ("createAcceptor failed in DtcpBaseConnMux::initialize.");
+        Log::Error("createAcceptor failed in DtcpBaseConnMux::initialize.");
         return false;
     }
     // Mux is now ready for action
     //
-    initialized_  = true;
+    initialized_ = true;
 
 
     return true;
 }
 
 
-
 bool
-DtcpBaseConnMux::getParentTransport (TransportInterface *& parentTransport)
+DtcpBaseConnMux::getParentTransport(TransportInterface *& parentTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::getParentTransport invoked.");
-#endif 
+    Log::Debug("DtcpBaseConnMux::getParentTransport invoked.");
+#endif
 
     if (!initialized_) {
         // must be initialized...
-        Log::Error ("getParentTransport invoked before initialization of DtcpBaseConnMux.");
+        Log::Error("getParentTransport invoked before initialization of DtcpBaseConnMux.");
 
-        return false;      
+        return false;
     }
     parentTransport = static_cast<TransportInterface *>(parentTransport_);
 
@@ -113,64 +107,57 @@ DtcpBaseConnMux::getParentTransport (TransportInterface *& parentTransport)
 }
 
 
-
-bool 
-DtcpBaseConnMux::exists (ulong   ipAddress,
-                         ushort  port)
+bool
+DtcpBaseConnMux::exists(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::exists invoked.");
+    Log::Debug("DtcpBaseConnMux::exists invoked.");
 #endif
 
-    bool  status;
-    ReadLock  lock(connMapLock_);
+    bool status;
+    ReadLock lock(connMapLock_);
 
-    status = connectionMap_->exists (ipAddress, port);
+    status = connectionMap_->exists(ipAddress, port);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::locateConnection (ulong                     ipAddress,
-                                   ushort                    port,
-                                   DtcpBaseConnTransport *&  connection)
+bool
+DtcpBaseConnMux::locateConnection(ulong ipAddress, ushort port, DtcpBaseConnTransport *& connection)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::locateConnection invoked.");
+    Log::Debug("DtcpBaseConnMux::locateConnection invoked.");
 #endif
 
-    bool  status;
-    ReadLock  lock(connMapLock_);
+    bool status;
+    ReadLock lock(connMapLock_);
 
-    status = connectionMap_->locateConnection (ipAddress, port, connection);
+    status = connectionMap_->locateConnection(ipAddress, port, connection);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::processPacket (StackLinkInterface * packet)
+bool
+DtcpBaseConnMux::processPacket(StackLinkInterface * packet)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::processPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::processPacket invoked.");
 #endif
 
     if (!initialized_) {
         // must be initialized before processing packets...
-        Log::Error ("processPacket invoked before initialization of DtcpBaseConnMux.");
+        Log::Error("processPacket invoked before initialization of DtcpBaseConnMux.");
 
         return false;
     }
     // Get data buffer from parent interface
     //
     DataBuffer * dataBuffer;
-    parentTransport_->getDataBuffer (dataBuffer);
-
+    parentTransport_->getDataBuffer(dataBuffer);
 
 
     DtcpPacket * dtcpPacket;
@@ -179,36 +166,32 @@ DtcpBaseConnMux::processPacket (StackLinkInterface * packet)
 
     if (!dtcpPacket) {
         // This mux can only process DtcpPackets...
-        Log::Error ("processPacket passed a NON DtcpPacket object.");
+        Log::Error("processPacket passed a NON DtcpPacket object.");
 
         return false;
     }
     // See what kind of packet this is...
-    //    
-    bool  status;
-    t_IncomingMessage  request;
+    //
+    bool status;
+    t_IncomingMessage request;
 
     request.dataBuffer = dataBuffer;
-    request.packet     = dtcpPacket;
+    request.packet = dtcpPacket;
 
-    dtcpPacket->getPeerLocation (request.ipAddress,
-                                 request.port);
+    dtcpPacket->getPeerLocation(request.ipAddress, request.port);
 
-    ipPortToNetId (request.ipAddress,
-                   request.port,
-                   request.id);
+    ipPortToNetId(request.ipAddress, request.port, request.id);
 
 
-    DtcpPacket::t_PacketType  packetType;
+    DtcpPacket::t_PacketType packetType;
 
-    packetType = dtcpPacket->getPacketType ();
+    packetType = dtcpPacket->getPacketType();
 
 #ifdef _VERBOSE
     string packetTypeString;
-    DtcpPacket::packetTypeAsString (packetType, packetTypeString);
+    DtcpPacket::packetTypeAsString(packetType, packetTypeString);
 
-    Log::Debug ("Received packet type: '"s + packetTypeString +
-                "' .");
+    Log::Debug("Received packet type: '"s + packetTypeString + "' .");
 #endif
 
 
@@ -216,70 +199,69 @@ DtcpBaseConnMux::processPacket (StackLinkInterface * packet)
     //
     switch (packetType) {
 
-       case DtcpPacket::t_PacketType::connRequest :
-         status = handleConnRequestPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connRequest:
+        status = handleConnRequestPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connOffer :
-         status = handleConnOfferPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connOffer:
+        status = handleConnOfferPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connAccept :
-         status = handleConnAcceptPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connAccept:
+        status = handleConnAcceptPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connSuspend :
-         status = handleConnSuspendPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connSuspend:
+        status = handleConnSuspendPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connResume :
-         status = handleConnResumePacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connResume:
+        status = handleConnResumePacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connData :
-         status = handleConnDataPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connData:
+        status = handleConnDataPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connReliableData :
-         status = handleConnReliableDataPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connReliableData:
+        status = handleConnReliableDataPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connDataAck :
-         status = handleConnDataAckPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connDataAck:
+        status = handleConnDataAckPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::connClose :
-         status = handleConnClosePacket (request);
-         break;
+    case DtcpPacket::t_PacketType::connClose:
+        status = handleConnClosePacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::poll :
-         status = handlePollPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::poll:
+        status = handlePollPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::ack :
-         status = handleAckPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::ack:
+        status = handleAckPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::error :
-         status = handleErrorPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::error:
+        status = handleErrorPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::natDiscover :
-         status = handleNatDiscoverPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::natDiscover:
+        status = handleNatDiscoverPacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::natSource :
-         status = handleNatSourcePacket (request);
-         break;
+    case DtcpPacket::t_PacketType::natSource:
+        status = handleNatSourcePacket(request);
+        break;
 
-       case DtcpPacket::t_PacketType::txnData :
-         status = handleTxnPacket (request);
-         break;
+    case DtcpPacket::t_PacketType::txnData:
+        status = handleTxnPacket(request);
+        break;
 
 
-
-      default:
-        Log::Error ("Invalid packetType in switch dispatch at DtcpBaseConnMux::processPacket.");
+    default:
+        Log::Error("Invalid packetType in switch dispatch at DtcpBaseConnMux::processPacket.");
         status = false;
         break;
     }
@@ -288,67 +270,65 @@ DtcpBaseConnMux::processPacket (StackLinkInterface * packet)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnRequestPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnRequestPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnRequestPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnRequestPacket invoked.");
 #endif
 
 
     // make sure we dont already have a connection at this location.
     //
-    bool  status;
+    bool status;
 
     // scope lock
     {
-        ReadLock  lock(connMapLock_);
+        ReadLock lock(connMapLock_);
 
-        status = connectionMap_->exists (request.ipAddress,
-                                         request.port);
+        status = connectionMap_->exists(request.ipAddress, request.port);
     }
 
     if (status) {
         // duplicate request, ignore.
-#ifdef _VERBOSE        
-        Log::Debug ("Duplicate request (conn exists) ! Ignoring.");
+#ifdef _VERBOSE
+        Log::Debug("Duplicate request (conn exists) ! Ignoring.");
 #endif
         return true;
     }
     // Verify that this connection is not in setup state
     //
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (status) {
 #ifdef _VERBOSE
-        Log::Debug ("Duplicate request (in progress) ! Ignoring.");
+        Log::Debug("Duplicate request (in progress) ! Ignoring.");
 #endif
         return true;
     }
     // Parse connection packet information (verification)
     //
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
 
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet type?
 #ifdef _VERBOSE
-        Log::Debug ("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnRequestPacket.");
+        Log::Debug("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnRequestPacket.");
 #endif
 
         return false;
-}
+    }
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux - Sending packet to acceptor.");
+    Log::Debug("DtcpBaseConnMux - Sending packet to acceptor.");
 #endif
 
-    status = acceptor_->acceptConnection (request.packet);
+    status = acceptor_->acceptConnection(request.packet);
 
     if (!status) {
         // acceptor rejected request...
@@ -356,25 +336,23 @@ DtcpBaseConnMux::handleConnRequestPacket (t_IncomingMessage & request)
     }
     // Connection request accepted, setup for transport...
     //
-    dtcpConnPacket->setPeerLocation (request.ipAddress, request.port);
-    dtcpConnPacket->unsetParent ();
+    dtcpConnPacket->setPeerLocation(request.ipAddress, request.port);
+    dtcpConnPacket->unsetParent();
 
-    status = createConnectionAcceptEntry (dtcpConnPacket,
-                                          request.ipAddress,
-                                          request.port);
+    status = createConnectionAcceptEntry(dtcpConnPacket, request.ipAddress, request.port);
 
     if (!status) {
         // This shouldnt happen
-        Log::Error ("createConnectionEntry failed in DtcpBaseConnMux::handleConnRequestPacket.");
+        Log::Error("createConnectionEntry failed in DtcpBaseConnMux::handleConnRequestPacket.");
 
         return false;
     }
-    status = sendConnectionOffer (dtcpConnPacket);
+    status = sendConnectionOffer(dtcpConnPacket);
 
     if (!status) {
         // UDP Transport error?
 #ifdef _VERBOSE
-        Log::Debug ("sendConnectionOffer failed in DtcpBaseConnMux::handleConnRequestPacket.");
+        Log::Debug("sendConnectionOffer failed in DtcpBaseConnMux::handleConnRequestPacket.");
 #endif
 
         return false;
@@ -386,51 +364,50 @@ DtcpBaseConnMux::handleConnRequestPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnOfferPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnOfferPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnOfferPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnOfferPacket invoked.");
 #endif
 
 
     // Verify pending acknowledgement record state
     //
     bool status;
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Unable to locate pending ack record for request! Ignoring.");
+        Log::Debug("Unable to locate pending ack record for request! Ignoring.");
 #endif
         return true;
     }
     if (ackRecord->msgType != DtcpPacket::t_PacketType::connRequest) {
 #ifdef _VERBOSE
-        Log::Debug ("Request for this ID is not in correct state. Ignoring.");
+        Log::Debug("Request for this ID is not in correct state. Ignoring.");
 #endif
         return true;
     }
     // cleanup pending ack record; reliable transfer complete
     //
-    removePendingAckRecord (ackRecord);
+    removePendingAckRecord(ackRecord);
 
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
-        
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
+
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
 #ifdef _VERBOSE
-        Log::Debug ("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnOfferPacket.");
+        Log::Debug("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnOfferPacket.");
 #endif
 
         return false;
@@ -439,33 +416,32 @@ DtcpBaseConnMux::handleConnOfferPacket (t_IncomingMessage & request)
     //
     ulong peerId;
     ulong myId;
-    dtcpConnPacket->getPeerId (peerId);
-    dtcpConnPacket->getMyId (myId);
+    dtcpConnPacket->getPeerId(peerId);
+    dtcpConnPacket->getMyId(myId);
 
 
 #ifdef _VERBOSE
-    Log::Debug ("CONNECTION OFFER RECEIVED with values: "s +
-                "\nPeer ID: "s + std::to_string (peerId) +
-                "\nMy ID: "s + std::to_string (myId));
+    Log::Debug("CONNECTION OFFER RECEIVED with values: "s + "\nPeer ID: "s + std::to_string(peerId) + "\nMy ID: "s +
+               std::to_string(myId));
 #endif
 
 
-    t_ConnRequestRecord *  connRequestRecord = nullptr;
+    t_ConnRequestRecord * connRequestRecord = nullptr;
 
     // scope lock
     {
-        ReadLock  lock(indexLock_);
+        ReadLock lock(indexLock_);
 
-        auto iter = connRequestIndex_->find (peerId);
+        auto iter = connRequestIndex_->find(peerId);
 
-        if (iter != connRequestIndex_->end ()) {
+        if (iter != connRequestIndex_->end()) {
             connRequestRecord = (*iter).second;
         }
     }
 
     if (!connRequestRecord) {
 #ifdef _VERBOSE
-        Log::Debug ("Received connection offer from unknown peer.");
+        Log::Debug("Received connection offer from unknown peer.");
 #endif
 
         return false;
@@ -479,17 +455,17 @@ DtcpBaseConnMux::handleConnOfferPacket (t_IncomingMessage & request)
     connTransport = dynamic_cast<DtcpBaseConnTransport *>(connRequestRecord->transport);
 
     if (!connTransport) {
-        Log::Error ("Invalid transport type in DtcpBaseConnMux::handleConnRequestPacket.");
+        Log::Error("Invalid transport type in DtcpBaseConnMux::handleConnRequestPacket.");
 
         return false;
     }
-    connTransport->setMyId (myId);
+    connTransport->setMyId(myId);
 
     // scope lock
     {
-        WriteLock  lock(indexLock_);
+        WriteLock lock(indexLock_);
 
-        connRequestIndex_->erase (peerId);
+        connRequestIndex_->erase(peerId);
     }
 
     delete connRequestRecord;
@@ -498,42 +474,42 @@ DtcpBaseConnMux::handleConnOfferPacket (t_IncomingMessage & request)
     // Index this connection...
     //
     {
-        WriteLock  lock(connMapLock_);
+        WriteLock lock(connMapLock_);
 
-        status = connectionMap_->indexConnection (peerId, connTransport);
+        status = connectionMap_->indexConnection(peerId, connTransport);
     }
 
     if (!status) {
-        Log::Error ("Unable to index transport in DtcpBaseConnMux::handleConnOfferPacket.");
+        Log::Error("Unable to index transport in DtcpBaseConnMux::handleConnOfferPacket.");
 
         return false;
     }
     // Send connection accept packet.
     //
-    status = sendConnectionAccept (connTransport);
+    status = sendConnectionAccept(connTransport);
 
     if (!status) {
         // UDP Transport error?
 #ifdef _VERBOSE
-        Log::Debug ("sendConnectionAccept failed in DtcpBaseConnMux::handleConnRequestPacket.");
+        Log::Debug("sendConnectionAccept failed in DtcpBaseConnMux::handleConnRequestPacket.");
 #endif
 
         return false;
     }
     // Add pending transport record once we receive accept packet.
     //
-    t_PendingTransportRecord *  transportRecord;
+    t_PendingTransportRecord * transportRecord;
     transportRecord = new t_PendingTransportRecord;
 
-    transportRecord->netId     = request.id;
+    transportRecord->netId = request.id;
     transportRecord->requestor = connector;
     transportRecord->transport = connTransport;
 
     // scope lock
     {
-        WriteLock  lock(indexLock_);
+        WriteLock lock(indexLock_);
 
-        pendingTransportIndex_->emplace (request.id, transportRecord);
+        pendingTransportIndex_->emplace(request.id, transportRecord);
     }
 
 
@@ -541,54 +517,53 @@ DtcpBaseConnMux::handleConnOfferPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnAcceptPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnAcceptPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnAcceptPacket invoked.");
 #endif
 
 
     // Verify pending acknowledgement record state
     //
     bool status;
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Unable to locate pending ack record for request. Checking retry logic...");
+        Log::Debug("Unable to locate pending ack record for request. Checking retry logic...");
 #endif
-        status = checkAcceptAckRetry (request);
+        status = checkAcceptAckRetry(request);
 
         return status;
     }
 
     if (ackRecord->msgType != DtcpPacket::t_PacketType::connOffer) {
 #ifdef _VERBOSE
-        Log::Debug ("Request for this ID is not in correct state. Ignoring.");
+        Log::Debug("Request for this ID is not in correct state. Ignoring.");
 #endif
         return true;
     }
     // cleanup pending ack record; reliable transfer complete
     //
-    removePendingAckRecord (ackRecord);
+    removePendingAckRecord(ackRecord);
 
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
-        
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
+
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
 #ifdef _VERBOSE
-        Log::Debug ("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnAcceptPacket.");
+        Log::Debug("readData failed for DtcpConnPacket in DtcpBaseConnMux::handleConnAcceptPacket.");
 #endif
 
         return false;
@@ -596,24 +571,24 @@ DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
     // Lookup pending accept record for this peer.
     //
     ulong peerId;
-    dtcpConnPacket->getPeerId (peerId);
+    dtcpConnPacket->getPeerId(peerId);
 
-    t_PendingAcceptRecord *  acceptRecord = nullptr;
+    t_PendingAcceptRecord * acceptRecord = nullptr;
 
     // scope lock
     {
-        ReadLock  lock(indexLock_);
+        ReadLock lock(indexLock_);
 
-        auto iter = pendingAcceptIndex_->find (peerId);
+        auto iter = pendingAcceptIndex_->find(peerId);
 
-        if (iter != pendingAcceptIndex_->end ()) {
+        if (iter != pendingAcceptIndex_->end()) {
             acceptRecord = (*iter).second;
         }
     }
 
     if (!acceptRecord) {
 #ifdef _VERBOSE
-        Log::Debug ("Received connection accept from unknown peer.");
+        Log::Debug("Received connection accept from unknown peer.");
 #endif
 
         return false;
@@ -621,16 +596,16 @@ DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
     // Have acceptor create transport...
     //
     TransportInterface * transport;
-    status = acceptor_->createTransport (transport);
+    status = acceptor_->createTransport(transport);
 
     if (!status) {
-        Log::Error ("Acceptor createTransport failed in "
-                             "DtcpBaseConnMux::handleConnAcceptPacket.");
+        Log::Error("Acceptor createTransport failed in "
+                   "DtcpBaseConnMux::handleConnAcceptPacket.");
 
         // scope lock
         {
-            WriteLock  lock(connMapLock_);
-            connectionMap_->removePendingConnection (peerId);
+            WriteLock lock(connMapLock_);
+            connectionMap_->removePendingConnection(peerId);
         }
 
         return false;
@@ -641,40 +616,40 @@ DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
     connTransport = dynamic_cast<DtcpBaseConnTransport *>(transport);
 
     if (!connTransport) {
-        Log::Error ("Invalid transport from createTransport in "
-                             "DtcpBaseConnMux::handleConnAcceptPacket.");
+        Log::Error("Invalid transport from createTransport in "
+                   "DtcpBaseConnMux::handleConnAcceptPacket.");
 
         // scope lock
         {
-            WriteLock  lock(connMapLock_);
-            connectionMap_->removePendingConnection (peerId);
+            WriteLock lock(connMapLock_);
+            connectionMap_->removePendingConnection(peerId);
         }
 
         return false;
     }
     // Initialize transport
     //
-    connTransport->setParent (parentTransport_);
-    connTransport->setMux (this);
-    connTransport->setMyId (acceptRecord->myId);
-    connTransport->setPeerId (peerId);
-    connTransport->setPeerLocation (request.ipAddress, request.port);
+    connTransport->setParent(parentTransport_);
+    connTransport->setMux(this);
+    connTransport->setMyId(acceptRecord->myId);
+    connTransport->setPeerId(peerId);
+    connTransport->setPeerLocation(request.ipAddress, request.port);
 
 
     // Index new transport...
     //
     {
-        WriteLock  lock(connMapLock_);
-        status = connectionMap_->indexConnection (peerId, connTransport);
+        WriteLock lock(connMapLock_);
+        status = connectionMap_->indexConnection(peerId, connTransport);
     }
 
     if (!status) {
-        Log::Error ("Unable to index transport in DtcpBaseConnMux::handleConnAcceptPacket.");
+        Log::Error("Unable to index transport in DtcpBaseConnMux::handleConnAcceptPacket.");
 
         // scope lock
         {
-            WriteLock  lock(connMapLock_);
-            connectionMap_->removePendingConnection (peerId);
+            WriteLock lock(connMapLock_);
+            connectionMap_->removePendingConnection(peerId);
         }
 
         return false;
@@ -683,7 +658,7 @@ DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
     //
     {
         WriteLock lock(indexLock_);
-        connRequestIndex_->erase (peerId);
+        connRequestIndex_->erase(peerId);
     }
 
     delete acceptRecord;
@@ -691,29 +666,28 @@ DtcpBaseConnMux::handleConnAcceptPacket (t_IncomingMessage & request)
 
     // Send ACK packet for this request
     //
-    status = sendAck (connTransport);
+    status = sendAck(connTransport);
 
     if (!status) {
-        Log::Error ("Sending ack packet failed, ignoring..");
+        Log::Error("Sending ack packet failed, ignoring..");
         return false;
     }
 
-    
+
     // Send transport to acceptor...
     //
-    status = acceptor_->receiveTransport (connTransport);
+    status = acceptor_->receiveTransport(connTransport);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnSuspendPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnSuspendPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnSuspendPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnSuspendPacket invoked.");
 #endif
 
 
@@ -721,12 +695,11 @@ DtcpBaseConnMux::handleConnSuspendPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnResumePacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnResumePacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnResumePacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnResumePacket invoked.");
 #endif
 
 
@@ -734,23 +707,22 @@ DtcpBaseConnMux::handleConnResumePacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnDataPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnDataPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnDataPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnDataPacket invoked.");
 #endif
 
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    bool  status;
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
+    bool status;
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
 
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
@@ -759,14 +731,14 @@ DtcpBaseConnMux::handleConnDataPacket (t_IncomingMessage & request)
     // Locate transport for this connection
     //
     ulong peerId;
-    dtcpConnPacket->getPeerId (peerId);
+    dtcpConnPacket->getPeerId(peerId);
 
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
-        status = connectionMap_->locateConnection (peerId, transport);
+        WriteLock lock(connMapLock_);
+        status = connectionMap_->locateConnection(peerId, transport);
     }
 
     if (!status) {
@@ -775,29 +747,28 @@ DtcpBaseConnMux::handleConnDataPacket (t_IncomingMessage & request)
     }
     // Send packet to transport...
     //
-    status = transport->processPacket (dtcpConnPacket);
+    status = transport->processPacket(dtcpConnPacket);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnReliableDataPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnReliableDataPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnReliableDataPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnReliableDataPacket invoked.");
 #endif
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    bool  status;
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
+    bool status;
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
 
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
@@ -806,71 +777,70 @@ DtcpBaseConnMux::handleConnReliableDataPacket (t_IncomingMessage & request)
     // Locate transport for this connection
     //
     ulong peerId;
-    dtcpConnPacket->getPeerId (peerId);
+    dtcpConnPacket->getPeerId(peerId);
 
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
-        status = connectionMap_->locateConnection (peerId, transport);
+        WriteLock lock(connMapLock_);
+        status = connectionMap_->locateConnection(peerId, transport);
     }
 
     if (!status) {
         // Invalid peer ID?
         return false;
     }
-    // First, verify that this is not a repeat packet.  If it is, 
+    // First, verify that this is not a repeat packet.  If it is,
     // we should resend the dataAck packet, but not pass the data
     // up to the transport.
     //
-    ulong  currSequenceNum;
-    ulong  recvSequenceNum;
+    ulong currSequenceNum;
+    ulong recvSequenceNum;
 
-    dtcpConnPacket->getSequenceNum (currSequenceNum);
-    transport->getRecvSequenceNum (recvSequenceNum);
+    dtcpConnPacket->getSequenceNum(currSequenceNum);
+    transport->getRecvSequenceNum(recvSequenceNum);
 
     if (recvSequenceNum == currSequenceNum) {
         // duplicate data packet, our ACK must have been lost.
         // Resend ack packet.
         //
-        status = sendDataAck (transport);
+        status = sendDataAck(transport);
 
         return status;
     }
 
     // Update current received sequence number, and send ACK for this data.
     //
-    transport->setRecvSequenceNum (currSequenceNum);
+    transport->setRecvSequenceNum(currSequenceNum);
 
-    sendDataAck (transport);
+    sendDataAck(transport);
 
 
     // Send data packet to transport...
     //
-    status = transport->processPacket (dtcpConnPacket);
+    status = transport->processPacket(dtcpConnPacket);
 
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnDataAckPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnDataAckPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnDataAckPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnDataAckPacket invoked.");
 #endif
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    bool  status;
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
+    bool status;
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
 
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
@@ -879,14 +849,14 @@ DtcpBaseConnMux::handleConnDataAckPacket (t_IncomingMessage & request)
     // Locate transport for this connection
     //
     ulong peerId;
-    dtcpConnPacket->getPeerId (peerId);
+    dtcpConnPacket->getPeerId(peerId);
 
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
-        status = connectionMap_->locateConnection (peerId, transport);
+        WriteLock lock(connMapLock_);
+        status = connectionMap_->locateConnection(peerId, transport);
     }
 
     if (!status) {
@@ -896,35 +866,34 @@ DtcpBaseConnMux::handleConnDataAckPacket (t_IncomingMessage & request)
     // Verify that we have a request ID associated with this
     // data acknowledgement...
     //
-    if (!transport->pendingAck ()) {
+    if (!transport->pendingAck()) {
         // We are not waiting on any aknowledgement.  Bad packet?
         // MRP_TEMP - DoS protect
         //
         return true;
     }
-    ulong  requestId;
-    transport->getRequestId (requestId);
-    status = parentTransport_->reliableRequestComplete (requestId);
+    ulong requestId;
+    transport->getRequestId(requestId);
+    status = parentTransport_->reliableRequestComplete(requestId);
 
     if (!status) {
-        Log::Error ("request complete call to parentTransport failed in"
-                             " DtcpBaseConnMux::handleConnDataAckPacket.");
+        Log::Error("request complete call to parentTransport failed in"
+                   " DtcpBaseConnMux::handleConnDataAckPacket.");
         return false;
     }
 
-    status = transport->handleSendReceived (requestId);
+    status = transport->handleSendReceived(requestId);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleConnClosePacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleConnClosePacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleConnClosePacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleConnClosePacket invoked.");
 #endif
 
 
@@ -932,12 +901,11 @@ DtcpBaseConnMux::handleConnClosePacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handlePollPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handlePollPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handlePollPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handlePollPacket invoked.");
 #endif
 
 
@@ -945,24 +913,23 @@ DtcpBaseConnMux::handlePollPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleAckPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleAckPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleAckPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleAckPacket invoked.");
 #endif
 
     // Verify pending acknowledgement record state
     //
     bool status;
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Unable to locate pending ack record for request! Ignoring.");
+        Log::Debug("Unable to locate pending ack record for request! Ignoring.");
 #endif
         return true;
     }
@@ -973,42 +940,41 @@ DtcpBaseConnMux::handleAckPacket (t_IncomingMessage & request)
 
 #ifdef _VERBOSE
     string packetTypeString;
-    DtcpPacket::packetTypeAsString (ackRecord->msgType, packetTypeString);
+    DtcpPacket::packetTypeAsString(ackRecord->msgType, packetTypeString);
 
-    Log::Debug ("Checking sub handler for previous SENT packet type: "s +
-                packetTypeString);
+    Log::Debug("Checking sub handler for previous SENT packet type: "s + packetTypeString);
 #endif
 
     switch (ackRecord->msgType) {
 
-        case DtcpPacket::t_PacketType::connAccept :
-               validState = true;
-               status     = pendingConnAcceptComplete (request, ackRecord);
-               break;
+    case DtcpPacket::t_PacketType::connAccept:
+        validState = true;
+        status = pendingConnAcceptComplete(request, ackRecord);
+        break;
 
-        case DtcpPacket::t_PacketType::connClose :
-               validState = true;
-               status     = pendingConnCloseComplete (request, ackRecord);
-               break;
+    case DtcpPacket::t_PacketType::connClose:
+        validState = true;
+        status = pendingConnCloseComplete(request, ackRecord);
+        break;
 
-        case DtcpPacket::t_PacketType::connSuspend :
-               validState = true;
-               status     = pendingConnSuspendComplete (request, ackRecord);
-               break;
+    case DtcpPacket::t_PacketType::connSuspend:
+        validState = true;
+        status = pendingConnSuspendComplete(request, ackRecord);
+        break;
 
-        case DtcpPacket::t_PacketType::poll :
-               validState = true;
-               status     = pendingPollComplete (request, ackRecord);
-               break;
+    case DtcpPacket::t_PacketType::poll:
+        validState = true;
+        status = pendingPollComplete(request, ackRecord);
+        break;
 
-      default:
-          // unhandled pending type, invalid packet?
-          break;
+    default:
+        // unhandled pending type, invalid packet?
+        break;
     };
 
     if (!validState) {
 #ifdef _VERBOSE
-        Log::Debug ("Invalid pending state for this request! Ignoring.");
+        Log::Debug("Invalid pending state for this request! Ignoring.");
 #endif
         return true;
     }
@@ -1016,25 +982,24 @@ DtcpBaseConnMux::handleAckPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleErrorPacket (t_IncomingMessage & request)
-{   
+bool
+DtcpBaseConnMux::handleErrorPacket(t_IncomingMessage & request)
+{
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleErrorPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleErrorPacket invoked.");
 #endif
 
     // We may have a pending state for this error packet.  See what type
     // of error occured, and cleanup any state if nescessary.
     //
     bool status;
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Unable to locate pending ack record for request! Ignoring.");
+        Log::Debug("Unable to locate pending ack record for request! Ignoring.");
 #endif
         return true;
     }
@@ -1045,12 +1010,11 @@ DtcpBaseConnMux::handleErrorPacket (t_IncomingMessage & request)
 }
 
 
-
 bool
-DtcpBaseConnMux::handleNatDiscoverPacket (t_IncomingMessage & request)
+DtcpBaseConnMux::handleNatDiscoverPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleNatDiscoverPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleNatDiscoverPacket invoked.");
 #endif
 
 
@@ -1058,30 +1022,29 @@ DtcpBaseConnMux::handleNatDiscoverPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleNatSourcePacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleNatSourcePacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleNatSourcePacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleNatSourcePacket invoked.");
 #endif
 
     // Verify pending acknowledgement record state
     //
     bool status;
-    t_PendingAckRecord *  ackRecord;
+    t_PendingAckRecord * ackRecord;
 
-    status = getPendingAckRecord (request.id, ackRecord);
+    status = getPendingAckRecord(request.id, ackRecord);
 
     if (!status) {
 #ifdef _VERBOSE
-        Log::Debug ("Unable to locate pending ack record for request! Ignoring.");
+        Log::Debug("Unable to locate pending ack record for request! Ignoring.");
 #endif
         return true;
     }
     if (ackRecord->msgType != DtcpPacket::t_PacketType::natDiscover) {
 #ifdef _VERBOSE
-        Log::Debug ("Request for this ID is not in correct state. Ignoring.");
+        Log::Debug("Request for this ID is not in correct state. Ignoring.");
 #endif
         return true;
     }
@@ -1089,12 +1052,11 @@ DtcpBaseConnMux::handleNatSourcePacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::handleTxnPacket (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::handleTxnPacket(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::handleTxnPacket invoked.");
+    Log::Debug("DtcpBaseConnMux::handleTxnPacket invoked.");
 #endif
 
 
@@ -1102,107 +1064,104 @@ DtcpBaseConnMux::handleTxnPacket (t_IncomingMessage & request)
 }
 
 
-
-bool 
-DtcpBaseConnMux::checkAcceptAckRetry (t_IncomingMessage & request)
+bool
+DtcpBaseConnMux::checkAcceptAckRetry(t_IncomingMessage & request)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::checkAcceptAckRetry invoked.");
+    Log::Debug("DtcpBaseConnMux::checkAcceptAckRetry invoked.");
 #endif
 
 
-    // Parse connection packet information 
+    // Parse connection packet information
     //
-    bool  status;
-    DtcpConnPacket *  dtcpConnPacket;
-    dtcpConnPacket =  new DtcpConnPacket ();
-        
-    dtcpConnPacket->setPacketType (request.packet->getPacketType ());        
-    status = dtcpConnPacket->readData (request.dataBuffer);
+    bool status;
+    DtcpConnPacket * dtcpConnPacket;
+    dtcpConnPacket = new DtcpConnPacket();
+
+    dtcpConnPacket->setPacketType(request.packet->getPacketType());
+    status = dtcpConnPacket->readData(request.dataBuffer);
 
     if (!status) {
         // Invalid packet data...
 #ifdef _VERBOSE
-        Log::Debug ("readData failed for DtcpConnPacket in DtcpBaseConnMux::checkAcceptAckRetry.");
+        Log::Debug("readData failed for DtcpConnPacket in DtcpBaseConnMux::checkAcceptAckRetry.");
 #endif
 
         return false;
     }
     // Try to locate transport for this connection.  If it is found, we need to
     // resend an ack packet...
-// MRP_TEMP - add code to prevent DOS attacks.
+    // MRP_TEMP - add code to prevent DOS attacks.
     //
     ulong peerId;
-    dtcpConnPacket->getPeerId (peerId);
+    dtcpConnPacket->getPeerId(peerId);
 
-    DtcpBaseConnTransport *  transport;
+    DtcpBaseConnTransport * transport;
 
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
-        status = connectionMap_->locateConnection (peerId, transport);
+        WriteLock lock(connMapLock_);
+        status = connectionMap_->locateConnection(peerId, transport);
     }
 
     if (!status) {
         // Invalid peer ID?
 #ifdef _VERBOSE
-        Log::Debug ("Invalid peer ID.  Assuming bad resent packet.");
+        Log::Debug("Invalid peer ID.  Assuming bad resent packet.");
 #endif
-    
+
         return true;
     }
     // resend ack packet
     //
-    status = sendAck (transport);
+    status = sendAck(transport);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::pendingConnAcceptComplete (t_IncomingMessage &  request,
-                                            t_PendingAckRecord * ackRecord)
-{   
+bool
+DtcpBaseConnMux::pendingConnAcceptComplete(t_IncomingMessage & request, t_PendingAckRecord * ackRecord)
+{
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::pendingConnAcceptComplete invoked.");
+    Log::Debug("DtcpBaseConnMux::pendingConnAcceptComplete invoked.");
 #endif
 
     // delete pending ack information.. no longer needed.
     //
-    t_NetId   netId = ackRecord->netId;
+    t_NetId netId = ackRecord->netId;
 
     bool status;
-    status = removePendingAckRecord (ackRecord);
+    status = removePendingAckRecord(ackRecord);
 
     if (!status) {
         // This shouldnt happen...
-        Log::Error ("Error removing pending ack record in"
-                             " DtcpBaseConnMux::pendingConnAcceptComplete.");
+        Log::Error("Error removing pending ack record in"
+                   " DtcpBaseConnMux::pendingConnAcceptComplete.");
 
         // continue on anyway, asume that nothing critical occurred.
     }
 
     // Locate pending transport record for this request and return transport to requestor.
     //
-    t_PendingTransportRecord *  transportRecord = nullptr;
+    t_PendingTransportRecord * transportRecord = nullptr;
 
     // scope lock
     {
-        WriteLock  lock(indexLock_);
+        WriteLock lock(indexLock_);
 
-        auto iter = pendingTransportIndex_->find (netId);
+        auto iter = pendingTransportIndex_->find(netId);
 
-        if (iter != pendingTransportIndex_->end ()) {
+        if (iter != pendingTransportIndex_->end()) {
             transportRecord = (*iter).second;
-            pendingTransportIndex_->erase (netId);
+            pendingTransportIndex_->erase(netId);
         }
     }
 
     if (!transportRecord) {
-        Log::Error ("Error locating pending transport record for request in"
-                             " DtcpBaseConnMux::pendingConnAcceptComplete");
+        Log::Error("Error locating pending transport record for request in"
+                   " DtcpBaseConnMux::pendingConnAcceptComplete");
 
         return false;
     }
@@ -1210,119 +1169,111 @@ DtcpBaseConnMux::pendingConnAcceptComplete (t_IncomingMessage &  request,
     TransportInterface * transport = transportRecord->transport;
     delete transportRecord;
 
-    status = connector->receiveTransport (transport);
+    status = connector->receiveTransport(transport);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnMux::pendingConnCloseComplete (t_IncomingMessage &  request,
-                                           t_PendingAckRecord * ackRecord)
-{   
-#ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::pendingConnCloseComplete invoked.");
-#endif
-
-
-    // delete pending ack information.. no longer needed.
-    //
-    t_NetId   netId = ackRecord->netId;
-
-    bool status;
-    status = removePendingAckRecord (ackRecord);
-
-    if (!status) {
-        // This shouldnt happen...
-        Log::Error ("Error removing pending ack record in"
-                             " DtcpBaseConnMux::pendingConnCloseComplete.");
-
-        // continue on anyway, asume that nothing critical occurred.
-    }
-
-// MRP_TEMP - silence compiler warning about variable
-netId = 0;
-
-
-    return true;
-}
-
-
-
 bool
-DtcpBaseConnMux::pendingConnSuspendComplete (t_IncomingMessage &  request,
-                                             t_PendingAckRecord * ackRecord)
-{   
-#ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::pendingConnSuspendComplete invoked.");
-#endif
-
-
-    // delete pending ack information.. no longer needed.
-    //
-    t_NetId   netId = ackRecord->netId;
-
-    bool status;
-    status = removePendingAckRecord (ackRecord);
-
-    if (!status) {
-        // This shouldnt happen...
-        Log::Error ("Error removing pending ack record in"
-                             " DtcpBaseConnMux::pendingConnSuspendComplete.");
-
-        // continue on anyway, asume that nothing critical occurred.
-    }
-
-// MRP_TEMP - silence compiler warning about variable
-netId = 0;
-
-
-    return true;
-}
-
-
-
-bool
-DtcpBaseConnMux::pendingPollComplete (t_IncomingMessage &  request,
-                                      t_PendingAckRecord * ackRecord)
-{   
-#ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::pendingPollComplete invoked.");
-#endif
-
-
-    // delete pending ack information.. no longer needed.
-    //
-    t_NetId   netId = ackRecord->netId;
-
-    bool status;
-    status = removePendingAckRecord (ackRecord);
-
-    if (!status) {
-        // This shouldnt happen...
-        Log::Error ("Error removing pending ack record in"
-                             " DtcpBaseConnMux::pendingPollComplete.");
-
-        // continue on anyway, asume that nothing critical occurred.
-    }
-
-// MRP_TEMP - silence compiler warning about variable
-netId = 0;
-
-
-    return true;
-}
-
-
-
-bool
-DtcpBaseConnMux::requestTransport (ConnectorInterface * requestor,
-                                   TransportInterface * transport)
+DtcpBaseConnMux::pendingConnCloseComplete(t_IncomingMessage & request, t_PendingAckRecord * ackRecord)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::requestTransport invoked.");
+    Log::Debug("DtcpBaseConnMux::pendingConnCloseComplete invoked.");
+#endif
+
+
+    // delete pending ack information.. no longer needed.
+    //
+    t_NetId netId = ackRecord->netId;
+
+    bool status;
+    status = removePendingAckRecord(ackRecord);
+
+    if (!status) {
+        // This shouldnt happen...
+        Log::Error("Error removing pending ack record in"
+                   " DtcpBaseConnMux::pendingConnCloseComplete.");
+
+        // continue on anyway, asume that nothing critical occurred.
+    }
+
+    // MRP_TEMP - silence compiler warning about variable
+    (void)netId;
+
+
+    return true;
+}
+
+
+bool
+DtcpBaseConnMux::pendingConnSuspendComplete(t_IncomingMessage & request, t_PendingAckRecord * ackRecord)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpBaseConnMux::pendingConnSuspendComplete invoked.");
+#endif
+
+
+    // delete pending ack information.. no longer needed.
+    //
+    t_NetId netId = ackRecord->netId;
+
+    bool status;
+    status = removePendingAckRecord(ackRecord);
+
+    if (!status) {
+        // This shouldnt happen...
+        Log::Error("Error removing pending ack record in"
+                   " DtcpBaseConnMux::pendingConnSuspendComplete.");
+
+        // continue on anyway, asume that nothing critical occurred.
+    }
+
+    // MRP_TEMP - silence compiler warning about variable
+    (void)netId;
+
+
+    return true;
+}
+
+
+bool
+DtcpBaseConnMux::pendingPollComplete(t_IncomingMessage & request, t_PendingAckRecord * ackRecord)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpBaseConnMux::pendingPollComplete invoked.");
+#endif
+
+
+    // delete pending ack information.. no longer needed.
+    //
+    t_NetId netId = ackRecord->netId;
+
+    bool status;
+    status = removePendingAckRecord(ackRecord);
+
+    if (!status) {
+        // This shouldnt happen...
+        Log::Error("Error removing pending ack record in"
+                   " DtcpBaseConnMux::pendingPollComplete.");
+
+        // continue on anyway, asume that nothing critical occurred.
+    }
+
+    // MRP_TEMP - silence compiler warning about variable
+    (void)netId;
+
+
+    return true;
+}
+
+
+bool
+DtcpBaseConnMux::requestTransport(ConnectorInterface * requestor, TransportInterface * transport)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpBaseConnMux::requestTransport invoked.");
 #endif
 
     if (!initialized_) {
@@ -1332,30 +1283,30 @@ DtcpBaseConnMux::requestTransport (ConnectorInterface * requestor,
     // setup transport...
     //
     bool status;
-    DtcpBaseConnTransport *  connTransport;
+    DtcpBaseConnTransport * connTransport;
 
-    connTransport =  dynamic_cast<DtcpBaseConnTransport *>(transport);
+    connTransport = dynamic_cast<DtcpBaseConnTransport *>(transport);
 
     if (!connTransport) {
         // Have to have a DtcpBaseConnTransport type.
-        Log::Error ("Invalid transport type passed to DtcpBaseConnMux::requestTransport.");
-        
+        Log::Error("Invalid transport type passed to DtcpBaseConnMux::requestTransport.");
+
         return false;
     }
-    status = createConnectionRequestEntry (requestor, connTransport);
+    status = createConnectionRequestEntry(requestor, connTransport);
 
     if (!status) {
         // This shouldnt happen
-        Log::Error ("createConnectionEntry failed in DtcpBaseConnMux::requestTransport.");
+        Log::Error("createConnectionEntry failed in DtcpBaseConnMux::requestTransport.");
 
         return false;
     }
-    status = sendConnectionRequest (connTransport);
+    status = sendConnectionRequest(connTransport);
 
     if (!status) {
         // UDP Transport error?
 #ifdef _VERBOSE
-        Log::Debug ("sendConnectionRequest failed in DtcpBaseConnMux::requestTransport.");
+        Log::Debug("sendConnectionRequest failed in DtcpBaseConnMux::requestTransport.");
 #endif
 
         return false;
@@ -1364,59 +1315,53 @@ DtcpBaseConnMux::requestTransport (ConnectorInterface * requestor,
 }
 
 
-
-bool 
-DtcpBaseConnMux::createConnectionAcceptEntry (DtcpConnPacket * packet,
-                                              ulong            ipAddress,
-                                              ushort           port)
+bool
+DtcpBaseConnMux::createConnectionAcceptEntry(DtcpConnPacket * packet, ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::createConnectionAcceptEntry invoked.");
+    Log::Debug("DtcpBaseConnMux::createConnectionAcceptEntry invoked.");
 #endif
 
     // Allocate a connection ID for this connection.
     //
-    bool  status;
+    bool status;
     ulong peerId;
 
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
+        WriteLock lock(connMapLock_);
 
-        status = connectionMap_->createConnection (ipAddress,
-                                                   port,
-                                                   peerId); 
+        status = connectionMap_->createConnection(ipAddress, port, peerId);
     }
 
     if (!status) {
-        Log::Error ("Unable to create connection in DtcpBaseConnMux::createConnectionAcceptEntry.");
+        Log::Error("Unable to create connection in DtcpBaseConnMux::createConnectionAcceptEntry.");
         return false;
     }
     // Create pending accept record for this request.
     //
-    t_PendingAcceptRecord *  pendingAcceptRecord;
+    t_PendingAcceptRecord * pendingAcceptRecord;
     pendingAcceptRecord = new t_PendingAcceptRecord;
 
     ulong myId;
-    packet->getMyId (myId);
+    packet->getMyId(myId);
 
-    packet->setPeerId (peerId);
+    packet->setPeerId(peerId);
 
-    pendingAcceptRecord->myId           = myId;
-    pendingAcceptRecord->tempPeerId     = peerId;
+    pendingAcceptRecord->myId = myId;
+    pendingAcceptRecord->tempPeerId = peerId;
 
 
     // Insert into pending accept index
     //
     {
-        WriteLock  lock(indexLock_);
-        pendingAcceptIndex_->emplace (peerId, pendingAcceptRecord);
+        WriteLock lock(indexLock_);
+        pendingAcceptIndex_->emplace(peerId, pendingAcceptRecord);
     }
 
 #ifdef _VERBOSE
-    Log::Debug ("CONNECTION ACCEPT CREATED with values: "s +
-                "\nPeer ID: "s + std::to_string (peerId) +
-                "\nMy ID: "s + std::to_string (myId));
+    Log::Debug("CONNECTION ACCEPT CREATED with values: "s + "\nPeer ID: "s + std::to_string(peerId) + "\nMy ID: "s +
+               std::to_string(myId));
 #endif
 
 
@@ -1424,60 +1369,55 @@ DtcpBaseConnMux::createConnectionAcceptEntry (DtcpConnPacket * packet,
 }
 
 
-
 bool
-DtcpBaseConnMux::createConnectionRequestEntry (ConnectorInterface *    requestor,
-                                               DtcpBaseConnTransport * transport)
+DtcpBaseConnMux::createConnectionRequestEntry(ConnectorInterface * requestor, DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::createConnectionRequestEntry invoked.");
+    Log::Debug("DtcpBaseConnMux::createConnectionRequestEntry invoked.");
 #endif
 
     // Allocate a connection ID for this requested connection
     //
-    ulong   destIpAddress;
-    ushort  destPort;
-    bool    status;
-    ulong   peerId;
+    ulong destIpAddress;
+    ushort destPort;
+    bool status;
+    ulong peerId;
 
-    transport->getPeerLocation (destIpAddress, destPort);
-   
+    transport->getPeerLocation(destIpAddress, destPort);
+
     // scope lock
     {
-        WriteLock  lock(connMapLock_);
- 
-        status = connectionMap_->createConnection (destIpAddress,
-                                                   destPort,
-                                                   peerId);
+        WriteLock lock(connMapLock_);
+
+        status = connectionMap_->createConnection(destIpAddress, destPort, peerId);
     }
 
     if (!status) {
-        Log::Error ("Unable to create connection in DtcpBaseConnMux::createConnectionRequestEntry.");
+        Log::Error("Unable to create connection in DtcpBaseConnMux::createConnectionRequestEntry.");
         return false;
     }
-    transport->setPeerId (peerId);
+    transport->setPeerId(peerId);
 
 
     // Create pending accept record for this request.
     //
-    t_ConnRequestRecord *  connRequestRecord;
+    t_ConnRequestRecord * connRequestRecord;
     connRequestRecord = new t_ConnRequestRecord;
 
-    connRequestRecord->requestor   = requestor;
-    connRequestRecord->transport   = static_cast<TransportInterface *>(transport);
-    connRequestRecord->tempPeerId  = peerId;
+    connRequestRecord->requestor = requestor;
+    connRequestRecord->transport = static_cast<TransportInterface *>(transport);
+    connRequestRecord->tempPeerId = peerId;
 
 
     // Insert into connection request index
     //
     {
-        WriteLock  lock(indexLock_);
-        connRequestIndex_->emplace (peerId, connRequestRecord);
+        WriteLock lock(indexLock_);
+        connRequestIndex_->emplace(peerId, connRequestRecord);
     }
 
 #ifdef _VERBOSE
-    Log::Debug ("CONNECTION REQUEST CREATED with values: "s +
-                "\nPeer ID: "s + std::to_string (peerId));
+    Log::Debug("CONNECTION REQUEST CREATED with values: "s + "\nPeer ID: "s + std::to_string(peerId));
 #endif
 
 
@@ -1485,38 +1425,37 @@ DtcpBaseConnMux::createConnectionRequestEntry (ConnectorInterface *    requestor
 }
 
 
-
 bool
-DtcpBaseConnMux::sendConnectionRequest (DtcpBaseConnTransport * transport)
+DtcpBaseConnMux::sendConnectionRequest(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::sendConnectionRequest invoked.");
+    Log::Debug("DtcpBaseConnMux::sendConnectionRequest invoked.");
 #endif
 
     // Set packet links for connection request.
     //
-    bool   status;
-    ulong  peerId;
-    ulong  ipAddress;
+    bool status;
+    ulong peerId;
+    ulong ipAddress;
     ushort port;
 
-    DtcpConnPacket * packet = new DtcpConnPacket ();
+    DtcpConnPacket * packet = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    transport->getPeerId (peerId);
-    transport->getPeerLocation (ipAddress, port);
+    transport->getPeerId(peerId);
+    transport->getPeerLocation(ipAddress, port);
 
-    dtcpPacket->setParent (packet);
+    dtcpPacket->setParent(packet);
 
-    packet->setPeerLocation (ipAddress, port);
-    packet->setPeerId (peerId);
-    packet->setPacketType (DtcpPacket::t_PacketType::connRequest);
+    packet->setPeerLocation(ipAddress, port);
+    packet->setPeerId(peerId);
+    packet->setPacketType(DtcpPacket::t_PacketType::connRequest);
 
     ulong requestId;
 
-    status = parentTransport_->sendReliablePacket (dtcpPacket,
-                                                   (DtcpBaseConnTransport *)0, // no transport for ConnMux,
-                                                   requestId);
+    status = parentTransport_->sendReliablePacket(dtcpPacket,
+                                                  (DtcpBaseConnTransport *)0,  // no transport for ConnMux,
+                                                  requestId);
 
     delete packet;
     delete dtcpPacket;
@@ -1524,70 +1463,67 @@ DtcpBaseConnMux::sendConnectionRequest (DtcpBaseConnTransport * transport)
     if (!status) {
         // Error sending on socket???
         //
-        Log::Error ("Error sending reliable packet in"
-                             " DtcpBaseConnMux::sendConnectionRequest.");
+        Log::Error("Error sending reliable packet in"
+                   " DtcpBaseConnMux::sendConnectionRequest.");
 
         return false;
     }
     // Index this pending request...
     //
     t_PendingAckRecord * pendingRequest;
-    pendingRequest =  new t_PendingAckRecord;
+    pendingRequest = new t_PendingAckRecord;
 
-    ipPortToNetId (ipAddress,
-                   port,
-                   pendingRequest->netId);
+    ipPortToNetId(ipAddress, port, pendingRequest->netId);
 
-    pendingRequest->msgType  = DtcpPacket::t_PacketType::connRequest;
+    pendingRequest->msgType = DtcpPacket::t_PacketType::connRequest;
     pendingRequest->requestId = requestId;
 
     // scope lock
     {
-        WriteLock  lock(pendingAckLock_);
+        WriteLock lock(pendingAckLock_);
 
-        pendingAckIndex_->emplace (pendingRequest->netId, pendingRequest);
+        pendingAckIndex_->emplace(pendingRequest->netId, pendingRequest);
     }
-    
+
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnMux::sendConnectionOffer (DtcpConnPacket * packet)
+bool
+DtcpBaseConnMux::sendConnectionOffer(DtcpConnPacket * packet)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::sendConnectionOffer invoked.");
+    Log::Debug("DtcpBaseConnMux::sendConnectionOffer invoked.");
 #endif
 
     // Set packet links for connection offer.
     //
     bool status;
     DtcpPacket * dtcpPacket = new DtcpPacket();
-    dtcpPacket->setParent (packet);
+    dtcpPacket->setParent(packet);
 
-    packet->setPacketType (DtcpPacket::t_PacketType::connOffer);
+    packet->setPacketType(DtcpPacket::t_PacketType::connOffer);
 
-    ulong  ipAddress;
+    ulong ipAddress;
     ushort port;
 
-    packet->getPeerLocation (ipAddress, port);
+    packet->getPeerLocation(ipAddress, port);
 
 
-    ulong  requestId;
+    ulong requestId;
 
-    status = parentTransport_->sendReliablePacket (dtcpPacket,
-                                                   0, // no requestor for ConnMux
-                                                   requestId); 
+    status = parentTransport_->sendReliablePacket(dtcpPacket,
+                                                  0,  // no requestor for ConnMux
+                                                  requestId);
 
     delete dtcpPacket;
 
     if (!status) {
         // Error sending on socket???
         //
-        Log::Error ("Error sending reliable packet in"
-                             " DtcpBaseConnMux::sendConnectionOffer.");
+        Log::Error("Error sending reliable packet in"
+                   " DtcpBaseConnMux::sendConnectionOffer.");
 
         return false;
     }
@@ -1595,18 +1531,16 @@ DtcpBaseConnMux::sendConnectionOffer (DtcpConnPacket * packet)
     //
     t_PendingAckRecord * pendingRequest;
     pendingRequest = new t_PendingAckRecord;
-    pendingRequest->msgType   = DtcpPacket::t_PacketType::connOffer;
+    pendingRequest->msgType = DtcpPacket::t_PacketType::connOffer;
     pendingRequest->requestId = requestId;
 
-    ipPortToNetId (ipAddress,
-                   port,
-                   pendingRequest->netId);
+    ipPortToNetId(ipAddress, port, pendingRequest->netId);
 
     // scope lock
     {
-        WriteLock  lock(pendingAckLock_);
+        WriteLock lock(pendingAckLock_);
 
-        pendingAckIndex_->emplace (pendingRequest->netId, pendingRequest);
+        pendingAckIndex_->emplace(pendingRequest->netId, pendingRequest);
     }
 
 
@@ -1614,38 +1548,37 @@ DtcpBaseConnMux::sendConnectionOffer (DtcpConnPacket * packet)
 }
 
 
-
-bool 
-DtcpBaseConnMux::sendConnectionAccept (DtcpBaseConnTransport * transport)
+bool
+DtcpBaseConnMux::sendConnectionAccept(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::sendConnectionAccept invoked.");
+    Log::Debug("DtcpBaseConnMux::sendConnectionAccept invoked.");
 #endif
 
     // Set packet links for connection accept.
     //
-    bool   status;
-    ulong  myId;
-    ulong  ipAddress;
+    bool status;
+    ulong myId;
+    ulong ipAddress;
     ushort port;
 
-    DtcpConnPacket * packet = new DtcpConnPacket ();
+    DtcpConnPacket * packet = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    transport->getMyId (myId);
-    transport->getPeerLocation (ipAddress, port);
+    transport->getMyId(myId);
+    transport->getPeerLocation(ipAddress, port);
 
-    dtcpPacket->setParent (packet);
+    dtcpPacket->setParent(packet);
 
-    packet->setPeerLocation (ipAddress, port);
-    packet->setMyId (myId);
-    packet->setPacketType (DtcpPacket::t_PacketType::connAccept);
+    packet->setPeerLocation(ipAddress, port);
+    packet->setMyId(myId);
+    packet->setPacketType(DtcpPacket::t_PacketType::connAccept);
 
-    ulong  requestId;
+    ulong requestId;
 
-    status = parentTransport_->sendReliablePacket (dtcpPacket,
-                                                   0, // no requestor for ConnMux
-                                                   requestId); 
+    status = parentTransport_->sendReliablePacket(dtcpPacket,
+                                                  0,  // no requestor for ConnMux
+                                                  requestId);
 
     delete dtcpPacket;
     delete packet;
@@ -1653,8 +1586,8 @@ DtcpBaseConnMux::sendConnectionAccept (DtcpBaseConnTransport * transport)
     if (!status) {
         // Error sending on socket???
         //
-        Log::Error ("Error sending reliable packet in"
-                             " DtcpBaseConnMux::sendConnectionAccept.");
+        Log::Error("Error sending reliable packet in"
+                   " DtcpBaseConnMux::sendConnectionAccept.");
 
         return false;
     }
@@ -1662,18 +1595,16 @@ DtcpBaseConnMux::sendConnectionAccept (DtcpBaseConnTransport * transport)
     //
     t_PendingAckRecord * pendingRequest;
     pendingRequest = new t_PendingAckRecord;
-    pendingRequest->msgType   = DtcpPacket::t_PacketType::connAccept;
+    pendingRequest->msgType = DtcpPacket::t_PacketType::connAccept;
     pendingRequest->requestId = requestId;
 
-    ipPortToNetId (ipAddress,
-                   port,
-                   pendingRequest->netId);
+    ipPortToNetId(ipAddress, port, pendingRequest->netId);
 
     // scope lock
     {
-        WriteLock  lock(pendingAckLock_);
+        WriteLock lock(pendingAckLock_);
 
-        pendingAckIndex_->emplace (pendingRequest->netId, pendingRequest);
+        pendingAckIndex_->emplace(pendingRequest->netId, pendingRequest);
     }
 
 
@@ -1681,105 +1612,101 @@ DtcpBaseConnMux::sendConnectionAccept (DtcpBaseConnTransport * transport)
 }
 
 
-
-bool 
-DtcpBaseConnMux::sendAck (DtcpBaseConnTransport * transport)
+bool
+DtcpBaseConnMux::sendAck(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::sendAck invoked.");
+    Log::Debug("DtcpBaseConnMux::sendAck invoked.");
 #endif
 
     // Set packet links for ack message
     //
-    bool   status;
-    ulong  myId;
-    ulong  ipAddress;
+    bool status;
+    ulong myId;
+    ulong ipAddress;
     ushort port;
 
-    DtcpConnPacket * packet = new DtcpConnPacket ();
+    DtcpConnPacket * packet = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    transport->getMyId (myId);
-    transport->getPeerLocation (ipAddress, port);
+    transport->getMyId(myId);
+    transport->getPeerLocation(ipAddress, port);
 
-    dtcpPacket->setParent (packet);
+    dtcpPacket->setParent(packet);
 
-    packet->setPeerLocation (ipAddress, port);
-    packet->setMyId (myId);
-    packet->setPacketType (DtcpPacket::t_PacketType::ack);
+    packet->setPeerLocation(ipAddress, port);
+    packet->setMyId(myId);
+    packet->setPacketType(DtcpPacket::t_PacketType::ack);
 
 
-    status = parentTransport_->sendPacket (dtcpPacket);
+    status = parentTransport_->sendPacket(dtcpPacket);
 
     delete packet;
     delete dtcpPacket;
 
     if (!status) {
-        Log::Error ("Send packet failed in DtcpBaseConnMux::sendAck!");
+        Log::Error("Send packet failed in DtcpBaseConnMux::sendAck!");
         return false;
     }
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnMux::sendDataAck (DtcpBaseConnTransport * transport)
+bool
+DtcpBaseConnMux::sendDataAck(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::sendDataAck invoked.");
+    Log::Debug("DtcpBaseConnMux::sendDataAck invoked.");
 #endif
 
     // Set packet links for ack message
     //
-    bool   status;
-    ulong  myId;
-    ulong  ipAddress;
+    bool status;
+    ulong myId;
+    ulong ipAddress;
     ushort port;
-    ulong  sequenceNum;
+    ulong sequenceNum;
 
-    DtcpConnPacket * packet = new DtcpConnPacket ();
+    DtcpConnPacket * packet = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    transport->getMyId (myId);
-    transport->getPeerLocation (ipAddress, port);
-    transport->getRecvSequenceNum (sequenceNum);
+    transport->getMyId(myId);
+    transport->getPeerLocation(ipAddress, port);
+    transport->getRecvSequenceNum(sequenceNum);
 
-    dtcpPacket->setParent (packet);
+    dtcpPacket->setParent(packet);
 
-    packet->setPeerLocation (ipAddress, port);
-    packet->setMyId (myId);
-    packet->setPacketType (DtcpPacket::t_PacketType::connDataAck);
-    packet->setSequenceNum (sequenceNum);
+    packet->setPeerLocation(ipAddress, port);
+    packet->setMyId(myId);
+    packet->setPacketType(DtcpPacket::t_PacketType::connDataAck);
+    packet->setSequenceNum(sequenceNum);
 
 
-    status = parentTransport_->sendPacket (dtcpPacket);
+    status = parentTransport_->sendPacket(dtcpPacket);
 
     delete packet;
     delete dtcpPacket;
 
     if (!status) {
-        Log::Error ("Send packet failed in DtcpBaseConnMux::sendDataAck!");
+        Log::Error("Send packet failed in DtcpBaseConnMux::sendDataAck!");
         return false;
     }
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnMux::getPendingAckRecord (const t_NetId &        id,
-                                      t_PendingAckRecord *&  record)
+bool
+DtcpBaseConnMux::getPendingAckRecord(const t_NetId & id, t_PendingAckRecord *& record)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::getPendingAckRecord invoked.");
+    Log::Debug("DtcpBaseConnMux::getPendingAckRecord invoked.");
 #endif
 
-    ReadLock  lock(pendingAckLock_);
+    ReadLock lock(pendingAckLock_);
 
-    auto iter = pendingAckIndex_->find (id);
+    auto iter = pendingAckIndex_->find(id);
 
-    if (iter == pendingAckIndex_->end ()) {
+    if (iter == pendingAckIndex_->end()) {
         return false;
     }
     record = (*iter).second;
@@ -1789,12 +1716,11 @@ DtcpBaseConnMux::getPendingAckRecord (const t_NetId &        id,
 }
 
 
-
-bool 
-DtcpBaseConnMux::removePendingAckRecord (t_PendingAckRecord *  record)
+bool
+DtcpBaseConnMux::removePendingAckRecord(t_PendingAckRecord * record)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::removePendingAckRecord invoked.");
+    Log::Debug("DtcpBaseConnMux::removePendingAckRecord invoked.");
 #endif
 
     if (!record) {
@@ -1802,16 +1728,16 @@ DtcpBaseConnMux::removePendingAckRecord (t_PendingAckRecord *  record)
     }
     // Remove record from pendingIndex and cleanup state in pending ack map
     //
-    ReadLock  lock(pendingAckLock_);
+    ReadLock lock(pendingAckLock_);
 
-    pendingAckIndex_->erase (record->netId);
+    pendingAckIndex_->erase(record->netId);
 
     bool status;
-    status = parentTransport_->reliableRequestComplete (record->requestId);
+    status = parentTransport_->reliableRequestComplete(record->requestId);
 
     if (!status) {
-        Log::Error ("request complete call to parentTransport failed in"
-                             " DtcpBaseConnMux::removePendingAckRecord.");
+        Log::Error("request complete call to parentTransport failed in"
+                   " DtcpBaseConnMux::removePendingAckRecord.");
         return false;
     }
 
@@ -1822,38 +1748,34 @@ DtcpBaseConnMux::removePendingAckRecord (t_PendingAckRecord *  record)
 }
 
 
-
-bool 
-DtcpBaseConnMux::acknowledgeTransfer (DtcpBaseConnTransport * transport)
+bool
+DtcpBaseConnMux::acknowledgeTransfer(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnMux::removePendingAckRecord invoked.");
+    Log::Debug("DtcpBaseConnMux::removePendingAckRecord invoked.");
 #endif
 
     // Verify that we have a request ID associated with a reliable transfer
     //
-    if (!transport->pendingAck ()) {
+    if (!transport->pendingAck()) {
         // We are not waiting on any aknowledgement.  User error?
         //
-        Log::Error ("DtcpBaseConnMux::acknowledgeTransfer invoked, but no reliable data "
-                             "pending acknowledgement!");
-          
+        Log::Error("DtcpBaseConnMux::acknowledgeTransfer invoked, but no reliable data "
+                   "pending acknowledgement!");
+
         return false;
     }
-    bool   status;
-    ulong  requestId;
-    transport->getRequestId (requestId);
+    bool status;
+    ulong requestId;
+    transport->getRequestId(requestId);
 
-    status = parentTransport_->reliableRequestComplete (requestId);
+    status = parentTransport_->reliableRequestComplete(requestId);
 
     if (!status) {
-        Log::Error ("request complete call to parentTransport failed in "
-                             "DtcpBaseConnMux::acknowledgeTransfer!");
+        Log::Error("request complete call to parentTransport failed in "
+                   "DtcpBaseConnMux::acknowledgeTransfer!");
 
         return false;
     }
     return true;
 }
-
-
-

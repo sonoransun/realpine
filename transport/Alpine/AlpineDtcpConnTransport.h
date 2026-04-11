@@ -15,22 +15,20 @@ class DataBlock;
 class AlpineDtcpConnTransport : public DtcpBaseConnTransport
 {
   public:
-    AlpineDtcpConnTransport ();
-    
-    virtual ~AlpineDtcpConnTransport ();
+    AlpineDtcpConnTransport();
+
+    virtual ~AlpineDtcpConnTransport();
 
 
+    virtual bool handleData(const byte * data, uint dataLength);
 
-    virtual bool handleData (const byte * data,
-                             uint         dataLength);
+    virtual bool handleConnectionClose();
 
-    virtual bool handleConnectionClose ();
+    virtual bool handleSendReceived();
 
-    virtual bool handleSendReceived ();
+    virtual bool handleSendFailure();
 
-    virtual bool handleSendFailure ();
-
-    virtual bool handleConnectionDeactivate ();
+    virtual bool handleConnectionDeactivate();
 
 
     // Provide some methods used for reliable transfer of data.
@@ -38,49 +36,40 @@ class AlpineDtcpConnTransport : public DtcpBaseConnTransport
     // is implemented at this layer.  The underlying DTCP transports
     // only keep track of a single reliable request.
     //
-    virtual bool sendReliableData (const byte * data,
-                                   uint         dataLength,
-                                   ulong        requestId);
+    virtual bool sendReliableData(const byte * data, uint dataLength, ulong requestId);
 
-    virtual bool acknowledgeTransfer (ulong  requestId);
-
+    virtual bool acknowledgeTransfer(ulong requestId);
 
 
     // Types and data structures for management of reliable transfer queue
     //
-    struct t_ReliableRequest {
-        ulong        requestId;
-        DataBlock *  data;
+    struct t_ReliableRequest
+    {
+        ulong requestId;
+        DataBlock * data;
     };
 
     using t_RequestList = list<t_ReliableRequest *>;
 
-    struct t_RequestStateIndex {
-        t_RequestList  pendingRequests;
-        ulong          currRequestId;
+    struct t_RequestStateIndex
+    {
+        t_RequestList pendingRequests;
+        ulong currRequestId;
     };
-        
 
 
   private:
+    bool processAlpineQueryPacket(AlpinePacket * packet, DataBuffer * buffer);
 
-    bool  processAlpineQueryPacket (AlpinePacket *  packet,
-                                    DataBuffer *    buffer);
+    bool processAlpinePeerPacket(AlpinePacket * packet, DataBuffer * buffer);
 
-    bool  processAlpinePeerPacket (AlpinePacket *  packet,
-                                    DataBuffer *    buffer);
+    bool processAlpineProxyPacket(AlpinePacket * packet, DataBuffer * buffer);
 
-    bool  processAlpineProxyPacket (AlpinePacket *  packet,
-                                    DataBuffer *    buffer);
+    void checkPendingRequests();
 
-    void  checkPendingRequests ();
+    void cleanUp();
 
-    void  cleanUp ();
 
-    
-
-    ulong                  requestId_;
-    t_RequestStateIndex *  pendingIndex_;  // this is usually unused.  Only allocate if needed.
+    ulong requestId_;
+    t_RequestStateIndex * pendingIndex_;  // this is usually unused.  Only allocate if needed.
 };
-
-

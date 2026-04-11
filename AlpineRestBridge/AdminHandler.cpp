@@ -3,32 +3,31 @@
 
 #include <AdminHandler.h>
 #include <ApiKeyAuth.h>
-#include <DtcpStackInterface.h>
 #include <Configuration.h>
-#include <StringUtils.h>
-#include <Log.h>
-#include <JsonWriter.h>
+#include <DtcpStackInterface.h>
 #include <JsonReader.h>
-#include <SafeParse.h>
+#include <JsonWriter.h>
+#include <Log.h>
 #include <NetUtils.h>
+#include <SafeParse.h>
+#include <StringUtils.h>
 
 
 void
-AdminHandler::registerRoutes (HttpRouter & router)
+AdminHandler::registerRoutes(HttpRouter & router)
 {
-    router.addRoute("POST",   "/admin/peers/:id/ban",  banPeer);
-    router.addRoute("DELETE", "/admin/peers/:id/ban",  unbanPeer);
-    router.addRoute("GET",    "/admin/peers/banned",   getBannedPeers);
-    router.addRoute("POST",   "/admin/config/reload",  reloadConfig);
-    router.addRoute("GET",    "/admin/logs/level",     getLogLevel);
-    router.addRoute("PUT",    "/admin/logs/level",     setLogLevel);
-    router.addRoute("POST",   "/admin/keys/rotate",    rotateApiKey);
+    router.addRoute("POST", "/admin/peers/:id/ban", banPeer);
+    router.addRoute("DELETE", "/admin/peers/:id/ban", unbanPeer);
+    router.addRoute("GET", "/admin/peers/banned", getBannedPeers);
+    router.addRoute("POST", "/admin/config/reload", reloadConfig);
+    router.addRoute("GET", "/admin/logs/level", getLogLevel);
+    router.addRoute("PUT", "/admin/logs/level", setLogLevel);
+    router.addRoute("POST", "/admin/keys/rotate", rotateApiKey);
 }
 
 
 HttpResponse
-AdminHandler::banPeer (const HttpRequest & request,
-                       const std::unordered_map<string, string> & params)
+AdminHandler::banPeer(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -63,8 +62,7 @@ AdminHandler::banPeer (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::unbanPeer (const HttpRequest & request,
-                         const std::unordered_map<string, string> & params)
+AdminHandler::unbanPeer(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto it = params.find("id");
     if (it == params.end())
@@ -98,8 +96,7 @@ AdminHandler::unbanPeer (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::getBannedPeers (const HttpRequest & request,
-                              const std::unordered_map<string, string> & params)
+AdminHandler::getBannedPeers(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     DtcpStackInterface::t_IpAddressList excluded;
     if (!DtcpStackInterface::listExcludedHosts(excluded))
@@ -110,7 +107,7 @@ AdminHandler::getBannedPeers (const HttpRequest & request,
     writer.key("banned");
     writer.beginArray();
 
-    for (const auto& ip : excluded)
+    for (const auto & ip : excluded)
         writer.value(ip);
 
     writer.endArray();
@@ -123,8 +120,7 @@ AdminHandler::getBannedPeers (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::reloadConfig (const HttpRequest & request,
-                            const std::unordered_map<string, string> & params)
+AdminHandler::reloadConfig(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     if (!Configuration::reload())
         return HttpResponse::serverError("Failed to reload configuration");
@@ -142,8 +138,7 @@ AdminHandler::reloadConfig (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::flushCache (const HttpRequest & request,
-                          const std::unordered_map<string, string> & params)
+AdminHandler::flushCache(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // ContentStore is not statically accessible — this endpoint is a placeholder
     // that logs the request. Actual flush requires wiring the ContentStore instance.
@@ -160,8 +155,7 @@ AdminHandler::flushCache (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::getLogLevel (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+AdminHandler::getLogLevel(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     auto level = Log::getLogLevel();
 
@@ -176,8 +170,7 @@ AdminHandler::getLogLevel (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::setLogLevel (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+AdminHandler::setLogLevel(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     JsonReader reader(request.body);
 
@@ -203,8 +196,7 @@ AdminHandler::setLogLevel (const HttpRequest & request,
 
 
 HttpResponse
-AdminHandler::rotateApiKey (const HttpRequest & request,
-                            const std::unordered_map<string, string> & params)
+AdminHandler::rotateApiKey(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     // Parse optional grace_period_seconds from JSON body
     ulong gracePeriodSec = 3600;
@@ -219,8 +211,7 @@ AdminHandler::rotateApiKey (const HttpRequest & request,
     if (newKey.empty())
         return HttpResponse::serverError("Failed to rotate API key");
 
-    Log::Info("Admin: API key rotated with grace period "s
-              + std::to_string(gracePeriodSec) + "s"s);
+    Log::Info("Admin: API key rotated with grace period "s + std::to_string(gracePeriodSec) + "s"s);
 
     JsonWriter writer;
     writer.beginObject();

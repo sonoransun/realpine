@@ -1,17 +1,16 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <JsonRpcHandler.h>
 #include <AlpineStackInterface.h>
+#include <Configuration.h>
 #include <DtcpStackInterface.h>
 #include <JsonReader.h>
+#include <JsonRpcHandler.h>
 #include <JsonWriter.h>
 #include <Log.h>
-#include <Configuration.h>
 #include <NetUtils.h>
-#include <cstdlib>
 #include <climits>
-
+#include <cstdlib>
 
 
 // ---------------------------------------------------------------------------
@@ -19,18 +18,30 @@
 // ---------------------------------------------------------------------------
 
 static string
-escapeJsonRpc (const string & s)
+escapeJsonRpc(const string & s)
 {
     string escaped;
     escaped.reserve(s.length());
     for (char c : s) {
         switch (c) {
-            case '"':  escaped += "\\\""; break;
-            case '\\': escaped += "\\\\"; break;
-            case '\n': escaped += "\\n";  break;
-            case '\r': escaped += "\\r";  break;
-            case '\t': escaped += "\\t";  break;
-            default:   escaped += c;      break;
+        case '"':
+            escaped += "\\\"";
+            break;
+        case '\\':
+            escaped += "\\\\";
+            break;
+        case '\n':
+            escaped += "\\n";
+            break;
+        case '\r':
+            escaped += "\\r";
+            break;
+        case '\t':
+            escaped += "\\t";
+            break;
+        default:
+            escaped += c;
+            break;
         }
     }
     return escaped;
@@ -38,12 +49,11 @@ escapeJsonRpc (const string & s)
 
 
 static string
-jsonRpcError (int code, const string & message, const string & id,
-              const string & data = {})
+jsonRpcError(int code, const string & message, const string & id, const string & data = {})
 {
     string codeStr = std::to_string(code);
-    string result = "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":"s + codeStr +
-                    ",\"message\":\""s + escapeJsonRpc(message) + "\""s;
+    string result =
+        "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":"s + codeStr + ",\"message\":\""s + escapeJsonRpc(message) + "\""s;
     if (!data.empty())
         result += ",\"data\":\""s + escapeJsonRpc(data) + "\""s;
     result += "},\"id\":"s + id + "}"s;
@@ -52,28 +62,26 @@ jsonRpcError (int code, const string & message, const string & id,
 
 
 // JSON-RPC 2.0 standard codes
-static constexpr int JSONRPC_PARSE_ERROR      = -32700;
-static constexpr int JSONRPC_INVALID_REQUEST   = -32600;
-static constexpr int JSONRPC_METHOD_NOT_FOUND  = -32601;
-static constexpr int JSONRPC_INVALID_PARAMS    = -32602;
-static constexpr int JSONRPC_INTERNAL_ERROR    = -32603;
+static constexpr int JSONRPC_PARSE_ERROR = -32700;
+static constexpr int JSONRPC_INVALID_REQUEST = -32600;
+static constexpr int JSONRPC_METHOD_NOT_FOUND = -32601;
+static constexpr int JSONRPC_INVALID_PARAMS = -32602;
+static constexpr int JSONRPC_INTERNAL_ERROR = -32603;
 
 // Application-specific codes (-32000 to -32099 reserved)
-[[maybe_unused]] static constexpr int JSONRPC_APP_NOT_FOUND     = -32000;
+[[maybe_unused]] static constexpr int JSONRPC_APP_NOT_FOUND = -32000;
 [[maybe_unused]] static constexpr int JSONRPC_APP_INVALID_PARAM = -32001;
-[[maybe_unused]] static constexpr int JSONRPC_APP_UNAUTHORIZED  = -32002;
-[[maybe_unused]] static constexpr int JSONRPC_APP_RATE_LIMITED   = -32003;
-[[maybe_unused]] static constexpr int JSONRPC_APP_UNAVAILABLE   = -32004;
-[[maybe_unused]] static constexpr int JSONRPC_APP_CONFLICT      = -32005;
+[[maybe_unused]] static constexpr int JSONRPC_APP_UNAUTHORIZED = -32002;
+[[maybe_unused]] static constexpr int JSONRPC_APP_RATE_LIMITED = -32003;
+[[maybe_unused]] static constexpr int JSONRPC_APP_UNAVAILABLE = -32004;
+[[maybe_unused]] static constexpr int JSONRPC_APP_CONFLICT = -32005;
 
 
 static string
-jsonRpcResult (const string & resultJson, const string & id)
+jsonRpcResult(const string & resultJson, const string & id)
 {
-    return "{\"jsonrpc\":\"2.0\",\"result\":"s + resultJson +
-           ",\"id\":"s + id + "}";
+    return "{\"jsonrpc\":\"2.0\",\"result\":"s + resultJson + ",\"id\":"s + id + "}";
 }
-
 
 
 // ---------------------------------------------------------------------------
@@ -84,7 +92,7 @@ jsonRpcResult (const string & resultJson, const string & id)
 // ---
 
 static bool
-rpcStartQuery (const string & body, string & result)
+rpcStartQuery(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -128,7 +136,7 @@ rpcStartQuery (const string & body, string & result)
 
 
 static bool
-rpcQueryInProgress (const string & body, string & result)
+rpcQueryInProgress(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -151,7 +159,7 @@ rpcQueryInProgress (const string & body, string & result)
 
 
 static bool
-rpcGetQueryStatus (const string & body, string & result)
+rpcGetQueryStatus(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -182,7 +190,7 @@ rpcGetQueryStatus (const string & body, string & result)
 
 
 static bool
-rpcPauseQuery (const string & body, string & result)
+rpcPauseQuery(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -204,7 +212,7 @@ rpcPauseQuery (const string & body, string & result)
 
 
 static bool
-rpcResumeQuery (const string & body, string & result)
+rpcResumeQuery(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -226,7 +234,7 @@ rpcResumeQuery (const string & body, string & result)
 
 
 static bool
-rpcCancelQuery (const string & body, string & result)
+rpcCancelQuery(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -250,7 +258,7 @@ rpcCancelQuery (const string & body, string & result)
 
 
 static bool
-rpcGetQueryResults (const string & body, string & result)
+rpcGetQueryResults(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -269,16 +277,14 @@ rpcGetQueryResults (const string & body, string & result)
     writer.key("peers");
     writer.beginArray();
 
-    for (const auto& peerResult : results)
-    {
+    for (const auto & peerResult : results) {
         writer.beginObject();
         writer.key("peerId");
         writer.value(peerResult.first);
         writer.key("resources");
         writer.beginArray();
 
-        for (const auto& res : peerResult.second.resourceDescList)
-        {
+        for (const auto & res : peerResult.second.resourceDescList) {
             writer.beginObject();
             writer.key("resourceId");
             writer.value(res.resourceId);
@@ -289,8 +295,7 @@ rpcGetQueryResults (const string & body, string & result)
             writer.key("locators");
             writer.beginArray();
 
-            for (const auto& loc : res.locators)
-            {
+            for (const auto & loc : res.locators) {
                 writer.value(loc);
             }
 
@@ -309,12 +314,11 @@ rpcGetQueryResults (const string & body, string & result)
 }
 
 
-
 // Peer methods
 // ---
 
 static bool
-rpcGetAllPeers (const string & body, string & result)
+rpcGetAllPeers(const string & body, string & result)
 {
     DtcpStackInterface::t_DtcpPeerIdList peerIds;
     if (!DtcpStackInterface::getAllDtcpPeerIds(peerIds))
@@ -325,8 +329,7 @@ rpcGetAllPeers (const string & body, string & result)
     writer.key("peerIds");
     writer.beginArray();
 
-    for (const auto& id : peerIds)
-    {
+    for (const auto & id : peerIds) {
         writer.value(id);
     }
 
@@ -338,7 +341,7 @@ rpcGetAllPeers (const string & body, string & result)
 
 
 static bool
-rpcGetPeer (const string & body, string & result)
+rpcGetPeer(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -373,7 +376,7 @@ rpcGetPeer (const string & body, string & result)
 
 
 static bool
-rpcAddPeer (const string & body, string & result)
+rpcAddPeer(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -409,7 +412,7 @@ rpcAddPeer (const string & body, string & result)
 
 
 static bool
-rpcGetPeerId (const string & body, string & result)
+rpcGetPeerId(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -445,7 +448,7 @@ rpcGetPeerId (const string & body, string & result)
 
 
 static bool
-rpcActivatePeer (const string & body, string & result)
+rpcActivatePeer(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -467,7 +470,7 @@ rpcActivatePeer (const string & body, string & result)
 
 
 static bool
-rpcDeactivatePeer (const string & body, string & result)
+rpcDeactivatePeer(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -489,7 +492,7 @@ rpcDeactivatePeer (const string & body, string & result)
 
 
 static bool
-rpcPingPeer (const string & body, string & result)
+rpcPingPeer(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -510,12 +513,11 @@ rpcPingPeer (const string & body, string & result)
 }
 
 
-
 // Network filter methods
 // ---
 
 static bool
-rpcExcludeHost (const string & body, string & result)
+rpcExcludeHost(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -541,7 +543,7 @@ rpcExcludeHost (const string & body, string & result)
 
 
 static bool
-rpcExcludeSubnet (const string & body, string & result)
+rpcExcludeSubnet(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -574,7 +576,7 @@ rpcExcludeSubnet (const string & body, string & result)
 
 
 static bool
-rpcAllowHost (const string & body, string & result)
+rpcAllowHost(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -600,7 +602,7 @@ rpcAllowHost (const string & body, string & result)
 
 
 static bool
-rpcAllowSubnet (const string & body, string & result)
+rpcAllowSubnet(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -626,7 +628,7 @@ rpcAllowSubnet (const string & body, string & result)
 
 
 static bool
-rpcListExcludedHosts (const string & body, string & result)
+rpcListExcludedHosts(const string & body, string & result)
 {
     DtcpStackInterface::t_IpAddressList hostList;
     if (!DtcpStackInterface::listExcludedHosts(hostList))
@@ -637,8 +639,7 @@ rpcListExcludedHosts (const string & body, string & result)
     writer.key("hosts");
     writer.beginArray();
 
-    for (const auto& host : hostList)
-    {
+    for (const auto & host : hostList) {
         writer.value(host);
     }
 
@@ -650,7 +651,7 @@ rpcListExcludedHosts (const string & body, string & result)
 
 
 static bool
-rpcListExcludedSubnets (const string & body, string & result)
+rpcListExcludedSubnets(const string & body, string & result)
 {
     DtcpStackInterface::t_SubnetAddressList subnetList;
     if (!DtcpStackInterface::listExcludedSubnets(subnetList))
@@ -661,8 +662,7 @@ rpcListExcludedSubnets (const string & body, string & result)
     writer.key("subnets");
     writer.beginArray();
 
-    for (const auto& subnet : subnetList)
-    {
+    for (const auto & subnet : subnetList) {
         writer.beginObject();
         writer.key("ipAddress");
         writer.value(subnet->ipAddress);
@@ -678,12 +678,11 @@ rpcListExcludedSubnets (const string & body, string & result)
 }
 
 
-
 // Group methods
 // ---
 
 static bool
-rpcCreateGroup (const string & body, string & result)
+rpcCreateGroup(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -709,7 +708,7 @@ rpcCreateGroup (const string & body, string & result)
 
 
 static bool
-rpcDeleteGroup (const string & body, string & result)
+rpcDeleteGroup(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -731,7 +730,7 @@ rpcDeleteGroup (const string & body, string & result)
 
 
 static bool
-rpcListGroups (const string & body, string & result)
+rpcListGroups(const string & body, string & result)
 {
     AlpineStackInterface::t_IdList groupIds;
     if (!AlpineStackInterface::listGroups(groupIds))
@@ -742,8 +741,7 @@ rpcListGroups (const string & body, string & result)
     writer.key("groupIds");
     writer.beginArray();
 
-    for (const auto& id : groupIds)
-    {
+    for (const auto & id : groupIds) {
         writer.value(id);
     }
 
@@ -755,7 +753,7 @@ rpcListGroups (const string & body, string & result)
 
 
 static bool
-rpcGetGroupInfo (const string & body, string & result)
+rpcGetGroupInfo(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -788,7 +786,7 @@ rpcGetGroupInfo (const string & body, string & result)
 
 
 static bool
-rpcGetDefaultGroupInfo (const string & body, string & result)
+rpcGetDefaultGroupInfo(const string & body, string & result)
 {
     AlpineStackInterface::t_GroupInfo info;
     if (!AlpineStackInterface::getDefaultGroupInfo(info))
@@ -815,7 +813,7 @@ rpcGetDefaultGroupInfo (const string & body, string & result)
 
 
 static bool
-rpcGetGroupPeerList (const string & body, string & result)
+rpcGetGroupPeerList(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -832,8 +830,7 @@ rpcGetGroupPeerList (const string & body, string & result)
     writer.key("peerIds");
     writer.beginArray();
 
-    for (const auto& id : peerIds)
-    {
+    for (const auto & id : peerIds) {
         writer.value(id);
     }
 
@@ -845,7 +842,7 @@ rpcGetGroupPeerList (const string & body, string & result)
 
 
 static bool
-rpcAddPeerToGroup (const string & body, string & result)
+rpcAddPeerToGroup(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -871,7 +868,7 @@ rpcAddPeerToGroup (const string & body, string & result)
 
 
 static bool
-rpcRemovePeerFromGroup (const string & body, string & result)
+rpcRemovePeerFromGroup(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -896,12 +893,11 @@ rpcRemovePeerFromGroup (const string & body, string & result)
 }
 
 
-
 // Module methods
 // ---
 
 static bool
-rpcRegisterModule (const string & body, string & result)
+rpcRegisterModule(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -918,8 +914,7 @@ rpcRegisterModule (const string & body, string & result)
     if (Configuration::getValue("Module Directory", allowedDir) && !allowedDir.empty()) {
         char resolvedPath[PATH_MAX];
         char resolvedAllowed[PATH_MAX];
-        if (!realpath(libraryPath.c_str(), resolvedPath) ||
-            !realpath(allowedDir.c_str(), resolvedAllowed))
+        if (!realpath(libraryPath.c_str(), resolvedPath) || !realpath(allowedDir.c_str(), resolvedAllowed))
             return false;
         if (string(resolvedPath).find(resolvedAllowed) != 0)
             return false;
@@ -944,7 +939,7 @@ rpcRegisterModule (const string & body, string & result)
 
 
 static bool
-rpcUnregisterModule (const string & body, string & result)
+rpcUnregisterModule(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -966,7 +961,7 @@ rpcUnregisterModule (const string & body, string & result)
 
 
 static bool
-rpcLoadModule (const string & body, string & result)
+rpcLoadModule(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -988,7 +983,7 @@ rpcLoadModule (const string & body, string & result)
 
 
 static bool
-rpcUnloadModule (const string & body, string & result)
+rpcUnloadModule(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -1010,7 +1005,7 @@ rpcUnloadModule (const string & body, string & result)
 
 
 static bool
-rpcListActiveModules (const string & body, string & result)
+rpcListActiveModules(const string & body, string & result)
 {
     AlpineStackInterface::t_IdList moduleIds;
     if (!AlpineStackInterface::listActiveModules(moduleIds))
@@ -1021,8 +1016,7 @@ rpcListActiveModules (const string & body, string & result)
     writer.key("moduleIds");
     writer.beginArray();
 
-    for (const auto& id : moduleIds)
-    {
+    for (const auto & id : moduleIds) {
         writer.value(id);
     }
 
@@ -1034,7 +1028,7 @@ rpcListActiveModules (const string & body, string & result)
 
 
 static bool
-rpcListAllModules (const string & body, string & result)
+rpcListAllModules(const string & body, string & result)
 {
     AlpineStackInterface::t_IdList moduleIds;
     if (!AlpineStackInterface::listAllModules(moduleIds))
@@ -1045,8 +1039,7 @@ rpcListAllModules (const string & body, string & result)
     writer.key("moduleIds");
     writer.beginArray();
 
-    for (const auto& id : moduleIds)
-    {
+    for (const auto & id : moduleIds) {
         writer.value(id);
     }
 
@@ -1058,7 +1051,7 @@ rpcListAllModules (const string & body, string & result)
 
 
 static bool
-rpcGetModuleInfo (const string & body, string & result)
+rpcGetModuleInfo(const string & body, string & result)
 {
     JsonReader reader(body);
 
@@ -1092,12 +1085,11 @@ rpcGetModuleInfo (const string & body, string & result)
 }
 
 
-
 // Status methods
 // ---
 
 static bool
-rpcGetStatus (const string & body, string & result)
+rpcGetStatus(const string & body, string & result)
 {
     JsonWriter writer;
     writer.beginObject();
@@ -1111,86 +1103,80 @@ rpcGetStatus (const string & body, string & result)
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Method dispatch table
 // ---------------------------------------------------------------------------
 
-using t_RpcMethod = bool(*)(const string &, string &);
+using t_RpcMethod = bool (*)(const string &, string &);
 
-using t_MethodTable = std::unordered_map<string,
-                 t_RpcMethod,
-                 OptHash<string>,
-                 equal_to<string> >;
+using t_MethodTable = std::unordered_map<string, t_RpcMethod, OptHash<string>, equal_to<string>>;
 
-static t_MethodTable  methodTable_s;
-static bool           tableInitialized_s = false;
+static t_MethodTable methodTable_s;
+static bool tableInitialized_s = false;
 
 
 static void
-initMethodTable ()
+initMethodTable()
 {
     if (tableInitialized_s)
         return;
 
     // Query
-    methodTable_s.emplace("startQuery",        rpcStartQuery);
-    methodTable_s.emplace("queryInProgress",   rpcQueryInProgress);
-    methodTable_s.emplace("getQueryStatus",    rpcGetQueryStatus);
-    methodTable_s.emplace("pauseQuery",        rpcPauseQuery);
-    methodTable_s.emplace("resumeQuery",       rpcResumeQuery);
-    methodTable_s.emplace("cancelQuery",       rpcCancelQuery);
-    methodTable_s.emplace("getQueryResults",   rpcGetQueryResults);
+    methodTable_s.emplace("startQuery", rpcStartQuery);
+    methodTable_s.emplace("queryInProgress", rpcQueryInProgress);
+    methodTable_s.emplace("getQueryStatus", rpcGetQueryStatus);
+    methodTable_s.emplace("pauseQuery", rpcPauseQuery);
+    methodTable_s.emplace("resumeQuery", rpcResumeQuery);
+    methodTable_s.emplace("cancelQuery", rpcCancelQuery);
+    methodTable_s.emplace("getQueryResults", rpcGetQueryResults);
 
     // Peer
-    methodTable_s.emplace("getAllPeers",       rpcGetAllPeers);
-    methodTable_s.emplace("getPeer",           rpcGetPeer);
-    methodTable_s.emplace("addPeer",           rpcAddPeer);
-    methodTable_s.emplace("getPeerId",         rpcGetPeerId);
-    methodTable_s.emplace("activatePeer",      rpcActivatePeer);
-    methodTable_s.emplace("deactivatePeer",    rpcDeactivatePeer);
-    methodTable_s.emplace("pingPeer",          rpcPingPeer);
+    methodTable_s.emplace("getAllPeers", rpcGetAllPeers);
+    methodTable_s.emplace("getPeer", rpcGetPeer);
+    methodTable_s.emplace("addPeer", rpcAddPeer);
+    methodTable_s.emplace("getPeerId", rpcGetPeerId);
+    methodTable_s.emplace("activatePeer", rpcActivatePeer);
+    methodTable_s.emplace("deactivatePeer", rpcDeactivatePeer);
+    methodTable_s.emplace("pingPeer", rpcPingPeer);
 
     // Network filter
-    methodTable_s.emplace("excludeHost",           rpcExcludeHost);
-    methodTable_s.emplace("excludeSubnet",         rpcExcludeSubnet);
-    methodTable_s.emplace("allowHost",             rpcAllowHost);
-    methodTable_s.emplace("allowSubnet",           rpcAllowSubnet);
-    methodTable_s.emplace("listExcludedHosts",     rpcListExcludedHosts);
-    methodTable_s.emplace("listExcludedSubnets",   rpcListExcludedSubnets);
+    methodTable_s.emplace("excludeHost", rpcExcludeHost);
+    methodTable_s.emplace("excludeSubnet", rpcExcludeSubnet);
+    methodTable_s.emplace("allowHost", rpcAllowHost);
+    methodTable_s.emplace("allowSubnet", rpcAllowSubnet);
+    methodTable_s.emplace("listExcludedHosts", rpcListExcludedHosts);
+    methodTable_s.emplace("listExcludedSubnets", rpcListExcludedSubnets);
 
     // Group
-    methodTable_s.emplace("createGroup",           rpcCreateGroup);
-    methodTable_s.emplace("deleteGroup",           rpcDeleteGroup);
-    methodTable_s.emplace("listGroups",            rpcListGroups);
-    methodTable_s.emplace("getGroupInfo",          rpcGetGroupInfo);
-    methodTable_s.emplace("getDefaultGroupInfo",   rpcGetDefaultGroupInfo);
-    methodTable_s.emplace("getGroupPeerList",      rpcGetGroupPeerList);
-    methodTable_s.emplace("addPeerToGroup",        rpcAddPeerToGroup);
-    methodTable_s.emplace("removePeerFromGroup",   rpcRemovePeerFromGroup);
+    methodTable_s.emplace("createGroup", rpcCreateGroup);
+    methodTable_s.emplace("deleteGroup", rpcDeleteGroup);
+    methodTable_s.emplace("listGroups", rpcListGroups);
+    methodTable_s.emplace("getGroupInfo", rpcGetGroupInfo);
+    methodTable_s.emplace("getDefaultGroupInfo", rpcGetDefaultGroupInfo);
+    methodTable_s.emplace("getGroupPeerList", rpcGetGroupPeerList);
+    methodTable_s.emplace("addPeerToGroup", rpcAddPeerToGroup);
+    methodTable_s.emplace("removePeerFromGroup", rpcRemovePeerFromGroup);
 
     // Module — registerModule gated by config
     {
         string moduleRegistrationEnabled;
         if (Configuration::getValue("Module Registration Enabled", moduleRegistrationEnabled) &&
-            (moduleRegistrationEnabled == "true" || moduleRegistrationEnabled == "1"))
-        {
+            (moduleRegistrationEnabled == "true" || moduleRegistrationEnabled == "1")) {
             methodTable_s.emplace("registerModule", rpcRegisterModule);
         }
     }
-    methodTable_s.emplace("unregisterModule",  rpcUnregisterModule);
-    methodTable_s.emplace("loadModule",        rpcLoadModule);
-    methodTable_s.emplace("unloadModule",      rpcUnloadModule);
+    methodTable_s.emplace("unregisterModule", rpcUnregisterModule);
+    methodTable_s.emplace("loadModule", rpcLoadModule);
+    methodTable_s.emplace("unloadModule", rpcUnloadModule);
     methodTable_s.emplace("listActiveModules", rpcListActiveModules);
-    methodTable_s.emplace("listAllModules",    rpcListAllModules);
-    methodTable_s.emplace("getModuleInfo",     rpcGetModuleInfo);
+    methodTable_s.emplace("listAllModules", rpcListAllModules);
+    methodTable_s.emplace("getModuleInfo", rpcGetModuleInfo);
 
     // Status
-    methodTable_s.emplace("getStatus",         rpcGetStatus);
+    methodTable_s.emplace("getStatus", rpcGetStatus);
 
     tableInitialized_s = true;
 }
-
 
 
 // ---------------------------------------------------------------------------
@@ -1198,20 +1184,17 @@ initMethodTable ()
 // ---------------------------------------------------------------------------
 
 void
-JsonRpcHandler::registerRoutes (HttpRouter & router)
+JsonRpcHandler::registerRoutes(HttpRouter & router)
 {
     initMethodTable();
     router.addRoute("POST", "/rpc", handleRpc);
 }
 
 
-
 HttpResponse
-JsonRpcHandler::handleRpc (const HttpRequest & request,
-                           const std::unordered_map<string, string> & params)
+JsonRpcHandler::handleRpc(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
-    if (request.body.empty())
-    {
+    if (request.body.empty()) {
         string err = jsonRpcError(JSONRPC_PARSE_ERROR, "Parse error", "null");
         return HttpResponse::ok(err);
     }
@@ -1221,18 +1204,15 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
     // Validate jsonrpc version
     string version;
     reader.getString("jsonrpc", version);
-    if (version != "2.0")
-    {
+    if (version != "2.0") {
         string err = jsonRpcError(JSONRPC_INVALID_REQUEST, "Invalid Request", "null");
         return HttpResponse::ok(err);
     }
 
     // Extract method
     string method;
-    if (!reader.getString("method", method))
-    {
-        string err = jsonRpcError(JSONRPC_INVALID_REQUEST, "Invalid Request", "null",
-                                  "Missing 'method' field"s);
+    if (!reader.getString("method", method)) {
+        string err = jsonRpcError(JSONRPC_INVALID_REQUEST, "Invalid Request", "null", "Missing 'method' field"s);
         return HttpResponse::ok(err);
     }
 
@@ -1248,19 +1228,16 @@ JsonRpcHandler::handleRpc (const HttpRequest & request,
 
     // Look up method in dispatch table
     auto iter = methodTable_s.find(method);
-    if (iter == methodTable_s.end())
-    {
-        string err = jsonRpcError(JSONRPC_METHOD_NOT_FOUND, "Method not found", idStr,
-                                  method);
+    if (iter == methodTable_s.end()) {
+        string err = jsonRpcError(JSONRPC_METHOD_NOT_FOUND, "Method not found", idStr, method);
         return HttpResponse::ok(err);
     }
 
     // Dispatch — pass the full body so handler can read params via JsonReader
     string result;
-    if (!iter->second(request.body, result))
-    {
-        string err = jsonRpcError(JSONRPC_INTERNAL_ERROR, "Internal error", idStr,
-                                  "Method '"s + method + "' execution failed"s);
+    if (!iter->second(request.body, result)) {
+        string err =
+            jsonRpcError(JSONRPC_INTERNAL_ERROR, "Internal error", idStr, "Method '"s + method + "' execution failed"s);
         return HttpResponse::ok(err);
     }
 

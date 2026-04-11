@@ -3,8 +3,8 @@
 
 #pragma once
 #include <Common.h>
-#include <ReadWriteSem.h>
 #include <OptHash.h>
+#include <ReadWriteSem.h>
 #include <vector>
 
 
@@ -14,9 +14,8 @@ class AlpineGroup;
 class AlpineGroupMgr
 {
   public:
-
-    AlpineGroupMgr () = default;
-    ~AlpineGroupMgr () = default;
+    AlpineGroupMgr() = default;
+    ~AlpineGroupMgr() = default;
 
 
     // Public types
@@ -24,69 +23,50 @@ class AlpineGroupMgr
     using t_GroupIdList = vector<ulong>;
 
 
+    static bool createGroup(const string & name, const string & description, AlpineGroup *& group);
 
-    static bool  createGroup (const string &  name,
-                              const string &  description,
-                              AlpineGroup *&  group);
+    static bool copyGroup(ulong copyGroupId, const string & name, const string & description, AlpineGroup *& group);
 
-    static bool  copyGroup (ulong           copyGroupId,
-                            const string &  name,
-                            const string &  description,
-                            AlpineGroup *&  group);
+    static bool deleteGroup(ulong groupId);
 
-    static bool  deleteGroup (ulong  groupId);
+    static bool exists(const string & groupName);
 
-    static bool  exists (const string &  groupName);
+    static bool exists(ulong groupId);
 
-    static bool  exists (ulong  groupId);
+    static bool listGroups(t_GroupIdList & groupIdList);
 
-    static bool  listGroups (t_GroupIdList &  groupIdList);
+    static bool locateGroup(ulong groupId, AlpineGroup *& group);
 
-    static bool  locateGroup (ulong           groupId,
-                              AlpineGroup *&  group);
+    static bool locateGroup(const string & groupName, AlpineGroup *& group);
 
-    static bool  locateGroup (const string &  groupName,
-                              AlpineGroup *&  group);
-
-    static bool  getDefaultGroup (AlpineGroup *&  group);
-
+    static bool getDefaultGroup(AlpineGroup *& group);
 
 
     // Private types
     //
-    using t_GroupIdIndex = std::unordered_map< ulong,
-                      AlpineGroup *,
-                      OptHash<ulong>,
-                      equal_to<ulong> >;
+    using t_GroupIdIndex = std::unordered_map<ulong, AlpineGroup *, OptHash<ulong>, equal_to<ulong>>;
 
     using t_GroupIdIndexPair = std::pair<ulong, AlpineGroup *>;
 
-    using t_GroupNameIndex = std::unordered_map< string,
-                      AlpineGroup *,
-                      OptHash<string>,
-                      equal_to<string> >;
+    using t_GroupNameIndex = std::unordered_map<string, AlpineGroup *, OptHash<string>, equal_to<string>>;
 
     using t_GroupNameIndexPair = std::pair<string, AlpineGroup *>;
 
 
   private:
-
-    static bool                 initialized_s;
-    static AlpineGroup *        defaultGroup_s;
-    static t_GroupIdIndex *     groupIdIndex_s;
-    static t_GroupNameIndex *   groupNameIndex_s;
-    static ulong                currGroupId_s;
-    static ReadWriteSem         dataLock_s;
+    static bool initialized_s;
+    static AlpineGroup * defaultGroup_s;
+    static t_GroupIdIndex * groupIdIndex_s;
+    static t_GroupNameIndex * groupNameIndex_s;
+    static ulong currGroupId_s;
+    static ReadWriteSem dataLock_s;
 
 
     // Initialization performed by AlpineStack
     //
-    static bool  initialize ();
-
+    static bool initialize();
 
 
     friend class AlpineStack;
     friend class AlpineGroup;
 };
-
-

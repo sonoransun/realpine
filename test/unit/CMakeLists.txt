@@ -27,11 +27,13 @@ catch_discover_tests(test_http_request)
 add_executable(test_http_response
     test_http_response.cpp
     ${REST_SRC_DIR}/HttpResponse.cpp
+    ${REST_SRC_DIR}/Compression.cpp
 )
 target_include_directories(test_http_response PRIVATE ${REST_SRC_DIR})
 target_link_libraries(test_http_response PRIVATE
     Catch2::Catch2WithMain
     Alpine::AppUtils
+    ZLIB::ZLIB
 )
 catch_discover_tests(test_http_response)
 
@@ -41,11 +43,13 @@ add_executable(test_http_router
     ${REST_SRC_DIR}/HttpRouter.cpp
     ${REST_SRC_DIR}/HttpRequest.cpp
     ${REST_SRC_DIR}/HttpResponse.cpp
+    ${REST_SRC_DIR}/Compression.cpp
 )
 target_include_directories(test_http_router PRIVATE ${REST_SRC_DIR})
 target_link_libraries(test_http_router PRIVATE
     Catch2::Catch2WithMain
     Alpine::AppUtils
+    ZLIB::ZLIB
 )
 catch_discover_tests(test_http_router)
 
@@ -55,11 +59,13 @@ add_executable(test_api_key_auth
     ${REST_SRC_DIR}/ApiKeyAuth.cpp
     ${REST_SRC_DIR}/HttpRequest.cpp
     ${REST_SRC_DIR}/HttpResponse.cpp
+    ${REST_SRC_DIR}/Compression.cpp
 )
 target_include_directories(test_api_key_auth PRIVATE ${REST_SRC_DIR})
 target_link_libraries(test_api_key_auth PRIVATE
     Catch2::Catch2WithMain
     Alpine::AppUtils
+    ZLIB::ZLIB
 )
 catch_discover_tests(test_api_key_auth)
 
@@ -70,6 +76,14 @@ target_link_libraries(test_readwritesem PRIVATE
     Alpine::ThreadUtils
 )
 catch_discover_tests(test_readwritesem)
+
+# --- ThreadName tests ---
+add_executable(test_thread_name test_thread_name.cpp)
+target_link_libraries(test_thread_name PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::ThreadUtils
+)
+catch_discover_tests(test_thread_name)
 
 # --- Configuration tests ---
 add_executable(test_configuration test_configuration.cpp)
@@ -94,6 +108,22 @@ target_link_libraries(test_secure_string PRIVATE
     Alpine::AppUtils
 )
 catch_discover_tests(test_secure_string)
+
+# --- SecureString zeroization tests ---
+add_executable(test_secure_string_zero test_secure_string_zero.cpp)
+target_link_libraries(test_secure_string_zero PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_secure_string_zero)
+
+# --- Platform random bytes tests ---
+add_executable(test_platform_random test_platform_random.cpp)
+target_link_libraries(test_platform_random PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_platform_random)
 
 # --- Error tests ---
 add_executable(test_error test_error.cpp)
@@ -248,3 +278,49 @@ target_link_libraries(test_access_tracker PRIVATE
     nlohmann_json::nlohmann_json
 )
 catch_discover_tests(test_access_tracker)
+
+# --- AlpinePacket tests ---
+add_executable(test_alpine_packet test_alpine_packet.cpp)
+target_link_libraries(test_alpine_packet PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AlpineProtocol
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+)
+catch_discover_tests(test_alpine_packet)
+
+# --- PollSet tests ---
+add_executable(test_poll_set test_poll_set.cpp)
+target_link_libraries(test_poll_set PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AppUtils
+)
+catch_discover_tests(test_poll_set)
+
+# --- UdpConnection tests ---
+add_executable(test_udp_connection test_udp_connection.cpp)
+target_link_libraries(test_udp_connection PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::NetUtils
+    Alpine::AppUtils
+)
+catch_discover_tests(test_udp_connection)
+
+# --- UdpConnection SO_REUSEPORT tests ---
+add_executable(test_udp_reuseport test_udp_reuseport.cpp)
+target_link_libraries(test_udp_reuseport PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::NetUtils
+    Alpine::AppUtils
+)
+catch_discover_tests(test_udp_reuseport)
+
+# --- AlpineRatingEngine tests ---
+add_executable(test_rating_engine test_rating_engine.cpp)
+target_link_libraries(test_rating_engine PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::AlpineProtocol
+    Alpine::ConfigUtils
+    Alpine::ThreadUtils
+)
+catch_discover_tests(test_rating_engine)

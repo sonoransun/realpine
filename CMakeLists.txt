@@ -24,6 +24,9 @@ option(ALPINE_ENABLE_UPNP "Enable UPnP IGD port mapping" OFF)
 option(ALPINE_ENABLE_FUSE "Enable FUSE virtual filesystem" OFF)
 option(ALPINE_ENABLE_COVERAGE "Enable code coverage instrumentation" OFF)
 option(ALPINE_USE_SYSTEM_DEPS "Use system-installed dependencies via find_package instead of FetchContent" OFF)
+option(ALPINE_WARNINGS_AS_ERRORS "Promote compiler warnings to errors (CI uses this)" OFF)
+option(ALPINE_ENABLE_LTO "Enable link-time optimization for Release builds" OFF)
+option(ALPINE_INSTALL_SYSTEMD "Install systemd unit file (Linux only)" OFF)
 set(ALPINE_SANITIZER "" CACHE STRING
     "Enable sanitizer instrumentation (address, undefined, thread, memory, or comma-separated combo)")
 
@@ -35,8 +38,55 @@ set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "-pg" CACHE STRING "Shared linker flags fo
 # Common flags interface target
 add_library(AlpineFlags INTERFACE)
 add_library(Alpine::Flags ALIAS AlpineFlags)
+
+# Warning set — applies to every Alpine translation unit.  The curated set
+# below catches real bugs in this codebase without requiring the long-tail
+# shadow/conversion cleanup that -Wshadow / -Wconversion would demand.
+# `-Werror` is opt-in via ALPINE_WARNINGS_AS_ERRORS so local developer
+# builds remain warning-friendly while CI stays strict.
+set(ALPINE_WARNING_FLAGS
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wformat=2
+    -Wnon-virtual-dtor
+    -Wimplicit-fallthrough
+    -Wmisleading-indentation
+    -Wdouble-promotion
+    -Wno-unused-parameter
+    -Wno-unused-variable
+    -Wno-unused-function
+    -Wno-unused-result
+    -Wno-sign-compare
+    -Wno-missing-field-initializers
+    -Wno-deprecated-declarations
+    -Wno-deprecated-copy
+    -Wno-missing-braces
+    -Wno-reorder
+)
+# These warning-disables exist only on GCC.  Clang rejects `-Wno-class-memaccess`
+# and `-Wno-maybe-uninitialized` as "unknown warning option" under `-Werror`,
+# so gate them on compiler id.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND ALPINE_WARNING_FLAGS
+        -Wno-class-memaccess
+        -Wno-maybe-uninitialized
+        -Wno-unused-but-set-variable
+    )
+endif()
+# Clang's `-Werror` turns unrecognized `-Wno-*` flags into errors; accept them
+# instead so we can keep a single shared flag list across compilers.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    list(APPEND ALPINE_WARNING_FLAGS -Wno-unknown-warning-option)
+endif()
+
+if(ALPINE_WARNINGS_AS_ERRORS)
+    list(APPEND ALPINE_WARNING_FLAGS -Werror)
+    message(STATUS "ALPINE_WARNINGS_AS_ERRORS: warnings are fatal")
+endif()
+
 if(WIN32)
-    target_compile_options(AlpineFlags INTERFACE -Wall)
+    target_compile_options(AlpineFlags INTERFACE ${ALPINE_WARNING_FLAGS})
     target_compile_definitions(AlpineFlags INTERFACE
         WIN32_LEAN_AND_MEAN
         _WIN32_WINNT=0x0600
@@ -45,7 +95,7 @@ if(WIN32)
         _VERBOSE
     )
 else()
-    target_compile_options(AlpineFlags INTERFACE -Wall)
+    target_compile_options(AlpineFlags INTERFACE ${ALPINE_WARNING_FLAGS})
     target_compile_definitions(AlpineFlags INTERFACE
         _GNU_SOURCE
         _POSIX_THREADS
@@ -53,6 +103,44 @@ else()
         _REENTRANT
         _VERBOSE
     )
+endif()
+
+# Linux Release-mode hardening flags.  `-D_FORTIFY_SOURCE=2` requires at least
+# `-O1`, so these are gated on Release / RelWithDebInfo / Profile.  The
+# generator expression keeps Debug builds debuggable.
+#
+# `-fPIE`/`-pie` MUST only be applied to executables.  If we push them into
+# an INTERFACE library that is consumed by SHARED targets, the resulting
+# objects end up with PIE-only TLS relocations (R_X86_64_TPOFF32) that the
+# linker rejects with "can not be used when making a shared object".  Gate
+# them on TARGET_PROPERTY:TYPE so that CMake's own PIC handling
+# (CMAKE_POSITION_INDEPENDENT_CODE=ON) supplies `-fPIC` for libraries and we
+# only add `-fPIE`/`-pie` on top for EXECUTABLE consumers.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT WIN32)
+    target_compile_options(AlpineFlags INTERFACE
+        $<$<NOT:$<CONFIG:Debug>>:-fstack-protector-strong>
+        $<$<NOT:$<CONFIG:Debug>>:-D_FORTIFY_SOURCE=2>
+        $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:-fPIE>
+    )
+    target_link_options(AlpineFlags INTERFACE
+        -Wl,-z,relro
+        -Wl,-z,now
+        -Wl,-z,noexecstack
+        $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:-pie>
+    )
+endif()
+
+# Link-time optimization (opt-in).  Disable for Debug to keep build times sane.
+if(ALPINE_ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ALPINE_IPO_SUPPORTED OUTPUT ALPINE_IPO_ERROR)
+    if(ALPINE_IPO_SUPPORTED)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO TRUE)
+        message(STATUS "LTO / IPO enabled for Release builds")
+    else()
+        message(WARNING "LTO requested but not supported by compiler: ${ALPINE_IPO_ERROR}")
+    endif()
 endif()
 
 # Sanitizer support (requires Clang or GCC >= 4.8)
@@ -69,14 +157,86 @@ if(ALPINE_SANITIZER)
 endif()
 
 if(ALPINE_ENABLE_COVERAGE)
-    target_compile_options(AlpineFlags INTERFACE --coverage)
+    # `-fprofile-update=atomic` avoids the "negative count" gcov error that
+    # libstdc++'s heavily-inlined <format> / <string> produce when multiple
+    # threads update the same counter concurrently (as they do in Catch2's
+    # test harness).
+    target_compile_options(AlpineFlags INTERFACE --coverage -O0 -g -fprofile-update=atomic)
     target_link_options(AlpineFlags INTERFACE --coverage)
     message(STATUS "Code coverage instrumentation enabled")
+
+    # `make coverage` → run ctest, capture .gcda, filter out third-party,
+    # emit an HTML report under build/coverage/.  Requires lcov + genhtml.
+    find_program(LCOV_PROGRAM   NAMES lcov)
+    find_program(GENHTML_PROGRAM NAMES genhtml)
+    if(LCOV_PROGRAM AND GENHTML_PROGRAM)
+        # gcov version has to match the compiler that produced the .gcno files.
+        # lcov defaults to whatever `gcov` is on PATH, which on this host is
+        # gcc-13's gcov — not the gcc-14 we actually compile with.  Pick a
+        # matching gcov tool from the same toolchain as CMAKE_CXX_COMPILER.
+        get_filename_component(_cxx_dir  "${CMAKE_CXX_COMPILER}" DIRECTORY)
+        get_filename_component(_cxx_name "${CMAKE_CXX_COMPILER}" NAME)
+        string(REGEX REPLACE "^g\\+\\+" "gcov" _gcov_name "${_cxx_name}")
+        find_program(ALPINE_GCOV_TOOL NAMES ${_gcov_name} gcov-14 gcov HINTS ${_cxx_dir})
+        set(_gcov_arg "")
+        if(ALPINE_GCOV_TOOL)
+            set(_gcov_arg "--gcov-tool" "${ALPINE_GCOV_TOOL}")
+            message(STATUS "Coverage gcov tool: ${ALPINE_GCOV_TOOL}")
+        endif()
+        add_custom_target(coverage
+            COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure --timeout 180 || true
+            COMMAND ${LCOV_PROGRAM} --capture --directory ${CMAKE_BINARY_DIR}
+                --output-file ${CMAKE_BINARY_DIR}/coverage.info --quiet
+                ${_gcov_arg}
+                --rc geninfo_unexecuted_blocks=1
+                --ignore-errors mismatch,unused,empty,source,version,inconsistent,negative,gcov,format
+            COMMAND ${LCOV_PROGRAM} --remove ${CMAKE_BINARY_DIR}/coverage.info
+                "'*/_deps/*'" "'*/build*/*'" "'*/test/*'" "'/usr/*'"
+                --output-file ${CMAKE_BINARY_DIR}/coverage.info --quiet
+                ${_gcov_arg}
+                --ignore-errors unused,inconsistent
+            COMMAND ${GENHTML_PROGRAM} ${CMAKE_BINARY_DIR}/coverage.info
+                --output-directory ${CMAKE_BINARY_DIR}/coverage --quiet
+                --ignore-errors source,unmapped,inconsistent,category,negative
+            COMMENT "Generating coverage report in ${CMAKE_BINARY_DIR}/coverage/"
+            VERBATIM
+            USES_TERMINAL
+        )
+    else()
+        message(WARNING "Coverage enabled but lcov/genhtml not found — 'coverage' target not created")
+    endif()
 endif()
 
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
 target_link_libraries(AlpineFlags INTERFACE Threads::Threads)
+
+# Probe for optional platform symbols so we can take the fast paths when
+# the host libc exposes them and fall back cleanly elsewhere.
+# NB: several of these (explicit_bzero, accept4, pthread_setname_np) are
+# glibc extensions guarded by _GNU_SOURCE, so the probe must see that define
+# even though AlpineFlags adds it to real build targets later.
+include(CheckSymbolExists)
+set(_ALPINE_PROBE_DEFS_SAVED "${CMAKE_REQUIRED_DEFINITIONS}")
+if(NOT WIN32)
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS -D_GNU_SOURCE)
+endif()
+# On glibc, explicit_bzero is declared in <string.h> (guarded by __USE_MISC),
+# not <strings.h>. On BSD libc it lives in <strings.h>. Probe both headers so
+# the check fires on either host.
+check_symbol_exists(explicit_bzero "string.h;strings.h" HAVE_EXPLICIT_BZERO)
+check_symbol_exists(getrandom "sys/random.h" HAVE_GETRANDOM)
+check_symbol_exists(accept4 "sys/socket.h" HAVE_ACCEPT4)
+check_symbol_exists(pthread_setname_np "pthread.h" HAVE_PTHREAD_SETNAME_NP)
+set(CMAKE_REQUIRED_DEFINITIONS "${_ALPINE_PROBE_DEFS_SAVED}")
+unset(_ALPINE_PROBE_DEFS_SAVED)
+
+target_compile_definitions(AlpineFlags INTERFACE
+    $<$<BOOL:${HAVE_EXPLICIT_BZERO}>:ALPINE_HAVE_EXPLICIT_BZERO=1>
+    $<$<BOOL:${HAVE_GETRANDOM}>:ALPINE_HAVE_GETRANDOM=1>
+    $<$<BOOL:${HAVE_ACCEPT4}>:ALPINE_HAVE_ACCEPT4=1>
+    $<$<BOOL:${HAVE_PTHREAD_SETNAME_NP}>:ALPINE_HAVE_PTHREAD_SETNAME_NP=1>
+)
 
 if(ALPINE_ENABLE_TLS)
     find_package(OpenSSL REQUIRED)
@@ -244,6 +404,19 @@ add_subdirectory(transport/Alpine)
 # Protocol layer
 add_subdirectory(protocols/Alpine)
 
+# AlpineProtocol and AlpineTransport have mutual symbol references
+# (protocol handlers live in AlpineProtocol but are invoked from transport
+# dispatch code in AlpineTransport, and vice versa).  GNU ld is a single-pass
+# linker that cannot resolve a static-library cycle without --start-group /
+# --end-group.  We wrap both archives in a CMake LINK_GROUP:RESCAN helper and
+# expose it as Alpine::Stack, which every downstream binary and test should
+# link instead of the two libraries directly.
+add_library(AlpineStack INTERFACE)
+add_library(Alpine::Stack ALIAS AlpineStack)
+target_link_libraries(AlpineStack INTERFACE
+    "$<LINK_GROUP:RESCAN,Alpine::AlpineProtocol,Alpine::AlpineTransport>"
+)
+
 # Application core
 add_subdirectory(applcore/ApplCore)
 
@@ -366,6 +539,33 @@ install(DIRECTORY applcore/ApplCore/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alp
 install(DIRECTORY interfaces/AlpineStackInterface/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alpine/AlpineStackInterface FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY interfaces/DtcpStackInterface/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/alpine/DtcpStackInterface FILES_MATCHING PATTERN "*.h")
 
+# Sample configuration installed under ${sysconfdir}/alpine/ — packagers can
+# wire this as a config file via dpkg/rpm conffiles.
+install(FILES packaging/etc/alpine/alpine.conf
+    DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}/alpine
+    COMPONENT runtime
+)
+
+# pkg-config (.pc) file so downstream C++ projects can `pkg-config --cflags alpine`.
+configure_file(
+    ${CMAKE_SOURCE_DIR}/packaging/pkgconfig/alpine.pc.in
+    ${CMAKE_BINARY_DIR}/alpine.pc
+    @ONLY
+)
+install(FILES ${CMAKE_BINARY_DIR}/alpine.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    COMPONENT development
+)
+
+# systemd unit — only installed on Linux and only when explicitly requested,
+# because not every packager wants us to drop files into /lib/systemd/system/.
+if(ALPINE_INSTALL_SYSTEMD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(FILES packaging/systemd/alpine-rest-bridge.service
+        DESTINATION lib/systemd/system
+        COMPONENT runtime
+    )
+endif()
+
 # ---------------------------------------------------------------------------
 # CPack configuration
 # ---------------------------------------------------------------------------
@@ -384,10 +584,30 @@ set(CPACK_GENERATOR "TGZ")
 # DEB settings
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "sonoransun")
 set(CPACK_DEBIAN_PACKAGE_SECTION "net")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/sonoransun/alpine")
+# Base runtime dependencies; SHLIBDEPS fills in the libc6/libstdc++6/libssl3 lines
+# automatically, so this is just a floor for packages that link optional features.
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.38), libstdc++6 (>= 14), zlib1g")
+if(ALPINE_ENABLE_TLS)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libssl3")
+endif()
+if(ALPINE_ENABLE_FUSE)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libfuse3-3")
+endif()
+set(CPACK_DEBIAN_PACKAGE_RECOMMENDS "tini")
 
 # RPM settings
 set(CPACK_RPM_PACKAGE_LICENSE "LGPL")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Internet")
+set(CPACK_RPM_PACKAGE_URL "https://github.com/sonoransun/alpine")
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc >= 2.38, libstdc++ >= 14, zlib")
+if(ALPINE_ENABLE_TLS)
+    set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, openssl-libs")
+endif()
+if(ALPINE_ENABLE_FUSE)
+    set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, fuse3-libs")
+endif()
 
 include(CPack)

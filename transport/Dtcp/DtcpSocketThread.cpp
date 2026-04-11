@@ -1,39 +1,37 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpSocketThread.h>
 #include <DtcpBaseUdpTransport.h>
+#include <DtcpSocketThread.h>
 #include <DtcpThreadTable.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <Platform.h>
+#include <StringUtils.h>
 
 
-DtcpSocketThread::DtcpSocketThread (DtcpBaseUdpTransport * udpTransport)
+DtcpSocketThread::DtcpSocketThread(DtcpBaseUdpTransport * udpTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSocketThread constructor invoked.");
+    Log::Debug("DtcpSocketThread constructor invoked.");
 #endif
 
     udpTransport_ = udpTransport;
 }
 
 
-
-DtcpSocketThread::~DtcpSocketThread ()
+DtcpSocketThread::~DtcpSocketThread()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSocketThread destructor invoked.");
+    Log::Debug("DtcpSocketThread destructor invoked.");
 #endif
 }
 
 
-
-void 
-DtcpSocketThread::threadMain ()
+void
+DtcpSocketThread::threadMain()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpSocketThread::threadMain invoked.");
+    Log::Debug("DtcpSocketThread::threadMain invoked.");
 #endif
 
     bool finished = false;
@@ -43,8 +41,8 @@ DtcpSocketThread::threadMain ()
     // thread if possible.  We use the maximum value as the majority of the thread
     // time is in sleep state waiting on poll() activity. (no system impact)
     //
-    if ( (getuid () == 0) || (geteuid () == 0) ) {
-        nice (-40);
+    if ((getuid() == 0) || (geteuid() == 0)) {
+        nice(-40);
     }
 
     // wait for data on UDP socket and process accordingly.
@@ -52,7 +50,7 @@ DtcpSocketThread::threadMain ()
     //
     while (!finished) {
 
-        status = udpTransport_->processSocketEvents ();
+        status = udpTransport_->processSocketEvents();
 
         if (!status)
             finished = true;
@@ -62,5 +60,3 @@ DtcpSocketThread::threadMain ()
     // wait for resume.
     //
 }
-
-

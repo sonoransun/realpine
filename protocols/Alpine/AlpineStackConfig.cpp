@@ -2,133 +2,123 @@
 
 
 #include <AlpineStackConfig.h>
-#include <NetUtils.h>
 #include <Log.h>
+#include <NetUtils.h>
 #include <StringUtils.h>
 
 
-
-AlpineStackConfig::AlpineStackConfig ()
+AlpineStackConfig::AlpineStackConfig()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig constructor invoked.");
+    Log::Debug("AlpineStackConfig constructor invoked.");
 #endif
 
-    localIpAddress_        = 0;
-    localPort_             = 0;
-    maxConcurrentQueries_  = 0;
+    localIpAddress_ = 0;
+    localPort_ = 0;
+    maxConcurrentQueries_ = 0;
 
-    multicastEnabled_      = false;
-    multicastPort_         = 0;
-    broadcastEnabled_      = false;
-    broadcastPort_         = 0;
-    rawWifiEnabled_        = false;
+    multicastEnabled_ = false;
+    multicastPort_ = 0;
+    broadcastEnabled_ = false;
+    broadcastPort_ = 0;
+    rawWifiEnabled_ = false;
 }
 
 
-
-AlpineStackConfig::AlpineStackConfig (const AlpineStackConfig & copy)
+AlpineStackConfig::AlpineStackConfig(const AlpineStackConfig & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig copy constructor invoked.");
+    Log::Debug("AlpineStackConfig copy constructor invoked.");
 #endif
 
-    localIpAddress_        = copy.localIpAddress_;
-    localPort_             = copy.localPort_;
-    maxConcurrentQueries_  = copy.maxConcurrentQueries_;
+    localIpAddress_ = copy.localIpAddress_;
+    localPort_ = copy.localPort_;
+    maxConcurrentQueries_ = copy.maxConcurrentQueries_;
 
-    multicastEnabled_      = copy.multicastEnabled_;
-    multicastGroup_        = copy.multicastGroup_;
-    multicastPort_         = copy.multicastPort_;
-    broadcastEnabled_      = copy.broadcastEnabled_;
-    broadcastPort_         = copy.broadcastPort_;
-    rawWifiEnabled_        = copy.rawWifiEnabled_;
-    rawWifiInterface_      = copy.rawWifiInterface_;
+    multicastEnabled_ = copy.multicastEnabled_;
+    multicastGroup_ = copy.multicastGroup_;
+    multicastPort_ = copy.multicastPort_;
+    broadcastEnabled_ = copy.broadcastEnabled_;
+    broadcastPort_ = copy.broadcastPort_;
+    rawWifiEnabled_ = copy.rawWifiEnabled_;
+    rawWifiInterface_ = copy.rawWifiInterface_;
 }
-
 
 
 // Dtor defaulted in header
 
 
-
 AlpineStackConfig &
-AlpineStackConfig::operator = (const AlpineStackConfig & copy)
+AlpineStackConfig::operator=(const AlpineStackConfig & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig assignment invoked.");
+    Log::Debug("AlpineStackConfig assignment invoked.");
 #endif
 
     if (&copy == this) {
         return *this;
     }
 
-    localIpAddress_        = copy.localIpAddress_;
-    localPort_             = copy.localPort_;
-    maxConcurrentQueries_  = copy.maxConcurrentQueries_;
+    localIpAddress_ = copy.localIpAddress_;
+    localPort_ = copy.localPort_;
+    maxConcurrentQueries_ = copy.maxConcurrentQueries_;
 
-    multicastEnabled_      = copy.multicastEnabled_;
-    multicastGroup_        = copy.multicastGroup_;
-    multicastPort_         = copy.multicastPort_;
-    broadcastEnabled_      = copy.broadcastEnabled_;
-    broadcastPort_         = copy.broadcastPort_;
-    rawWifiEnabled_        = copy.rawWifiEnabled_;
-    rawWifiInterface_      = copy.rawWifiInterface_;
+    multicastEnabled_ = copy.multicastEnabled_;
+    multicastGroup_ = copy.multicastGroup_;
+    multicastPort_ = copy.multicastPort_;
+    broadcastEnabled_ = copy.broadcastEnabled_;
+    broadcastPort_ = copy.broadcastPort_;
+    rawWifiEnabled_ = copy.rawWifiEnabled_;
+    rawWifiInterface_ = copy.rawWifiInterface_;
 
     return *this;
 }
 
 
-
-bool  
-AlpineStackConfig::setLocalEndpoint (const string &  ipAddress,
-                                     ushort          port)
+bool
+AlpineStackConfig::setLocalEndpoint(const string & ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::setLocalEndpoint invoked.  Values: "s +
-                "\n IP Address: "s + ipAddress +
-                "\n Port: "s + std::to_string (port) +
-                "\n");
+    Log::Debug("AlpineStackConfig::setLocalEndpoint invoked.  Values: "s + "\n IP Address: "s + ipAddress +
+               "\n Port: "s + std::to_string(port) + "\n");
 #endif
 
-    bool   status;
-    ulong  localIp;
+    bool status;
+    ulong localIp;
 
-    status = NetUtils::stringIpToLong (ipAddress, localIp);
+    status = NetUtils::stringIpToLong(ipAddress, localIp);
 
     if (!status) {
-        Log::Error ("Invalid IP address passed in call to AlpineStackConfig::setLocalEndpoint!");
+        Log::Error("Invalid IP address passed in call to AlpineStackConfig::setLocalEndpoint!");
         return false;
     }
 
     if (port == 0) {
-        Log::Error ("Invalid port passed in call to AlpineStackConfig::setLocalEndpoint!");
+        Log::Error("Invalid port passed in call to AlpineStackConfig::setLocalEndpoint!");
         return false;
     }
 
     localIpAddress_ = localIp;
-    localPort_      = port;
-    
+    localPort_ = port;
+
 
     return true;
 }
 
 
-
-bool  
-AlpineStackConfig::getLocalEndpoint (string &   ipAddress,
-                                     ushort &  port)
+bool
+AlpineStackConfig::getLocalEndpoint(string & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::getLocalEndpoint invoked.");
+    Log::Debug("AlpineStackConfig::getLocalEndpoint invoked.");
 #endif
 
     if (localIpAddress_ == 0) {
-        Log::Error ("Call to AlpineStackConfig::getLocalEndpoint before initialization!");
+        Log::Error("Call to AlpineStackConfig::getLocalEndpoint before initialization!");
         return false;
     }
 
-    NetUtils::longIpToString (localIpAddress_, ipAddress);
+    NetUtils::longIpToString(localIpAddress_, ipAddress);
     port = localPort_;
 
 
@@ -136,92 +126,83 @@ AlpineStackConfig::getLocalEndpoint (string &   ipAddress,
 }
 
 
-
-bool  
-AlpineStackConfig::setLocalEndpoint (ulong   ipAddress,
-                                     ushort  port)
+bool
+AlpineStackConfig::setLocalEndpoint(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
     string ipAddressString;
-    NetUtils::longIpToString (ipAddress, ipAddressString);
+    NetUtils::longIpToString(ipAddress, ipAddressString);
 
-    Log::Debug ("AlpineStackConfig::setLocalEndpoint invoked.  Values: "s +
-                "\n IP Address: "s + ipAddressString +
-                "\n Port: "s + std::to_string (port) +
-                "\n");
+    Log::Debug("AlpineStackConfig::setLocalEndpoint invoked.  Values: "s + "\n IP Address: "s + ipAddressString +
+               "\n Port: "s + std::to_string(port) + "\n");
 #endif
 
     if (ipAddress == 0) {
-        Log::Error ("Invalid IP address passed in call to AlpineStackConfig::setLocalEndpoint!");
+        Log::Error("Invalid IP address passed in call to AlpineStackConfig::setLocalEndpoint!");
         return false;
     }
 
     if (port == 0) {
-        Log::Error ("Invalid port passed in call to AlpineStackConfig::setLocalEndpoint!");
+        Log::Error("Invalid port passed in call to AlpineStackConfig::setLocalEndpoint!");
         return false;
     }
 
     localIpAddress_ = ipAddress;
-    localPort_      = port;
+    localPort_ = port;
 
 
     return true;
 }
 
 
-
-bool  
-AlpineStackConfig::getLocalEndpoint (ulong &   ipAddress,
-                                     ushort &  port)
+bool
+AlpineStackConfig::getLocalEndpoint(ulong & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::getLocalEndpoint invoked.");
+    Log::Debug("AlpineStackConfig::getLocalEndpoint invoked.");
 #endif
 
     if (localIpAddress_ == 0) {
-        Log::Error ("Call to AlpineStackConfig::getLocalEndpoint before initialization!");
+        Log::Error("Call to AlpineStackConfig::getLocalEndpoint before initialization!");
         return false;
     }
 
     ipAddress = localIpAddress_;
-    port      = localPort_;
+    port = localPort_;
 
 
     return true;
 }
 
 
-
-bool  
-AlpineStackConfig::setMaxConcurrentQueries (ulong  max)
+bool
+AlpineStackConfig::setMaxConcurrentQueries(ulong max)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::setMaxConcurrentQueries invoked.  Max: "s +
-                std::to_string (max));
+    Log::Debug("AlpineStackConfig::setMaxConcurrentQueries invoked.  Max: "s + std::to_string(max));
 #endif
 
     if (max == 0) {
-        Log::Error ("Invalid maximum passed in call to AlpineStackConfig::setMaxConcurrentQueries!");
+        Log::Error("Invalid maximum passed in call to AlpineStackConfig::setMaxConcurrentQueries!");
         return false;
     }
 
     maxConcurrentQueries_ = max;
-    
+
 
     return true;
 }
 
 
-
 bool
-AlpineStackConfig::getMaxConcurrentQueries (ulong &  max)
+AlpineStackConfig::getMaxConcurrentQueries(ulong & max)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::getMaxConcurrentQueries invoked.");
+    Log::Debug("AlpineStackConfig::getMaxConcurrentQueries invoked.");
 #endif
 
     if (maxConcurrentQueries_ == 0) {
-        Log::Error ("Call to AlpineStackConfig::getMaxConcurrentQueries before initialization!");
+        Log::Error("Call to AlpineStackConfig::getMaxConcurrentQueries before initialization!");
         return false;
     }
 
@@ -232,73 +213,68 @@ AlpineStackConfig::getMaxConcurrentQueries (ulong &  max)
 }
 
 
-
 bool
-AlpineStackConfig::setMulticastEndpoint (const string & group, ushort port)
+AlpineStackConfig::setMulticastEndpoint(const string & group, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::setMulticastEndpoint invoked.");
+    Log::Debug("AlpineStackConfig::setMulticastEndpoint invoked.");
 #endif
 
     if (group.empty() || port == 0) {
-        Log::Error ("Invalid multicast parameters in AlpineStackConfig::setMulticastEndpoint!");
+        Log::Error("Invalid multicast parameters in AlpineStackConfig::setMulticastEndpoint!");
         return false;
     }
 
-    multicastGroup_   = group;
-    multicastPort_    = port;
+    multicastGroup_ = group;
+    multicastPort_ = port;
     multicastEnabled_ = true;
 
     return true;
 }
 
 
-
 bool
-AlpineStackConfig::getMulticastEndpoint (string & group, ushort & port)
+AlpineStackConfig::getMulticastEndpoint(string & group, ushort & port)
 {
     if (!multicastEnabled_) {
         return false;
     }
 
     group = multicastGroup_;
-    port  = multicastPort_;
+    port = multicastPort_;
 
     return true;
 }
 
 
-
 bool
-AlpineStackConfig::multicastEnabled ()
+AlpineStackConfig::multicastEnabled()
 {
     return multicastEnabled_;
 }
 
 
-
 bool
-AlpineStackConfig::setBroadcastEndpoint (ushort port)
+AlpineStackConfig::setBroadcastEndpoint(ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::setBroadcastEndpoint invoked.");
+    Log::Debug("AlpineStackConfig::setBroadcastEndpoint invoked.");
 #endif
 
     if (port == 0) {
-        Log::Error ("Invalid broadcast port in AlpineStackConfig::setBroadcastEndpoint!");
+        Log::Error("Invalid broadcast port in AlpineStackConfig::setBroadcastEndpoint!");
         return false;
     }
 
-    broadcastPort_    = port;
+    broadcastPort_ = port;
     broadcastEnabled_ = true;
 
     return true;
 }
 
 
-
 bool
-AlpineStackConfig::getBroadcastEndpoint (ushort & port)
+AlpineStackConfig::getBroadcastEndpoint(ushort & port)
 {
     if (!broadcastEnabled_) {
         return false;
@@ -310,37 +286,34 @@ AlpineStackConfig::getBroadcastEndpoint (ushort & port)
 }
 
 
-
 bool
-AlpineStackConfig::broadcastEnabled ()
+AlpineStackConfig::broadcastEnabled()
 {
     return broadcastEnabled_;
 }
 
 
-
 bool
-AlpineStackConfig::setRawWifiInterface (const string & interfaceName)
+AlpineStackConfig::setRawWifiInterface(const string & interfaceName)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStackConfig::setRawWifiInterface invoked.");
+    Log::Debug("AlpineStackConfig::setRawWifiInterface invoked.");
 #endif
 
     if (interfaceName.empty()) {
-        Log::Error ("Invalid interface name in AlpineStackConfig::setRawWifiInterface!");
+        Log::Error("Invalid interface name in AlpineStackConfig::setRawWifiInterface!");
         return false;
     }
 
     rawWifiInterface_ = interfaceName;
-    rawWifiEnabled_   = true;
+    rawWifiEnabled_ = true;
 
     return true;
 }
 
 
-
 bool
-AlpineStackConfig::getRawWifiInterface (string & interfaceName)
+AlpineStackConfig::getRawWifiInterface(string & interfaceName)
 {
     if (!rawWifiEnabled_) {
         return false;
@@ -352,12 +325,8 @@ AlpineStackConfig::getRawWifiInterface (string & interfaceName)
 }
 
 
-
 bool
-AlpineStackConfig::rawWifiEnabled ()
+AlpineStackConfig::rawWifiEnabled()
 {
     return rawWifiEnabled_;
 }
-
-
-

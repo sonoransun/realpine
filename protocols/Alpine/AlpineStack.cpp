@@ -1,55 +1,53 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineStack.h>
+#include <AlpineBroadcastUdpTransport.h>
+#include <AlpineDtcpConnTransport.h>
+#include <AlpineDtcpUdpTransport.h>
+#include <AlpineGroupMgr.h>
+#include <AlpineMulticastUdpTransport.h>
 #include <AlpinePacket.h>
+#include <AlpinePeerMgr.h>
 #include <AlpinePeerPacket.h>
 #include <AlpineProxyPacket.h>
-#include <AlpineQueryPacket.h>
-#include <AlpineGroupMgr.h>
-#include <AlpinePeerMgr.h>
 #include <AlpineQueryMgr.h>
-#include <AlpineServiceThread.h>
-#include <AlpineDtcpUdpTransport.h>
-#include <AlpineDtcpConnTransport.h>
-#include <AlpineMulticastUdpTransport.h>
-#include <AlpineBroadcastUdpTransport.h>
-#include <AlpineRawWifiUdpTransport.h>
+#include <AlpineQueryPacket.h>
 #include <AlpineRatingEngine.h>
-#include <DtcpStack.h>
+#include <AlpineRawWifiUdpTransport.h>
+#include <AlpineServiceThread.h>
+#include <AlpineStack.h>
 #include <DataBuffer.h>
+#include <DtcpStack.h>
 #include <Log.h>
+#include <Platform.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
 #include <WriteLock.h>
-#include <ReadLock.h>
-#include <Platform.h>
-#include <thread>
 #include <memory>
+#include <thread>
 
 #ifdef ALPINE_TLS_ENABLED
-#include <PeerTlsVerifier.h>
 #include <DtlsWrapper.h>
+#include <PeerTlsVerifier.h>
 #endif
 
 
+bool AlpineStack::initialized_s = false;
+AlpineServiceThread * AlpineStack::serviceThread_s = nullptr;
+AlpineStackConfig * AlpineStack::configuration_s = nullptr;
+AlpineDtcpUdpTransport * AlpineStack::baseUdpTransport_s = nullptr;
+DtcpBaseUdpTransport * AlpineStack::multicastTransport_s = nullptr;
+DtcpBaseUdpTransport * AlpineStack::broadcastTransport_s = nullptr;
+DtcpBaseUdpTransport * AlpineStack::rawWifiTransport_s = nullptr;
+ReadWriteSem AlpineStack::dataLock_s;
+std::condition_variable AlpineStack::eventCV_s;
+std::mutex AlpineStack::eventMutex_s;
+bool AlpineStack::eventPending_s = false;
+AlpineStack::CompletedQueryCallback AlpineStack::completedQueryCallback_s;
+std::atomic<bool> AlpineStack::shutdownRequested_s{false};
 
-bool                              AlpineStack::initialized_s = false;
-AlpineServiceThread *             AlpineStack::serviceThread_s = nullptr;
-AlpineStackConfig *               AlpineStack::configuration_s = nullptr;
-AlpineDtcpUdpTransport *          AlpineStack::baseUdpTransport_s = nullptr;
-DtcpBaseUdpTransport *            AlpineStack::multicastTransport_s = nullptr;
-DtcpBaseUdpTransport *            AlpineStack::broadcastTransport_s = nullptr;
-DtcpBaseUdpTransport *            AlpineStack::rawWifiTransport_s = nullptr;
-ReadWriteSem                      AlpineStack::dataLock_s;
-std::condition_variable           AlpineStack::eventCV_s;
-std::mutex                        AlpineStack::eventMutex_s;
-bool                              AlpineStack::eventPending_s = false;
-AlpineStack::CompletedQueryCallback  AlpineStack::completedQueryCallback_s;
-std::atomic<bool>                    AlpineStack::shutdownRequested_s{false};
-
-static constexpr int  EVENT_LOOP_MAX_WAIT_MS = 100;  // max idle wait between iterations
-static constexpr int  EVENT_LOOP_MIN_INTERVAL_MS = 10; // minimum time between iterations
-
+static constexpr int EVENT_LOOP_MAX_WAIT_MS = 100;     // max idle wait between iterations
+static constexpr int EVENT_LOOP_MIN_INTERVAL_MS = 10;  // minimum time between iterations
 
 
 // Ctor defaulted in header
@@ -58,110 +56,109 @@ static constexpr int  EVENT_LOOP_MIN_INTERVAL_MS = 10; // minimum time between i
 // Dtor defaulted in header
 
 
-
-bool  
-AlpineStack::initialize (AlpineStackConfig &  configuration)
+bool
+AlpineStack::initialize(AlpineStackConfig & configuration)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::initialize invoked.");
+    Log::Debug("AlpineStack::initialize invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock lock(dataLock_s);
 
     if (initialized_s) {
-        Log::Error ("Attempt to re-initialize AlpineStack!");
+        Log::Error("Attempt to re-initialize AlpineStack!");
         return false;
     }
     // Verify that all configuration data is correct, get required values...
     //
-    bool   status;
-    ulong  localIp;
+    bool status;
+    ulong localIp;
     ushort localPort;
 
-    status = configuration.getLocalEndpoint (localIp, localPort);
+    status = configuration.getLocalEndpoint(localIp, localPort);
 
     if (!status) {
-        Log::Error ("Invalid endpoint in stack configuration passed in call to "
-                             "AlpineStack::initialize!");
+        Log::Error("Invalid endpoint in stack configuration passed in call to "
+                   "AlpineStack::initialize!");
         return false;
     }
-    ulong  maxConcurrentQueries;
-    status = configuration.getMaxConcurrentQueries (maxConcurrentQueries);
+    ulong maxConcurrentQueries;
+    status = configuration.getMaxConcurrentQueries(maxConcurrentQueries);
 
     if (!status) {
-        Log::Error ("Invalid concurrent query limit in stack configuration passed in call to "
-                             "AlpineStack::initialize!");
+        Log::Error("Invalid concurrent query limit in stack configuration passed in call to "
+                   "AlpineStack::initialize!");
         return false;
     }
-    configuration_s = new AlpineStackConfig (configuration);
+    configuration_s = new AlpineStackConfig(configuration);
 
 
     // Initialize DTCP stack and base UDP transport for local endpoint
     //
-    status = DtcpStack::initialize ();
+    status = DtcpStack::initialize();
 
     if (!status) {
-        Log::Error ("Initializing DtcpStack failed in call to AlpineStack::initialize!");
+        Log::Error("Initializing DtcpStack failed in call to AlpineStack::initialize!");
         return false;
     }
-    baseUdpTransport_s = new AlpineDtcpUdpTransport (localIp, localPort);   
+    baseUdpTransport_s = new AlpineDtcpUdpTransport(localIp, localPort);
 
-    status = baseUdpTransport_s->initialize ();
+    status = baseUdpTransport_s->initialize();
 
     if (!status) {
-        Log::Error ("Initialization of base UDP transport failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Initialization of base UDP transport failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
     // Initialize various ALPINE stack components
     //
-    status = AlpineGroupMgr::initialize ();
+    status = AlpineGroupMgr::initialize();
 
     if (!status) {
-        Log::Error ("Initialization of AlpineGroupMgr failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Initialization of AlpineGroupMgr failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
-    status = AlpinePeerMgr::initialize ();
+    status = AlpinePeerMgr::initialize();
 
     if (!status) {
-        Log::Error ("Initialization of AlpinePeerMgr failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Initialization of AlpinePeerMgr failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
-    status = AlpineQueryMgr::initialize (maxConcurrentQueries);
+    status = AlpineQueryMgr::initialize(maxConcurrentQueries);
 
     if (!status) {
-        Log::Error ("Initialization of AlpineQueryMgr failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Initialization of AlpineQueryMgr failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
     // Create service thread to handle various events in the ALPINE stack outside
     // of incoming requests.
     //
     serviceThread_s = new AlpineServiceThread;
-    serviceThread_s->setDeleteOnExit (true);
+    serviceThread_s->setDeleteOnExit(true);
 
-    status = serviceThread_s->run ();
+    status = serviceThread_s->run();
 
     if (!status) {
-        Log::Error ("Starting AlpineServiceThread failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Starting AlpineServiceThread failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
     // Everything initialized, activate base UDP transport and start processing traffic...
     //
-    status = baseUdpTransport_s->activate ();
+    status = baseUdpTransport_s->activate();
 
     if (!status) {
-        Log::Error ("Activation of base UDP transport failed in call to "
-                             "AlpineStack::initialize!");
-        cleanUp ();
+        Log::Error("Activation of base UDP transport failed in call to "
+                   "AlpineStack::initialize!");
+        cleanUp();
         return false;
     }
 
@@ -170,22 +167,19 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
     if (configuration.multicastEnabled()) {
         string group;
         ushort mport;
-        configuration.getMulticastEndpoint (group, mport);
+        configuration.getMulticastEndpoint(group, mport);
 
-        multicastTransport_s = new AlpineMulticastUdpTransport (localIp, localPort,
-                                                                 group, mport);
-        status = multicastTransport_s->initialize ();
+        multicastTransport_s = new AlpineMulticastUdpTransport(localIp, localPort, group, mport);
+        status = multicastTransport_s->initialize();
 
         if (status) {
-            status = multicastTransport_s->activate ();
+            status = multicastTransport_s->activate();
         }
 
         if (status) {
-            Log::Info ("Multicast transport activated on "s + group +
-                       ":" + std::to_string (mport));
-        }
-        else {
-            Log::Error ("Failed to activate multicast transport.");
+            Log::Info("Multicast transport activated on "s + group + ":" + std::to_string(mport));
+        } else {
+            Log::Error("Failed to activate multicast transport.");
             delete multicastTransport_s;
             multicastTransport_s = nullptr;
         }
@@ -193,22 +187,20 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
 
     if (configuration.broadcastEnabled()) {
         ushort bport;
-        configuration.getBroadcastEndpoint (bport);
+        configuration.getBroadcastEndpoint(bport);
 
-        broadcastTransport_s = new AlpineBroadcastUdpTransport (localIp, htons(bport));
+        broadcastTransport_s = new AlpineBroadcastUdpTransport(localIp, htons(bport));
 
-        status = broadcastTransport_s->initialize ();
+        status = broadcastTransport_s->initialize();
 
         if (status) {
-            status = broadcastTransport_s->activate ();
+            status = broadcastTransport_s->activate();
         }
 
         if (status) {
-            Log::Info ("Broadcast transport activated on port "s +
-                       std::to_string (bport));
-        }
-        else {
-            Log::Error ("Failed to activate broadcast transport.");
+            Log::Info("Broadcast transport activated on port "s + std::to_string(bport));
+        } else {
+            Log::Error("Failed to activate broadcast transport.");
             delete broadcastTransport_s;
             broadcastTransport_s = nullptr;
         }
@@ -216,21 +208,20 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
 
     if (configuration.rawWifiEnabled()) {
         string ifName;
-        configuration.getRawWifiInterface (ifName);
+        configuration.getRawWifiInterface(ifName);
 
-        rawWifiTransport_s = new AlpineRawWifiUdpTransport (localIp, localPort, ifName);
+        rawWifiTransport_s = new AlpineRawWifiUdpTransport(localIp, localPort, ifName);
 
-        status = rawWifiTransport_s->initialize ();
+        status = rawWifiTransport_s->initialize();
 
         if (status) {
-            status = rawWifiTransport_s->activate ();
+            status = rawWifiTransport_s->activate();
         }
 
         if (status) {
-            Log::Info ("Raw 802.11 transport activated on interface "s + ifName);
-        }
-        else {
-            Log::Error ("Failed to activate raw 802.11 transport.");
+            Log::Info("Raw 802.11 transport activated on interface "s + ifName);
+        } else {
+            Log::Error("Failed to activate raw 802.11 transport.");
             delete rawWifiTransport_s;
             rawWifiTransport_s = nullptr;
         }
@@ -240,12 +231,11 @@ AlpineStack::initialize (AlpineStackConfig &  configuration)
 }
 
 
-
 void
-AlpineStack::processEvents ()
+AlpineStack::processEvents()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::processEvents invoked.");
+    Log::Debug("AlpineStack::processEvents invoked.");
 #endif
 
     auto lastRun = std::chrono::steady_clock::now();
@@ -259,9 +249,7 @@ AlpineStack::processEvents ()
         //
         {
             std::unique_lock lock(eventMutex_s);
-            eventCV_s.wait_for(lock,
-                               std::chrono::milliseconds(EVENT_LOOP_MAX_WAIT_MS),
-                               [] { return eventPending_s; });
+            eventCV_s.wait_for(lock, std::chrono::milliseconds(EVENT_LOOP_MAX_WAIT_MS), [] { return eventPending_s; });
             eventPending_s = false;
         }
 
@@ -272,8 +260,7 @@ AlpineStack::processEvents ()
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastRun);
 
         if (elapsed.count() < EVENT_LOOP_MIN_INTERVAL_MS) {
-            std::this_thread::sleep_for(
-                std::chrono::milliseconds(EVENT_LOOP_MIN_INTERVAL_MS - elapsed.count()));
+            std::this_thread::sleep_for(std::chrono::milliseconds(EVENT_LOOP_MIN_INTERVAL_MS - elapsed.count()));
         }
         lastRun = std::chrono::steady_clock::now();
 
@@ -282,9 +269,9 @@ AlpineStack::processEvents ()
         // This is all done from this thread, as all of these processes are
         // fast, and high tolerance.
         //
-        AlpinePeerMgr::processTimedEvents ();
+        AlpinePeerMgr::processTimedEvents();
 
-        auto completedIds = AlpineQueryMgr::processTimedEvents ();
+        auto completedIds = AlpineQueryMgr::processTimedEvents();
 
         if (!completedIds.empty() && completedQueryCallback_s) {
             completedQueryCallback_s(completedIds);
@@ -293,9 +280,8 @@ AlpineStack::processEvents ()
 }
 
 
-
 void
-AlpineStack::notifyEvent ()
+AlpineStack::notifyEvent()
 {
     {
         std::lock_guard lock(eventMutex_s);
@@ -305,29 +291,26 @@ AlpineStack::notifyEvent ()
 }
 
 
-
 void
-AlpineStack::setCompletedQueryCallback (CompletedQueryCallback callback)
+AlpineStack::setCompletedQueryCallback(CompletedQueryCallback callback)
 {
     completedQueryCallback_s = std::move(callback);
 }
 
 
-
 void
-AlpineStack::requestShutdown ()
+AlpineStack::requestShutdown()
 {
     shutdownRequested_s.store(true, std::memory_order_release);
     notifyEvent();
 }
 
 
-
 void
-AlpineStack::cleanUp ()
+AlpineStack::cleanUp()
 {
-#ifdef _VERBOSE  
-    Log::Debug ("AlpineStack::cleanUp invoked.");
+#ifdef _VERBOSE
+    Log::Debug("AlpineStack::cleanUp invoked.");
 #endif
 
     // Cancel all in-flight queries
@@ -337,7 +320,7 @@ AlpineStack::cleanUp ()
     AlpineRatingEngine::persist();
 
     if (serviceThread_s) {
-        serviceThread_s->stop ();
+        serviceThread_s->stop();
         serviceThread_s = nullptr;  // thread will delete itself when finished.
     }
 
@@ -347,25 +330,25 @@ AlpineStack::cleanUp ()
     }
 
     if (multicastTransport_s) {
-        multicastTransport_s->shutdown ();
+        multicastTransport_s->shutdown();
         delete multicastTransport_s;
         multicastTransport_s = nullptr;
     }
 
     if (broadcastTransport_s) {
-        broadcastTransport_s->shutdown ();
+        broadcastTransport_s->shutdown();
         delete broadcastTransport_s;
         broadcastTransport_s = nullptr;
     }
 
     if (rawWifiTransport_s) {
-        rawWifiTransport_s->shutdown ();
+        rawWifiTransport_s->shutdown();
         delete rawWifiTransport_s;
         rawWifiTransport_s = nullptr;
     }
 
     if (baseUdpTransport_s) {
-        baseUdpTransport_s->shutdown ();
+        baseUdpTransport_s->shutdown();
         delete baseUdpTransport_s;
         baseUdpTransport_s = nullptr;
     }
@@ -374,14 +357,11 @@ AlpineStack::cleanUp ()
 }
 
 
-
 bool
-AlpineStack::registerTransport (ulong                      peerId,
-                                AlpineDtcpConnTransport *  transport)
+AlpineStack::registerTransport(ulong peerId, AlpineDtcpConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::registerTransport invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::registerTransport invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
 #ifdef ALPINE_TLS_ENABLED
@@ -394,15 +374,15 @@ AlpineStack::registerTransport (ulong                      peerId,
             return false;
         }
 
-        Log::Info("AlpineStack::registerTransport: peer "s +
-                  std::to_string(peerId) + " passed mutual TLS verification"s);
+        Log::Info("AlpineStack::registerTransport: peer "s + std::to_string(peerId) +
+                  " passed mutual TLS verification"s);
     }
 #endif
 
     // The PeerMgr is the only one that requires this information at the moment...
     //
     bool status;
-    status = AlpinePeerMgr::registerTransport (peerId, transport);
+    status = AlpinePeerMgr::registerTransport(peerId, transport);
 
     if (status)
         notifyEvent();
@@ -411,21 +391,19 @@ AlpineStack::registerTransport (ulong                      peerId,
 }
 
 
-
-bool  
-AlpineStack::handleConnectionClose (ulong  peerId)
+bool
+AlpineStack::handleConnectionClose(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::handleConnectionClose invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::handleConnectionClose invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // We need to clean up any queries that may involve this peer.  Dont care
     // about result, failure will probably be due to no peer queries.
     //
-    AlpineQueryMgr::cancelAll (peerId);
+    AlpineQueryMgr::cancelAll(peerId);
 
-    AlpinePeerMgr::deletePeer (peerId);
+    AlpinePeerMgr::deletePeer(peerId);
 
     // MRP_TEMP connect to new peer to fill position?
 
@@ -434,172 +412,149 @@ AlpineStack::handleConnectionClose (ulong  peerId)
 }
 
 
-
-bool  
-AlpineStack::handleConnectionDeactivate (ulong  peerId)
+bool
+AlpineStack::handleConnectionDeactivate(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::handleConnectionDeactivate invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::handleConnectionDeactivate invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // We need to clean up any queries that may involve this peer.  Dont care
     // about result, failure will probably be due to no peer queries.
     //
-    AlpineQueryMgr::cancelAll (peerId);
+    AlpineQueryMgr::cancelAll(peerId);
 
-    AlpinePeerMgr::deactivatePeer (peerId);
-
-
-    return true;
-}
-
-
-
-bool  
-AlpineStack::handleBadDataEvent (ulong  peerId)
-{
-#ifdef _VERBOSE
-    Log::Debug ("AlpineStack::handleBadDataEvent invoked.  Peer ID: "s +
-                std::to_string (peerId));
-#endif
+    AlpinePeerMgr::deactivatePeer(peerId);
 
 
     return true;
 }
-
 
 
 bool
-AlpineStack::handleSendReceived (ulong  peerId,
-                                 ulong  requestId)
+AlpineStack::handleBadDataEvent(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::handleSendReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::handleBadDataEvent invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
-
-    // MRP_TEMP handle correctly
-    AlpineQueryMgr::handleSendReceived (peerId, requestId);
 
 
     return true;
 }
 
 
-
-bool  
-AlpineStack::handleSendFailure (ulong  peerId,
-                                ulong  requestId)
+bool
+AlpineStack::handleSendReceived(ulong peerId, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::handleSendFailure invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::handleSendReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // MRP_TEMP handle correctly
-    AlpineQueryMgr::handleSendFailure (peerId, requestId);
+    AlpineQueryMgr::handleSendReceived(peerId, requestId);
 
 
     return true;
 }
 
 
-
-bool  
-AlpineStack::sendReliablePacket (ulong           peerId,
-                                 AlpinePacket *  packet,
-                                 ulong &         requestId)
+bool
+AlpineStack::handleSendFailure(ulong peerId, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::sendReliablePacket invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpineStack::handleSendFailure invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
-  
-    bool  status; 
-    DtcpBaseConnTransport *  dtcpTransport;
-    status = DtcpStack::locateTransport (peerId, dtcpTransport);
+
+    // MRP_TEMP handle correctly
+    AlpineQueryMgr::handleSendFailure(peerId, requestId);
+
+
+    return true;
+}
+
+
+bool
+AlpineStack::sendReliablePacket(ulong peerId, AlpinePacket * packet, ulong & requestId)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpineStack::sendReliablePacket invoked.  Peer ID: "s + std::to_string(peerId));
+#endif
+
+    bool status;
+    DtcpBaseConnTransport * dtcpTransport;
+    status = DtcpStack::locateTransport(peerId, dtcpTransport);
 
     if (!status) {
-        Log::Error ("Could not locate transport for peer ID passed in call to "
-                             "AlpineStack::sendReliablePacket!");
+        Log::Error("Could not locate transport for peer ID passed in call to "
+                   "AlpineStack::sendReliablePacket!");
         return false;
     }
-    AlpineDtcpConnTransport *  peerTransport;
+    AlpineDtcpConnTransport * peerTransport;
     peerTransport = dynamic_cast<AlpineDtcpConnTransport *>(dtcpTransport);
 
     if (!peerTransport) {
-        Log::Error ("Invalid transport type returned by DtcpStack in call to "
-                             "AlpineStack::sendReliablePacket!");
+        Log::Error("Invalid transport type returned by DtcpStack in call to "
+                   "AlpineStack::sendReliablePacket!");
         return false;
     }
     // Write packet data and send to transport
     //
     // MRP_TEMP implement constants!
-    auto buffer = std::make_unique<DataBuffer>(1024*34);
-    buffer->writeReset ();
+    auto buffer = std::make_unique<DataBuffer>(1024 * 34);
+    buffer->writeReset();
 
-    status = packet->writeData (buffer.get());
+    status = packet->writeData(buffer.get());
 
     if (!status) {
-        Log::Error ("Could not write packet data in call to "
-                             "AlpineStack::sendReliablePacket!");
+        Log::Error("Could not write packet data in call to "
+                   "AlpineStack::sendReliablePacket!");
         return false;
     }
     byte * data;
-    uint   length;
-    buffer->readReset ();
-    buffer->getReadBuffer (data, length);
+    uint length;
+    buffer->readReset();
+    buffer->getReadBuffer(data, length);
 
-    status = peerTransport->sendReliableData (data,
-                                              length,
-                                              requestId);
+    status = peerTransport->sendReliableData(data, length, requestId);
 
     if (!status) {
-        Log::Error ("sendReliableData for response packet data failed in call to "
-                             "AlpineStack::sendReliablePacket!");
+        Log::Error("sendReliableData for response packet data failed in call to "
+                   "AlpineStack::sendReliablePacket!");
         return false;
     }
     return true;
 }
 
 
-
-bool  
-AlpineStack::acknowledgeTransfer (ulong  peerId,
-                                  ulong  requestId)
+bool
+AlpineStack::acknowledgeTransfer(ulong peerId, ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineStack::acknowledgeTransfer invoked."s +
-                "\n Peer ID: "s + std::to_string (peerId) +
-                "\n Request ID: "s + std::to_string (requestId) +
-                "\n");
+    Log::Debug("AlpineStack::acknowledgeTransfer invoked."s + "\n Peer ID: "s + std::to_string(peerId) +
+               "\n Request ID: "s + std::to_string(requestId) + "\n");
 #endif
 
     // Locate AlpineDtcpConnTransport and invoke acknowledgement.
     //
-    bool  status; 
-    DtcpBaseConnTransport *  dtcpTransport;
-    status = DtcpStack::locateTransport (peerId, dtcpTransport);
+    bool status;
+    DtcpBaseConnTransport * dtcpTransport;
+    status = DtcpStack::locateTransport(peerId, dtcpTransport);
 
     if (!status) {
-        Log::Error ("Could not locate transport for peer ID passed in call to "
-                             "AlpineStack::acknowledgeTransfer!");
+        Log::Error("Could not locate transport for peer ID passed in call to "
+                   "AlpineStack::acknowledgeTransfer!");
         return false;
     }
-    AlpineDtcpConnTransport *  peerTransport;
+    AlpineDtcpConnTransport * peerTransport;
     peerTransport = dynamic_cast<AlpineDtcpConnTransport *>(dtcpTransport);
 
     if (!peerTransport) {
-        Log::Error ("Invalid transport type returned by DtcpStack in call to "
-                             "AlpineStack::acknowledgeTransfer!");
+        Log::Error("Invalid transport type returned by DtcpStack in call to "
+                   "AlpineStack::acknowledgeTransfer!");
         return false;
     }
-    peerTransport->acknowledgeTransfer (requestId);
+    peerTransport->acknowledgeTransfer(requestId);
 
 
     return true;
-}   
-
-
-
+}

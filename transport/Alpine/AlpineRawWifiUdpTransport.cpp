@@ -1,16 +1,15 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineRawWifiUdpTransport.h>
 #include <AlpineDtcpConnMux.h>
-#include <RawWifiConnection.h>
+#include <AlpineRawWifiUdpTransport.h>
 #include <Log.h>
+#include <RawWifiConnection.h>
 
 
-
-AlpineRawWifiUdpTransport::AlpineRawWifiUdpTransport (const ulong    ipAddress,
-                                                        const int      port,
-                                                        const string & interfaceName)
+AlpineRawWifiUdpTransport::AlpineRawWifiUdpTransport(const ulong ipAddress,
+                                                     const int port,
+                                                     const string & interfaceName)
     : DtcpBaseUdpTransport(ipAddress, port),
       interfaceName_(interfaceName)
 {
@@ -20,8 +19,7 @@ AlpineRawWifiUdpTransport::AlpineRawWifiUdpTransport (const ulong    ipAddress,
 }
 
 
-
-AlpineRawWifiUdpTransport::~AlpineRawWifiUdpTransport ()
+AlpineRawWifiUdpTransport::~AlpineRawWifiUdpTransport()
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineRawWifiUdpTransport destructor invoked.");
@@ -29,9 +27,8 @@ AlpineRawWifiUdpTransport::~AlpineRawWifiUdpTransport ()
 }
 
 
-
 bool
-AlpineRawWifiUdpTransport::createMux (DtcpBaseConnMux *& connMux)
+AlpineRawWifiUdpTransport::createMux(DtcpBaseConnMux *& connMux)
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineRawWifiUdpTransport::createMux invoked.");
@@ -46,23 +43,33 @@ AlpineRawWifiUdpTransport::createMux (DtcpBaseConnMux *& connMux)
 }
 
 
-
 UdpConnection *
-AlpineRawWifiUdpTransport::createConnection ()
+AlpineRawWifiUdpTransport::createConnection()
 {
 #ifndef __linux__
     Log::Error("AlpineRawWifiUdpTransport: Raw 802.11 is only supported on Linux.");
     return nullptr;
 #else
-    return new RawWifiConnection(interfaceName_);
+    // Return a RawWifiConnection without yet binding to the AF_PACKET socket;
+    // DtcpBaseUdpTransport::activate() will call create() and handle failures
+    // (e.g. EPERM when CAP_NET_RAW is missing) cleanly. Wrap in try/catch so
+    // an allocation failure cannot crash the stack.
+    //
+    try {
+        return new RawWifiConnection(interfaceName_);
+    } catch (const std::exception & e) {
+        Log::Error("AlpineRawWifiUdpTransport: Failed to allocate RawWifiConnection: "s + e.what());
+        return nullptr;
+    } catch (...) {
+        Log::Error("AlpineRawWifiUdpTransport: Failed to allocate RawWifiConnection (unknown error).");
+        return nullptr;
+    }
 #endif
 }
 
 
-
 bool
-AlpineRawWifiUdpTransport::handleData (const byte * data,
-                                        uint         dataLength)
+AlpineRawWifiUdpTransport::handleData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineRawWifiUdpTransport::handleData invoked.");

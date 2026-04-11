@@ -4,21 +4,19 @@
 #include <HttpRequest.h>
 #include <HttpResponse.h>
 #include <HttpRouter.h>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 
 static HttpResponse
-dummyHandler (const HttpRequest &                          request,
-              const std::unordered_map<string, string> &   params)
+dummyHandler(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
     return HttpResponse::ok("{}");
 }
 
 
 extern "C" int
-LLVMFuzzerTestOneInput (const uint8_t * data,
-                        size_t          size)
+LLVMFuzzerTestOneInput(const uint8_t * data, size_t size)
 {
     HttpRouter router;
     router.addRoute("GET", "/test/:id", dummyHandler);

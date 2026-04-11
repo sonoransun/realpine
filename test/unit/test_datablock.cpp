@@ -1,7 +1,7 @@
 /// Unit tests for DataBlock
 
-#include <catch2/catch_test_macros.hpp>
 #include <DataBlock.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 TEST_CASE("DataBlock allocation", "[DataBlock]")
@@ -48,7 +48,7 @@ TEST_CASE("DataBlock deallocation", "[DataBlock]")
 {
     SECTION("destructor runs without error")
     {
-        auto* block = new DataBlock(128);
+        auto * block = new DataBlock(128);
         REQUIRE(block->buffer_ != nullptr);
         delete block;
         // If we get here, deallocation succeeded
@@ -57,8 +57,7 @@ TEST_CASE("DataBlock deallocation", "[DataBlock]")
 
     SECTION("multiple allocations and deallocations")
     {
-        for (int i = 0; i < 100; ++i)
-        {
+        for (int i = 0; i < 100; ++i) {
             DataBlock block(512);
             REQUIRE(block.buffer_ != nullptr);
         }

@@ -8,20 +8,15 @@
 class AlpineBroadcastUdpTransport : public DtcpBaseUdpTransport
 {
   public:
+    AlpineBroadcastUdpTransport(const ulong ipAddress, const int port);
 
-    AlpineBroadcastUdpTransport (const ulong   ipAddress,
-                                 const int     port);
-
-    ~AlpineBroadcastUdpTransport () override;
+    ~AlpineBroadcastUdpTransport() override;
 
 
-    bool createMux (DtcpBaseConnMux *& connMux) override;
+    bool createMux(DtcpBaseConnMux *& connMux) override;
 
-    bool handleData (const byte * data,
-                     uint         dataLength) override;
+    bool handleData(const byte * data, uint dataLength) override;
 
   protected:
-
-    UdpConnection * createConnection () override;
-
+    UdpConnection * createConnection() override;
 };

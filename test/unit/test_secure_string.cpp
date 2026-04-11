@@ -1,7 +1,7 @@
 /// Unit tests for SecureString
 
-#include <catch2/catch_test_macros.hpp>
 #include <SecureString.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 TEST_CASE("SecureString default construction", "[SecureString]")

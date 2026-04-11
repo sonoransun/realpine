@@ -1,14 +1,14 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
 #include <DataBuffer.h>
 #include <Log.h>
 #include <StringUtils.h>
 
+#include <cstring>
 
 
-DataBuffer::DataBuffer (uint bufferSize)
+DataBuffer::DataBuffer(uint bufferSize)
     : buffer_(bufferSize),
       dataSize_(0),
       readOffset_(0),
@@ -17,13 +17,12 @@ DataBuffer::DataBuffer (uint bufferSize)
       writeRemaining_(bufferSize)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer constructor invoked.");
+    Log::Debug("DataBuffer constructor invoked.");
 #endif
 }
 
 
-
-DataBuffer::DataBuffer (const DataBuffer & copy)
+DataBuffer::DataBuffer(const DataBuffer & copy)
     : buffer_(copy.buffer_),
       dataSize_(copy.dataSize_),
       readOffset_(copy.readOffset_),
@@ -32,14 +31,12 @@ DataBuffer::DataBuffer (const DataBuffer & copy)
       writeRemaining_(copy.writeRemaining_)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer copy constructor invoked.");
+    Log::Debug("DataBuffer copy constructor invoked.");
 #endif
 }
 
 
-
-DataBuffer::DataBuffer (const byte * data,
-                        uint         dataLength)
+DataBuffer::DataBuffer(const byte * data, uint dataLength)
     : buffer_(data, data + dataLength),
       dataSize_(dataLength),
       readOffset_(0),
@@ -48,51 +45,48 @@ DataBuffer::DataBuffer (const byte * data,
       writeRemaining_(0)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DatBuffer raw buffer constructor invoked.");
+    Log::Debug("DatBuffer raw buffer constructor invoked.");
 #endif
 }
 
 
-
-DataBuffer::~DataBuffer ()
+DataBuffer::~DataBuffer()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer destructor invoked.");
+    Log::Debug("DataBuffer destructor invoked.");
 #endif
 }
-
 
 
 DataBuffer &
-DataBuffer::operator = (const DataBuffer & copy)
+DataBuffer::operator=(const DataBuffer & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::operator = invoked.");
+    Log::Debug("DataBuffer::operator = invoked.");
 #endif
 
     if (&copy == this) {
         return *this;
     }
 
-    buffer_         = copy.buffer_;
-    dataSize_       = copy.dataSize_;
+    buffer_ = copy.buffer_;
+    dataSize_ = copy.dataSize_;
 
-    readOffset_     = copy.readOffset_;
-    readRemaining_  = copy.readRemaining_;
+    readOffset_ = copy.readOffset_;
+    readRemaining_ = copy.readRemaining_;
 
-    writeOffset_    = copy.writeOffset_;
+    writeOffset_ = copy.writeOffset_;
     writeRemaining_ = copy.writeRemaining_;
 
     return *this;
 }
 
 
-
 bool
-DataBuffer::resize (uint size)
+DataBuffer::resize(uint size)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::resize invoked.");
+    Log::Debug("DataBuffer::resize invoked.");
 #endif
 
     if (size == buffer_.size()) {
@@ -100,76 +94,71 @@ DataBuffer::resize (uint size)
     }
 
     buffer_.resize(size);
-    dataSize_   = 0;
+    dataSize_ = 0;
 
-    readOffset_     = 0;
-    readRemaining_  = dataSize_;
+    readOffset_ = 0;
+    readRemaining_ = dataSize_;
 
-    writeOffset_    = 0;
+    writeOffset_ = 0;
     writeRemaining_ = buffer_.size();
 
     return true;
 }
 
 
-
 void
-DataBuffer::clear ()
+DataBuffer::clear()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::clear invoked.");
+    Log::Debug("DataBuffer::clear invoked.");
 #endif
 
     dataSize_ = 0;
 
-    readOffset_     = 0;
-    readRemaining_  = dataSize_;
+    readOffset_ = 0;
+    readRemaining_ = dataSize_;
 
-    writeOffset_    = 0;
+    writeOffset_ = 0;
     writeRemaining_ = buffer_.size();
 }
 
 
-
 void
-DataBuffer::readReset ()
+DataBuffer::readReset()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::readReset invoked.");
+    Log::Debug("DataBuffer::readReset invoked.");
 #endif
 
-    readOffset_    = 0;
+    readOffset_ = 0;
     readRemaining_ = dataSize_;
 }
 
 
-
 void
-DataBuffer::writeReset ()
+DataBuffer::writeReset()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::writeReset invoked.");
+    Log::Debug("DataBuffer::writeReset invoked.");
 #endif
 
-    writeOffset_    = 0;
+    writeOffset_ = 0;
     writeRemaining_ = buffer_.size();
-    dataSize_       = 0;
+    dataSize_ = 0;
 
     // We also need to perform a read reset to make sure
     // our data is consistant.
     //
-    readOffset_    = 0;
+    readOffset_ = 0;
     readRemaining_ = dataSize_;
 }
 
 
-
 bool
-DataBuffer::setData (const byte * data,
-                     uint         dataLength)
+DataBuffer::setData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::setData invoked.");
+    Log::Debug("DataBuffer::setData invoked.");
 #endif
 
     if (buffer_.size() < dataLength) {
@@ -178,25 +167,23 @@ DataBuffer::setData (const byte * data,
 
     dataSize_ = dataLength;
 
-    memcpy (buffer_.data(), data, dataSize_);
+    memcpy(buffer_.data(), data, dataSize_);
 
-    readOffset_     = 0;
-    readRemaining_  = dataSize_;
+    readOffset_ = 0;
+    readRemaining_ = dataSize_;
 
-    writeOffset_    = buffer_.size();
+    writeOffset_ = buffer_.size();
     writeRemaining_ = 0;
 
     return true;
 }
 
 
-
 bool
-DataBuffer::getData (byte *& data,
-                     uint &  dataLength)
+DataBuffer::getData(byte *& data, uint & dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::getData invoked.");
+    Log::Debug("DataBuffer::getData invoked.");
 #endif
 
     data = buffer_.data();
@@ -206,32 +193,29 @@ DataBuffer::getData (byte *& data,
 }
 
 
-
 bool
-DataBuffer::getReadBuffer (byte *& buffer,
-                           uint &  bufferSize)
+DataBuffer::getReadBuffer(byte *& buffer, uint & bufferSize)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::getReadBuffer invoked.");
+    Log::Debug("DataBuffer::getReadBuffer invoked.");
 #endif
 
     if (readRemaining_ == 0) {
         return false;
     }
 
-    buffer     = buffer_.data() + readOffset_;
+    buffer = buffer_.data() + readOffset_;
     bufferSize = readRemaining_;
 
     return true;
 }
 
 
-
 bool
-DataBuffer::addReadBytes (uint  bytes)
+DataBuffer::addReadBytes(uint bytes)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::addReadBytes invoked.");
+    Log::Debug("DataBuffer::addReadBytes invoked.");
 #endif
 
     if (bytes > readRemaining_) {
@@ -240,38 +224,35 @@ DataBuffer::addReadBytes (uint  bytes)
     }
 
     readRemaining_ -= bytes;
-    readOffset_    += bytes;
+    readOffset_ += bytes;
 
     return true;
 }
 
 
-    
 bool
-DataBuffer::getWriteBuffer (byte *& buffer,
-                            uint &  bufferSize)
+DataBuffer::getWriteBuffer(byte *& buffer, uint & bufferSize)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::getWriteBuffer invoked.");
+    Log::Debug("DataBuffer::getWriteBuffer invoked.");
 #endif
 
     if (writeRemaining_ == 0) {
         return false;
     }
 
-    buffer     = buffer_.data() + writeOffset_;
+    buffer = buffer_.data() + writeOffset_;
     bufferSize = writeRemaining_;
 
     return true;
 }
 
 
-
 bool
-DataBuffer::addWriteBytes (uint bytes)
+DataBuffer::addWriteBytes(uint bytes)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DataBuffer::addWriteBytes invoked.");
+    Log::Debug("DataBuffer::addWriteBytes invoked.");
 #endif
 
     if (bytes > writeRemaining_) {
@@ -280,11 +261,8 @@ DataBuffer::addWriteBytes (uint bytes)
     }
 
     writeRemaining_ -= bytes;
-    writeOffset_    += bytes;
-    dataSize_       += bytes;
+    writeOffset_ += bytes;
+    dataSize_ += bytes;
 
     return true;
 }
-
-    
-

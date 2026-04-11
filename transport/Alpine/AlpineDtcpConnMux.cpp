@@ -1,37 +1,35 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineDtcpConnMux.h>
 #include <AlpineDtcpConnAcceptor.h>
 #include <AlpineDtcpConnConnector.h>
+#include <AlpineDtcpConnMux.h>
 #include <Log.h>
 #include <StringUtils.h>
 #include <memory>
 
 
-AlpineDtcpConnMux::AlpineDtcpConnMux ()
+AlpineDtcpConnMux::AlpineDtcpConnMux()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnMux constructor invoked.");
+    Log::Debug("AlpineDtcpConnMux constructor invoked.");
 #endif
 }
 
 
-    
-AlpineDtcpConnMux::~AlpineDtcpConnMux ()
+AlpineDtcpConnMux::~AlpineDtcpConnMux()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnMux destructor invoked.");
+    Log::Debug("AlpineDtcpConnMux destructor invoked.");
 #endif
 }
-
 
 
 bool
-AlpineDtcpConnMux::createAcceptor (DtcpBaseConnAcceptor *&  acceptor)
+AlpineDtcpConnMux::createAcceptor(DtcpBaseConnAcceptor *& acceptor)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnMux::createAcceptor invoked.");
+    Log::Debug("AlpineDtcpConnMux::createAcceptor invoked.");
 #endif
 
     auto alpineAcceptor = std::make_unique<AlpineDtcpConnAcceptor>();
@@ -43,12 +41,11 @@ AlpineDtcpConnMux::createAcceptor (DtcpBaseConnAcceptor *&  acceptor)
 }
 
 
-
 bool
-AlpineDtcpConnMux::createConnector (DtcpBaseConnConnector *&  connector)
+AlpineDtcpConnMux::createConnector(DtcpBaseConnConnector *& connector)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineDtcpConnMux::createConnector invoked.");
+    Log::Debug("AlpineDtcpConnMux::createConnector invoked.");
 #endif
 
     auto alpineConnector = std::make_unique<AlpineDtcpConnConnector>();
@@ -58,17 +55,17 @@ AlpineDtcpConnMux::createConnector (DtcpBaseConnConnector *&  connector)
     dtcpMux = static_cast<DtcpBaseConnMux *>(this);
     TransportInterface * parent;
 
-    status = getParentTransport (parent);
+    status = getParentTransport(parent);
 
     if (!status) {
-        Log::Error ("Could not retrieve parent transport in AlpineDtcpConnMux::createConnector."s);
+        Log::Error("Could not retrieve parent transport in AlpineDtcpConnMux::createConnector."s);
         return false;
     }
 
-    status = alpineConnector->initialize (dtcpMux, parent);
+    status = alpineConnector->initialize(dtcpMux, parent);
 
     if (!status) {
-        Log::Error ("Could not initialize connector in AlpineDtcpConnMux::createConnector."s);
+        Log::Error("Could not initialize connector in AlpineDtcpConnMux::createConnector."s);
         return false;
     }
 
@@ -77,6 +74,3 @@ AlpineDtcpConnMux::createConnector (DtcpBaseConnConnector *&  connector)
 
     return true;
 }
-
-
-

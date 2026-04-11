@@ -1,8 +1,8 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <catch2/catch_test_macros.hpp>
 #include <StringUtils.h>
+#include <catch2/catch_test_macros.hpp>
 #include <string>
 
 using namespace std::string_literals;
@@ -50,8 +50,7 @@ TEST_CASE("sanitizeForLog: all control chars", "[StringUtils]")
     string input;
     string expected;
 
-    for (int i = 0x00; i <= 0x08; ++i)
-    {
+    for (int i = 0x00; i <= 0x08; ++i) {
         input += static_cast<char>(i);
         char buf[7];
         std::snprintf(buf, sizeof(buf), "<0x%02X>", i);
@@ -64,8 +63,7 @@ TEST_CASE("sanitizeForLog: all control chars", "[StringUtils]")
     input += '\x0C';
     expected += "<0x0C>"s;
 
-    for (int i = 0x0E; i <= 0x1F; ++i)
-    {
+    for (int i = 0x0E; i <= 0x1F; ++i) {
         input += static_cast<char>(i);
         char buf[7];
         std::snprintf(buf, sizeof(buf), "<0x%02X>", i);

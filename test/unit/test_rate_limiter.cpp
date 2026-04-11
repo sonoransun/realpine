@@ -1,12 +1,12 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <catch2/catch_test_macros.hpp>
 #include <RateLimiter.h>
-#include <thread>
-#include <chrono>
-#include <vector>
 #include <atomic>
+#include <catch2/catch_test_macros.hpp>
+#include <chrono>
+#include <thread>
+#include <vector>
 
 
 TEST_CASE("RateLimiter basic behavior", "[RateLimiter]")

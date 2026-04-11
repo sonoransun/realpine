@@ -2,8 +2,8 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AcceptorInterface.h>
+#include <Common.h>
 
 
 class MuxInterface;
@@ -14,40 +14,32 @@ class DtcpBaseConnTransport;
 class DtcpBaseConnAcceptor : public AcceptorInterface
 {
   public:
-
-    DtcpBaseConnAcceptor ();
-    virtual ~DtcpBaseConnAcceptor ();
+    DtcpBaseConnAcceptor();
+    virtual ~DtcpBaseConnAcceptor();
 
 
     // AcceptorInterface operations
     //
-    virtual bool initialize (MuxInterface *        multiplexor,
-                             TransportInterface *  parentTransport);
+    virtual bool initialize(MuxInterface * multiplexor, TransportInterface * parentTransport);
 
 
-    virtual bool acceptConnection (StackLinkInterface * request);
+    virtual bool acceptConnection(StackLinkInterface * request);
 
-    virtual bool createTransport (TransportInterface *& transport);
+    virtual bool createTransport(TransportInterface *& transport);
 
-    virtual bool receiveTransport (TransportInterface * transport);
-
+    virtual bool receiveTransport(TransportInterface * transport);
 
 
     // derived implementation handlers
     //
-    virtual bool acceptConnection (ulong   ipAddress,
-                                   ushort  port) = 0;
+    virtual bool acceptConnection(ulong ipAddress, ushort port) = 0;
 
-    virtual bool createTransport (DtcpBaseConnTransport *& transport) = 0;
+    virtual bool createTransport(DtcpBaseConnTransport *& transport) = 0;
 
-    virtual bool receiveTransport (DtcpBaseConnTransport * transport) = 0;
+    virtual bool receiveTransport(DtcpBaseConnTransport * transport) = 0;
 
 
   protected:
-
-    MuxInterface *        mux_;
-    TransportInterface *  parentTransport_;
-
+    MuxInterface * mux_;
+    TransportInterface * parentTransport_;
 };
-
-

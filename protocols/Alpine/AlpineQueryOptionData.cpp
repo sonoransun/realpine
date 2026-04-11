@@ -7,7 +7,4 @@
 // Ctor defaulted in header
 
 
-AlpineQueryOptionData::~AlpineQueryOptionData () = default;
-
-
-
+AlpineQueryOptionData::~AlpineQueryOptionData() = default;

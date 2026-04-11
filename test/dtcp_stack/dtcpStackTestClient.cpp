@@ -1,94 +1,96 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DataBuffer.h>
-#include <DtcpBaseConnMux.h>
-#include <DtcpPacket.h>
-#include <DtcpConnPacket.h>
-#include <AlpineDtcpUdpTransport.h>
 #include <AlpineDtcpConnAcceptor.h>
 #include <AlpineDtcpConnConnector.h>
 #include <AlpineDtcpConnTransport.h>
+#include <AlpineDtcpUdpTransport.h>
 #include <ApplCore.h>
+#include <DataBuffer.h>
+#include <DtcpBaseConnMux.h>
+#include <DtcpConnPacket.h>
+#include <DtcpPacket.h>
 #include <DtcpStackTest.h>
 #include <Log.h>
 #include <StringUtils.h>
+
 #include <NetUtils.h>
+#include <cstring>
+#include <iostream>
 #include <list>
 #include <stdlib.h>
 #include <unistd.h>
-#include <iostream>
 
-using std::cout; using std::cerr; using std::endl;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 
 using t_StackList = list<AlpineDtcpUdpTransport *>;
 
 
-int 
-main (int argc, char *argv[])
+int
+main(int argc, char * argv[])
 {
     if (argc != 8) {
-        cerr << "Usage: " << argv[0] << " <debug filename> <debugLevel 1-4> "
-                "<svrIpAddr> <svrPort> <myIpAddr> <startPort> <numCreate>" << endl;
+        cerr << "Usage: " << argv[0]
+             << " <debug filename> <debugLevel 1-4> "
+                "<svrIpAddr> <svrPort> <myIpAddr> <startPort> <numCreate>"
+             << endl;
         return 1;
     }
     int debugLevel;
     const string logFile(argv[1]);
-    debugLevel = atoi (argv[2]);
+    debugLevel = atoi(argv[2]);
 
     if (debugLevel == 1) {
-        Log::initialize (logFile, Log::t_LogLevel::Silent);
-    }
-    else if (debugLevel == 2) {
-        Log::initialize (logFile, Log::t_LogLevel::Error);
-    }
-    else if (debugLevel == 3) {
-        Log::initialize (logFile, Log::t_LogLevel::Info);
-    }
-    else if (debugLevel == 4) {
-        Log::initialize (logFile, Log::t_LogLevel::Debug);
-    }
-    else {
+        Log::initialize(logFile, Log::t_LogLevel::Silent);
+    } else if (debugLevel == 2) {
+        Log::initialize(logFile, Log::t_LogLevel::Error);
+    } else if (debugLevel == 3) {
+        Log::initialize(logFile, Log::t_LogLevel::Info);
+    } else if (debugLevel == 4) {
+        Log::initialize(logFile, Log::t_LogLevel::Debug);
+    } else {
         cout << "Invalid log level." << endl;
         return 1;
     }
     // Initialize application core
     //
     bool status;
-    status = ApplCore::initialize (argc, argv);
+    status = ApplCore::initialize(argc, argv);
 
     if (!status) {
-        Log::Error ("Unable to initialize application core.  Exiting.");
-        exit (1);
+        Log::Error("Unable to initialize application core.  Exiting.");
+        exit(1);
     }
 
-    string  svrIpAddressStr;
-    string  myIpAddressStr;
-    ulong   svrIpAddress;
-    ulong   myIpAddress;
-    string  svrPortStr;
-    int     svrPort;
-    string  startPortStr;
-    int     startPort;
+    string svrIpAddressStr;
+    string myIpAddressStr;
+    ulong svrIpAddress;
+    ulong myIpAddress;
+    string svrPortStr;
+    int svrPort;
+    string startPortStr;
+    int startPort;
 
-    svrIpAddressStr  = argv[3];
-    svrPortStr       = argv[4];
-    myIpAddressStr   = argv[5];
-    startPortStr     = argv[6];
+    svrIpAddressStr = argv[3];
+    svrPortStr = argv[4];
+    myIpAddressStr = argv[5];
+    startPortStr = argv[6];
 
-    if (!NetUtils::stringIpToLong (svrIpAddressStr, svrIpAddress)) {
+    if (!NetUtils::stringIpToLong(svrIpAddressStr, svrIpAddress)) {
         cerr << "Invalid Server IP Address.  Exiting." << endl;
         return 1;
     }
-    if (!NetUtils::stringIpToLong (myIpAddressStr, myIpAddress)) {
+    if (!NetUtils::stringIpToLong(myIpAddressStr, myIpAddress)) {
         cerr << "Invalid Client IP Address.  Exiting." << endl;
         return 1;
     }
-    svrPort = atoi (svrPortStr.c_str());
+    svrPort = atoi(svrPortStr.c_str());
     svrPort = htons(svrPort);
 
-    startPort = atoi (startPortStr.c_str());
+    startPort = atoi(startPortStr.c_str());
     startPort = htons(startPort);
 
     ulong createCount;
@@ -98,40 +100,34 @@ main (int argc, char *argv[])
         // We run out of FD's after 1024.  Make 1000 the limit...
         //
         cerr << "createCount reduced to maximum 1000 count." << endl;
-        Log::Error ("createCount reduced to maximum 1000 count.");
+        Log::Error("createCount reduced to maximum 1000 count.");
 
         createCount = 1000;
         return false;
     }
 
 
-
-    Log::Info ("Starting client."s +
-               "\nServer IP: "s + svrIpAddressStr +
-               "\nServer Port: "s + svrPortStr +
-               "\nClient IP: "s + myIpAddressStr +
-               "\nStart Port: "s + startPortStr +
-               "\nCreate Count: "s + std::to_string(createCount) +
-               "\n");
+    Log::Info("Starting client."s + "\nServer IP: "s + svrIpAddressStr + "\nServer Port: "s + svrPortStr +
+              "\nClient IP: "s + myIpAddressStr + "\nStart Port: "s + startPortStr + "\nCreate Count: "s +
+              std::to_string(createCount) + "\n");
 
 
- 
     // For each create operation, open a new port, and send request.
     //
-    AlpineDtcpUdpTransport *     transport;
-    DtcpBaseConnConnector *      connector;
+    AlpineDtcpUdpTransport * transport;
+    DtcpBaseConnConnector * connector;
 
-    int  currPort = startPort;
+    int currPort = startPort;
 
     uint dataLength = 256;
     byte * data = new byte[dataLength];
-    memset (data, 255, dataLength);
+    memset(data, 255, dataLength);
 
 
     // Store created stacks...
     //
-    t_StackList   stackList;   
-    stackList.clear ();
+    t_StackList stackList;
+    stackList.clear();
 
 
     uint i;
@@ -139,19 +135,18 @@ main (int argc, char *argv[])
 
 #ifdef _VERBOSE
         int tempPort;
-        tempPort = ntohs (currPort);
+        tempPort = ntohs(currPort);
 
-        Log::Debug ("Begin create iteration "s + std::to_string(i+1) +
-                    " of "s + std::to_string(createCount) +
-                    " at port: "s + std::to_string(tempPort));
+        Log::Debug("Begin create iteration "s + std::to_string(i + 1) + " of "s + std::to_string(createCount) +
+                   " at port: "s + std::to_string(tempPort));
 #endif
 
-        transport    = new AlpineDtcpUdpTransport (myIpAddress, currPort);
+        transport = new AlpineDtcpUdpTransport(myIpAddress, currPort);
 
-        status = transport->initialize ();
+        status = transport->initialize();
 
         if (!status) {
-            Log::Error ("Initializing alpine udp transport failed.  Continuing...");
+            Log::Error("Initializing alpine udp transport failed.  Continuing...");
             delete transport;
             currPort = ntohs(currPort) + 1;
             currPort = htons(currPort);
@@ -159,10 +154,10 @@ main (int argc, char *argv[])
             continue;
         }
 
-        status = transport->activate ();
+        status = transport->activate();
 
         if (!status) {
-            Log::Error ("Activating alpine udp transport failed.  Continuing...");
+            Log::Error("Activating alpine udp transport failed.  Continuing...");
             delete transport;
             currPort = ntohs(currPort) + 1;
             currPort = htons(currPort);
@@ -171,7 +166,7 @@ main (int argc, char *argv[])
         }
 
 
-#if 0 // No raw data
+#if 0  // No raw data
         status = transport->sendData (svrIpAddress, svrPort, data, dataLength);
 
         if (!status) {
@@ -186,8 +181,7 @@ main (int argc, char *argv[])
 
         // Store stack info
         //
-        stackList.push_back (transport);
-
+        stackList.push_back(transport);
 
 
         // try sending some DTCP packets.
@@ -213,10 +207,10 @@ main (int argc, char *argv[])
 
         // Try creating transport with connector
         //
-        status = transport->createConnector (connector);
+        status = transport->createConnector(connector);
 
         if (!status) {
-            Log::Error ("createConnector failed.  Continuing...");
+            Log::Error("createConnector failed.  Continuing...");
             currPort = ntohs(currPort) + 1;
             currPort = htons(currPort);
 
@@ -224,10 +218,10 @@ main (int argc, char *argv[])
         }
 
 
-        status = connector->requestConnection (svrIpAddress, svrPort);
+        status = connector->requestConnection(svrIpAddress, svrPort);
 
         if (!status) {
-            Log::Error ("requestConnection failed.  Continuing...");
+            Log::Error("requestConnection failed.  Continuing...");
             currPort = ntohs(currPort) + 1;
             currPort = htons(currPort);
 
@@ -289,22 +283,18 @@ main (int argc, char *argv[])
 
     // Initialize tester
     //
-    DtcpStackTest::initialize ();
+    DtcpStackTest::initialize();
 
 
-
-    Log::Info ("Client going into endless sleep... ... .. . .. .  .  ..  .    .        .        .");
+    Log::Info("Client going into endless sleep... ... .. . .. .  .  ..  .    .        .        .");
 
     while (true) {
-        sleep (3600);
+        sleep(3600);
     }
 
     // Cleanup
-    delete [] data;
-    Log::Info ("Client finished.  Exiting.");
+    delete[] data;
+    Log::Info("Client finished.  Exiting.");
 
     return 0;
 }
-
-
-

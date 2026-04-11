@@ -9,18 +9,14 @@
 class TestThread : public SysThread
 {
   public:
+    TestThread(const string message);
 
-    TestThread (const string  message);
-
-    virtual ~TestThread ();
+    virtual ~TestThread();
 
 
-    virtual void threadMain ();
+    virtual void threadMain();
 
 
   private:
-
     string msg_;
-
 };
-

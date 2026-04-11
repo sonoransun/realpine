@@ -2,16 +2,15 @@
 
 
 #include <DlnaHandler.h>
-#include <XmlWriter.h>
 #include <SafeParse.h>
+#include <XmlWriter.h>
 
 #include <cstdio>
 
 
 static void
-addAction (XmlWriter & xml, const string & name,
-           const string * inArgs, int inCount,
-           const string * outArgs, int outCount)
+addAction(
+    XmlWriter & xml, const string & name, const string * inArgs, int inCount, const string * outArgs, int outCount)
 {
     xml.beginElement("action");
     xml.simpleElement("name", name);
@@ -37,7 +36,7 @@ addAction (XmlWriter & xml, const string & name,
 
 
 string
-DlnaHandler::deviceDescription (const string & uuid, const string & baseUrl)
+DlnaHandler::deviceDescription(const string & uuid, const string & baseUrl)
 {
     XmlWriter xml;
     xml.declaration();
@@ -85,7 +84,7 @@ DlnaHandler::deviceDescription (const string & uuid, const string & baseUrl)
 
 
 string
-DlnaHandler::cdsServiceDescription ()
+DlnaHandler::cdsServiceDescription()
 {
     static const string cached = []() {
         XmlWriter xml;
@@ -99,8 +98,7 @@ DlnaHandler::cdsServiceDescription ()
 
         xml.beginElement("actionList");
 
-        string browseIn[]  = {"ObjectID", "BrowseFlag", "Filter",
-                              "StartingIndex", "RequestedCount", "SortCriteria"};
+        string browseIn[] = {"ObjectID", "BrowseFlag", "Filter", "StartingIndex", "RequestedCount", "SortCriteria"};
         string browseOut[] = {"Result", "NumberReturned", "TotalMatches", "UpdateID"};
         addAction(xml, "Browse", browseIn, 6, browseOut, 4);
 
@@ -128,7 +126,7 @@ DlnaHandler::cdsServiceDescription ()
 
 
 string
-DlnaHandler::cmsServiceDescription ()
+DlnaHandler::cmsServiceDescription()
 {
     static const string cached = []() {
         XmlWriter xml;
@@ -166,11 +164,11 @@ DlnaHandler::cmsServiceDescription ()
 
 
 string
-DlnaHandler::handleCdsAction (const string & soapBody,
-                               const string & soapAction,
-                               ContentStore & store,
-                               const string & baseUrl,
-                               bool transcodeEnabled)
+DlnaHandler::handleCdsAction(const string & soapBody,
+                             const string & soapAction,
+                             ContentStore & store,
+                             const string & baseUrl,
+                             bool transcodeEnabled)
 {
     string svcType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
@@ -183,20 +181,17 @@ DlnaHandler::handleCdsAction (const string & soapBody,
     }
 
     if (soapAction.contains("GetSearchCapabilities"))
-        return wrapSoapResponse("GetSearchCapabilities", svcType,
-                                "<SearchCaps></SearchCaps>");
+        return wrapSoapResponse("GetSearchCapabilities", svcType, "<SearchCaps></SearchCaps>");
 
     if (soapAction.contains("GetSortCapabilities"))
-        return wrapSoapResponse("GetSortCapabilities", svcType,
-                                "<SortCaps></SortCaps>");
+        return wrapSoapResponse("GetSortCapabilities", svcType, "<SortCaps></SortCaps>");
 
     return wrapSoapResponse("Unknown", svcType, "");
 }
 
 
 string
-DlnaHandler::handleCmsAction (const string & soapBody,
-                               const string & soapAction)
+DlnaHandler::handleCmsAction(const string & soapBody, const string & soapAction)
 {
     string svcType = "urn:schemas-upnp-org:service:ConnectionManager:1";
 
@@ -204,18 +199,18 @@ DlnaHandler::handleCmsAction (const string & soapBody,
         return actionGetProtocolInfo();
 
     if (soapAction.contains("GetCurrentConnectionIDs"))
-        return wrapSoapResponse("GetCurrentConnectionIDs", svcType,
-                                "<ConnectionIDs>0</ConnectionIDs>");
+        return wrapSoapResponse("GetCurrentConnectionIDs", svcType, "<ConnectionIDs>0</ConnectionIDs>");
 
     if (soapAction.contains("GetCurrentConnectionInfo")) {
-        return wrapSoapResponse("GetCurrentConnectionInfo", svcType,
-            "<RcsID>-1</RcsID>"
-            "<AVTransportID>-1</AVTransportID>"
-            "<ProtocolInfo></ProtocolInfo>"
-            "<PeerConnectionManager></PeerConnectionManager>"
-            "<PeerConnectionID>-1</PeerConnectionID>"
-            "<Direction>Output</Direction>"
-            "<Status>OK</Status>");
+        return wrapSoapResponse("GetCurrentConnectionInfo",
+                                svcType,
+                                "<RcsID>-1</RcsID>"
+                                "<AVTransportID>-1</AVTransportID>"
+                                "<ProtocolInfo></ProtocolInfo>"
+                                "<PeerConnectionManager></PeerConnectionManager>"
+                                "<PeerConnectionID>-1</PeerConnectionID>"
+                                "<Direction>Output</Direction>"
+                                "<Status>OK</Status>");
     }
 
     return wrapSoapResponse("Unknown", svcType, "");
@@ -223,15 +218,12 @@ DlnaHandler::handleCmsAction (const string & soapBody,
 
 
 string
-DlnaHandler::actionBrowse (const string & soapBody,
-                            ContentStore & store,
-                            const string & baseUrl,
-                            bool transcodeEnabled)
+DlnaHandler::actionBrowse(const string & soapBody, ContentStore & store, const string & baseUrl, bool transcodeEnabled)
 {
     string svcType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
-    string objectId    = extractXmlValue(soapBody, "ObjectID");
-    string browseFlag  = extractXmlValue(soapBody, "BrowseFlag");
+    string objectId = extractXmlValue(soapBody, "ObjectID");
+    string browseFlag = extractXmlValue(soapBody, "BrowseFlag");
     string startIdxStr = extractXmlValue(soapBody, "StartingIndex");
     string reqCountStr = extractXmlValue(soapBody, "RequestedCount");
 
@@ -240,10 +232,12 @@ DlnaHandler::actionBrowse (const string & soapBody,
 
     if (browseFlag == "BrowseMetadata" && (objectId == "0" || objectId.empty())) {
         string didl = buildDidlContainer(store.getItemCount());
-        string body = "<Result>"s + didl + "</Result>"
-            "<NumberReturned>1</NumberReturned>"
-            "<TotalMatches>1</TotalMatches>"
-            "<UpdateID>" + std::to_string(store.getSystemUpdateId()) + "</UpdateID>";
+        string body = "<Result>"s + didl +
+                      "</Result>"
+                      "<NumberReturned>1</NumberReturned>"
+                      "<TotalMatches>1</TotalMatches>"
+                      "<UpdateID>" +
+                      std::to_string(store.getSystemUpdateId()) + "</UpdateID>";
         return wrapSoapResponse("Browse", svcType, body);
     }
 
@@ -251,7 +245,8 @@ DlnaHandler::actionBrowse (const string & soapBody,
     store.getAllItems(items);
 
     ulong totalMatches = items.size();
-    if (reqCount == 0) reqCount = totalMatches;
+    if (reqCount == 0)
+        reqCount = totalMatches;
 
     string didlItems;
     ulong returned = 0;
@@ -261,60 +256,67 @@ DlnaHandler::actionBrowse (const string & soapBody,
         returned++;
     }
 
-    string didl =
-        "&lt;DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\""
-        " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
-        " xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\""
-        " xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"&gt;"s +
-        didlItems +
-        "&lt;/DIDL-Lite&gt;";
+    string didl = "&lt;DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\""
+                  " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
+                  " xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\""
+                  " xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0/\"&gt;"s +
+                  didlItems + "&lt;/DIDL-Lite&gt;";
 
-    string body = "<Result>"s + didl + "</Result>"
-        "<NumberReturned>" + std::to_string(returned) + "</NumberReturned>"
-        "<TotalMatches>" + std::to_string(totalMatches) + "</TotalMatches>"
-        "<UpdateID>" + std::to_string(store.getSystemUpdateId()) + "</UpdateID>";
+    string body = "<Result>"s + didl +
+                  "</Result>"
+                  "<NumberReturned>" +
+                  std::to_string(returned) +
+                  "</NumberReturned>"
+                  "<TotalMatches>" +
+                  std::to_string(totalMatches) +
+                  "</TotalMatches>"
+                  "<UpdateID>" +
+                  std::to_string(store.getSystemUpdateId()) + "</UpdateID>";
 
     return wrapSoapResponse("Browse", svcType, body);
 }
 
 
 string
-DlnaHandler::actionGetProtocolInfo ()
+DlnaHandler::actionGetProtocolInfo()
 {
     string svcType = "urn:schemas-upnp-org:service:ConnectionManager:1";
 
-    return wrapSoapResponse("GetProtocolInfo", svcType,
-        "<Source>"
-        "http-get:*:video/mp4:*,"
-        "http-get:*:video/x-matroska:*,"
-        "http-get:*:video/x-msvideo:*,"
-        "http-get:*:video/quicktime:*,"
-        "http-get:*:video/webm:*,"
-        "http-get:*:video/mpeg:*,"
-        "http-get:*:video/mp2t:*"
-        "</Source>"
-        "<Sink></Sink>");
+    return wrapSoapResponse("GetProtocolInfo",
+                            svcType,
+                            "<Source>"
+                            "http-get:*:video/mp4:*,"
+                            "http-get:*:video/x-matroska:*,"
+                            "http-get:*:video/x-msvideo:*,"
+                            "http-get:*:video/quicktime:*,"
+                            "http-get:*:video/webm:*,"
+                            "http-get:*:video/mpeg:*,"
+                            "http-get:*:video/mp2t:*"
+                            "</Source>"
+                            "<Sink></Sink>");
 }
 
 
 string
-DlnaHandler::buildDidlItem (const ContentStore::MediaItem & item,
-                             const string & baseUrl,
-                             bool transcodeEnabled)
+DlnaHandler::buildDidlItem(const ContentStore::MediaItem & item, const string & baseUrl, bool transcodeEnabled)
 {
     string mediaUrl = baseUrl + "/media/" + item.id;
 
-    string result =
-        "&lt;item id=\""s + item.id + "\" parentID=\"0\" restricted=\"1\"&gt;"
-        "&lt;dc:title&gt;" + item.title + "&lt;/dc:title&gt;"
-        "&lt;upnp:class&gt;object.item.videoItem&lt;/upnp:class&gt;"
-        "&lt;res protocolInfo=\"http-get:*:" + item.mimeType + ":DLNA.ORG_OP=01;DLNA.ORG_CI=0\""
-        " size=\"" + std::to_string(item.fileSize) + "\"&gt;" + mediaUrl + "&lt;/res&gt;";
+    string result = "&lt;item id=\""s + item.id +
+                    "\" parentID=\"0\" restricted=\"1\"&gt;"
+                    "&lt;dc:title&gt;" +
+                    item.title +
+                    "&lt;/dc:title&gt;"
+                    "&lt;upnp:class&gt;object.item.videoItem&lt;/upnp:class&gt;"
+                    "&lt;res protocolInfo=\"http-get:*:" +
+                    item.mimeType +
+                    ":DLNA.ORG_OP=01;DLNA.ORG_CI=0\""
+                    " size=\"" +
+                    std::to_string(item.fileSize) + "\"&gt;" + mediaUrl + "&lt;/res&gt;";
 
     if (transcodeEnabled) {
-        result +=
-            "&lt;res protocolInfo=\"http-get:*:video/mp2t:DLNA.ORG_OP=00;DLNA.ORG_CI=1\"&gt;"s +
-            mediaUrl + "/transcode&lt;/res&gt;";
+        result += "&lt;res protocolInfo=\"http-get:*:video/mp2t:DLNA.ORG_OP=00;DLNA.ORG_CI=1\"&gt;"s + mediaUrl +
+                  "/transcode&lt;/res&gt;";
     }
 
     result += "&lt;/item&gt;";
@@ -323,40 +325,38 @@ DlnaHandler::buildDidlItem (const ContentStore::MediaItem & item,
 
 
 string
-DlnaHandler::buildDidlContainer (ulong childCount)
+DlnaHandler::buildDidlContainer(ulong childCount)
 {
-    return
-        "&lt;DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\""
-        " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
-        " xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\"&gt;"
-        "&lt;container id=\"0\" parentID=\"-1\" childCount=\""s + std::to_string(childCount) + "\" restricted=\"1\"&gt;"
-        "&lt;dc:title&gt;Root&lt;/dc:title&gt;"
-        "&lt;upnp:class&gt;object.container&lt;/upnp:class&gt;"
-        "&lt;/container&gt;"
-        "&lt;/DIDL-Lite&gt;";
+    return "&lt;DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\""
+           " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""
+           " xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\"&gt;"
+           "&lt;container id=\"0\" parentID=\"-1\" childCount=\""s +
+           std::to_string(childCount) +
+           "\" restricted=\"1\"&gt;"
+           "&lt;dc:title&gt;Root&lt;/dc:title&gt;"
+           "&lt;upnp:class&gt;object.container&lt;/upnp:class&gt;"
+           "&lt;/container&gt;"
+           "&lt;/DIDL-Lite&gt;";
 }
 
 
 string
-DlnaHandler::wrapSoapResponse (const string & action,
-                                const string & svcType,
-                                const string & body)
+DlnaHandler::wrapSoapResponse(const string & action, const string & svcType, const string & body)
 {
-    return
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\""
-        " s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
-        "<s:Body>"
-        "<u:"s + action + "Response xmlns:u=\"" + svcType + "\">" +
-        body +
-        "</u:" + action + "Response>"
-        "</s:Body>"
-        "</s:Envelope>";
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+           "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\""
+           " s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+           "<s:Body>"
+           "<u:"s +
+           action + "Response xmlns:u=\"" + svcType + "\">" + body + "</u:" + action +
+           "Response>"
+           "</s:Body>"
+           "</s:Envelope>";
 }
 
 
 string
-DlnaHandler::extractXmlValue (const string & xml, const string & tag)
+DlnaHandler::extractXmlValue(const string & xml, const string & tag)
 {
     string openTag = "<" + tag + ">";
     string closeTag = "</" + tag + ">";

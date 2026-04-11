@@ -1,32 +1,29 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TorService.h>
+#include <Log.h>
 #include <TcpConnector.h>
 #include <TcpTransport.h>
-#include <Log.h>
+#include <TorService.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
-
-TorService::~TorService ()
+TorService::~TorService()
 {
     shutdown();
 }
 
 
-
 bool
-TorService::initialize (ushort torControlPort, const string & controlAuth)
+TorService::initialize(ushort torControlPort, const string & controlAuth)
 {
     TcpConnector connector;
     connector.setDestination(htonl(INADDR_LOOPBACK), htons(torControlPort));
 
     if (!connector.connect(controlConn_)) {
-        Log::Error("TorService: Failed to connect to Tor control port "s +
-                   std::to_string(torControlPort));
+        Log::Error("TorService: Failed to connect to Tor control port "s + std::to_string(torControlPort));
         return false;
     }
 
@@ -37,24 +34,21 @@ TorService::initialize (ushort torControlPort, const string & controlAuth)
         return false;
     }
 
-    Log::Info("TorService: Connected to Tor control port "s +
-              std::to_string(torControlPort));
+    Log::Info("TorService: Connected to Tor control port "s + std::to_string(torControlPort));
     return true;
 }
 
 
-
 bool
-TorService::addPortMapping (ushort virtualPort, ushort localTargetPort)
+TorService::addPortMapping(ushort virtualPort, ushort localTargetPort)
 {
     pendingMappings_.push_back({virtualPort, localTargetPort});
     return true;
 }
 
 
-
 bool
-TorService::createService ()
+TorService::createService()
 {
     if (pendingMappings_.empty()) {
         Log::Error("TorService: No port mappings configured.");
@@ -65,8 +59,7 @@ TorService::createService ()
     string command = "ADD_ONION NEW:BEST"s;
 
     for (const auto & mapping : pendingMappings_) {
-        command += " Port="s + std::to_string(mapping.virtualPort) +
-                   ",127.0.0.1:" + std::to_string(mapping.targetPort);
+        command += " Port="s + std::to_string(mapping.virtualPort) + ",127.0.0.1:" + std::to_string(mapping.targetPort);
     }
 
     command += "\r\n"s;
@@ -93,17 +86,16 @@ TorService::createService ()
     onionAddress_ = serviceId_ + ".onion";
     active_ = true;
 
-    Log::Info("TorService: Created hidden service at "s + onionAddress_ +
-              " with " + std::to_string(pendingMappings_.size()) + " port mappings");
+    Log::Info("TorService: Created hidden service at "s + onionAddress_ + " with " +
+              std::to_string(pendingMappings_.size()) + " port mappings");
 
     pendingMappings_.clear();
     return true;
 }
 
 
-
 void
-TorService::shutdown ()
+TorService::shutdown()
 {
     if (!active_)
         return;
@@ -123,25 +115,22 @@ TorService::shutdown ()
 }
 
 
-
 const string &
-TorService::onionAddress () const
+TorService::onionAddress() const
 {
     return onionAddress_;
 }
 
 
-
 bool
-TorService::isActive () const
+TorService::isActive() const
 {
     return active_;
 }
 
 
-
 bool
-TorService::authenticate (const string & auth)
+TorService::authenticate(const string & auth)
 {
     string command;
 
@@ -158,15 +147,13 @@ TorService::authenticate (const string & auth)
 }
 
 
-
 bool
-TorService::sendCommand (const string & command, string & response)
+TorService::sendCommand(const string & command, string & response)
 {
     if (!controlConn_)
         return false;
 
-    if (!controlConn_->send(reinterpret_cast<const byte *>(command.data()),
-                            command.size())) {
+    if (!controlConn_->send(reinterpret_cast<const byte *>(command.data()), command.size())) {
         Log::Error("TorService: Failed to send command to control port.");
         return false;
     }
@@ -175,9 +162,8 @@ TorService::sendCommand (const string & command, string & response)
 }
 
 
-
 bool
-TorService::readResponse (string & response)
+TorService::readResponse(string & response)
 {
     response.clear();
 
@@ -204,8 +190,7 @@ TorService::readResponse (string & response)
             if (prevNewline == string::npos)
                 lastLine = response.substr(0, lastNewline);
             else
-                lastLine = response.substr(prevNewline + 1,
-                                           lastNewline - prevNewline - 1);
+                lastLine = response.substr(prevNewline + 1, lastNewline - prevNewline - 1);
         } else {
             lastLine = response;
         }
@@ -215,9 +200,7 @@ TorService::readResponse (string & response)
             lastLine.pop_back();
 
         // "250 " means final success line; 5xx/4xx means error
-        if (lastLine.starts_with("250 ") ||
-            lastLine.starts_with("5") ||
-            lastLine.starts_with("4"))
+        if (lastLine.starts_with("250 ") || lastLine.starts_with("5") || lastLine.starts_with("4"))
             break;
     }
 

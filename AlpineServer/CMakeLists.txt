@@ -10,6 +10,8 @@ add_executable(AlpineServer
     ../AlpineRestBridge/JsonWriter.cpp
     ../AlpineRestBridge/JsonReader.cpp
     ../AlpineRestBridge/ApiKeyAuth.cpp
+    ../AlpineRestBridge/Compression.cpp
+    ../AlpineRestBridge/MetricsHandler.cpp
     ../AlpineRestBridge/RateLimiter.cpp
     ../AlpineRestBridge/RestBridgeConfig.cpp
     ../AlpineRestBridge/WebSocketSession.cpp
@@ -23,13 +25,14 @@ target_link_libraries(AlpineServer PRIVATE
     Alpine::ApplCore
     Alpine::AlpineStackInterface
     Alpine::DtcpStackInterface
-    Alpine::AlpineProtocol
-    Alpine::AlpineTransport
+    Alpine::Stack
     Alpine::AppUtils
     Alpine::NetUtils
+    Alpine::ThreadUtils
     Alpine::ConfigUtils
     nlohmann_json::nlohmann_json
     Asio::Asio
+    ZLIB::ZLIB
 )
 if(ALPINE_ENABLE_CORBA)
     target_link_libraries(AlpineServer PRIVATE

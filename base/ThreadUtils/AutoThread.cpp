@@ -2,25 +2,24 @@
 
 
 #include <AutoThread.h>
-#include <ThreadUtils.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <Platform.h>
+#include <StringUtils.h>
+#include <ThreadUtils.h>
 
 
-AutoThread::AutoThread ()
+AutoThread::AutoThread()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread constructor invoked.");
+    Log::Debug("AutoThread constructor invoked.");
 #endif
 }
 
 
-
-AutoThread::~AutoThread ()
+AutoThread::~AutoThread()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread destructor invoked.");
+    Log::Debug("AutoThread destructor invoked.");
 #endif
 
     // Signal the thread to exit if it is still running.
@@ -34,40 +33,38 @@ AutoThread::~AutoThread ()
         std::lock_guard<std::mutex> lk(cvMutex_);
         resumed_ = true;
     }
-    cv_.notify_one ();
+    cv_.notify_one();
 
     // request_stop() ensures the stop_token is signalled before
     // the jthread destructor joins.
     //
-    if (thread_.joinable ()) {
-        thread_.request_stop ();
+    if (thread_.joinable()) {
+        thread_.request_stop();
     }
     // jthread destructor handles the join.
 }
 
 
-
 void
-AutoThread::threadMain (std::stop_token /* stopToken */)
+AutoThread::threadMain(std::stop_token /* stopToken */)
 {
     // Default implementation: delegate to the legacy threadMain().
     // Subclasses that want cooperative cancellation should override
     // this overload and check stopToken.stop_requested() directly.
     //
-    threadMain ();
+    threadMain();
 }
 
 
-
 bool
-AutoThread::create ()
+AutoThread::create()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::create invoked.");
+    Log::Debug("AutoThread::create invoked.");
 #endif
 
     if (created_) {
-        Log::Error ("Duplicate call to AutoThread::create.  Ignoring.");
+        Log::Error("Duplicate call to AutoThread::create.  Ignoring.");
         return false;
     }
 
@@ -75,28 +72,25 @@ AutoThread::create ()
     // Launch the thread via std::jthread.  The jthread constructor
     // passes the stop_token as the first argument to the callable.
     //
-    thread_ = std::jthread ([this] (std::stop_token st) {
-        threadEntry (std::move (st), this);
-    });
+    thread_ = std::jthread([this](std::stop_token st) { threadEntry(std::move(st), this); });
 
-    threadId_ = thread_.get_id ();
+    threadId_ = thread_.get_id();
 
     created_ = true;
     running_ = false;
 
-    ThreadUtils::addThread (threadId_);
+    ThreadUtils::addThread(threadId_);
 
 
     return true;
 }
 
 
-
 bool
-AutoThread::destroy ()
+AutoThread::destroy()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::destroy invoked.");
+    Log::Debug("AutoThread::destroy invoked.");
 #endif
 
     // Flag-based stop: set destroyed_ so the thread loop exits
@@ -106,7 +100,7 @@ AutoThread::destroy ()
 
     // Request cooperative cancellation via the stop token.
     //
-    thread_.request_stop ();
+    thread_.request_stop();
 
     // Wake the thread if it is waiting so it can observe the stop.
     //
@@ -114,30 +108,29 @@ AutoThread::destroy ()
         std::lock_guard<std::mutex> lk(cvMutex_);
         resumed_ = true;
     }
-    cv_.notify_one ();
+    cv_.notify_one();
 
     // Join the thread so it completes cleanly before we return.
     //
-    if (thread_.joinable ()) {
-        thread_.join ();
+    if (thread_.joinable()) {
+        thread_.join();
     }
 
     created_ = false;
     running_ = false;
 
-    ThreadUtils::deleteThread (threadId_);
+    ThreadUtils::deleteThread(threadId_);
 
 
     return true;
 }
 
 
-
 bool
-AutoThread::resume ()
+AutoThread::resume()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::resume invoked.");
+    Log::Debug("AutoThread::resume invoked.");
 #endif
 
     if (!created_) {
@@ -153,31 +146,29 @@ AutoThread::resume ()
         std::lock_guard<std::mutex> lk(cvMutex_);
         resumed_ = true;
     }
-    cv_.notify_one ();
+    cv_.notify_one();
 
 
     return true;
 }
 
 
-
 bool
-AutoThread::isActive ()
+AutoThread::isActive()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::isActive invoked.");
+    Log::Debug("AutoThread::isActive invoked.");
 #endif
 
     return running_;
 }
 
 
-
 bool
-AutoThread::getThreadId (t_ThreadId & threadId)
+AutoThread::getThreadId(t_ThreadId & threadId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::getThreadId invoked.");
+    Log::Debug("AutoThread::getThreadId invoked.");
 #endif
 
     if (!created_) {
@@ -191,35 +182,31 @@ AutoThread::getThreadId (t_ThreadId & threadId)
 }
 
 
-
 void
-AutoThread::threadEntry (std::stop_token stopToken, AutoThread * self)
+AutoThread::threadEntry(std::stop_token stopToken, AutoThread * self)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AutoThread::threadEntry invoked.");
+    Log::Debug("AutoThread::threadEntry invoked.");
 #endif
 
     // Wait for initial resume before entering the main loop.
     //
     {
         std::unique_lock<std::mutex> lk(self->cvMutex_);
-        self->cv_.wait (lk, [self, &stopToken] {
-            return self->resumed_ || stopToken.stop_requested ();
-        });
+        self->cv_.wait(lk, [self, &stopToken] { return self->resumed_ || stopToken.stop_requested(); });
         self->resumed_ = false;
     }
 
-    if (self->destroyed_ || stopToken.stop_requested ())
+    if (self->destroyed_ || stopToken.stop_requested())
         return;
 
 
 #ifdef _VERBOSE
-    pid_t  pid;
-    pid = getpid ();
+    pid_t pid;
+    pid = getpid();
 
-    Log::Debug ("++> Thread started with ID: "s +
-                threadIdToString (self->threadId_) +
-                " - Process ID: "s + std::to_string (pid));
+    Log::Debug("++> Thread started with ID: "s + threadIdToString(self->threadId_) + " - Process ID: "s +
+               std::to_string(pid));
 #endif
 
 
@@ -229,14 +216,14 @@ AutoThread::threadEntry (std::stop_token stopToken, AutoThread * self)
 
         // Invoke derived threadMain (stop_token)...
         //
-        self->threadMain (stopToken);
+        self->threadMain(stopToken);
 
         // Suspend thread until next resume().
         self->running_ = false;
 
         // Check if we have been destroyed or stop requested.
         //
-        if (self->destroyed_ || stopToken.stop_requested ()) {
+        if (self->destroyed_ || stopToken.stop_requested()) {
             break;
         }
 
@@ -244,19 +231,15 @@ AutoThread::threadEntry (std::stop_token stopToken, AutoThread * self)
         //
         {
             std::unique_lock<std::mutex> lk(self->cvMutex_);
-            self->cv_.wait (lk, [self, &stopToken] {
-                return self->resumed_ || stopToken.stop_requested ();
-            });
+            self->cv_.wait(lk, [self, &stopToken] { return self->resumed_ || stopToken.stop_requested(); });
             self->resumed_ = false;
         }
 
-        if (self->destroyed_ || stopToken.stop_requested ()) {
+        if (self->destroyed_ || stopToken.stop_requested()) {
             break;
         }
     }
 
 
-    ThreadUtils::deleteThread (self->threadId_);
+    ThreadUtils::deleteThread(self->threadId_);
 }
-
-

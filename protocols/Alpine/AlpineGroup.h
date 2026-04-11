@@ -14,30 +14,26 @@ class AlpineQuery;
 class AlpineGroup
 {
   public:
-
-    ~AlpineGroup ();
-
+    ~AlpineGroup();
 
 
-    bool  getId (ulong &  id);
+    bool getId(ulong & id);
 
-    bool  getName (string &  name);
+    bool getName(string & name);
 
-    bool  getDescription (string & description);
+    bool getDescription(string & description);
 
-    ulong  size ();
+    ulong size();
 
-    ulong  totalQueries ();
+    ulong totalQueries();
 
-    ulong  totalResponses ();
+    ulong totalResponses();
 
-    bool  addPeer (ulong peerId);
+    bool addPeer(ulong peerId);
 
-    bool  removePeer (ulong  peerId);
+    bool removePeer(ulong peerId);
 
-    bool  getPeerProfile (ulong                 peerId,
-                          AlpinePeerProfile *&  profile);
-
+    bool getPeerProfile(ulong peerId, AlpinePeerProfile *& profile);
 
 
     // Internal Types
@@ -48,57 +44,48 @@ class AlpineGroup
 
 
   private:
-
-    ulong                     groupId_;
-    string                    name_;
-    string                    description_;
-    AlpinePeerProfileIndex *  profileIndex_;
-    t_QueryList *             queryList_;
-    ulong                     numQueries_;
-    ulong                     numResponses_;
-    ReadWriteSem              dataLock_;
-
-
-    AlpineGroup (ulong           groupId,
-                 const string &  name,
-                 const string &  description);
-
-    AlpineGroup (AlpineGroup *   copy,
-                 ulong           groupId, 
-                 const string &  name, 
-                 const string &  description);
+    ulong groupId_;
+    string name_;
+    string description_;
+    AlpinePeerProfileIndex * profileIndex_;
+    t_QueryList * queryList_;
+    ulong numQueries_;
+    ulong numResponses_;
+    ReadWriteSem dataLock_;
 
 
-    bool  createPeerList (t_PeerIdList &  peerList);
+    AlpineGroup(ulong groupId, const string & name, const string & description);
 
-    bool  adjustPeerQuality (int  delta);
+    AlpineGroup(AlpineGroup * copy, ulong groupId, const string & name, const string & description);
 
-    bool  queryStart (AlpineQuery *  query);
 
-    bool  queryEnd (AlpineQuery *  query);
+    bool createPeerList(t_PeerIdList & peerList);
 
-    void  querySent (ulong  peerId);
+    bool adjustPeerQuality(int delta);
 
-    bool  cancelAll ();
+    bool queryStart(AlpineQuery * query);
+
+    bool queryEnd(AlpineQuery * query);
+
+    void querySent(ulong peerId);
+
+    bool cancelAll();
 
     // Profile operations specific to this group
     //
-    bool  responseReceived (ulong  peerId);
+    bool responseReceived(ulong peerId);
 
-    bool  badPacketReceived (ulong  peerId);
+    bool badPacketReceived(ulong peerId);
 
-    bool  adjustQuality (ulong  peerId,
-                         short  delta);
+    bool adjustQuality(ulong peerId, short delta);
 
 
     // Copy constructor and assignment operator not implemented
     //
-    AlpineGroup (const AlpineGroup & copy);
-    AlpineGroup & operator = (const AlpineGroup & copy);
+    AlpineGroup(const AlpineGroup & copy);
+    AlpineGroup & operator=(const AlpineGroup & copy);
 
 
     friend class AlpineQuery;
     friend class AlpineGroupMgr;
 };
-
-

@@ -1,14 +1,14 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <catch2/catch_test_macros.hpp>
 #include <AccessTracker.h>
+#include <catch2/catch_test_macros.hpp>
 #include <nlohmann/json.hpp>
 
 
 // Use high base IDs to avoid collisions with other test runs
 static constexpr ulong BASE_RESOURCE = 100000;
-static constexpr ulong BASE_PEER     = 200000;
+static constexpr ulong BASE_PEER = 200000;
 
 
 TEST_CASE("AccessTracker record and retrieve resource stats", "[AccessTracker]")
@@ -52,7 +52,7 @@ TEST_CASE("AccessTracker peer stats aggregate across resources", "[AccessTracker
 
     ulong rid1 = BASE_RESOURCE + 10;
     ulong rid2 = BASE_RESOURCE + 11;
-    ulong pid  = BASE_PEER + 10;
+    ulong pid = BASE_PEER + 10;
 
     AccessTracker::recordResourceAccess(rid1, pid, "a.mp3", 500);
     AccessTracker::recordResourceAccess(rid2, pid, "b.mp3", 700);
@@ -90,7 +90,7 @@ TEST_CASE("AccessTracker getMostAccessedResources ordering", "[AccessTracker]")
     ulong rid1 = BASE_RESOURCE + 20;
     ulong rid2 = BASE_RESOURCE + 21;
     ulong rid3 = BASE_RESOURCE + 22;
-    ulong pid  = BASE_PEER + 20;
+    ulong pid = BASE_PEER + 20;
 
     // Access rid2 most, rid1 second, rid3 least
     for (int i = 0; i < 10; ++i) {
@@ -118,8 +118,7 @@ TEST_CASE("AccessTracker getMostAccessedResources limit", "[AccessTracker]")
     ulong pid = BASE_PEER + 30;
 
     for (ulong i = 0; i < 10; ++i) {
-        AccessTracker::recordResourceAccess(BASE_RESOURCE + 30 + i, pid,
-                                            "file-" + std::to_string(i), 100);
+        AccessTracker::recordResourceAccess(BASE_RESOURCE + 30 + i, pid, "file-" + std::to_string(i), 100);
     }
 
     vector<AccessTracker::t_ResourceStats> list;
@@ -146,8 +145,7 @@ TEST_CASE("AccessTracker serializeJson produces valid JSON", "[AccessTracker]")
 {
     AccessTracker::reset();
 
-    AccessTracker::recordResourceAccess(BASE_RESOURCE + 50, BASE_PEER + 50,
-                                        "test.mp3", 512);
+    AccessTracker::recordResourceAccess(BASE_RESOURCE + 50, BASE_PEER + 50, "test.mp3", 512);
 
     string json = AccessTracker::serializeJson();
     auto parsed = nlohmann::json::parse(json);
@@ -161,8 +159,7 @@ TEST_CASE("AccessTracker serializeText produces readable output", "[AccessTracke
 {
     AccessTracker::reset();
 
-    AccessTracker::recordResourceAccess(BASE_RESOURCE + 60, BASE_PEER + 60,
-                                        "test.mp3", 256);
+    AccessTracker::recordResourceAccess(BASE_RESOURCE + 60, BASE_PEER + 60, "test.mp3", 256);
 
     string text = AccessTracker::serializeText();
     REQUIRE(text.contains("Resource Access Statistics"));

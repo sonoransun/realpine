@@ -5,8 +5,8 @@
 /// Tests that the RateLimiter correctly enforces token-bucket rate limits,
 /// returning 429 responses when the limit is exceeded.
 
-#include <catch2/catch_test_macros.hpp>
 #include <RateLimiter.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 TEST_CASE("Rate limiter: requests within burst are allowed", "[integration][ratelimit]")

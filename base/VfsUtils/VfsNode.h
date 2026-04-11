@@ -13,38 +13,34 @@
 class VfsNode
 {
   public:
-
     enum class t_NodeType { Directory, File };
 
-    string                      name;
-    t_NodeType                  nodeType;
-    ulong                       size         = 0;
-    ulong                       peerId       = 0;
-    ulong                       resourceId   = 0;
-    ulong                       queryId      = 0;
-    string                      queryTerm;
-    string                      locatorUrl;
+    string name;
+    t_NodeType nodeType;
+    ulong size = 0;
+    ulong peerId = 0;
+    ulong resourceId = 0;
+    ulong queryId = 0;
+    string queryTerm;
+    string locatorUrl;
 
-    std::chrono::system_clock::time_point  createdAt;
-    std::chrono::system_clock::time_point  accessedAt;
+    std::chrono::system_clock::time_point createdAt;
+    std::chrono::system_clock::time_point accessedAt;
 
-    VfsNode *  parent = nullptr;
+    VfsNode * parent = nullptr;
 
-    std::unordered_map<string, std::unique_ptr<VfsNode>, OptHash<string>>  children;
+    std::unordered_map<string, std::unique_ptr<VfsNode>, OptHash<string>> children;
 
 
-    VfsNode (std::string_view  nodeName,
-             t_NodeType        type,
-             VfsNode *         parentNode = nullptr);
+    VfsNode(std::string_view nodeName, t_NodeType type, VfsNode * parentNode = nullptr);
 
-    VfsNode * addChild (std::string_view  childName,
-                        t_NodeType        type);
+    VfsNode * addChild(std::string_view childName, t_NodeType type);
 
-    VfsNode * findChild (std::string_view  childName);
+    VfsNode * findChild(std::string_view childName);
 
-    bool  removeChild (std::string_view  childName);
+    bool removeChild(std::string_view childName);
 
-    string  fullPath () const;
+    string fullPath() const;
 
-    bool  isDirectory () const;
+    bool isDirectory() const;
 };

@@ -11,19 +11,15 @@ class DataBuffer;
 class StackLinkInterface
 {
   public:
+    StackLinkInterface() = default;
+    virtual ~StackLinkInterface();
 
-    StackLinkInterface () = default;
-    virtual ~StackLinkInterface ();
 
+    virtual bool setParent(StackLinkInterface * parent) = 0;
 
-    virtual bool  setParent (StackLinkInterface *  parent) = 0;
+    virtual void unsetParent() = 0;
 
-    virtual void  unsetParent () = 0;
+    virtual bool writeData(DataBuffer * linkBuffer) = 0;
 
-    virtual bool  writeData (DataBuffer * linkBuffer) = 0;
-
-    virtual bool  readData (DataBuffer * linkBuffer) = 0;
-
+    virtual bool readData(DataBuffer * linkBuffer) = 0;
 };
-
-

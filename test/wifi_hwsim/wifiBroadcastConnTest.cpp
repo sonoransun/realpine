@@ -22,37 +22,38 @@
 ///////
 
 
+#include <BroadcastUdpConnection.h>
 #include <Common.h>
 #include <Log.h>
 #include <NetUtils.h>
-#include <BroadcastUdpConnection.h>
 
+#include <chrono>
 #include <cstring>
-#include <unistd.h>
 #include <poll.h>
+#include <thread>
+#include <unistd.h>
 
 
 static const char MAGIC[] = "ALPINE_BCAST_TEST";
 static constexpr uint MAGIC_LEN = sizeof(MAGIC);
 static constexpr uint NUM_PACKETS = 5;
 static constexpr uint PAYLOAD_SIZE = 256;
-static constexpr int  RECV_TIMEOUT_MS = 8000;
-
+static constexpr int RECV_TIMEOUT_MS = 8000;
 
 
 static bool
-runSender (ulong bindIp, ushort port, ulong bcastIp)
+runSender(ulong bindIp, ushort port, ulong bcastIp)
 {
-    Log::Info ("Sender: Creating BroadcastUdpConnection.");
+    Log::Info("Sender: Creating BroadcastUdpConnection.");
 
     BroadcastUdpConnection conn;
 
     if (!conn.create(bindIp, port)) {
-        Log::Error ("Sender: Failed to create broadcast connection.");
+        Log::Error("Sender: Failed to create broadcast connection.");
         return false;
     }
 
-    Log::Info ("Sender: Connection created, fd="s + std::to_string(conn.getFd()));
+    Log::Info("Sender: Connection created, fd="s + std::to_string(conn.getFd()));
 
     // Give receiver time to bind
     usleep(1000000);  // 1 second
@@ -68,50 +69,47 @@ runSender (ulong bindIp, ushort port, ulong bcastIp)
             payload[j] = static_cast<byte>((i + j) & 0xFF);
         }
 
-        Log::Info ("Sender: Sending packet "s + std::to_string(i) +
-                   " to broadcast address.");
+        Log::Info("Sender: Sending packet "s + std::to_string(i) + " to broadcast address.");
 
         if (!conn.sendData(bcastIp, port, payload, PAYLOAD_SIZE)) {
-            Log::Error ("Sender: sendData failed for packet "s + std::to_string(i));
+            Log::Error("Sender: sendData failed for packet "s + std::to_string(i));
             return false;
         }
 
         usleep(200000);  // 200ms between packets
     }
 
-    Log::Info ("Sender: All packets sent.");
+    Log::Info("Sender: All packets sent.");
     return true;
 }
 
 
-
 static bool
-runReceiver (ulong bindIp, ushort port)
+runReceiver(ulong bindIp, ushort port)
 {
-    Log::Info ("Receiver: Creating BroadcastUdpConnection.");
+    Log::Info("Receiver: Creating BroadcastUdpConnection.");
 
     BroadcastUdpConnection conn;
 
     if (!conn.create(bindIp, port)) {
-        Log::Error ("Receiver: Failed to create broadcast connection.");
+        Log::Error("Receiver: Failed to create broadcast connection.");
         return false;
     }
 
-    Log::Info ("Receiver: Listening on fd="s + std::to_string(conn.getFd()));
+    Log::Info("Receiver: Listening on fd="s + std::to_string(conn.getFd()));
 
     uint packetsReceived = 0;
     int fd = conn.getFd();
 
-    auto deadline = std::chrono::steady_clock::now() +
-                    std::chrono::milliseconds(RECV_TIMEOUT_MS);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(RECV_TIMEOUT_MS);
 
     while (packetsReceived < NUM_PACKETS) {
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-                             deadline - std::chrono::steady_clock::now()).count();
+        auto remaining =
+            std::chrono::duration_cast<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now()).count();
 
         if (remaining <= 0) {
-            Log::Error ("Receiver: Timeout. Got "s + std::to_string(packetsReceived) +
-                        " of " + std::to_string(NUM_PACKETS));
+            Log::Error("Receiver: Timeout. Got "s + std::to_string(packetsReceived) + " of " +
+                       std::to_string(NUM_PACKETS));
             return false;
         }
 
@@ -120,7 +118,7 @@ runReceiver (ulong bindIp, ushort port)
         pfd.events = POLLIN;
         pfd.revents = 0;
 
-        int ret = poll(&pfd, 1, static_cast<int>(std::min(remaining, (long long)500)));
+        int ret = poll(&pfd, 1, static_cast<int>(std::min<long long>(remaining, 500LL)));
 
         if (ret <= 0) {
             continue;
@@ -143,9 +141,8 @@ runReceiver (ulong bindIp, ushort port)
         uint seqNum = buffer[MAGIC_LEN];
 
         if (dataLen != PAYLOAD_SIZE) {
-            Log::Error ("Receiver: Packet "s + std::to_string(seqNum) +
-                        " size mismatch: expected " + std::to_string(PAYLOAD_SIZE) +
-                        ", got " + std::to_string(dataLen));
+            Log::Error("Receiver: Packet "s + std::to_string(seqNum) + " size mismatch: expected " +
+                       std::to_string(PAYLOAD_SIZE) + ", got " + std::to_string(dataLen));
             return false;
         }
 
@@ -154,8 +151,8 @@ runReceiver (ulong bindIp, ushort port)
         for (uint j = MAGIC_LEN + 1; j < PAYLOAD_SIZE; ++j) {
             byte expected = static_cast<byte>((seqNum + j) & 0xFF);
             if (buffer[j] != expected) {
-                Log::Error ("Receiver: Packet "s + std::to_string(seqNum) +
-                            " payload mismatch at byte " + std::to_string(j));
+                Log::Error("Receiver: Packet "s + std::to_string(seqNum) + " payload mismatch at byte " +
+                           std::to_string(j));
                 payloadOk = false;
                 break;
             }
@@ -166,10 +163,10 @@ runReceiver (ulong bindIp, ushort port)
         }
 
         packetsReceived++;
-        Log::Info ("Receiver: Packet "s + std::to_string(seqNum) + " OK.");
+        Log::Info("Receiver: Packet "s + std::to_string(seqNum) + " OK.");
     }
 
-    Log::Info ("Receiver: All "s + std::to_string(packetsReceived) + " packets received.");
+    Log::Info("Receiver: All "s + std::to_string(packetsReceived) + " packets received.");
 
     // Signal success to the runner script
     printf("BROADCAST_RECV_OK\n");
@@ -179,15 +176,16 @@ runReceiver (ulong bindIp, ushort port)
 }
 
 
-
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     if (argc < 4) {
-        fprintf(stderr, "Usage:\n"
+        fprintf(stderr,
+                "Usage:\n"
                 "  %s send <bind_ip> <port> <broadcast_ip>\n"
                 "  %s recv <bind_ip> <port>\n",
-                argv[0], argv[0]);
+                argv[0],
+                argv[0]);
         return 1;
     }
 
@@ -199,7 +197,7 @@ main (int argc, char * argv[])
 
     ulong ip;
     if (!NetUtils::stringIpToLong(ipStr, ip)) {
-        Log::Error ("Invalid IP address: "s + ipStr);
+        Log::Error("Invalid IP address: "s + ipStr);
         return 1;
     }
     ushort port = htons(static_cast<ushort>(portNum));
@@ -212,16 +210,16 @@ main (int argc, char * argv[])
         string bcastStr = argv[4];
         ulong bcastIp;
         if (!NetUtils::stringIpToLong(bcastStr, bcastIp)) {
-            Log::Error ("Invalid broadcast IP: "s + bcastStr);
+            Log::Error("Invalid broadcast IP: "s + bcastStr);
             return 1;
         }
 
-        Log::Info ("=== Broadcast UDP Send Test ===");
+        Log::Info("=== Broadcast UDP Send Test ===");
         return runSender(ip, port, bcastIp) ? 0 : 1;
     }
 
     if (mode == "recv") {
-        Log::Info ("=== Broadcast UDP Receive Test ===");
+        Log::Info("=== Broadcast UDP Receive Test ===");
         return runReceiver(ip, port) ? 0 : 1;
     }
 

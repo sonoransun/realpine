@@ -2,13 +2,13 @@
 
 
 #include <ShellCompletion.h>
-#include <sstream>
 #include <algorithm>
 #include <format>
+#include <sstream>
 
 
 string
-ShellCompletion::generateBash (const vector<pair<string, string>> & commands)
+ShellCompletion::generateBash(const vector<pair<string, string>> & commands)
 {
     std::ostringstream oss;
 
@@ -142,9 +142,8 @@ ShellCompletion::generateBash (const vector<pair<string, string>> & commands)
 }
 
 
-
 string
-ShellCompletion::generateZsh (const vector<pair<string, string>> & commands)
+ShellCompletion::generateZsh(const vector<pair<string, string>> & commands)
 {
     std::ostringstream oss;
 

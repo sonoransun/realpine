@@ -2,28 +2,26 @@
 
 
 #include <ApplCore.h>
-#include <SignalSet.h>
-#include <ThreadSigMask.h>
-#include <SignalMonitorThread.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <Platform.h>
+#include <ReadLock.h>
+#include <SignalMonitorThread.h>
+#include <SignalSet.h>
+#include <StringUtils.h>
+#include <ThreadSigMask.h>
+#include <WriteLock.h>
 #ifndef ALPINE_PLATFORM_WINDOWS
 #include <sys/wait.h>
 #include <unistd.h>
 #endif
 
 
-
-std::unique_ptr<ApplCore::t_SigHandlerIndex>  ApplCore::sigHandlerIndex_s;
-std::unique_ptr<ApplCore::t_MethodIndex>      ApplCore::methodIndex_s;
-std::unique_ptr<SignalMonitorThread>           ApplCore::signalMonitor_s;
-ReadWriteSem                      ApplCore::dataLock_s;
-std::atomic<int>                  ApplCore::shutdownSignal_s{0};
-std::atomic<bool>                 ApplCore::shutdownRequested_s{false};
-
+std::unique_ptr<ApplCore::t_SigHandlerIndex> ApplCore::sigHandlerIndex_s;
+std::unique_ptr<ApplCore::t_MethodIndex> ApplCore::methodIndex_s;
+std::unique_ptr<SignalMonitorThread> ApplCore::signalMonitor_s;
+ReadWriteSem ApplCore::dataLock_s;
+std::atomic<int> ApplCore::shutdownSignal_s{0};
+std::atomic<bool> ApplCore::shutdownRequested_s{false};
 
 
 // Ctor defaulted in header
@@ -32,35 +30,33 @@ std::atomic<bool>                 ApplCore::shutdownRequested_s{false};
 // Dtor defaulted in header
 
 
-
-bool 
-ApplCore::initialize (int      argc,
-                      char **  argv)
+bool
+ApplCore::initialize(int argc, char ** argv)
 {
-    Log::Info ("Application core initialize invoked; preparing core data.");
+    Log::Info("Application core initialize invoked; preparing core data.");
 
-    updateLog (argc, argv);
+    updateLog(argc, argv);
 
 
     // Mask all signals in this thread (must be main process thread).
     // This prevents problems with signals received in various other threads
     // of execution, which cause major problems.
     //
-    SignalSet  sigSet;
-    sigSet.fill ();
+    SignalSet sigSet;
+    sigSet.fill();
 
-    ThreadSigMask::setSigMask (sigSet);
+    ThreadSigMask::setSigMask(sigSet);
 
 
     // Scope lock
     {
-        WriteLock  lock(dataLock_s);
+        WriteLock lock(dataLock_s);
 
         // initialize signal handler indexes
         //
-        signalMonitor_s   = std::make_unique<SignalMonitorThread>();
+        signalMonitor_s = std::make_unique<SignalMonitorThread>();
         sigHandlerIndex_s = std::make_unique<t_SigHandlerIndex>();
-        methodIndex_s     = std::make_unique<t_MethodIndex>();
+        methodIndex_s = std::make_unique<t_MethodIndex>();
 
         sigHandlerIndex_s->resize(SignalMax + 1);
     }
@@ -71,44 +67,45 @@ ApplCore::initialize (int      argc,
     bool status = true;
 
     if (status)
-        status = addSignalHandler (&defaultInterruptHandler, SIGINT);
-   
-    if (status) 
-        status = addSignalHandler (&defaultQuitHandler, SIGQUIT);
+        status = addSignalHandler(&defaultInterruptHandler, SIGINT);
 
     if (status)
-        status = addSignalHandler (&defaultAbortHandler, SIGABRT);
+        status = addSignalHandler(&defaultQuitHandler, SIGQUIT);
 
     if (status)
-        status = addSignalHandler (&defaultSegvHandler, SIGSEGV);
+        status = addSignalHandler(&defaultAbortHandler, SIGABRT);
 
     if (status)
-        status = addSignalHandler (&defaultTerminateHandler, SIGTERM);
+        status = addSignalHandler(&defaultSegvHandler, SIGSEGV);
+
+    if (status)
+        status = addSignalHandler(&defaultTerminateHandler, SIGTERM);
 
 #ifndef ALPINE_PLATFORM_WINDOWS
     if (status)
-        status = addSignalHandler (&defaultChildHandler, SIGCHLD);
+        status = addSignalHandler(&defaultChildHandler, SIGCHLD);
 #endif
 
 
     if (!status) {
-        Log::Error ("Error loading default signal handlers in ApplCore::initialize.");
+        Log::Error("Error loading default signal handlers in ApplCore::initialize.");
         return false;
     }
 
     // Scope lock
     {
-        WriteLock  lock(dataLock_s);
+        WriteLock lock(dataLock_s);
 
         // start signal monitor thread
         //
-        signalMonitor_s->run ();
+        signalMonitor_s->run();
     }
 
 #ifdef ALPINE_PLATFORM_WINDOWS
     // Windows console control handler for graceful shutdown
-    SetConsoleCtrlHandler([](DWORD ctrlType) -> BOOL {
-        switch (ctrlType) {
+    SetConsoleCtrlHandler(
+        [](DWORD ctrlType) -> BOOL {
+            switch (ctrlType) {
             case CTRL_C_EVENT:
                 handleSignal(SIGINT);
                 return TRUE;
@@ -120,36 +117,34 @@ ApplCore::initialize (int      argc,
                 return TRUE;
             default:
                 return FALSE;
-        }
-    }, TRUE);
+            }
+        },
+        TRUE);
 #endif
 
     return true;
 }
 
 
-
-bool 
-ApplCore::addSignalHandler (t_SigHandler  method,
-                            int           signal)
+bool
+ApplCore::addSignalHandler(t_SigHandler method, int signal)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::addSignalHandler invoked.");
+    Log::Debug("ApplCore::addSignalHandler invoked.");
 #endif
 
-    if ( (signal < 1) ||
-         (signal > SignalMax) ) {
+    if ((signal < 1) || (signal > SignalMax)) {
 
         // Invalid signal number
 #ifdef _VERBOSE
-       Log::Error ("Invalid signal number passed to ApplCore::addSignalHandler.");
+        Log::Error("Invalid signal number passed to ApplCore::addSignalHandler.");
 #endif
 
-       return false;
+        return false;
     }
 
 
-    WriteLock  lock(dataLock_s);
+    WriteLock lock(dataLock_s);
 
     if (!sigHandlerIndex_s) {
         // not initialized
@@ -195,9 +190,8 @@ ApplCore::addSignalHandler (t_SigHandler  method,
 }
 
 
-
 bool
-ApplCore::removeSignalHandler (t_SigHandler  method)
+ApplCore::removeSignalHandler(t_SigHandler method)
 {
 #ifdef _VERBOSE
     Log::Debug("ApplCore::removeSignalHandler invoked.");
@@ -229,9 +223,8 @@ ApplCore::removeSignalHandler (t_SigHandler  method)
 }
 
 
-
 bool
-ApplCore::removeDefaultHandler (int signal)
+ApplCore::removeDefaultHandler(int signal)
 {
 #ifdef _VERBOSE
     Log::Debug("ApplCore::removeDefaultHandler invoked.");
@@ -274,23 +267,21 @@ ApplCore::removeDefaultHandler (int signal)
 }
 
 
-
-void  
-ApplCore::updateLog (int      argc,
-                     char **  argv)
+void
+ApplCore::updateLog(int argc, char ** argv)
 {
-    const string  logFileOption ("--logFile");
-    const string  logLevelOption ("--logLevel");
+    const string logFileOption("--logFile");
+    const string logLevelOption("--logLevel");
 
     char ** currArgPtr;
-    char *  currArg = nullptr;
-    char *  lastArg;
+    char * currArg = nullptr;
+    char * lastArg;
 
     currArgPtr = argv;
     currArg = *(currArgPtr++);
-    lastArg = argv[argc -1];
+    lastArg = argv[argc - 1];
 
-    char * logFile  = nullptr;
+    char * logFile = nullptr;
     char * logLevel = nullptr;
 
     bool done = false;
@@ -302,8 +293,7 @@ ApplCore::updateLog (int      argc,
             if (currArg != lastArg) {
                 logFile = *currArgPtr;
             }
-        }
-        else if (arg == logLevelOption) {
+        } else if (arg == logLevelOption) {
             if (currArg != lastArg) {
                 logLevel = *currArgPtr;
             }
@@ -311,8 +301,7 @@ ApplCore::updateLog (int      argc,
 
         if (currArg == lastArg) {
             done = true;
-        }
-        else {
+        } else {
             currArg = *(currArgPtr++);
         }
     }
@@ -320,165 +309,153 @@ ApplCore::updateLog (int      argc,
 
     // Setup log level
     //
-    bool  isValid;
-    Log::t_LogLevel  newLogLevel = Log::t_LogLevel::Debug; // default log level
+    bool isValid;
+    Log::t_LogLevel newLogLevel = Log::t_LogLevel::Debug;  // default log level
 
     if (!logLevel) {
-        Log::Error ("No log level specified.  --logLevel option required!");
-    }
-    else {
-        isValid = Log::stringToLogLevel (std::string(logLevel), newLogLevel);
+        Log::Error("No log level specified.  --logLevel option required!");
+    } else {
+        isValid = Log::stringToLogLevel(std::string(logLevel), newLogLevel);
 
         if (!isValid) {
-            Log::Error ("Invalid log level passed on command line!");
+            Log::Error("Invalid log level passed on command line!");
         }
     }
 
-    Log::setLogLevel (newLogLevel);
+    Log::setLogLevel(newLogLevel);
 
-     
+
     // Setup log file
-    //   
+    //
     if (!logFile) {
-        Log::Error ("No logFile specified.  --logFile option required!");
+        Log::Error("No logFile specified.  --logFile option required!");
         return;
     }
 
-    Log::initialize (std::string(logFile), newLogLevel);
+    Log::initialize(std::string(logFile), newLogLevel);
 }
-
 
 
 bool
-ApplCore::isShutdownRequested ()
+ApplCore::isShutdownRequested()
 {
-    return shutdownRequested_s.load (std::memory_order_acquire);
+    return shutdownRequested_s.load(std::memory_order_acquire);
 }
-
 
 
 int
-ApplCore::getShutdownSignal ()
+ApplCore::getShutdownSignal()
 {
-    return shutdownSignal_s.load (std::memory_order_acquire);
+    return shutdownSignal_s.load(std::memory_order_acquire);
 }
-
 
 
 // NOTE: These handlers are invoked from SignalMonitorThread via sigwait(),
 // not from async signal context. Log calls are safe here.
 
 void
-ApplCore::defaultInterruptHandler ()
+ApplCore::defaultInterruptHandler()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultInterruptHandler invoked.");
+    Log::Debug("ApplCore::defaultInterruptHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGINT, requesting shutdown."s);
-    shutdownSignal_s.store (SIGINT, std::memory_order_release);
-    shutdownRequested_s.store (true, std::memory_order_release);
+    Log::Info("Received SIGINT, requesting shutdown."s);
+    shutdownSignal_s.store(SIGINT, std::memory_order_release);
+    shutdownRequested_s.store(true, std::memory_order_release);
 }
 
 
-
 void
-ApplCore::defaultQuitHandler ()
+ApplCore::defaultQuitHandler()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultQuitHandler invoked.");
+    Log::Debug("ApplCore::defaultQuitHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGQUIT, requesting shutdown."s);
-    shutdownSignal_s.store (SIGQUIT, std::memory_order_release);
-    shutdownRequested_s.store (true, std::memory_order_release);
+    Log::Info("Received SIGQUIT, requesting shutdown."s);
+    shutdownSignal_s.store(SIGQUIT, std::memory_order_release);
+    shutdownRequested_s.store(true, std::memory_order_release);
 }
 
 
-
 void
-ApplCore::defaultAbortHandler ()
+ApplCore::defaultAbortHandler()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultAbortHandler invoked.");
+    Log::Debug("ApplCore::defaultAbortHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGABORT, requesting shutdown."s);
-    shutdownSignal_s.store (SIGABRT, std::memory_order_release);
-    shutdownRequested_s.store (true, std::memory_order_release);
+    Log::Info("Received SIGABORT, requesting shutdown."s);
+    shutdownSignal_s.store(SIGABRT, std::memory_order_release);
+    shutdownRequested_s.store(true, std::memory_order_release);
 }
 
 
-
 void
-ApplCore::defaultSegvHandler ()
+ApplCore::defaultSegvHandler()
 {
     // SIGSEGV — corrupt state, unsafe to log or allocate.
     // Use _exit() to terminate immediately.
     ::write(STDERR_FILENO, "FATAL: SIGSEGV received, terminating.\n", 38);
-    _exit (1);
+    _exit(1);
 }
 
 
-
 void
-ApplCore::defaultTerminateHandler ()
+ApplCore::defaultTerminateHandler()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultTerminateHandler invoked.");
+    Log::Debug("ApplCore::defaultTerminateHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGTERM, requesting shutdown."s);
-    shutdownSignal_s.store (SIGTERM, std::memory_order_release);
-    shutdownRequested_s.store (true, std::memory_order_release);
+    Log::Info("Received SIGTERM, requesting shutdown."s);
+    shutdownSignal_s.store(SIGTERM, std::memory_order_release);
+    shutdownRequested_s.store(true, std::memory_order_release);
 }
 
 
-
 void
-ApplCore::defaultChildHandler ()
+ApplCore::defaultChildHandler()
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::defaultChildHandler invoked.");
+    Log::Debug("ApplCore::defaultChildHandler invoked.");
 #endif
 
-    Log::Info ("Received SIGCHLD, checking child PIDs...");
+    Log::Info("Received SIGCHLD, checking child PIDs...");
 
 #ifndef ALPINE_PLATFORM_WINDOWS
     int childStatus;
     int result;
 
-    result = waitpid (-1, &childStatus, WNOHANG);
+    result = waitpid(-1, &childStatus, WNOHANG);
 
     if (result <= 0) {
         // No child after all?
         return;
     }
 
-    Log::Info ("Child process: "s + std::to_string (result) +
-               " exited.");
+    Log::Info("Child process: "s + std::to_string(result) + " exited.");
 #endif
 }
 
 
-
-void  
-ApplCore::handleSignal (int signal)
+void
+ApplCore::handleSignal(int signal)
 {
 #ifdef _VERBOSE
-    Log::Debug ("ApplCore::handleSignal invoked.");
+    Log::Debug("ApplCore::handleSignal invoked.");
 #endif
 
-    if ( (signal < 1) ||
-         (signal > SignalMax) ) {
+    if ((signal < 1) || (signal > SignalMax)) {
 
         // Invalid signal number
-       Log::Error ("Invalid signal number passed to ApplCore::handleSignal.");
-       return;
+        Log::Error("Invalid signal number passed to ApplCore::handleSignal.");
+        return;
     }
 
 
-    ReadLock  lock(dataLock_s);
+    ReadLock lock(dataLock_s);
 
     const auto & handlerListPtr = (*sigHandlerIndex_s)[signal];
 
@@ -493,6 +470,3 @@ ApplCore::handleSignal (int signal)
         handler();
     }
 }
-
-
-

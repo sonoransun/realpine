@@ -21,38 +21,33 @@ class DataBuffer;
 class AlpineBaseOptionData
 {
   public:
+    AlpineBaseOptionData() = default;
 
-    AlpineBaseOptionData () = default;
-
-    virtual ~AlpineBaseOptionData ();
+    virtual ~AlpineBaseOptionData();
 
 
-   
     // Misc optional extension information.
-    // 
-    virtual ulong  getOptionId () = 0;
+    //
+    virtual ulong getOptionId() = 0;
 
-    virtual string  getOptionDescription () = 0;
+    virtual string getOptionDescription() = 0;
 
 
     // Total Data Length for raw packet data
     //
-    virtual ulong  getOptionDataLength () = 0;
+    virtual ulong getOptionDataLength() = 0;
 
 
     // Marshalling option data to/from query packets
     //
-    virtual bool  writeData (DataBuffer * linkBuffer) = 0;
+    virtual bool writeData(DataBuffer * linkBuffer) = 0;
 
-    virtual bool  readData (DataBuffer * linkBuffer) = 0;
+    virtual bool readData(DataBuffer * linkBuffer) = 0;
 
 
     // Marshalling option data to/from strings (for use in interface operations)
     //
-    virtual bool  writeData (string &  stringBuffer) = 0;
+    virtual bool writeData(string & stringBuffer) = 0;
 
-    virtual bool  readData (const string &  stringBuffer) = 0;
-
-
+    virtual bool readData(const string & stringBuffer) = 0;
 };
-

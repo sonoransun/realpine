@@ -1,111 +1,102 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
 #include <DtcpConnPacket.h>
 //#include <DtcpTxnPacket.h>
 #include <DataBuffer.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <StringUtils.h>
 
 
-
-DtcpConnPacket::DtcpConnPacket ()
+DtcpConnPacket::DtcpConnPacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket constructor invoked.");
+    Log::Debug("DtcpConnPacket constructor invoked.");
 #endif
 
-    peerId_        = 0;
-    myId_          = 0;
+    peerId_ = 0;
+    myId_ = 0;
     peerIpAddress_ = 0;
-    peerPort_      = 0;
-    parent_        = nullptr;
-    sequenceNum_   = 0;
+    peerPort_ = 0;
+    parent_ = nullptr;
+    sequenceNum_ = 0;
 }
 
 
-
-DtcpConnPacket::DtcpConnPacket (StackLinkInterface * parent)
+DtcpConnPacket::DtcpConnPacket(StackLinkInterface * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket stack link interface constructor invoked.");
+    Log::Debug("DtcpConnPacket stack link interface constructor invoked.");
 #endif
 
-    peerId_        = 0;
-    myId_          = 0;
+    peerId_ = 0;
+    myId_ = 0;
     peerIpAddress_ = 0;
-    peerPort_      = 0;
-    parent_        = parent;
+    peerPort_ = 0;
+    parent_ = parent;
 }
 
 
-
-DtcpConnPacket::DtcpConnPacket (const DtcpConnPacket & copy)
+DtcpConnPacket::DtcpConnPacket(const DtcpConnPacket & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket copy constructor invoked.");
+    Log::Debug("DtcpConnPacket copy constructor invoked.");
 #endif
 
-    peerId_        = copy.peerId_;
-    myId_          = copy.myId_;
+    peerId_ = copy.peerId_;
+    myId_ = copy.myId_;
     peerIpAddress_ = copy.peerIpAddress_;
-    peerPort_      = copy.peerPort_;
-    parent_        = copy.parent_;
+    peerPort_ = copy.peerPort_;
+    parent_ = copy.parent_;
 }
 
 
-
-DtcpConnPacket::~DtcpConnPacket ()
+DtcpConnPacket::~DtcpConnPacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket destructor invoked.");
+    Log::Debug("DtcpConnPacket destructor invoked.");
 #endif
-
 }
 
 
-
-DtcpConnPacket & 
-DtcpConnPacket::operator = (const DtcpConnPacket & copy)
+DtcpConnPacket &
+DtcpConnPacket::operator=(const DtcpConnPacket & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::operator = invoked.");
+    Log::Debug("DtcpConnPacket::operator = invoked.");
 #endif
 
     if (&copy == this) {
         return *this;
     }
 
-    peerId_        = copy.peerId_;
-    myId_          = copy.myId_;
+    peerId_ = copy.peerId_;
+    myId_ = copy.myId_;
     peerIpAddress_ = copy.peerIpAddress_;
-    peerPort_      = copy.peerPort_;
-    parent_        = copy.parent_;
+    peerPort_ = copy.peerPort_;
+    parent_ = copy.parent_;
 
     return *this;
 }
 
 
-
-DtcpPacket::t_PacketType  
-DtcpConnPacket::getPacketType ()
+DtcpPacket::t_PacketType
+DtcpConnPacket::getPacketType()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::getPacketType invoked.");
+    Log::Debug("DtcpConnPacket::getPacketType invoked.");
 #endif
 
     return packetType_;
 }
 
 
-
-bool 
-DtcpConnPacket::setPacketType (DtcpPacket::t_PacketType  type)
+bool
+DtcpConnPacket::setPacketType(DtcpPacket::t_PacketType type)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setPacketType invoked.");
+    Log::Debug("DtcpConnPacket::setPacketType invoked.");
 #endif
 
     packetType_ = type;
@@ -114,12 +105,11 @@ DtcpConnPacket::setPacketType (DtcpPacket::t_PacketType  type)
 }
 
 
-
-bool  
-DtcpConnPacket::setPeerId (ulong peerId)
+bool
+DtcpConnPacket::setPeerId(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setPeerId invoked.");
+    Log::Debug("DtcpConnPacket::setPeerId invoked.");
 #endif
 
     peerId_ = peerId;
@@ -128,12 +118,11 @@ DtcpConnPacket::setPeerId (ulong peerId)
 }
 
 
-
-bool  
-DtcpConnPacket::getPeerId (ulong & peerId)
+bool
+DtcpConnPacket::getPeerId(ulong & peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::getPeerId invoked.");
+    Log::Debug("DtcpConnPacket::getPeerId invoked.");
 #endif
 
     peerId = peerId_;
@@ -142,12 +131,11 @@ DtcpConnPacket::getPeerId (ulong & peerId)
 }
 
 
-
 bool
-DtcpConnPacket::setMyId (ulong myId)
+DtcpConnPacket::setMyId(ulong myId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setMyId invoked.");
+    Log::Debug("DtcpConnPacket::setMyId invoked.");
 #endif
 
     myId_ = myId;
@@ -156,12 +144,11 @@ DtcpConnPacket::setMyId (ulong myId)
 }
 
 
-
 bool
-DtcpConnPacket::getMyId (ulong & myId)
+DtcpConnPacket::getMyId(ulong & myId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::getMyId invoked.");
+    Log::Debug("DtcpConnPacket::getMyId invoked.");
 #endif
 
     myId = myId_;
@@ -170,13 +157,11 @@ DtcpConnPacket::getMyId (ulong & myId)
 }
 
 
-
 bool
-DtcpConnPacket::getPeerLocation (ulong &   ipAddress,
-                                 ushort &  port)
+DtcpConnPacket::getPeerLocation(ulong & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::getPeerLocation invoked.");
+    Log::Debug("DtcpConnPacket::getPeerLocation invoked.");
 #endif
 
     if (!peerIpAddress_) {
@@ -189,13 +174,11 @@ DtcpConnPacket::getPeerLocation (ulong &   ipAddress,
 }
 
 
-
 bool
-DtcpConnPacket::setPeerLocation (ulong   ipAddress,
-                                 ushort  port)
+DtcpConnPacket::setPeerLocation(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setPeerLocation invoked.");
+    Log::Debug("DtcpConnPacket::setPeerLocation invoked.");
 #endif
 
     peerIpAddress_ = ipAddress;
@@ -205,12 +188,11 @@ DtcpConnPacket::setPeerLocation (ulong   ipAddress,
 }
 
 
-
-bool  
-DtcpConnPacket::setParent (StackLinkInterface *  parent)
+bool
+DtcpConnPacket::setParent(StackLinkInterface * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setParent invoked.");
+    Log::Debug("DtcpConnPacket::setParent invoked.");
 #endif
 
     parent_ = parent;
@@ -219,12 +201,11 @@ DtcpConnPacket::setParent (StackLinkInterface *  parent)
 }
 
 
-
-bool 
-DtcpConnPacket::setSequenceNum (ulong  sequenceNum)
+bool
+DtcpConnPacket::setSequenceNum(ulong sequenceNum)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setParent invoked.");
+    Log::Debug("DtcpConnPacket::setParent invoked.");
 #endif
 
     sequenceNum_ = sequenceNum;
@@ -233,12 +214,11 @@ DtcpConnPacket::setSequenceNum (ulong  sequenceNum)
 }
 
 
-
-bool 
-DtcpConnPacket::getSequenceNum (ulong & sequenceNum)
+bool
+DtcpConnPacket::getSequenceNum(ulong & sequenceNum)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::setParent invoked.");
+    Log::Debug("DtcpConnPacket::setParent invoked.");
 #endif
 
     sequenceNum = sequenceNum_;
@@ -247,37 +227,35 @@ DtcpConnPacket::getSequenceNum (ulong & sequenceNum)
 }
 
 
-
-void  
-DtcpConnPacket::unsetParent ()
+void
+DtcpConnPacket::unsetParent()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::unsetParent invoked.");
+    Log::Debug("DtcpConnPacket::unsetParent invoked.");
 #endif
 
     parent_ = nullptr;
 }
 
 
-
-bool  
-DtcpConnPacket::writeData (DataBuffer * linkBuffer)
+bool
+DtcpConnPacket::writeData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::writeData invoked.");
+    Log::Debug("DtcpConnPacket::writeData invoked.");
 #endif
 
     ////
     //
     // Write our data...
     //
-    bool   status;
+    bool status;
     byte * buffer;
     byte * curr;
-    uint   bufferSize;
-    uint   writeLength = 0;
+    uint bufferSize;
+    uint writeLength = 0;
 
-    status = linkBuffer->getWriteBuffer (buffer, bufferSize);
+    status = linkBuffer->getWriteBuffer(buffer, bufferSize);
 
     if (!status) {
         // no room left to write to?
@@ -286,7 +264,6 @@ DtcpConnPacket::writeData (DataBuffer * linkBuffer)
     curr = buffer;
 
 
-    
     // If this is a connRequest packet, we send assigned peerID
     //
     if (packetType_ == DtcpPacket::t_PacketType::connRequest) {
@@ -298,8 +275,7 @@ DtcpConnPacket::writeData (DataBuffer * linkBuffer)
         }
         *(reinterpret_cast<ulong *>(curr)) = htonl(peerId_);
         curr += sizeof(long);
-    }
-    else {
+    } else {
         // All other packets send myId...
         //
         writeLength += sizeof(long);
@@ -341,7 +317,7 @@ DtcpConnPacket::writeData (DataBuffer * linkBuffer)
         curr += sizeof(short);
     }
 
-   
+
     // If this is a reliable data packet, add sequence number
     //
     if (packetType_ == DtcpPacket::t_PacketType::connReliableData) {
@@ -353,23 +329,21 @@ DtcpConnPacket::writeData (DataBuffer * linkBuffer)
         }
         *(reinterpret_cast<ulong *>(curr)) = htonl(sequenceNum_);
         curr += sizeof(long);
-    } 
+    }
 
 
-
-
-    linkBuffer->addWriteBytes (writeLength);
+    linkBuffer->addWriteBytes(writeLength);
 
 
     if (parent_) {
         // We have a parent link set, have parent write data,
         //
-        status = parent_->writeData (linkBuffer);
+        status = parent_->writeData(linkBuffer);
 
         if (!status) {
             return false;
-}
-#if 0 // TEMP!!!!
+        }
+#if 0  // TEMP!!!!
 
         // If parent is a DtcpTxnPacket, update our packet type
         //
@@ -391,12 +365,11 @@ DtcpConnPacket::writeData (DataBuffer * linkBuffer)
 }
 
 
-
 bool
-DtcpConnPacket::readData (DataBuffer * linkBuffer)
+DtcpConnPacket::readData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpConnPacket::readData invoked.");
+    Log::Debug("DtcpConnPacket::readData invoked.");
 #endif
 
     ////
@@ -404,21 +377,19 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
     // Read our data...
     //
     //
-    bool   status;
+    bool status;
     byte * buffer;
     byte * curr;
-    uint   bufferSize;
-    uint   readLength = 0;
+    uint bufferSize;
+    uint readLength = 0;
 
-    status = linkBuffer->getReadBuffer (buffer, bufferSize);
+    status = linkBuffer->getReadBuffer(buffer, bufferSize);
 
     if (!status) {
         // nothing left to read?
         return false;
     }
     curr = buffer;
-
-
 
 
     // If this is a connRequest packet, read assigned myID
@@ -430,22 +401,21 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
         if (bufferSize < readLength) {
             return false;
         }
-        myId_ =  ntohl(*(reinterpret_cast<ulong *>(curr)));
+        myId_ = ntohl(*(reinterpret_cast<ulong *>(curr)));
         curr += sizeof(long);
-    }
-    else {
+    } else {
         // All other packets read peerId...
         //
         readLength += sizeof(long);
         if (bufferSize < readLength) {
             return false;
         }
-        peerId_ = ntohl(*(reinterpret_cast<ulong *>(curr))); 
+        peerId_ = ntohl(*(reinterpret_cast<ulong *>(curr)));
         curr += sizeof(long);
     }
 
 
-    // If this is a connOffer, read myID 
+    // If this is a connOffer, read myID
     //
     if (packetType_ == DtcpPacket::t_PacketType::connOffer) {
         // read myID
@@ -454,7 +424,7 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
         if (bufferSize < readLength) {
             return false;
         }
-        myId_ = ntohl(*(reinterpret_cast<ulong *>(curr))); 
+        myId_ = ntohl(*(reinterpret_cast<ulong *>(curr)));
         curr += sizeof(long);
     }
 
@@ -487,24 +457,22 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
         }
         sequenceNum_ = ntohl(*(reinterpret_cast<ulong *>(curr)));
         curr += sizeof(long);
-    } 
+    }
 
 
-
-
-    linkBuffer->addReadBytes (readLength);
+    linkBuffer->addReadBytes(readLength);
 
 
     if (parent_) {
         // We have a parent link set, have parent read data...
         //
 #ifdef _VERBOSE
-        Log::Debug ("Invoking parent link interface readData.");
+        Log::Debug("Invoking parent link interface readData.");
 #endif
 
-#if 0 // TEMP !!!
+#if 0
+        // TEMP !!!
         // If parent is a DtcpTxnPacket, update our packet type.
-        //
         DtcpTxnPacket * txnPacket;
         txnPacket = dynamic_cast<DtcpTxnPacket *>(parent_);
 
@@ -515,11 +483,10 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
         }
 #endif
 
-        status = parent_->readData (linkBuffer);
+        status = parent_->readData(linkBuffer);
 
         if (!status) {
             return false;
-
         }
         return false;
     }
@@ -527,5 +494,3 @@ DtcpConnPacket::readData (DataBuffer * linkBuffer)
 
     return true;
 }
-
-

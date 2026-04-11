@@ -1,23 +1,23 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <FuseOps.h>
-#include <AlpineFuse.h>
-#include <QueryCache.h>
 #include <AccessTracker.h>
+#include <AlpineFuse.h>
+#include <AlpinePeerProfileIndex.h>
+#include <AlpineRatingEngine.h>
 #include <AlpineStackInterface.h>
 #include <DtcpStackInterface.h>
-#include <AlpineRatingEngine.h>
-#include <AlpinePeerProfileIndex.h>
+#include <FuseOps.h>
 #include <Log.h>
+#include <QueryCache.h>
 
 #include <fuse.h>
 
-#include <cerrno>
-#include <cstring>
 #include <algorithm>
-#include <sstream>
+#include <cerrno>
 #include <chrono>
+#include <cstring>
+#include <sstream>
 
 
 // ---------------------------------------------------------------------------
@@ -25,13 +25,13 @@
 // ---------------------------------------------------------------------------
 
 const fuse_operations &
-FuseOps::operations ()
+FuseOps::operations()
 {
     static fuse_operations ops{};
     ops.getattr = fuseGetattr;
     ops.readdir = fuseReaddir;
-    ops.open    = fuseOpen;
-    ops.read    = fuseRead;
+    ops.open = fuseOpen;
+    ops.read = fuseRead;
     ops.release = fuseRelease;
     return ops;
 }
@@ -42,7 +42,7 @@ FuseOps::operations ()
 // ---------------------------------------------------------------------------
 
 VfsNode *
-FuseOps::resolvePath (const char *  path)
+FuseOps::resolvePath(const char * path)
 {
     auto * node = AlpineFuse::rootNode();
     if (!node)
@@ -53,12 +53,9 @@ FuseOps::resolvePath (const char *  path)
 
     string segment;
 
-    for (const char * p = path + 1; ; ++p)
-    {
-        if (*p == '/' || *p == '\0')
-        {
-            if (!segment.empty())
-            {
+    for (const char * p = path + 1;; ++p) {
+        if (*p == '/' || *p == '\0') {
+            if (!segment.empty()) {
                 auto * child = node->findChild(segment);
                 if (!child)
                     return nullptr;
@@ -68,9 +65,7 @@ FuseOps::resolvePath (const char *  path)
 
             if (*p == '\0')
                 break;
-        }
-        else
-        {
+        } else {
             segment += *p;
         }
     }
@@ -84,7 +79,7 @@ FuseOps::resolvePath (const char *  path)
 // ---------------------------------------------------------------------------
 
 string
-FuseOps::sanitizeFilename (const string &  name)
+FuseOps::sanitizeFilename(const string & name)
 {
     if (name.empty())
         return "unnamed"s;
@@ -92,8 +87,7 @@ FuseOps::sanitizeFilename (const string &  name)
     string result;
     result.reserve(name.size());
 
-    for (auto ch : name)
-    {
+    for (auto ch : name) {
         if (ch == '/')
             result += '_';
         else
@@ -112,8 +106,7 @@ FuseOps::sanitizeFilename (const string &  name)
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populateQueries (VfsNode *       queriesDir,
-                          const string &  searchTerm)
+FuseOps::populateQueries(VfsNode * queriesDir, const string & searchTerm)
 {
     QueryCache::t_CachedQuery cached{};
 
@@ -123,31 +116,24 @@ FuseOps::populateQueries (VfsNode *       queriesDir,
     queriesDir->queryId = cached.queryId;
 
     // Add .query_status virtual file
-    auto * statusFile   = queriesDir->addChild(".query_status"s,
-                                               VfsNode::t_NodeType::File);
+    auto * statusFile = queriesDir->addChild(".query_status"s, VfsNode::t_NodeType::File);
     statusFile->queryId = cached.queryId;
 
-    for (const auto & [peerId, peerRes] : cached.results)
-    {
+    for (const auto & [peerId, peerRes] : cached.results) {
         auto peerDirName = "peer_"s + std::to_string(peerId);
-        auto * peerDir   = queriesDir->addChild(peerDirName,
-                                                VfsNode::t_NodeType::Directory);
+        auto * peerDir = queriesDir->addChild(peerDirName, VfsNode::t_NodeType::Directory);
         peerDir->peerId = peerId;
 
-        for (const auto & res : peerRes.resourceDescList)
-        {
-            auto fileName = sanitizeFilename(
-                res.description.empty()
-                    ? "resource_"s + std::to_string(res.resourceId)
-                    : res.description);
+        for (const auto & res : peerRes.resourceDescList) {
+            auto fileName = sanitizeFilename(res.description.empty() ? "resource_"s + std::to_string(res.resourceId)
+                                                                     : res.description);
 
-            auto * fileNode      = peerDir->addChild(fileName,
-                                                     VfsNode::t_NodeType::File);
+            auto * fileNode = peerDir->addChild(fileName, VfsNode::t_NodeType::File);
             fileNode->resourceId = res.resourceId;
-            fileNode->peerId     = peerId;
-            fileNode->size       = res.size;
-            fileNode->queryTerm  = searchTerm;
-            fileNode->queryId    = cached.queryId;
+            fileNode->peerId = peerId;
+            fileNode->size = res.size;
+            fileNode->queryTerm = searchTerm;
+            fileNode->queryId = cached.queryId;
 
             if (!res.locators.empty())
                 fileNode->locatorUrl = res.locators.front();
@@ -163,22 +149,19 @@ FuseOps::populateQueries (VfsNode *       queriesDir,
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populatePeers (VfsNode *  peerDir)
+FuseOps::populatePeers(VfsNode * peerDir)
 {
     DtcpStackInterface::t_DtcpPeerIdList peerIds;
 
     if (!DtcpStackInterface::getAllDtcpPeerIds(peerIds))
         return;
 
-    for (auto peerId : peerIds)
-    {
-        auto dirName  = "peer_"s + std::to_string(peerId);
-        auto * subDir = peerDir->addChild(dirName,
-                                          VfsNode::t_NodeType::Directory);
+    for (auto peerId : peerIds) {
+        auto dirName = "peer_"s + std::to_string(peerId);
+        auto * subDir = peerDir->addChild(dirName, VfsNode::t_NodeType::Directory);
         subDir->peerId = peerId;
 
-        auto * infoFile  = subDir->addChild(".peer_info"s,
-                                            VfsNode::t_NodeType::File);
+        auto * infoFile = subDir->addChild(".peer_info"s, VfsNode::t_NodeType::File);
         infoFile->peerId = peerId;
     }
 }
@@ -189,39 +172,32 @@ FuseOps::populatePeers (VfsNode *  peerDir)
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populateGroups (VfsNode *  groupDir)
+FuseOps::populateGroups(VfsNode * groupDir)
 {
     auto groupsResult = AlpineStackInterface::listGroups2();
     if (!groupsResult)
         return;
 
-    for (auto groupId : *groupsResult)
-    {
+    for (auto groupId : *groupsResult) {
         auto infoResult = AlpineStackInterface::getGroupInfo2(groupId);
         if (!infoResult)
             continue;
 
-        auto dirName  = sanitizeFilename(infoResult->groupName);
-        auto * subDir = groupDir->addChild(dirName,
-                                           VfsNode::t_NodeType::Directory);
+        auto dirName = sanitizeFilename(infoResult->groupName);
+        auto * subDir = groupDir->addChild(dirName, VfsNode::t_NodeType::Directory);
 
         // Store groupId in queryId field for generateGroupInfo
-        auto * infoFile     = subDir->addChild(".group_info"s,
-                                               VfsNode::t_NodeType::File);
-        infoFile->queryId   = groupId;
+        auto * infoFile = subDir->addChild(".group_info"s, VfsNode::t_NodeType::File);
+        infoFile->queryId = groupId;
 
         // Peers sub-directory
-        auto * peersSubDir = subDir->addChild("peers"s,
-                                              VfsNode::t_NodeType::Directory);
+        auto * peersSubDir = subDir->addChild("peers"s, VfsNode::t_NodeType::Directory);
 
         auto peerListResult = AlpineStackInterface::getGroupPeerList2(groupId);
-        if (peerListResult)
-        {
-            for (auto peerId : *peerListResult)
-            {
-                auto peerName    = "peer_"s + std::to_string(peerId);
-                auto * peerFile  = peersSubDir->addChild(peerName,
-                                                         VfsNode::t_NodeType::File);
+        if (peerListResult) {
+            for (auto peerId : *peerListResult) {
+                auto peerName = "peer_"s + std::to_string(peerId);
+                auto * peerFile = peersSubDir->addChild(peerName, VfsNode::t_NodeType::File);
                 peerFile->peerId = peerId;
             }
         }
@@ -234,11 +210,11 @@ FuseOps::populateGroups (VfsNode *  groupDir)
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populateQualityTiers (VfsNode *  qualityDir)
+FuseOps::populateQualityTiers(VfsNode * qualityDir)
 {
-    auto * highDir   = qualityDir->findChild("high"s);
+    auto * highDir = qualityDir->findChild("high"s);
     auto * mediumDir = qualityDir->findChild("medium"s);
-    auto * lowDir    = qualityDir->findChild("low"s);
+    auto * lowDir = qualityDir->findChild("low"s);
 
     if (!highDir || !mediumDir || !lowDir)
         return;
@@ -248,8 +224,7 @@ FuseOps::populateQualityTiers (VfsNode *  qualityDir)
     if (!DtcpStackInterface::getAllDtcpPeerIds(peerIds))
         return;
 
-    for (auto peerId : peerIds)
-    {
+    for (auto peerId : peerIds) {
         auto profileResult = AlpineStackInterface::getDefaultPeerProfile2(peerId);
         if (!profileResult)
             continue;
@@ -264,8 +239,7 @@ FuseOps::populateQualityTiers (VfsNode *  qualityDir)
         else
             targetDir = lowDir;
 
-        auto * peerFile  = targetDir->addChild(peerName,
-                                               VfsNode::t_NodeType::File);
+        auto * peerFile = targetDir->addChild(peerName, VfsNode::t_NodeType::File);
         peerFile->peerId = peerId;
     }
 }
@@ -276,22 +250,18 @@ FuseOps::populateQualityTiers (VfsNode *  qualityDir)
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populateRecent (VfsNode *  recentDir)
+FuseOps::populateRecent(VfsNode * recentDir)
 {
     vector<AccessTracker::t_ResourceStats> recentList;
     AccessTracker::getMostRecentResources(recentList, 50);
 
-    for (const auto & rs : recentList)
-    {
-        auto fileName = sanitizeFilename(
-            rs.description.empty()
-                ? "resource_"s + std::to_string(rs.resourceId)
-                : rs.description);
+    for (const auto & rs : recentList) {
+        auto fileName =
+            sanitizeFilename(rs.description.empty() ? "resource_"s + std::to_string(rs.resourceId) : rs.description);
 
-        auto * fileNode      = recentDir->addChild(fileName,
-                                                   VfsNode::t_NodeType::File);
+        auto * fileNode = recentDir->addChild(fileName, VfsNode::t_NodeType::File);
         fileNode->resourceId = rs.resourceId;
-        fileNode->peerId     = rs.peerId;
+        fileNode->peerId = rs.peerId;
     }
 }
 
@@ -301,22 +271,18 @@ FuseOps::populateRecent (VfsNode *  recentDir)
 // ---------------------------------------------------------------------------
 
 void
-FuseOps::populatePopular (VfsNode *  popularDir)
+FuseOps::populatePopular(VfsNode * popularDir)
 {
     vector<AccessTracker::t_ResourceStats> popularList;
     AccessTracker::getMostAccessedResources(popularList, 50);
 
-    for (const auto & rs : popularList)
-    {
-        auto fileName = sanitizeFilename(
-            rs.description.empty()
-                ? "resource_"s + std::to_string(rs.resourceId)
-                : rs.description);
+    for (const auto & rs : popularList) {
+        auto fileName =
+            sanitizeFilename(rs.description.empty() ? "resource_"s + std::to_string(rs.resourceId) : rs.description);
 
-        auto * fileNode      = popularDir->addChild(fileName,
-                                                    VfsNode::t_NodeType::File);
+        auto * fileNode = popularDir->addChild(fileName, VfsNode::t_NodeType::File);
         fileNode->resourceId = rs.resourceId;
-        fileNode->peerId     = rs.peerId;
+        fileNode->peerId = rs.peerId;
     }
 }
 
@@ -326,39 +292,35 @@ FuseOps::populatePopular (VfsNode *  popularDir)
 // ---------------------------------------------------------------------------
 
 string
-FuseOps::generateStatsContent ()
+FuseOps::generateStatsContent()
 {
     return AccessTracker::serializeText();
 }
 
 
 string
-FuseOps::generatePeerInfo (ulong  peerId)
+FuseOps::generatePeerInfo(ulong peerId)
 {
     std::ostringstream out;
 
     out << "=== Peer " << peerId << " ===\n";
 
     DtcpStackInterface::t_DtcpPeerStatus dtcpStatus{};
-    if (DtcpStackInterface::getDtcpPeerStatus(peerId, dtcpStatus))
-    {
-        out << "IP: " << dtcpStatus.ipAddress
-            << ":" << dtcpStatus.port << "\n"
+    if (DtcpStackInterface::getDtcpPeerStatus(peerId, dtcpStatus)) {
+        out << "IP: " << dtcpStatus.ipAddress << ":" << dtcpStatus.port << "\n"
             << "Avg bandwidth: " << dtcpStatus.avgBandwidth << "\n"
             << "Peak bandwidth: " << dtcpStatus.peakBandwidth << "\n";
     }
 
     auto profileResult = AlpineStackInterface::getDefaultPeerProfile2(peerId);
-    if (profileResult)
-    {
+    if (profileResult) {
         out << "Quality: " << profileResult->relativeQuality << "\n"
             << "Total queries: " << profileResult->totalQueries << "\n"
             << "Total responses: " << profileResult->totalResponses << "\n";
     }
 
     AccessTracker::t_PeerStats peerStats{};
-    if (AccessTracker::getPeerStats(peerId, peerStats))
-    {
+    if (AccessTracker::getPeerStats(peerId, peerStats)) {
         out << "VFS accesses: " << peerStats.aggregateAccessCount << "\n"
             << "VFS bytes read: " << peerStats.aggregateBytesRead << "\n"
             << "Distinct resources: " << peerStats.distinctResourcesAccessed << "\n";
@@ -369,15 +331,14 @@ FuseOps::generatePeerInfo (ulong  peerId)
 
 
 string
-FuseOps::generateQueryStatus (ulong  queryId)
+FuseOps::generateQueryStatus(ulong queryId)
 {
     std::ostringstream out;
 
     out << "=== Query " << queryId << " ===\n";
 
     auto statusResult = AlpineStackInterface::getQueryStatus2(queryId);
-    if (statusResult)
-    {
+    if (statusResult) {
         out << "Total peers: " << statusResult->totalPeers << "\n"
             << "Peers queried: " << statusResult->peersQueried << "\n"
             << "Responses: " << statusResult->numPeerResponses << "\n"
@@ -392,13 +353,12 @@ FuseOps::generateQueryStatus (ulong  queryId)
 
 
 string
-FuseOps::generateGroupInfo (ulong  groupId)
+FuseOps::generateGroupInfo(ulong groupId)
 {
     std::ostringstream out;
 
     auto infoResult = AlpineStackInterface::getGroupInfo2(groupId);
-    if (infoResult)
-    {
+    if (infoResult) {
         out << "=== Group: " << infoResult->groupName << " ===\n"
             << "ID: " << infoResult->groupId << "\n"
             << "Description: " << infoResult->description << "\n"
@@ -416,12 +376,13 @@ FuseOps::generateGroupInfo (ulong  groupId)
 // ---------------------------------------------------------------------------
 
 int
-FuseOps::fuseGetattr (const char *  path,
-                      struct stat * stbuf
+FuseOps::fuseGetattr(const char * path,
+                     struct stat * stbuf
 #if FUSE_USE_VERSION >= 30
-                      , struct fuse_file_info *  /* fi */
+                     ,
+                     struct fuse_file_info * /* fi */
 #endif
-                      )
+)
 {
     std::memset(stbuf, 0, sizeof(struct stat));
 
@@ -433,16 +394,13 @@ FuseOps::fuseGetattr (const char *  path,
     auto ctime = std::chrono::system_clock::to_time_t(node->createdAt);
     auto atime = std::chrono::system_clock::to_time_t(node->accessedAt);
 
-    if (node->isDirectory())
-    {
-        stbuf->st_mode  = S_IFDIR | 0555;
+    if (node->isDirectory()) {
+        stbuf->st_mode = S_IFDIR | 0555;
         stbuf->st_nlink = 2;
-    }
-    else
-    {
-        stbuf->st_mode  = S_IFREG | 0444;
+    } else {
+        stbuf->st_mode = S_IFREG | 0444;
         stbuf->st_nlink = 1;
-        stbuf->st_size  = static_cast<off_t>(node->size);
+        stbuf->st_size = static_cast<off_t>(node->size);
     }
 
     stbuf->st_atime = atime;
@@ -458,15 +416,16 @@ FuseOps::fuseGetattr (const char *  path,
 // ---------------------------------------------------------------------------
 
 int
-FuseOps::fuseReaddir (const char *              path,
-                      void *                    buf,
-                      fuse_fill_dir_t           filler,
-                      off_t                     /* offset */,
-                      struct fuse_file_info *   /* fi */
+FuseOps::fuseReaddir(const char * path,
+                     void * buf,
+                     fuse_fill_dir_t filler,
+                     off_t /* offset */,
+                     struct fuse_file_info * /* fi */
 #if FUSE_USE_VERSION >= 30
-                      , enum fuse_readdir_flags  /* flags */
+                     ,
+                     enum fuse_readdir_flags /* flags */
 #endif
-                      )
+)
 {
     auto * node = resolvePath(path);
 
@@ -489,24 +448,35 @@ FuseOps::fuseReaddir (const char *              path,
     else if (nodePath.starts_with("/queries/"s) && !node->queryTerm.empty())
         populateQueries(node, node->queryTerm);
 
-    filler(buf, ".",  nullptr, 0
+    filler(buf,
+           ".",
+           nullptr,
+           0
 #if FUSE_USE_VERSION >= 30
-           , static_cast<fuse_fill_dir_flags>(0)
+           ,
+           static_cast<fuse_fill_dir_flags>(0)
 #endif
-           );
-    filler(buf, "..", nullptr, 0
+    );
+    filler(buf,
+           "..",
+           nullptr,
+           0
 #if FUSE_USE_VERSION >= 30
-           , static_cast<fuse_fill_dir_flags>(0)
+           ,
+           static_cast<fuse_fill_dir_flags>(0)
 #endif
-           );
+    );
 
-    for (const auto & [childName, _] : node->children)
-    {
-        filler(buf, childName.c_str(), nullptr, 0
+    for (const auto & [childName, _] : node->children) {
+        filler(buf,
+               childName.c_str(),
+               nullptr,
+               0
 #if FUSE_USE_VERSION >= 30
-               , static_cast<fuse_fill_dir_flags>(0)
+               ,
+               static_cast<fuse_fill_dir_flags>(0)
 #endif
-               );
+        );
     }
 
     return 0;
@@ -518,8 +488,7 @@ FuseOps::fuseReaddir (const char *              path,
 // ---------------------------------------------------------------------------
 
 int
-FuseOps::fuseOpen (const char *             path,
-                   struct fuse_file_info *  fi)
+FuseOps::fuseOpen(const char * path, struct fuse_file_info * fi)
 {
     auto * node = resolvePath(path);
 
@@ -536,22 +505,16 @@ FuseOps::fuseOpen (const char *             path,
     node->accessedAt = std::chrono::system_clock::now();
 
     // Record access and check feedback threshold
-    if (node->resourceId != 0)
-    {
-        AccessTracker::recordResourceAccess(node->resourceId, node->peerId,
-                                            node->name);
+    if (node->resourceId != 0) {
+        AccessTracker::recordResourceAccess(node->resourceId, node->peerId, node->name);
 
         AccessTracker::t_ResourceStats stats{};
-        if (AccessTracker::getResourceStats(node->resourceId, stats))
-        {
-            if (stats.accessCount >= AlpineFuse::feedbackThreshold())
-            {
+        if (AccessTracker::getResourceStats(node->resourceId, stats)) {
+            if (stats.accessCount >= AlpineFuse::feedbackThreshold()) {
                 AlpinePeerProfile * profile = nullptr;
                 short qualityDelta = 0;
                 AlpineRatingEngine::clientResourceEvaluation(
-                    profile,
-                    AlpineRatingEngine::t_ResourceRating::Average,
-                    qualityDelta);
+                    profile, AlpineRatingEngine::t_ResourceRating::Average, qualityDelta);
             }
         }
     }
@@ -565,11 +528,7 @@ FuseOps::fuseOpen (const char *             path,
 // ---------------------------------------------------------------------------
 
 int
-FuseOps::fuseRead (const char *             path,
-                   char *                   buf,
-                   size_t                   size,
-                   off_t                    offset,
-                   struct fuse_file_info *  /* fi */)
+FuseOps::fuseRead(const char * path, char * buf, size_t size, off_t offset, struct fuse_file_info * /* fi */)
 {
     auto * node = resolvePath(path);
 
@@ -590,15 +549,14 @@ FuseOps::fuseRead (const char *             path,
         content = generateQueryStatus(node->queryId);
     else if (node->name == ".group_info"s)
         content = generateGroupInfo(node->queryId);
-    else
-    {
+    else {
         // Resource file stub with metadata
         std::ostringstream out;
         out << "resource_id: " << node->resourceId << "\n"
-            << "peer_id: "     << node->peerId     << "\n"
-            << "size: "        << node->size        << "\n"
-            << "query: "       << node->queryTerm   << "\n"
-            << "locator: "     << node->locatorUrl  << "\n";
+            << "peer_id: " << node->peerId << "\n"
+            << "size: " << node->size << "\n"
+            << "query: " << node->queryTerm << "\n"
+            << "locator: " << node->locatorUrl << "\n";
 
         if (!node->locatorUrl.empty())
             out << "\nContent available via locator URL above.\n";
@@ -610,15 +568,13 @@ FuseOps::fuseRead (const char *             path,
         return 0;
 
     auto bytesAvailable = content.size() - static_cast<size_t>(offset);
-    auto bytesToCopy    = std::min(size, bytesAvailable);
+    auto bytesToCopy = std::min(size, bytesAvailable);
 
     std::memcpy(buf, content.data() + offset, bytesToCopy);
 
-    if (node->resourceId != 0)
-    {
-        AccessTracker::recordResourceAccess(node->resourceId, node->peerId,
-                                            node->name,
-                                            static_cast<ulong>(bytesToCopy));
+    if (node->resourceId != 0) {
+        AccessTracker::recordResourceAccess(
+            node->resourceId, node->peerId, node->name, static_cast<ulong>(bytesToCopy));
     }
 
     return static_cast<int>(bytesToCopy);
@@ -630,8 +586,7 @@ FuseOps::fuseRead (const char *             path,
 // ---------------------------------------------------------------------------
 
 int
-FuseOps::fuseRelease (const char *             /* path */,
-                      struct fuse_file_info *  /* fi */)
+FuseOps::fuseRelease(const char * /* path */, struct fuse_file_info * /* fi */)
 {
     return 0;
 }

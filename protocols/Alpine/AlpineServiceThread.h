@@ -9,15 +9,12 @@
 class AlpineServiceThread : public SysThread
 {
   public:
-    
-    AlpineServiceThread () = default;
-    virtual ~AlpineServiceThread ();
+    AlpineServiceThread() = default;
+    virtual ~AlpineServiceThread();
 
 
-    virtual void threadMain ();
+    virtual void threadMain();
 
 
   private:
-
 };
-

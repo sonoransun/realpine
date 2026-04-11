@@ -9,14 +9,11 @@
 class ReadLock
 {
   public:
-
-    explicit ReadLock (ReadWriteSem & semaphore)
+    explicit ReadLock(ReadWriteSem & semaphore)
         : lock_(semaphore.native())
     {}
 
 
   private:
-
-    std::shared_lock<std::shared_mutex>  lock_;
-
+    std::shared_lock<std::shared_mutex> lock_;
 };

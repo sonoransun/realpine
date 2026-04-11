@@ -9,13 +9,9 @@
 class JsonRpcHandler
 {
   public:
-
-    static void  registerRoutes (HttpRouter & router);
+    static void registerRoutes(HttpRouter & router);
 
 
   private:
-
-    static HttpResponse  handleRpc (const HttpRequest & request,
-                                    const std::unordered_map<string, string> & params);
-
+    static HttpResponse handleRpc(const HttpRequest & request, const std::unordered_map<string, string> & params);
 };

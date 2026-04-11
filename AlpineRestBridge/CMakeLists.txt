@@ -36,8 +36,7 @@ target_link_libraries(AlpineRestBridge PRIVATE
     Alpine::ApplCore
     Alpine::AlpineStackInterface
     Alpine::DtcpStackInterface
-    Alpine::AlpineProtocol
-    Alpine::AlpineTransport
+    Alpine::Stack
     Alpine::AppUtils
     Alpine::NetUtils
     Alpine::ThreadUtils

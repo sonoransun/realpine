@@ -1,83 +1,103 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
+#include <CovertChannel.h>
 #include <Log.h>
 #include <NetUtils.h>
 #include <UdpConnection.h>
-#include <CovertChannel.h>
+
+#include <cstring>
 
 
-
-UdpConnection::UdpConnection ()
+UdpConnection::UdpConnection()
 {
     connectionFd_ = -1;
 
     addressSize_ = sizeof(connectionAddress_);
-    memset (&connectionAddress_, 0, addressSize_);
+    memset(&connectionAddress_, 0, addressSize_);
     connectionAddress_.sin_family = AF_INET;
 }
 
 
-
-UdpConnection::~UdpConnection ()
+UdpConnection::~UdpConnection()
 {
     close();
 }
 
 
-
-bool 
-UdpConnection::create (ulong  ipAddress,
-                       ushort port)
+bool
+UdpConnection::create(ulong ipAddress, ushort port)
 {
     if (connectionFd_ >= 0) {
-        close ();
+        close();
     }
 
-    connectionFd_ = socket(AF_INET, SOCK_DGRAM, 0);
+    connectionFd_ = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
 
     if (connectionFd_ < 0) {
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Socket create error: "s + errorCode +
-                    " in UdpConnection::create.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Socket create error: "s + errorCode + " in UdpConnection::create.");
 
         return false;
     }
-    const int receiveSocketBufferSize = 262144; // 256k
 
-    if ( setsockopt(connectionFd_, 
-                    SOL_SOCKET,
-                    SO_RCVBUF,
-                    reinterpret_cast<const byte *>(&receiveSocketBufferSize),
-                    sizeof(int)) < 0) {
-
+    // Allow multiple sockets/processes to bind the same port. SO_REUSEADDR is
+    // portable; SO_REUSEPORT is Linux 3.9+ / BSD. Both are critical for
+    // zero-downtime restarts and multi-worker discovery listeners.
+    //
+    const int reuse = 1;
+    if (setsockopt(connectionFd_, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const byte *>(&reuse), sizeof(reuse)) <
+        0) {
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Set receive buffer size socket option error: "s + errorCode +
-                    " in UdpConnection::create.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Set SO_REUSEADDR error: "s + errorCode + " in UdpConnection::create.");
 
         close();
         return false;
     }
-    const int sendSocketBufferSize = 65536; // 64k
- 
-    if ( setsockopt(connectionFd_,
-                    SOL_SOCKET,
-                    SO_SNDBUF,
-                    reinterpret_cast<const byte *>(&sendSocketBufferSize),
-                    sizeof(int)) < 0) {
+#ifdef SO_REUSEPORT
+    if (setsockopt(connectionFd_, SOL_SOCKET, SO_REUSEPORT, reinterpret_cast<const byte *>(&reuse), sizeof(reuse)) <
+        0) {
+        string errorCode;
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Set SO_REUSEPORT error: "s + errorCode + " in UdpConnection::create.");
+
+        close();
+        return false;
+    }
+#endif
+
+    const int receiveSocketBufferSize = 262144;  // 256k
+
+    if (setsockopt(connectionFd_,
+                   SOL_SOCKET,
+                   SO_RCVBUF,
+                   reinterpret_cast<const byte *>(&receiveSocketBufferSize),
+                   sizeof(int)) < 0) {
 
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Set send buffer size socket option error: "s + errorCode +
-                    " in UdpConnection::create.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Set receive buffer size socket option error: "s + errorCode + " in UdpConnection::create.");
+
+        close();
+        return false;
+    }
+    const int sendSocketBufferSize = 65536;  // 64k
+
+    if (setsockopt(
+            connectionFd_, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<const byte *>(&sendSocketBufferSize), sizeof(int)) <
+        0) {
+
+        string errorCode;
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Set send buffer size socket option error: "s + errorCode + " in UdpConnection::create.");
 
         close();
         return false;
     }
     if (port > 0) {
-        connectionAddress_.sin_port   = port;
+        connectionAddress_.sin_port = port;
     }
 
     if (ipAddress > 0) {
@@ -85,30 +105,26 @@ UdpConnection::create (ulong  ipAddress,
     }
 
 
-    if ( bind(connectionFd_,
-              reinterpret_cast<const struct sockaddr *>(&connectionAddress_),
-              addressSize_) < 0) {
+    if (bind(connectionFd_, reinterpret_cast<const struct sockaddr *>(&connectionAddress_), addressSize_) < 0) {
 
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Bind error: "s + errorCode +
-                    " in UdpConnection::create.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Bind error: "s + errorCode + " in UdpConnection::create.");
 
         close();
         return false;
     }
     // By default we put the socket in non-blocking mode...
     //
-    nonBlocking ();
+    nonBlocking();
 
 
     return true;
 }
 
 
-
-void 
-UdpConnection::close ()
+void
+UdpConnection::close()
 {
     if (connectionFd_ >= 0) {
         alpine_close_socket(connectionFd_);
@@ -117,58 +133,54 @@ UdpConnection::close ()
 }
 
 
-
 int
-UdpConnection::getFd ()
+UdpConnection::getFd()
 {
     return connectionFd_;
 }
 
 
-
-bool 
-UdpConnection::nonBlocking ()
+bool
+UdpConnection::nonBlocking()
 {
 #ifdef _VERBOSE
-    Log::Debug ("UdpConnection::nonBlocking invoked.");
+    Log::Debug("UdpConnection::nonBlocking invoked.");
 #endif
 
-    bool  result;
-    result = NetUtils::nonBlocking (connectionFd_);
+    bool result;
+    result = NetUtils::nonBlocking(connectionFd_);
 
     return result;
 }
 
 
-
-bool 
-UdpConnection::blocking ()
+bool
+UdpConnection::blocking()
 {
 #ifdef _VERBOSE
-    Log::Debug ("UdpConnection::blocking invoked.");
+    Log::Debug("UdpConnection::blocking invoked.");
 #endif
 
-    bool  result;
-    result = NetUtils::blocking (connectionFd_);
+    bool result;
+    result = NetUtils::blocking(connectionFd_);
 
     return result;
 }
 
 
-
-bool 
-UdpConnection::sendData (const ulong    destIpAddress,
-                         const ushort   destPort,
-                         const byte *   dataBuffer,
-                         const uint     dataLength)
+bool
+UdpConnection::sendData(const ulong destIpAddress,
+                        const ushort destPort,
+                        const byte * dataBuffer,
+                        const uint dataLength)
 {
     if (connectionFd_ < 0) {
         return false;
     }
     connectionAddress_.sin_addr.s_addr = destIpAddress;
     connectionAddress_.sin_port = destPort;
-    
-    const byte* sendBuffer = dataBuffer;
+
+    const byte * sendBuffer = dataBuffer;
     vector<byte> obfuscatedBuffer;
 
     if (CovertChannel::isEnabled()) {
@@ -195,9 +207,8 @@ UdpConnection::sendData (const ulong    destIpAddress,
             return false;
         }
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Send error: "s + errorCode +
-                    " in UdpConnection::sendData.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Send error: "s + errorCode + " in UdpConnection::sendData.");
 
         return false;
     }
@@ -210,21 +221,16 @@ UdpConnection::sendData (const ulong    destIpAddress,
 }
 
 
-
-bool 
-UdpConnection::sendBufferFull ()
+bool
+UdpConnection::sendBufferFull()
 {
     return sendBufferFull_;
 }
 
 
-
-bool 
-UdpConnection::receiveData (byte *     dataBuffer,
-                            const uint bufferLength,
-                            ulong &    sourceIpAddress,
-                            ushort &   sourcePort,
-                            uint &     dataLength)
+bool
+UdpConnection::receiveData(
+    byte * dataBuffer, const uint bufferLength, ulong & sourceIpAddress, ushort & sourcePort, uint & dataLength)
 {
     if (connectionFd_ < 0) {
         return false;
@@ -233,12 +239,12 @@ UdpConnection::receiveData (byte *     dataBuffer,
 
     int result;
     do {
-        result = recvfrom (connectionFd_,
-                           dataBuffer,
-                           bufferLength,
-                           0,  // No options
-                           reinterpret_cast<struct sockaddr *>(&connectionAddress_),
-                           &incomingAddrSize);
+        result = recvfrom(connectionFd_,
+                          dataBuffer,
+                          bufferLength,
+                          0,  // No options
+                          reinterpret_cast<struct sockaddr *>(&connectionAddress_),
+                          &incomingAddrSize);
     } while (result < 0 && alpine_socket_errno() == EINTR);
 
     if (result < 0) {
@@ -247,11 +253,10 @@ UdpConnection::receiveData (byte *     dataBuffer,
             return false;
         }
         string errorCode;
-        NetUtils::socketErrorAsString (alpine_socket_errno(), errorCode);
-        Log::Error ("Receive error: "s + errorCode +
-                    " in UdpConnection::receiveData.");
+        NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
+        Log::Error("Receive error: "s + errorCode + " in UdpConnection::receiveData.");
 
-        return false;    
+        return false;
     }
     dataLength = (uint)result;
 
@@ -264,6 +269,3 @@ UdpConnection::receiveData (byte *     dataBuffer,
 
     return true;
 }
-
-
-

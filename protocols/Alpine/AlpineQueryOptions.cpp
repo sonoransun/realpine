@@ -1,60 +1,56 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineQueryOptions.h>
 #include <AlpineGroupMgr.h>
 #include <AlpineQueryOptionData.h>
+#include <AlpineQueryOptions.h>
 #include <Log.h>
 #include <StringUtils.h>
 
 
-
-static const ulong   defaultHaltLimit    = 10;
-static const ulong   defaultMaxDescLimit = 128;
-
+static const ulong defaultHaltLimit = 10;
+static const ulong defaultMaxDescLimit = 128;
 
 
-AlpineQueryOptions::AlpineQueryOptions ()
+AlpineQueryOptions::AlpineQueryOptions()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions constructor invoked.");
+    Log::Debug("AlpineQueryOptions constructor invoked.");
 #endif
 
-    group_           = "default";
-    autoHaltLimit_   = defaultHaltLimit;
-    maxDescPerPeer_  = defaultMaxDescLimit;
-    query_           = "";
-    optionId_        = 0;
-    optionData_      = nullptr;
-    priority_        = 128;
+    group_ = "default";
+    autoHaltLimit_ = defaultHaltLimit;
+    maxDescPerPeer_ = defaultMaxDescLimit;
+    query_ = "";
+    optionId_ = 0;
+    optionData_ = nullptr;
+    priority_ = 128;
 }
 
 
-
-AlpineQueryOptions::AlpineQueryOptions (const AlpineQueryOptions & copy)
+AlpineQueryOptions::AlpineQueryOptions(const AlpineQueryOptions & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions copy constructor invoked.");
+    Log::Debug("AlpineQueryOptions copy constructor invoked.");
 #endif
 
-    group_           = copy.group_;
-    autoHaltLimit_   = copy.autoHaltLimit_;
-    maxDescPerPeer_  = copy.maxDescPerPeer_;
-    query_           = copy.query_;
-    optionId_        = copy.optionId_;
-    priority_        = copy.priority_;
+    group_ = copy.group_;
+    autoHaltLimit_ = copy.autoHaltLimit_;
+    maxDescPerPeer_ = copy.maxDescPerPeer_;
+    query_ = copy.query_;
+    optionId_ = copy.optionId_;
+    priority_ = copy.priority_;
 
-    if ( (optionId_ != 0) && (copy.optionData_) ) {
-        optionData_ = copy.optionData_->duplicate ();
+    if ((optionId_ != 0) && (copy.optionData_)) {
+        optionData_ = copy.optionData_->duplicate();
     }
 }
 
 
-
-AlpineQueryOptions::~AlpineQueryOptions ()
+AlpineQueryOptions::~AlpineQueryOptions()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions destructor invoked.");
+    Log::Debug("AlpineQueryOptions destructor invoked.");
 #endif
 
     if (optionData_) {
@@ -64,53 +60,51 @@ AlpineQueryOptions::~AlpineQueryOptions ()
 }
 
 
-
-const AlpineQueryOptions & 
-AlpineQueryOptions::operator = (const AlpineQueryOptions & copy)
+const AlpineQueryOptions &
+AlpineQueryOptions::operator=(const AlpineQueryOptions & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions assignment invoked.");
+    Log::Debug("AlpineQueryOptions assignment invoked.");
 #endif
 
     if (&copy == this) {
         return *this;
     }
 
-    group_           = copy.group_;
-    autoHaltLimit_   = copy.autoHaltLimit_;
-    maxDescPerPeer_  = copy.maxDescPerPeer_;
-    query_           = copy.query_;
-    optionId_        = copy.optionId_;
-    priority_        = copy.priority_;
+    group_ = copy.group_;
+    autoHaltLimit_ = copy.autoHaltLimit_;
+    maxDescPerPeer_ = copy.maxDescPerPeer_;
+    query_ = copy.query_;
+    optionId_ = copy.optionId_;
+    priority_ = copy.priority_;
 
-    if ( (optionId_ != 0) && (copy.optionData_) ) {
+    if ((optionId_ != 0) && (copy.optionData_)) {
         if (optionData_) {
             delete optionData_;
         }
 
-        optionData_ = copy.optionData_->duplicate ();
+        optionData_ = copy.optionData_->duplicate();
     }
 
     return *this;
 }
 
 
-
-bool  
-AlpineQueryOptions::setGroup (const string &  groupName)
+bool
+AlpineQueryOptions::setGroup(const string & groupName)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setGroup invoked.  Group name: "s + groupName);
+    Log::Debug("AlpineQueryOptions::setGroup invoked.  Group name: "s + groupName);
 #endif
 
     bool status;
 
     // Verify that this is a valid group name.
     //
-    status = AlpineGroupMgr::exists (groupName);
+    status = AlpineGroupMgr::exists(groupName);
 
     if (!status) {
-        Log::Error ("Invalid group name passed to AlpineQueryOptions::setGroup!");
+        Log::Error("Invalid group name passed to AlpineQueryOptions::setGroup!");
         return false;
     }
     group_ = groupName;
@@ -120,9 +114,8 @@ AlpineQueryOptions::setGroup (const string &  groupName)
 }
 
 
-
-bool  
-AlpineQueryOptions::getGroup (string &  groupName)
+bool
+AlpineQueryOptions::getGroup(string & groupName)
 {
     groupName = group_;
 
@@ -130,13 +123,11 @@ AlpineQueryOptions::getGroup (string &  groupName)
 }
 
 
-
-bool  
-AlpineQueryOptions::setAutoHalt (ulong  numHits)
+bool
+AlpineQueryOptions::setAutoHalt(ulong numHits)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setAutoHalt invoked.  AutoHalt threshold: "s +
-                std::to_string (numHits));
+    Log::Debug("AlpineQueryOptions::setAutoHalt invoked.  AutoHalt threshold: "s + std::to_string(numHits));
 #endif
 
     autoHaltLimit_ = numHits;
@@ -145,9 +136,8 @@ AlpineQueryOptions::setAutoHalt (ulong  numHits)
 }
 
 
-
-bool  
-AlpineQueryOptions::getAutoHalt (ulong &  numHits)
+bool
+AlpineQueryOptions::getAutoHalt(ulong & numHits)
 {
     numHits = autoHaltLimit_;
 
@@ -155,24 +145,21 @@ AlpineQueryOptions::getAutoHalt (ulong &  numHits)
 }
 
 
-
-bool  
-AlpineQueryOptions::setMaxDescPerPeer (ulong  maxDesc)
+bool
+AlpineQueryOptions::setMaxDescPerPeer(ulong maxDesc)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setMaxDescPerPeer invoked.  MaxDesc threshold: "s +
-                std::to_string (maxDesc));
+    Log::Debug("AlpineQueryOptions::setMaxDescPerPeer invoked.  MaxDesc threshold: "s + std::to_string(maxDesc));
 #endif
-  
+
     maxDescPerPeer_ = maxDesc;
-    
+
     return true;
 }
 
 
-
-bool  
-AlpineQueryOptions::getMaxDescPerPeer (ulong &  maxDesc)
+bool
+AlpineQueryOptions::getMaxDescPerPeer(ulong & maxDesc)
 {
     maxDesc = maxDescPerPeer_;
 
@@ -180,19 +167,18 @@ AlpineQueryOptions::getMaxDescPerPeer (ulong &  maxDesc)
 }
 
 
-
-bool  
-AlpineQueryOptions::setQuery (const string &  query)
+bool
+AlpineQueryOptions::setQuery(const string & query)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setQuery invoked.  Query: "s + query);
+    Log::Debug("AlpineQueryOptions::setQuery invoked.  Query: "s + query);
 #endif
 
     // Query has to be non null
     // MRP_TEMP define constants in AlpineLimits:: and verify
     //
     if (query.empty()) {
-        Log::Error ("Invalid query passed to AlpineQueryOptions::setQuery!");
+        Log::Error("Invalid query passed to AlpineQueryOptions::setQuery!");
         return false;
     }
     query_ = query;
@@ -201,9 +187,8 @@ AlpineQueryOptions::setQuery (const string &  query)
 }
 
 
-
-bool  
-AlpineQueryOptions::getQuery (string &  query)
+bool
+AlpineQueryOptions::getQuery(string & query)
 {
     query = query_;
 
@@ -211,18 +196,16 @@ AlpineQueryOptions::getQuery (string &  query)
 }
 
 
-
-bool  
-AlpineQueryOptions::setOptionId (ulong  optionId)
+bool
+AlpineQueryOptions::setOptionId(ulong optionId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setOptionId invoked.  Value: "s +
-                std::to_string (optionId));
+    Log::Debug("AlpineQueryOptions::setOptionId invoked.  Value: "s + std::to_string(optionId));
 #endif
 
     if (optionId != 0) {
-        Log::Error ("Attempt to set extended option ID in call to "
-                             "AlpineQueryOptions::setOptionId!  Use setOptionData for extended options.");
+        Log::Error("Attempt to set extended option ID in call to "
+                   "AlpineQueryOptions::setOptionId!  Use setOptionData for extended options.");
         return false;
     }
     optionId_ = optionId;
@@ -231,9 +214,8 @@ AlpineQueryOptions::setOptionId (ulong  optionId)
 }
 
 
-
-bool  
-AlpineQueryOptions::getOptionId (ulong &  optionId)
+bool
+AlpineQueryOptions::getOptionId(ulong & optionId)
 {
     optionId = optionId_;
 
@@ -241,12 +223,11 @@ AlpineQueryOptions::getOptionId (ulong &  optionId)
 }
 
 
-
-bool  
-AlpineQueryOptions::setOptionData (AlpineQueryOptionData *  optionData)
+bool
+AlpineQueryOptions::setOptionData(AlpineQueryOptionData * optionData)
 {
 #ifdef _VERBOSE
-    Log::Debug (" invoked.");
+    Log::Debug(" invoked.");
 #endif
 
     if (optionData_) {
@@ -254,40 +235,37 @@ AlpineQueryOptions::setOptionData (AlpineQueryOptionData *  optionData)
         optionData_ = nullptr;
     }
 
-    optionId_   = optionData->getOptionId ();
-    optionData_ = optionData->duplicate ();
+    optionId_ = optionData->getOptionId();
+    optionData_ = optionData->duplicate();
 
 
     return true;
 }
 
 
-
 bool
-AlpineQueryOptions::getOptionData (AlpineQueryOptionData *&  optionData)
+AlpineQueryOptions::getOptionData(AlpineQueryOptionData *& optionData)
 {
 #ifdef _VERBOSE
-    Log::Debug (" invoked.");
+    Log::Debug(" invoked.");
 #endif
 
-    if ( (optionId_ == 0) || (!optionData_) ) {
-        Log::Error ("Attempt to get option data when no extension set in call to "
-                             "AlpineQueryOptions::getOptionData!");
+    if ((optionId_ == 0) || (!optionData_)) {
+        Log::Error("Attempt to get option data when no extension set in call to "
+                   "AlpineQueryOptions::getOptionData!");
         return false;
     }
-    optionData = optionData_->duplicate ();
+    optionData = optionData_->duplicate();
 
     return true;
 }
 
 
-
 bool
-AlpineQueryOptions::setPriority (uint8_t  priority)
+AlpineQueryOptions::setPriority(uint8_t priority)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineQueryOptions::setPriority invoked.  Priority: "s +
-                std::to_string (priority));
+    Log::Debug("AlpineQueryOptions::setPriority invoked.  Priority: "s + std::to_string(priority));
 #endif
 
     priority_ = priority;
@@ -296,14 +274,10 @@ AlpineQueryOptions::setPriority (uint8_t  priority)
 }
 
 
-
 bool
-AlpineQueryOptions::getPriority (uint8_t &  priority)
+AlpineQueryOptions::getPriority(uint8_t & priority)
 {
     priority = priority_;
 
     return true;
 }
-
-
-

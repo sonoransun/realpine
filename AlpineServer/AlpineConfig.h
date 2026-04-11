@@ -9,26 +9,22 @@
 class AlpineConfig
 {
   public:
+    AlpineConfig() = default;
+    ~AlpineConfig() = default;
 
-    AlpineConfig () = default;
-    ~AlpineConfig () = default;
 
+    static const string configFile_s;
 
-    static const string  configFile_s;
-    
-    static void  createConfigElements ();
+    static void createConfigElements();
 
-    static void  getConfigElements (ConfigData::t_ConfigElementList *& configElements);
+    static void getConfigElements(ConfigData::t_ConfigElementList *& configElements);
 
     // Shutdown drain
-    static int   getShutdownDrainSeconds ();
+    static int getShutdownDrainSeconds();
 
 
   private:
+    static ConfigData::t_ConfigElementList * configElements_s;
 
-    static ConfigData::t_ConfigElementList *  configElements_s;
-
-    static int  getIntConfig (const string & name, int defaultValue, int minValue, int maxValue);
-
+    static int getIntConfig(const string & name, int defaultValue, int minValue, int maxValue);
 };
-

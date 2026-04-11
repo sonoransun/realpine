@@ -1,7 +1,7 @@
 /// Unit tests for ApiKeyAuth
 
-#include <catch2/catch_test_macros.hpp>
 #include <ApiKeyAuth.h>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
 
 

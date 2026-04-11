@@ -2,10 +2,10 @@
 
 
 #pragma once
-#include <Common.h>
-#include <StackLinkInterface.h>
 #include <AlpinePacket.h>
 #include <AlpinePeerLocation.h>
+#include <Common.h>
+#include <StackLinkInterface.h>
 #include <vector>
 
 
@@ -16,23 +16,20 @@ class AlpinePeerOptionData;
 class AlpinePeerPacket : public StackLinkInterface
 {
   public:
+    AlpinePeerPacket();
 
-    AlpinePeerPacket ();
+    AlpinePeerPacket(StackLinkInterface * parent);
 
-    AlpinePeerPacket (StackLinkInterface * parent);
+    AlpinePeerPacket(const AlpinePeerPacket & copy);
 
-    AlpinePeerPacket (const AlpinePeerPacket & copy);
+    virtual ~AlpinePeerPacket();
 
-    virtual ~AlpinePeerPacket ();
-
-    AlpinePeerPacket & operator = (const AlpinePeerPacket & copy);
-
+    AlpinePeerPacket & operator=(const AlpinePeerPacket & copy);
 
 
-    AlpinePacket::t_PacketType  getPacketType ();
+    AlpinePacket::t_PacketType getPacketType();
 
-    bool setPacketType (AlpinePacket::t_PacketType  type);
-
+    bool setPacketType(AlpinePacket::t_PacketType type);
 
 
     ////
@@ -42,75 +39,67 @@ class AlpinePeerPacket : public StackLinkInterface
     using t_PeerLocationList = vector<AlpinePeerLocation>;
 
 
-
     ////
     //
     // Alpine Peer operations
     //
-    bool  setOptionId (ulong  optionId);
+    bool setOptionId(ulong optionId);
 
-    bool  getOptionId (ulong &  optionId);
+    bool getOptionId(ulong & optionId);
 
-    bool  setOptionData (AlpinePeerOptionData *  optionData);
+    bool setOptionData(AlpinePeerOptionData * optionData);
 
-    bool  getOptionData (AlpinePeerOptionData *&  optionData);
+    bool getOptionData(AlpinePeerOptionData *& optionData);
 
-    bool  setPeersAvailable (ulong  numAvailable);
+    bool setPeersAvailable(ulong numAvailable);
 
-    bool  getPeersAvailable (ulong &  numAvailable);
+    bool getPeersAvailable(ulong & numAvailable);
 
-    bool  setOfferId (ulong  offerId);
+    bool setOfferId(ulong offerId);
 
-    bool  getOfferId (ulong &  offerId);
+    bool getOfferId(ulong & offerId);
 
-    bool  setOffset (ulong  offset);
+    bool setOffset(ulong offset);
 
-    bool  getOffset (ulong &  offset);
+    bool getOffset(ulong & offset);
 
-    bool  setReplySetSize (ushort  setSize);
+    bool setReplySetSize(ushort setSize);
 
-    bool  getReplySetSize (ushort &  setSize);
+    bool getReplySetSize(ushort & setSize);
 
-    bool  setPeerLocationList (t_PeerLocationList &  locationList);
+    bool setPeerLocationList(t_PeerLocationList & locationList);
 
-    bool  getPeerLocationList (t_PeerLocationList &  locationList);
-
+    bool getPeerLocationList(t_PeerLocationList & locationList);
 
 
     ////
     //
     // StackLink operations
     //
-    virtual bool  setParent (StackLinkInterface *  parent);
+    virtual bool setParent(StackLinkInterface * parent);
 
-    virtual void  unsetParent ();
+    virtual void unsetParent();
 
-    virtual bool  writeData (DataBuffer * linkBuffer);
+    virtual bool writeData(DataBuffer * linkBuffer);
 
-    virtual bool  readData (DataBuffer * linkBuffer);
-
-
+    virtual bool readData(DataBuffer * linkBuffer);
 
 
   protected:
+    StackLinkInterface * parent_;
+    AlpinePacket::t_PacketType packetType_;
+    ulong optionId_;
+    AlpinePeerOptionData * optionData_;
+    ulong numPeersAvailable_;
+    ulong offerId_;
+    ulong offset_;
+    ushort setSize_;
+    t_PeerLocationList * peerLocationList_;
 
-    StackLinkInterface *           parent_;
-    AlpinePacket::t_PacketType     packetType_;
-    ulong                          optionId_;
-    AlpinePeerOptionData *         optionData_;
-    ulong                          numPeersAvailable_;
-    ulong                          offerId_;
-    ulong                          offset_;
-    ushort                         setSize_;
-    t_PeerLocationList *           peerLocationList_;
 
+    ulong calculatePeerListSize();
 
-    ulong  calculatePeerListSize ();
+    bool writePeerListData(DataBuffer * linkBuffer);
 
-    bool   writePeerListData (DataBuffer * linkBuffer);
-
-    bool   readPeerListData (DataBuffer * linkBuffer);
-
+    bool readPeerListData(DataBuffer * linkBuffer);
 };
-
-

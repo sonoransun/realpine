@@ -1,22 +1,21 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <MdnsService.h>
 #include <Log.h>
+#include <MdnsService.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
-MdnsService::MdnsService ()
+MdnsService::MdnsService()
     : mdnsFd_(-1),
       ipAddrBinary_(0),
       port_(0)
-{
-}
+{}
 
 
-MdnsService::~MdnsService ()
+MdnsService::~MdnsService()
 {
     stop();
 
@@ -26,13 +25,11 @@ MdnsService::~MdnsService ()
 
 
 bool
-MdnsService::initialize (const string & hostname,
-                          const string & ipAddress,
-                          ushort port)
+MdnsService::initialize(const string & hostname, const string & ipAddress, ushort port)
 {
-    hostname_  = hostname;
+    hostname_ = hostname;
     ipAddress_ = ipAddress;
-    port_      = port;
+    port_ = port;
 
     struct in_addr addr;
 
@@ -59,9 +56,9 @@ MdnsService::initialize (const string & hostname,
 
     struct sockaddr_in bindAddr;
     memset(&bindAddr, 0, sizeof(bindAddr));
-    bindAddr.sin_family      = AF_INET;
+    bindAddr.sin_family = AF_INET;
     bindAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bindAddr.sin_port        = htons(MDNS_PORT);
+    bindAddr.sin_port = htons(MDNS_PORT);
 
     if (bind(mdnsFd_, (struct sockaddr *)&bindAddr, sizeof(bindAddr)) < 0) {
         Log::Error("MdnsService: Failed to bind to port 5353.");
@@ -74,8 +71,7 @@ MdnsService::initialize (const string & hostname,
     mreq.imr_multiaddr.s_addr = inet_addr("224.0.0.251");
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
-    if (setsockopt(mdnsFd_, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                   &mreq, sizeof(mreq)) < 0) {
+    if (setsockopt(mdnsFd_, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
         Log::Error("MdnsService: Failed to join mDNS multicast group.");
         alpine_close_socket(mdnsFd_);
         mdnsFd_ = -1;
@@ -88,7 +84,7 @@ MdnsService::initialize (const string & hostname,
 
 
 void
-MdnsService::threadMain ()
+MdnsService::threadMain()
 {
     Log::Info("MdnsService: Thread started.");
 
@@ -96,11 +92,10 @@ MdnsService::threadMain ()
 
     int tickCount = 0;
 
-    while (isActive())
-    {
+    while (isActive()) {
         struct pollfd pfd;
-        pfd.fd      = mdnsFd_;
-        pfd.events  = POLLIN;
+        pfd.fd = mdnsFd_;
+        pfd.events = POLLIN;
         pfd.revents = 0;
 
         alpine_poll(&pfd, 1, POLL_TIMEOUT_MS);
@@ -118,7 +113,7 @@ MdnsService::threadMain ()
 
 
 void
-MdnsService::sendAnnouncement ()
+MdnsService::sendAnnouncement()
 {
     byte packet[1500];
     memset(packet, 0, sizeof(packet));
@@ -144,22 +139,20 @@ MdnsService::sendAnnouncement ()
 
     struct sockaddr_in destAddr;
     memset(&destAddr, 0, sizeof(destAddr));
-    destAddr.sin_family      = AF_INET;
+    destAddr.sin_family = AF_INET;
     destAddr.sin_addr.s_addr = inet_addr("224.0.0.251");
-    destAddr.sin_port        = htons(MDNS_PORT);
+    destAddr.sin_port = htons(MDNS_PORT);
 
-    sendto(mdnsFd_, packet, offset, 0,
-           (struct sockaddr *)&destAddr, sizeof(destAddr));
+    sendto(mdnsFd_, packet, offset, 0, (struct sockaddr *)&destAddr, sizeof(destAddr));
 }
 
 
 ulong
-MdnsService::writeDnsName (byte * buf, ulong offset, const string & name)
+MdnsService::writeDnsName(byte * buf, ulong offset, const string & name)
 {
     ulong pos = 0;
 
-    while (pos < name.length())
-    {
+    while (pos < name.length()) {
         auto dotPos = name.find('.', pos);
 
         if (dotPos == string::npos)
@@ -179,23 +172,21 @@ MdnsService::writeDnsName (byte * buf, ulong offset, const string & name)
 
 
 static void
-writeRecordHeader (byte * buf, ulong & offset, ushort type, ulong ttl)
+writeRecordHeader(byte * buf, ulong & offset, ushort type, ulong ttl)
 {
     buf[offset++] = (byte)(type >> 8);
     buf[offset++] = (byte)(type & 0xFF);
     buf[offset++] = 0x80;
-    buf[offset++] = 1;          // Class IN with cache-flush
+    buf[offset++] = 1;  // Class IN with cache-flush
     buf[offset++] = (byte)(ttl >> 24);
     buf[offset++] = (byte)(ttl >> 16);
-    buf[offset++] = (byte)(ttl >>  8);
+    buf[offset++] = (byte)(ttl >> 8);
     buf[offset++] = (byte)(ttl & 0xFF);
 }
 
 
 ulong
-MdnsService::writePtrRecord (byte * buf, ulong offset,
-                              const string & serviceName,
-                              const string & instanceName)
+MdnsService::writePtrRecord(byte * buf, ulong offset, const string & serviceName, const string & instanceName)
 {
     offset = writeDnsName(buf, offset, serviceName);
 
@@ -208,7 +199,7 @@ MdnsService::writePtrRecord (byte * buf, ulong offset,
     offset = writeDnsName(buf, offset, instanceName);
 
     ulong rdLen = offset - rdStart;
-    buf[rdLenOffset]     = (byte)(rdLen >> 8);
+    buf[rdLenOffset] = (byte)(rdLen >> 8);
     buf[rdLenOffset + 1] = (byte)(rdLen & 0xFF);
 
     return offset;
@@ -216,10 +207,7 @@ MdnsService::writePtrRecord (byte * buf, ulong offset,
 
 
 ulong
-MdnsService::writeSrvRecord (byte * buf, ulong offset,
-                              const string & instanceName,
-                              const string & target,
-                              ushort port)
+MdnsService::writeSrvRecord(byte * buf, ulong offset, const string & instanceName, const string & target, ushort port)
 {
     offset = writeDnsName(buf, offset, instanceName);
 
@@ -229,15 +217,17 @@ MdnsService::writeSrvRecord (byte * buf, ulong offset,
     offset += 2;
     ulong rdStart = offset;
 
-    buf[offset++] = 0; buf[offset++] = 0;  // Priority
-    buf[offset++] = 0; buf[offset++] = 0;  // Weight
+    buf[offset++] = 0;
+    buf[offset++] = 0;  // Priority
+    buf[offset++] = 0;
+    buf[offset++] = 0;  // Weight
     buf[offset++] = (byte)(port >> 8);
     buf[offset++] = (byte)(port & 0xFF);
 
     offset = writeDnsName(buf, offset, target);
 
     ulong rdLen = offset - rdStart;
-    buf[rdLenOffset]     = (byte)(rdLen >> 8);
+    buf[rdLenOffset] = (byte)(rdLen >> 8);
     buf[rdLenOffset + 1] = (byte)(rdLen & 0xFF);
 
     return offset;
@@ -245,9 +235,7 @@ MdnsService::writeSrvRecord (byte * buf, ulong offset,
 
 
 ulong
-MdnsService::writeTxtRecord (byte * buf, ulong offset,
-                              const string & instanceName,
-                              const string & txt)
+MdnsService::writeTxtRecord(byte * buf, ulong offset, const string & instanceName, const string & txt)
 {
     offset = writeDnsName(buf, offset, instanceName);
 
@@ -266,19 +254,19 @@ MdnsService::writeTxtRecord (byte * buf, ulong offset,
 
 
 ulong
-MdnsService::writeARecord (byte * buf, ulong offset,
-                            const string & hostname, ulong ipAddr)
+MdnsService::writeARecord(byte * buf, ulong offset, const string & hostname, ulong ipAddr)
 {
     offset = writeDnsName(buf, offset, hostname);
 
     writeRecordHeader(buf, offset, 1, 120);  // Type A
 
-    buf[offset++] = 0; buf[offset++] = 4;   // RDLENGTH
+    buf[offset++] = 0;
+    buf[offset++] = 4;  // RDLENGTH
 
     buf[offset++] = (byte)((ipAddr >> 24) & 0xFF);
     buf[offset++] = (byte)((ipAddr >> 16) & 0xFF);
-    buf[offset++] = (byte)((ipAddr >>  8) & 0xFF);
-    buf[offset++] = (byte)((ipAddr      ) & 0xFF);
+    buf[offset++] = (byte)((ipAddr >> 8) & 0xFF);
+    buf[offset++] = (byte)((ipAddr) & 0xFF);
 
     return offset;
 }

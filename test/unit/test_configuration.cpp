@@ -1,19 +1,19 @@
 /// Unit tests for Configuration basics
 
-#include <catch2/catch_test_macros.hpp>
 #include <ConfigData.h>
+#include <catch2/catch_test_macros.hpp>
 
 
 TEST_CASE("ConfigData getValue and setValue", "[ConfigData]")
 {
     // Set up a minimal config element
     ConfigData::t_ConfigElement elem;
-    elem.elementName    = "TestParam";
+    elem.elementName = "TestParam";
     elem.fileOptionName = "test_param";
-    elem.argOptionName  = "--test-param";
-    elem.envOptionName  = "TEST_PARAM";
-    elem.optionType     = ConfigData::t_ElementType::String;
-    elem.required       = false;
+    elem.argOptionName = "--test-param";
+    elem.envOptionName = "TEST_PARAM";
+    elem.optionType = ConfigData::t_ElementType::String;
+    elem.required = false;
 
     ConfigData::t_ConfigElementList elements;
     elements.push_back(&elem);
@@ -66,12 +66,12 @@ TEST_CASE("ConfigData getValue and setValue", "[ConfigData]")
 TEST_CASE("ConfigData value list operations", "[ConfigData]")
 {
     ConfigData::t_ConfigElement elem;
-    elem.elementName    = "ListParam";
+    elem.elementName = "ListParam";
     elem.fileOptionName = "list_param";
-    elem.argOptionName  = "--list-param";
-    elem.envOptionName  = "LIST_PARAM";
-    elem.optionType     = ConfigData::t_ElementType::StringList;
-    elem.required       = false;
+    elem.argOptionName = "--list-param";
+    elem.envOptionName = "LIST_PARAM";
+    elem.optionType = ConfigData::t_ElementType::StringList;
+    elem.required = false;
 
     ConfigData::t_ConfigElementList elements;
     elements.push_back(&elem);

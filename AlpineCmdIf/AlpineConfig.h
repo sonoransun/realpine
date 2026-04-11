@@ -9,21 +9,17 @@
 class AlpineConfig
 {
   public:
+    AlpineConfig() = default;
+    ~AlpineConfig() = default;
 
-    AlpineConfig () = default;
-    ~AlpineConfig () = default;
 
+    static const string configFile_s;
 
-    static const string  configFile_s;
-    
-    static void  createConfigElements ();
+    static void createConfigElements();
 
-    static void  getConfigElements (ConfigData::t_ConfigElementList *& configElements);
+    static void getConfigElements(ConfigData::t_ConfigElementList *& configElements);
 
 
   private:
-
-    static ConfigData::t_ConfigElementList *  configElements_s;
-
+    static ConfigData::t_ConfigElementList * configElements_s;
 };
-

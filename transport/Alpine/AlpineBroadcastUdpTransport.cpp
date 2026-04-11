@@ -7,9 +7,7 @@
 #include <Log.h>
 
 
-
-AlpineBroadcastUdpTransport::AlpineBroadcastUdpTransport (const ulong   ipAddress,
-                                                            const int     port)
+AlpineBroadcastUdpTransport::AlpineBroadcastUdpTransport(const ulong ipAddress, const int port)
     : DtcpBaseUdpTransport(ipAddress, port)
 {
 #ifdef _VERBOSE
@@ -18,8 +16,7 @@ AlpineBroadcastUdpTransport::AlpineBroadcastUdpTransport (const ulong   ipAddres
 }
 
 
-
-AlpineBroadcastUdpTransport::~AlpineBroadcastUdpTransport ()
+AlpineBroadcastUdpTransport::~AlpineBroadcastUdpTransport()
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineBroadcastUdpTransport destructor invoked.");
@@ -27,9 +24,8 @@ AlpineBroadcastUdpTransport::~AlpineBroadcastUdpTransport ()
 }
 
 
-
 bool
-AlpineBroadcastUdpTransport::createMux (DtcpBaseConnMux *& connMux)
+AlpineBroadcastUdpTransport::createMux(DtcpBaseConnMux *& connMux)
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineBroadcastUdpTransport::createMux invoked.");
@@ -44,18 +40,15 @@ AlpineBroadcastUdpTransport::createMux (DtcpBaseConnMux *& connMux)
 }
 
 
-
 UdpConnection *
-AlpineBroadcastUdpTransport::createConnection ()
+AlpineBroadcastUdpTransport::createConnection()
 {
     return new BroadcastUdpConnection();
 }
 
 
-
 bool
-AlpineBroadcastUdpTransport::handleData (const byte * data,
-                                          uint         dataLength)
+AlpineBroadcastUdpTransport::handleData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
     Log::Debug("AlpineBroadcastUdpTransport::handleData invoked.");

@@ -1,7 +1,6 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
 #include <DtcpBaseConnConnector.h>
 #include <DtcpBaseConnMux.h>
 #include <DtcpBaseConnTransport.h>
@@ -10,42 +9,37 @@
 #include <StringUtils.h>
 
 
-
-DtcpBaseConnConnector::DtcpBaseConnConnector ()
+DtcpBaseConnConnector::DtcpBaseConnConnector()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector constructor invoked.");
+    Log::Debug("DtcpBaseConnConnector constructor invoked.");
 #endif
 
-    destIpAddress_   = 0;
-    destPort_        = 0;
-    mux_             = nullptr;
+    destIpAddress_ = 0;
+    destPort_ = 0;
+    mux_ = nullptr;
     parentTransport_ = nullptr;
 }
 
 
-
-DtcpBaseConnConnector::~DtcpBaseConnConnector ()
+DtcpBaseConnConnector::~DtcpBaseConnConnector()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector destructor invoked.");
+    Log::Debug("DtcpBaseConnConnector destructor invoked.");
 #endif
-
 }
 
 
-
-bool 
-DtcpBaseConnConnector::initialize (DtcpBaseConnMux *     multiplexor,
-                                   TransportInterface *  parentTransport)
+bool
+DtcpBaseConnConnector::initialize(DtcpBaseConnMux * multiplexor, TransportInterface * parentTransport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::initialize invoked.");
+    Log::Debug("DtcpBaseConnConnector::initialize invoked.");
 #endif
 
-    destIpAddress_   = 0;
-    destPort_        = 0;
-    mux_             = multiplexor;
+    destIpAddress_ = 0;
+    destPort_ = 0;
+    mux_ = multiplexor;
     parentTransport_ = parentTransport;
 
 
@@ -53,27 +47,26 @@ DtcpBaseConnConnector::initialize (DtcpBaseConnMux *     multiplexor,
 }
 
 
-
-bool 
-DtcpBaseConnConnector::requestConnection ()
+bool
+DtcpBaseConnConnector::requestConnection()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::requestConnection invoked.");
+    Log::Debug("DtcpBaseConnConnector::requestConnection invoked.");
 #endif
 
     if (destIpAddress_ == 0) {
-        Log::Error ("Connection requested without destination set.");
+        Log::Error("Connection requested without destination set.");
         return false;
     }
 
 
     bool status;
     DtcpBaseConnTransport * connTransport;
-   
-    status = createTransport (connTransport);
+
+    status = createTransport(connTransport);
 
     if (!status) {
-        Log::Error ("createTransport failed.");
+        Log::Error("createTransport failed.");
         return false;
     }
 
@@ -86,32 +79,31 @@ DtcpBaseConnConnector::requestConnection ()
         return false;
     }
 
-    connTransport->setParent (udpTransport);
-    connTransport->setPeerLocation (destIpAddress_, destPort_);
+    connTransport->setParent(udpTransport);
+    connTransport->setPeerLocation(destIpAddress_, destPort_);
 
-    status = mux_->requestTransport (this, connTransport);
+    status = mux_->requestTransport(this, connTransport);
 
 
     return status;
 }
 
 
-
 bool
-DtcpBaseConnConnector::createTransport (TransportInterface *& transport)
+DtcpBaseConnConnector::createTransport(TransportInterface *& transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::createTransport invoked.");
+    Log::Debug("DtcpBaseConnConnector::createTransport invoked.");
 #endif
 
     DtcpBaseConnTransport * connTransport;
 
     bool status;
-    status = this->createTransport (connTransport);
+    status = this->createTransport(connTransport);
 
     if (!status) {
-        Log::Error ("Create transport for DtcpBaseConnTransport "
-                             "failed in DtcpBaseConnConnector::createTransport.");
+        Log::Error("Create transport for DtcpBaseConnTransport "
+                   "failed in DtcpBaseConnConnector::createTransport.");
         return false;
     }
 
@@ -122,19 +114,18 @@ DtcpBaseConnConnector::createTransport (TransportInterface *& transport)
 }
 
 
-
-bool 
-DtcpBaseConnConnector::receiveTransport (TransportInterface * transport)
+bool
+DtcpBaseConnConnector::receiveTransport(TransportInterface * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::receiveTransport invoked.");
+    Log::Debug("DtcpBaseConnConnector::receiveTransport invoked.");
 #endif
 
     DtcpBaseConnTransport * connTransport;
     connTransport = dynamic_cast<DtcpBaseConnTransport *>(transport);
 
     if (!connTransport) {
-        Log::Error ("Invalid transport type in DtcpBaseConnConnector::receiveTransport!");
+        Log::Error("Invalid transport type in DtcpBaseConnConnector::receiveTransport!");
 
         return false;
     }
@@ -142,82 +133,70 @@ DtcpBaseConnConnector::receiveTransport (TransportInterface * transport)
     // Invoke derived handler...
     //
     bool status;
-    status = receiveTransport (connTransport);
+    status = receiveTransport(connTransport);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnConnector::handleRequestFailure ()
+bool
+DtcpBaseConnConnector::handleRequestFailure()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::handleRequestFailure invoked.");
+    Log::Debug("DtcpBaseConnConnector::handleRequestFailure invoked.");
 #endif
 
     bool status;
 
-    status = handleRequestFailure (destIpAddress_,
-                                   destPort_);
+    status = handleRequestFailure(destIpAddress_, destPort_);
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnConnector::setDestination (ulong  ipAddress,
-                                       int    port)
+bool
+DtcpBaseConnConnector::setDestination(ulong ipAddress, int port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::setDestination invoked.");
+    Log::Debug("DtcpBaseConnConnector::setDestination invoked.");
 #endif
 
     destIpAddress_ = ipAddress;
-    destPort_      = port;
+    destPort_ = port;
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnConnector::getDestination (ulong &  ipAddress,
-                                       int &    port)
+bool
+DtcpBaseConnConnector::getDestination(ulong & ipAddress, int & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::getDestination invoked.");
+    Log::Debug("DtcpBaseConnConnector::getDestination invoked.");
 #endif
 
     ipAddress = destIpAddress_;
-    port      = destPort_;
+    port = destPort_;
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnConnector::requestConnection (ulong  ipAddress,
-                                          int    port)
+bool
+DtcpBaseConnConnector::requestConnection(ulong ipAddress, int port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnConnector::requestConnection invoked.");
+    Log::Debug("DtcpBaseConnConnector::requestConnection invoked.");
 #endif
 
     destIpAddress_ = ipAddress;
-    destPort_      = port;
+    destPort_ = port;
 
     bool status;
 
-    status = requestConnection ();
+    status = requestConnection();
 
 
     return status;
 }
-
-
-
-

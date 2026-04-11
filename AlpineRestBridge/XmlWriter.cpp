@@ -5,21 +5,21 @@
 
 
 string
-XmlWriter::result ()
+XmlWriter::result()
 {
     return std::move(buffer_);
 }
 
 
 void
-XmlWriter::declaration ()
+XmlWriter::declaration()
 {
     buffer_ += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 }
 
 
 void
-XmlWriter::beginElement (const string & name)
+XmlWriter::beginElement(const string & name)
 {
     closeOpenTag();
     buffer_ += "<";
@@ -29,7 +29,7 @@ XmlWriter::beginElement (const string & name)
 
 
 void
-XmlWriter::beginElement (const string & name, const string & ns)
+XmlWriter::beginElement(const string & name, const string & ns)
 {
     closeOpenTag();
     buffer_ += "<";
@@ -42,7 +42,7 @@ XmlWriter::beginElement (const string & name, const string & ns)
 
 
 void
-XmlWriter::endElement (const string & name)
+XmlWriter::endElement(const string & name)
 {
     closeOpenTag();
     buffer_ += "</";
@@ -52,7 +52,7 @@ XmlWriter::endElement (const string & name)
 
 
 void
-XmlWriter::attribute (const string & name, const string & value)
+XmlWriter::attribute(const string & name, const string & value)
 {
     if (inOpenTag_) {
         buffer_ += " ";
@@ -65,7 +65,7 @@ XmlWriter::attribute (const string & name, const string & value)
 
 
 void
-XmlWriter::text (const string & content)
+XmlWriter::text(const string & content)
 {
     closeOpenTag();
     buffer_ += escape(content);
@@ -73,7 +73,7 @@ XmlWriter::text (const string & content)
 
 
 void
-XmlWriter::selfClosing (const string & name)
+XmlWriter::selfClosing(const string & name)
 {
     closeOpenTag();
     buffer_ += "<";
@@ -83,7 +83,7 @@ XmlWriter::selfClosing (const string & name)
 
 
 void
-XmlWriter::rawXml (const string & xml)
+XmlWriter::rawXml(const string & xml)
 {
     closeOpenTag();
     buffer_ += xml;
@@ -91,7 +91,7 @@ XmlWriter::rawXml (const string & xml)
 
 
 void
-XmlWriter::simpleElement (const string & name, const string & content)
+XmlWriter::simpleElement(const string & name, const string & content)
 {
     closeOpenTag();
     buffer_ += "<";
@@ -105,7 +105,7 @@ XmlWriter::simpleElement (const string & name, const string & content)
 
 
 void
-XmlWriter::closeOpenTag ()
+XmlWriter::closeOpenTag()
 {
     if (inOpenTag_) {
         buffer_ += ">";
@@ -115,20 +115,28 @@ XmlWriter::closeOpenTag ()
 
 
 string
-XmlWriter::escape (const string & s)
+XmlWriter::escape(const string & s)
 {
     string out;
     out.reserve(s.length());
 
-    for (char c : s)
-    {
-        switch (c)
-        {
-            case '&':   out += "&amp;";   break;
-            case '<':   out += "&lt;";    break;
-            case '>':   out += "&gt;";    break;
-            case '"':   out += "&quot;";  break;
-            default:    out += c;         break;
+    for (char c : s) {
+        switch (c) {
+        case '&':
+            out += "&amp;";
+            break;
+        case '<':
+            out += "&lt;";
+            break;
+        case '>':
+            out += "&gt;";
+            break;
+        case '"':
+            out += "&quot;";
+            break;
+        default:
+            out += c;
+            break;
         }
     }
 

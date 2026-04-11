@@ -18,12 +18,6 @@
 
 using t_NetId = ulonglong;
 
-void netIdToIpPort (const t_NetId &  netId,
-                    ulong &          ipAddress,
-                    ushort &         port);
+void netIdToIpPort(const t_NetId & netId, ulong & ipAddress, ushort & port);
 
-void ipPortToNetId (const ulong   ipAddress,
-                    const ushort  port,
-                    t_NetId &     netId);
-
-
+void ipPortToNetId(const ulong ipAddress, const ushort port, t_NetId & netId);

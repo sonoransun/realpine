@@ -1,13 +1,14 @@
 /// Unit tests for IpFilter
 
-#include <catch2/catch_test_macros.hpp>
 #include <IpFilter.h>
-#include <fstream>
+#include <catch2/catch_test_macros.hpp>
 #include <filesystem>
+#include <fstream>
 
 
 // Helper to reset IpFilter state between tests
-static void resetIpFilter()
+static void
+resetIpFilter()
 {
     IpFilter::initialize("", "");
     IpFilter::reload();

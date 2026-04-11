@@ -1,0 +1,12 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@/alpine
+
+Name: Alpine
+Description: Decentralized P2P resource discovery & distributed querying platform
+Version: @PROJECT_VERSION@
+URL: https://github.com/sonoransun/alpine
+Libs: -L${libdir} -lAlpineStackInterface -lDtcpStackInterface -lAlpineProtocol -lAlpineTransport -lApplCore -lDtcp -lTransBase -lNetUtils -lConfigUtils -lSysUtils -lThreadUtils -lAppUtils -lpthread -lrt -ldl -lz
+Libs.private: -lstdc++
+Cflags: -I${includedir} -I${includedir}/AppUtils -I${includedir}/SysUtils -I${includedir}/ThreadUtils -I${includedir}/NetUtils -I${includedir}/ConfigUtils -I${includedir}/TransBase -I${includedir}/Dtcp -I${includedir}/AlpineTransport -I${includedir}/AlpineProtocol -I${includedir}/ApplCore -I${includedir}/AlpineStackInterface -I${includedir}/DtcpStackInterface -std=c++23

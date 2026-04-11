@@ -15,54 +15,48 @@ class DtcpBroadcastMgr;
 class DtcpBroadcast
 {
   public:
+    DtcpBroadcast(DtcpBroadcastSet * destinations);
 
-    DtcpBroadcast (DtcpBroadcastSet *  destinations);
-
-    virtual ~DtcpBroadcast ();
-
+    virtual ~DtcpBroadcast();
 
 
     // packet must be a DtcpConnPacket or equivalent
     // MRP_TEMP refine requirements / verify
     //
-    bool  sendPacket (StackLinkInterface * packet);
+    bool sendPacket(StackLinkInterface * packet);
 
-    bool  sending ();
+    bool sending();
 
-    bool  numDestinations (ulong &  destinationCount);
+    bool numDestinations(ulong & destinationCount);
 
-    bool  packetsSent (ulong &  numSent);
+    bool packetsSent(ulong & numSent);
 
-    bool  percentComplete (double &  percentage);
+    bool percentComplete(double & percentage);
 
-    virtual bool  pause ();
+    virtual bool pause();
 
-    virtual bool  resume ();
+    virtual bool resume();
 
-    virtual bool  cancel ();
+    virtual bool cancel();
 
-    bool  packetSendNotifications (bool  used);  // true == perform send notifications
+    bool packetSendNotifications(bool used);  // true == perform send notifications
 
-    virtual bool  handlePacketSend (ulong  transportId) = 0;
+    virtual bool handlePacketSend(ulong transportId) = 0;
 
-    virtual bool  handleSendComplete (ulong             numSent,
-                                      struct timeval &  duration) = 0;
+    virtual bool handleSendComplete(ulong numSent, struct timeval & duration) = 0;
 
 
   private:
-
-    bool                  active_;
-    DtcpBroadcastSet *    destinations_;
-    ulong                 requestId_;
-    struct timeval        startTime_;
-    bool                  packetNotification_;
-    ReadWriteSem          dataLock_;
-
-
-    virtual bool  broadcastComplete (ulong  requestId,
-                                     ulong  totalSent);
+    bool active_;
+    DtcpBroadcastSet * destinations_;
+    ulong requestId_;
+    struct timeval startTime_;
+    bool packetNotification_;
+    ReadWriteSem dataLock_;
 
 
-    friend class  DtcpBroadcastMgr;
+    virtual bool broadcastComplete(ulong requestId, ulong totalSent);
+
+
+    friend class DtcpBroadcastMgr;
 };
-

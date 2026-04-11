@@ -8,25 +8,18 @@
 class AlpineRawWifiUdpTransport : public DtcpBaseUdpTransport
 {
   public:
+    AlpineRawWifiUdpTransport(const ulong ipAddress, const int port, const string & interfaceName);
 
-    AlpineRawWifiUdpTransport (const ulong    ipAddress,
-                                const int      port,
-                                const string & interfaceName);
-
-    ~AlpineRawWifiUdpTransport () override;
+    ~AlpineRawWifiUdpTransport() override;
 
 
-    bool createMux (DtcpBaseConnMux *& connMux) override;
+    bool createMux(DtcpBaseConnMux *& connMux) override;
 
-    bool handleData (const byte * data,
-                     uint         dataLength) override;
+    bool handleData(const byte * data, uint dataLength) override;
 
   protected:
-
-    UdpConnection * createConnection () override;
+    UdpConnection * createConnection() override;
 
   private:
-
-    string  interfaceName_;
-
+    string interfaceName_;
 };

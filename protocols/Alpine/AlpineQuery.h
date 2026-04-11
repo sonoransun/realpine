@@ -2,9 +2,9 @@
 
 
 #pragma once
-#include <Common.h>
 #include <AlpineQueryOptions.h>
 #include <AlpineQueryStatus.h>
+#include <Common.h>
 #include <ReadWriteSem.h>
 
 
@@ -17,58 +17,53 @@ class AlpineGroup;
 class AlpineQuery
 {
   public:
-
-    ~AlpineQuery ();
+    ~AlpineQuery();
 
 
     using t_PeerIdList = vector<ulong>;
 
 
-    bool  startQuery ();
+    bool startQuery();
 
-    bool  inProgress ();
+    bool inProgress();
 
-    bool  getStatus (AlpineQueryStatus &  queryStatus);
+    bool getStatus(AlpineQueryStatus & queryStatus);
 
-    bool  getPeerIdList (t_PeerIdList &  peerIdList);
+    bool getPeerIdList(t_PeerIdList & peerIdList);
 
-    bool  halt ();
+    bool halt();
 
-    bool  resume ();
+    bool resume();
 
-    bool  cancel ();
+    bool cancel();
 
 
   private:
+    AlpineQueryOptions options_;
+    bool queryActive_;
+    AlpineGroup * group_;
+    AlpineBroadcast * broadcast_;
+    AlpinePacket * alpinePacket_;
+    AlpineQueryPacket * queryPacket_;
+    ReadWriteSem dataLock_;
 
-    AlpineQueryOptions   options_;
-    bool                 queryActive_;
-    AlpineGroup *        group_;
-    AlpineBroadcast *    broadcast_;
-    AlpinePacket *       alpinePacket_;
-    AlpineQueryPacket *  queryPacket_;
-    ReadWriteSem         dataLock_;
-    
 
     // Only the AlpineQueryMgr creates queries
     //
-    AlpineQuery (AlpineQueryOptions & options);
+    AlpineQuery(AlpineQueryOptions & options);
 
 
-    bool  packetSent (ulong  transportId);
+    bool packetSent(ulong transportId);
 
-    bool  broadcastComplete (ulong             numSent,
-                             struct timeval &  duration);
+    bool broadcastComplete(ulong numSent, struct timeval & duration);
 
 
     // Copy consturctor and assignement operator not implemented
     //
-    AlpineQuery (const AlpineQuery & copy);
-    AlpineQuery & operator = (const AlpineQuery & copy);
+    AlpineQuery(const AlpineQuery & copy);
+    AlpineQuery & operator=(const AlpineQuery & copy);
 
 
     friend class AlpineBroadcast;
     friend class AlpineQueryMgr;
 };
-
-

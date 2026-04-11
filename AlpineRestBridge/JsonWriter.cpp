@@ -4,7 +4,7 @@
 #include <JsonWriter.h>
 
 
-JsonWriter::JsonWriter ()
+JsonWriter::JsonWriter()
     : afterKey_(false)
 {
     buffer_.reserve(256);
@@ -12,14 +12,14 @@ JsonWriter::JsonWriter ()
 
 
 string
-JsonWriter::result ()
+JsonWriter::result()
 {
     return buffer_;
 }
 
 
 void
-JsonWriter::beginObject ()
+JsonWriter::beginObject()
 {
     if (!afterKey_)
         appendCommaIfNeeded();
@@ -31,7 +31,7 @@ JsonWriter::beginObject ()
 
 
 void
-JsonWriter::endObject ()
+JsonWriter::endObject()
 {
     if (!stack_.empty())
         stack_.pop_back();
@@ -45,7 +45,7 @@ JsonWriter::endObject ()
 
 
 void
-JsonWriter::beginArray ()
+JsonWriter::beginArray()
 {
     if (!afterKey_)
         appendCommaIfNeeded();
@@ -57,7 +57,7 @@ JsonWriter::beginArray ()
 
 
 void
-JsonWriter::endArray ()
+JsonWriter::endArray()
 {
     if (!stack_.empty())
         stack_.pop_back();
@@ -71,7 +71,7 @@ JsonWriter::endArray ()
 
 
 void
-JsonWriter::key (const string & k)
+JsonWriter::key(const string & k)
 {
     appendCommaIfNeeded();
     buffer_ += '"';
@@ -82,7 +82,7 @@ JsonWriter::key (const string & k)
 
 
 void
-JsonWriter::value (const string & v)
+JsonWriter::value(const string & v)
 {
     if (!afterKey_)
         appendCommaIfNeeded();
@@ -98,7 +98,7 @@ JsonWriter::value (const string & v)
 
 
 void
-JsonWriter::value (ulong v)
+JsonWriter::value(ulong v)
 {
     if (!afterKey_)
         appendCommaIfNeeded();
@@ -112,7 +112,7 @@ JsonWriter::value (ulong v)
 
 
 void
-JsonWriter::value (bool v)
+JsonWriter::value(bool v)
 {
     if (!afterKey_)
         appendCommaIfNeeded();
@@ -126,14 +126,14 @@ JsonWriter::value (bool v)
 
 
 void
-JsonWriter::separator ()
+JsonWriter::separator()
 {
     // no-op: commas are handled automatically
 }
 
 
 void
-JsonWriter::appendCommaIfNeeded ()
+JsonWriter::appendCommaIfNeeded()
 {
     if (!stack_.empty() && stack_.back().needsComma)
         buffer_ += ',';
@@ -141,33 +141,45 @@ JsonWriter::appendCommaIfNeeded ()
 
 
 string
-JsonWriter::escapeJsonString (std::string_view sv)
+JsonWriter::escapeJsonString(std::string_view sv)
 {
     string escaped;
     escaped.reserve(sv.size());
 
-    for (char c : sv)
-    {
-        switch (c)
-        {
-            case '"':   escaped += "\\\""s;  break;
-            case '\\':  escaped += "\\\\"s;  break;
-            case '\n':  escaped += "\\n"s;   break;
-            case '\r':  escaped += "\\r"s;   break;
-            case '\t':  escaped += "\\t"s;   break;
-            case '\b':  escaped += "\\b"s;   break;
-            case '\f':  escaped += "\\f"s;   break;
-            default:
-                if (static_cast<unsigned char>(c) < 0x20) {
-                    // Control characters as \u00XX
-                    static const char hexDigits[] = "0123456789abcdef";
-                    escaped += "\\u00"s;
-                    escaped += hexDigits[(static_cast<unsigned char>(c) >> 4) & 0x0F];
-                    escaped += hexDigits[static_cast<unsigned char>(c) & 0x0F];
-                } else {
-                    escaped += c;
-                }
-                break;
+    for (char c : sv) {
+        switch (c) {
+        case '"':
+            escaped += "\\\""s;
+            break;
+        case '\\':
+            escaped += "\\\\"s;
+            break;
+        case '\n':
+            escaped += "\\n"s;
+            break;
+        case '\r':
+            escaped += "\\r"s;
+            break;
+        case '\t':
+            escaped += "\\t"s;
+            break;
+        case '\b':
+            escaped += "\\b"s;
+            break;
+        case '\f':
+            escaped += "\\f"s;
+            break;
+        default:
+            if (static_cast<unsigned char>(c) < 0x20) {
+                // Control characters as \u00XX
+                static const char hexDigits[] = "0123456789abcdef";
+                escaped += "\\u00"s;
+                escaped += hexDigits[(static_cast<unsigned char>(c) >> 4) & 0x0F];
+                escaped += hexDigits[static_cast<unsigned char>(c) & 0x0F];
+            } else {
+                escaped += c;
+            }
+            break;
         }
     }
 

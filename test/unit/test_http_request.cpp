@@ -1,14 +1,13 @@
 /// Unit tests for HttpRequest::parse
 
-#include <catch2/catch_test_macros.hpp>
 #include <HttpRequest.h>
+#include <catch2/catch_test_macros.hpp>
 
 
-static bool parseString(const string& raw, HttpRequest& req)
+static bool
+parseString(const string & raw, HttpRequest & req)
 {
-    return HttpRequest::parse(reinterpret_cast<const byte*>(raw.data()),
-                              static_cast<ulong>(raw.size()),
-                              req);
+    return HttpRequest::parse(reinterpret_cast<const byte *>(raw.data()), static_cast<ulong>(raw.size()), req);
 }
 
 
@@ -36,8 +35,11 @@ TEST_CASE("HttpRequest::parse valid POST with body", "[HttpRequest]")
     string body = "{\"query\":\"test\"}";
     string raw = "POST /query/start HTTP/1.1\r\n"
                  "Content-Type: application/json\r\n"
-                 "Content-Length: " + std::to_string(body.size()) + "\r\n"
-                 "\r\n" + body;
+                 "Content-Length: " +
+                 std::to_string(body.size()) +
+                 "\r\n"
+                 "\r\n" +
+                 body;
 
     HttpRequest req;
     REQUIRE(parseString(raw, req));

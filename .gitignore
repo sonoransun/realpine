@@ -1,12 +1,19 @@
-# CMake build directories
-build/
+# CMake build directories (build/, build-ci/, build-baseline/, build_dir/, _build/, ...)
+build*/
 _build/
-build_dir/
+**/_deps/
 
 # CMake generated files
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
+
+# Vendored third-party sources / sub-repos
+AlpineGui/vendor/
+**/vendor/
+**/third_party/
+**/third-party/
+**/external/
 
 # Compiled objects
 *.o

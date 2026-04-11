@@ -6,174 +6,152 @@
 #include <StringUtils.h>
 
 
-
-AlpinePeerProfile::AlpinePeerProfile ()
+AlpinePeerProfile::AlpinePeerProfile()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile constructor invoked.");
+    Log::Debug("AlpinePeerProfile constructor invoked.");
 #endif
 
-    peerId_     = 0;
-    quality_    = 0;
-    queries_    = 0;
-    responses_  = 0;
+    peerId_ = 0;
+    quality_ = 0;
+    queries_ = 0;
+    responses_ = 0;
 }
 
 
-
-AlpinePeerProfile::AlpinePeerProfile (const AlpinePeerProfile &copy)
+AlpinePeerProfile::AlpinePeerProfile(const AlpinePeerProfile & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile copy constructor invoked.");
+    Log::Debug("AlpinePeerProfile copy constructor invoked.");
 #endif
 
-    peerId_     = copy.peerId_;
-    quality_    = copy.quality_;
-    queries_    = copy.queries_;
-    responses_  = copy.responses_;
+    peerId_ = copy.peerId_;
+    quality_ = copy.quality_;
+    queries_ = copy.queries_;
+    responses_ = copy.responses_;
 }
 
 
-
-AlpinePeerProfile::AlpinePeerProfile (ulong  peerId)
+AlpinePeerProfile::AlpinePeerProfile(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile peer ID constructor invoked.");
+    Log::Debug("AlpinePeerProfile peer ID constructor invoked.");
 #endif
 
-    peerId_     = peerId;
-    quality_    = 0;
-    queries_    = 0;
-    responses_  = 0;
+    peerId_ = peerId;
+    quality_ = 0;
+    queries_ = 0;
+    responses_ = 0;
 }
 
 
-
-AlpinePeerProfile::~AlpinePeerProfile ()
+AlpinePeerProfile::~AlpinePeerProfile()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile destructor invoked.");
+    Log::Debug("AlpinePeerProfile destructor invoked.");
 #endif
 }
 
 
-
-AlpinePeerProfile & 
-AlpinePeerProfile::operator = (const AlpinePeerProfile &copy)
+AlpinePeerProfile &
+AlpinePeerProfile::operator=(const AlpinePeerProfile & copy)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile assignment invoked.");
-#endif   
+    Log::Debug("AlpinePeerProfile assignment invoked.");
+#endif
 
     if (&copy == this) {
         return *this;
     }
 
-    peerId_     = copy.peerId_;
-    quality_    = copy.quality_;
-    queries_    = copy.queries_;
-    responses_  = copy.responses_;
+    peerId_ = copy.peerId_;
+    quality_ = copy.quality_;
+    queries_ = copy.queries_;
+    responses_ = copy.responses_;
 
 
     return *this;
 }
 
 
-
-void  
-AlpinePeerProfile::getPeerId (ulong &  peerId)
+void
+AlpinePeerProfile::getPeerId(ulong & peerId)
 {
     peerId = peerId_;
 }
 
 
-
-void  
-AlpinePeerProfile::getRelativeQuality (short &  quality)
+void
+AlpinePeerProfile::getRelativeQuality(short & quality)
 {
     quality = quality_;
 }
 
 
-
-void  
-AlpinePeerProfile::getTotalQueries (ulong &  total)
+void
+AlpinePeerProfile::getTotalQueries(ulong & total)
 {
     total = queries_;
 }
 
 
-
-void  
-AlpinePeerProfile::getTotalResponses (ulong &  total)
+void
+AlpinePeerProfile::getTotalResponses(ulong & total)
 {
     total = responses_;
 }
 
 
-
-void  
-AlpinePeerProfile::setPeerId (ulong  peerId)
+void
+AlpinePeerProfile::setPeerId(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile::setPeerId invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfile::setPeerId invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     peerId_ = peerId;
 }
 
 
-
-void  
-AlpinePeerProfile::setRelativeQuality (short  quality)
+void
+AlpinePeerProfile::setRelativeQuality(short quality)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile::setRelativeQuality invoked.  Quality: "s +
-                std::to_string (quality));
+    Log::Debug("AlpinePeerProfile::setRelativeQuality invoked.  Quality: "s + std::to_string(quality));
 #endif
 
     quality_ = quality;
 }
 
 
-
-void  
-AlpinePeerProfile::modifyRelativeQuality (short  delta)
+void
+AlpinePeerProfile::modifyRelativeQuality(short delta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile::modifyRelativeQuality invoked.  Quality delta: "s +
-                std::to_string (delta));
+    Log::Debug("AlpinePeerProfile::modifyRelativeQuality invoked.  Quality delta: "s + std::to_string(delta));
 #endif
 
     quality_ += delta;
 }
 
 
-
-void  
-AlpinePeerProfile::incrTotalQueries ()
+void
+AlpinePeerProfile::incrTotalQueries()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile::incrTotalQueries invoked.  New total: "s +
-                std::to_string (queries_ +1));
+    Log::Debug("AlpinePeerProfile::incrTotalQueries invoked.  New total: "s + std::to_string(queries_ + 1));
 #endif
 
     queries_++;
 }
 
 
-
-void  
-AlpinePeerProfile::incrTotalResponses ()
+void
+AlpinePeerProfile::incrTotalResponses()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfile::incrTotalResponses invoked.  New total: "s +
-                std::to_string (responses_ +1));
+    Log::Debug("AlpinePeerProfile::incrTotalResponses invoked.  New total: "s + std::to_string(responses_ + 1));
 #endif
 
     responses_++;
 }
-
-
-

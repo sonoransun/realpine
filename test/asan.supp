@@ -1,0 +1,21 @@
+# Alpine AddressSanitizer / LeakSanitizer suppressions.
+#
+# Rules here should be RARE and well-justified.  Prefer fixing the root cause
+# to adding a suppression.  Each entry must cite the reason the leak/error
+# cannot be fixed here (third-party, false positive, intentional lifetime, etc.)
+# and leave a trail for future reviewers.
+
+# spdlog allocates its thread-local pattern formatter once and never releases
+# it — that's not a leak, it's process-lifetime state.  Observed with
+# sanitizer runs against Catch2 executables that use spdlog via base/AppUtils/Log.
+leak:spdlog
+
+# Catch2 keeps a global test registry that outlives main().  The allocations
+# are bounded by the number of test cases compiled in; no runtime growth.
+leak:Catch::Detail::unique_name
+leak:Catch::getMutableRegistryHub
+
+# asio internal scheduler uses a thread-local service registry.  The registry
+# is cleaned up on thread exit only when ~io_context runs; tests that
+# construct io_context on the stack do so correctly.
+leak:asio::detail::service_registry

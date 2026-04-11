@@ -9,18 +9,14 @@
 class TcpClientConnector : public TcpAsyncConnector
 {
   public:
+    TcpClientConnector(){};
+    virtual ~TcpClientConnector(){};
 
-    TcpClientConnector () {};
-    virtual ~TcpClientConnector () {};
 
+    virtual void receiveTransport(ulong requestId, TcpTransport * transport);
 
-    virtual void  receiveTransport (ulong           requestId,
-                                    TcpTransport *  transport);
-
-    virtual void  handleRequestFailure (ulong  requestId);
+    virtual void handleRequestFailure(ulong requestId);
 
 
   private:
-
 };
-

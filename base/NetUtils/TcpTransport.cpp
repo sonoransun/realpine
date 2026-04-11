@@ -1,18 +1,13 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TcpTransport.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <StringUtils.h>
+#include <TcpTransport.h>
 
 
-
-TcpTransport::TcpTransport (int     socketFd,
-                            ulong   destIpAddress,
-                            ushort  destPort,
-                            ulong   localIpAddress,
-                            ushort  localPort)
+TcpTransport::TcpTransport(int socketFd, ulong destIpAddress, ushort destPort, ulong localIpAddress, ushort localPort)
     : socketFd_(socketFd),
       destIpAddress_(destIpAddress),
       destPort_(destPort),
@@ -20,69 +15,63 @@ TcpTransport::TcpTransport (int     socketFd,
       localPort_(localPort)
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport constructor invoked.");
+    Log::Debug("TcpTransport constructor invoked.");
 #endif
 }
 
 
-
-TcpTransport::~TcpTransport ()
+TcpTransport::~TcpTransport()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport destructor invoked.");
+    Log::Debug("TcpTransport destructor invoked.");
 #endif
 
-    if (socketFd_ >= 0) 
+    if (socketFd_ >= 0)
         alpine_close_socket(socketFd_);
 }
 
 
-
-bool 
-TcpTransport::getDestination (ulong &   ipAddress,
-                              ushort &  port)
+bool
+TcpTransport::getDestination(ulong & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::getDestination invoked.");
+    Log::Debug("TcpTransport::getDestination invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::getDestination when connection closed!");
+        Log::Error("Call to TcpTransport::getDestination when connection closed!");
         return false;
     }
     ipAddress = destIpAddress_;
-    port      = destPort_;
+    port = destPort_;
 
     return true;
 }
 
 
-
-bool 
-TcpTransport::getEndpoint (ulong &   ipAddress,
-                           ushort &  port)
+bool
+TcpTransport::getEndpoint(ulong & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::getEndpoint invoked.");
+    Log::Debug("TcpTransport::getEndpoint invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::getEndpoint when connection closed!");
+        Log::Error("Call to TcpTransport::getEndpoint when connection closed!");
         return false;
     }
     ipAddress = localIpAddress_;
-    port      = localPort_;
+    port = localPort_;
 
     return true;
 }
 
 
-
-void 
-TcpTransport::close ()
+void
+TcpTransport::close()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::close invoked.");
+    Log::Debug("TcpTransport::close invoked.");
 #endif
 
     if (socketFd_ >= 0) {
@@ -92,16 +81,15 @@ TcpTransport::close ()
 }
 
 
-
-int  
-TcpTransport::getFd ()
+int
+TcpTransport::getFd()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::getFd invoked.");
+    Log::Debug("TcpTransport::getFd invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::getFd when connection closed!");
+        Log::Error("Call to TcpTransport::getFd when connection closed!");
         return false;
     }
 
@@ -109,57 +97,53 @@ TcpTransport::getFd ()
 }
 
 
-
-bool 
-TcpTransport::nonBlocking ()
+bool
+TcpTransport::nonBlocking()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::nonBlocking invoked.");
+    Log::Debug("TcpTransport::nonBlocking invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::nonBlocking when connection closed!");
+        Log::Error("Call to TcpTransport::nonBlocking when connection closed!");
         return false;
     }
     bool status;
-    status = NetUtils::nonBlocking (socketFd_);
+    status = NetUtils::nonBlocking(socketFd_);
 
 
     return status;
 }
-
-
-
-bool 
-TcpTransport::blocking ()
-{
-#ifdef _VERBOSE
-    Log::Debug ("TcpTransport::blocking invoked.");
-#endif
-
-    if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::blocking when connection closed!");
-        return false;
-    }
-    bool status;
-    status = NetUtils::blocking (socketFd_);
-
-
-    return status;
-}
-
 
 
 bool
-TcpTransport::send (const byte *  data,
-                    ulong         dataLength)
+TcpTransport::blocking()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::send invoked.");
+    Log::Debug("TcpTransport::blocking invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::send when connection closed!");
+        Log::Error("Call to TcpTransport::blocking when connection closed!");
+        return false;
+    }
+    bool status;
+    status = NetUtils::blocking(socketFd_);
+
+
+    return status;
+}
+
+
+bool
+TcpTransport::send(const byte * data, ulong dataLength)
+{
+#ifdef _VERBOSE
+    Log::Debug("TcpTransport::send invoked.");
+#endif
+
+    if (socketFd_ < 0) {
+        Log::Error("Call to TcpTransport::send when connection closed!");
         return false;
     }
 
@@ -187,18 +171,15 @@ TcpTransport::send (const byte *  data,
 }
 
 
-
-bool 
-TcpTransport::receive (byte *   buffer,
-                       ulong    bufferSize,
-                       ulong &  dataLength)
+bool
+TcpTransport::receive(byte * buffer, ulong bufferSize, ulong & dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpTransport::receive invoked.");
+    Log::Debug("TcpTransport::receive invoked.");
 #endif
 
     if (socketFd_ < 0) {
-        Log::Error ("Call to TcpTransport::receive when connection closed!");
+        Log::Error("Call to TcpTransport::receive when connection closed!");
         return false;
     }
     ssize_t retVal;
@@ -213,8 +194,7 @@ TcpTransport::receive (byte *   buffer,
         }
         string errorCode;
         NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
-        Log::Error("Receive error: "s + errorCode +
-                   " in TcpTransport::receive!");
+        Log::Error("Receive error: "s + errorCode + " in TcpTransport::receive!");
 
         return false;
     }
@@ -223,6 +203,3 @@ TcpTransport::receive (byte *   buffer,
 
     return true;
 }
-
-
-

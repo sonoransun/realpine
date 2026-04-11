@@ -7,7 +7,4 @@
 // Ctor defaulted in header
 
 
-AlpineProxyOptionData::~AlpineProxyOptionData () = default;
-
-
-
+AlpineProxyOptionData::~AlpineProxyOptionData() = default;

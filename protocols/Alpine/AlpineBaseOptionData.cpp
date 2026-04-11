@@ -7,7 +7,4 @@
 // Ctor defaulted in header
 
 
-AlpineBaseOptionData::~AlpineBaseOptionData () = default;
-
-
-
+AlpineBaseOptionData::~AlpineBaseOptionData() = default;

@@ -2,49 +2,43 @@
 
 
 #include <AccessTracker.h>
-#include <nlohmann/json.hpp>
 #include <algorithm>
 #include <iomanip>
+#include <nlohmann/json.hpp>
 #include <sstream>
 
 
-std::unordered_map<ulong, AccessTracker::t_ResourceStats, OptHash<ulong>>
-    AccessTracker::resourceStats_s;
+std::unordered_map<ulong, AccessTracker::t_ResourceStats, OptHash<ulong>> AccessTracker::resourceStats_s;
 
-std::unordered_map<ulong, AccessTracker::t_PeerStats, OptHash<ulong>>
-    AccessTracker::peerStats_s;
+std::unordered_map<ulong, AccessTracker::t_PeerStats, OptHash<ulong>> AccessTracker::peerStats_s;
 
-std::unordered_map<string, AccessTracker::t_QueryTermStats, OptHash<string>>
-    AccessTracker::queryTermStats_s;
+std::unordered_map<string, AccessTracker::t_QueryTermStats, OptHash<string>> AccessTracker::queryTermStats_s;
 
-ReadWriteSem  AccessTracker::dataLock_s;
+ReadWriteSem AccessTracker::dataLock_s;
 
 
 void
-AccessTracker::recordResourceAccess (ulong           resourceId,
-                                     ulong           peerId,
-                                     const string &  description,
-                                     ulong           bytesRead)
+AccessTracker::recordResourceAccess(ulong resourceId, ulong peerId, const string & description, ulong bytesRead)
 {
     auto now = std::chrono::system_clock::now();
 
     dataLock_s.acquireWrite();
 
     // Update resource stats
-    auto & rs          = resourceStats_s[resourceId];
-    rs.resourceId      = resourceId;
-    rs.peerId          = peerId;
-    rs.description     = description;
+    auto & rs = resourceStats_s[resourceId];
+    rs.resourceId = resourceId;
+    rs.peerId = peerId;
+    rs.description = description;
     rs.accessCount++;
     rs.totalBytesRead += bytesRead;
-    rs.lastAccessTime  = now;
+    rs.lastAccessTime = now;
 
     // Update peer stats
     auto & ps = peerStats_s[peerId];
     ps.peerId = peerId;
     ps.aggregateAccessCount++;
     ps.aggregateBytesRead += bytesRead;
-    ps.lastAccessTime      = now;
+    ps.lastAccessTime = now;
 
     // Track distinct resources per peer
     if (rs.accessCount == 1)
@@ -55,14 +49,14 @@ AccessTracker::recordResourceAccess (ulong           resourceId,
 
 
 void
-AccessTracker::recordQueryAccess (const string &  queryTerm)
+AccessTracker::recordQueryAccess(const string & queryTerm)
 {
     auto now = std::chrono::system_clock::now();
 
     dataLock_s.acquireWrite();
 
-    auto & qs        = queryTermStats_s[queryTerm];
-    qs.queryTerm     = queryTerm;
+    auto & qs = queryTermStats_s[queryTerm];
+    qs.queryTerm = queryTerm;
     qs.accessCount++;
     qs.lastAccessTime = now;
 
@@ -71,13 +65,11 @@ AccessTracker::recordQueryAccess (const string &  queryTerm)
 
 
 bool
-AccessTracker::getResourceStats (ulong             resourceId,
-                                 t_ResourceStats & stats)
+AccessTracker::getResourceStats(ulong resourceId, t_ResourceStats & stats)
 {
     dataLock_s.acquireRead();
 
-    if (!resourceStats_s.contains(resourceId))
-    {
+    if (!resourceStats_s.contains(resourceId)) {
         dataLock_s.releaseRead();
         return false;
     }
@@ -89,13 +81,11 @@ AccessTracker::getResourceStats (ulong             resourceId,
 
 
 bool
-AccessTracker::getPeerStats (ulong          peerId,
-                             t_PeerStats &  stats)
+AccessTracker::getPeerStats(ulong peerId, t_PeerStats & stats)
 {
     dataLock_s.acquireRead();
 
-    if (!peerStats_s.contains(peerId))
-    {
+    if (!peerStats_s.contains(peerId)) {
         dataLock_s.releaseRead();
         return false;
     }
@@ -107,8 +97,7 @@ AccessTracker::getPeerStats (ulong          peerId,
 
 
 void
-AccessTracker::getMostAccessedResources (vector<t_ResourceStats> &  list,
-                                         ulong                      limit)
+AccessTracker::getMostAccessedResources(vector<t_ResourceStats> & list, ulong limit)
 {
     list.clear();
 
@@ -119,9 +108,9 @@ AccessTracker::getMostAccessedResources (vector<t_ResourceStats> &  list,
 
     dataLock_s.releaseRead();
 
-    std::sort(list.begin(), list.end(),
-              [](const t_ResourceStats & a, const t_ResourceStats & b)
-              { return a.accessCount > b.accessCount; });
+    std::sort(list.begin(), list.end(), [](const t_ResourceStats & a, const t_ResourceStats & b) {
+        return a.accessCount > b.accessCount;
+    });
 
     if (list.size() > limit)
         list.resize(limit);
@@ -129,8 +118,7 @@ AccessTracker::getMostAccessedResources (vector<t_ResourceStats> &  list,
 
 
 void
-AccessTracker::getMostRecentResources (vector<t_ResourceStats> &  list,
-                                       ulong                      limit)
+AccessTracker::getMostRecentResources(vector<t_ResourceStats> & list, ulong limit)
 {
     list.clear();
 
@@ -141,9 +129,9 @@ AccessTracker::getMostRecentResources (vector<t_ResourceStats> &  list,
 
     dataLock_s.releaseRead();
 
-    std::sort(list.begin(), list.end(),
-              [](const t_ResourceStats & a, const t_ResourceStats & b)
-              { return a.lastAccessTime > b.lastAccessTime; });
+    std::sort(list.begin(), list.end(), [](const t_ResourceStats & a, const t_ResourceStats & b) {
+        return a.lastAccessTime > b.lastAccessTime;
+    });
 
     if (list.size() > limit)
         list.resize(limit);
@@ -151,7 +139,7 @@ AccessTracker::getMostRecentResources (vector<t_ResourceStats> &  list,
 
 
 string
-AccessTracker::serializeJson ()
+AccessTracker::serializeJson()
 {
     nlohmann::json root;
 
@@ -161,44 +149,35 @@ AccessTracker::serializeJson ()
     auto & resources = root["resources"];
     resources = nlohmann::json::array();
 
-    for (const auto & [_, rs] : resourceStats_s)
-    {
-        resources.push_back({
-            {"resourceId",    rs.resourceId},
-            {"peerId",        rs.peerId},
-            {"description",   rs.description},
-            {"accessCount",   rs.accessCount},
-            {"totalBytesRead", rs.totalBytesRead},
-            {"lastAccessTime", std::chrono::system_clock::to_time_t(rs.lastAccessTime)}
-        });
+    for (const auto & [_, rs] : resourceStats_s) {
+        resources.push_back({{"resourceId", rs.resourceId},
+                             {"peerId", rs.peerId},
+                             {"description", rs.description},
+                             {"accessCount", rs.accessCount},
+                             {"totalBytesRead", rs.totalBytesRead},
+                             {"lastAccessTime", std::chrono::system_clock::to_time_t(rs.lastAccessTime)}});
     }
 
     // Peers
     auto & peers = root["peers"];
     peers = nlohmann::json::array();
 
-    for (const auto & [_, ps] : peerStats_s)
-    {
-        peers.push_back({
-            {"peerId",                    ps.peerId},
-            {"aggregateAccessCount",      ps.aggregateAccessCount},
-            {"aggregateBytesRead",        ps.aggregateBytesRead},
-            {"distinctResourcesAccessed", ps.distinctResourcesAccessed},
-            {"lastAccessTime",            std::chrono::system_clock::to_time_t(ps.lastAccessTime)}
-        });
+    for (const auto & [_, ps] : peerStats_s) {
+        peers.push_back({{"peerId", ps.peerId},
+                         {"aggregateAccessCount", ps.aggregateAccessCount},
+                         {"aggregateBytesRead", ps.aggregateBytesRead},
+                         {"distinctResourcesAccessed", ps.distinctResourcesAccessed},
+                         {"lastAccessTime", std::chrono::system_clock::to_time_t(ps.lastAccessTime)}});
     }
 
     // Query terms
     auto & queryTerms = root["queryTerms"];
     queryTerms = nlohmann::json::array();
 
-    for (const auto & [_, qs] : queryTermStats_s)
-    {
-        queryTerms.push_back({
-            {"queryTerm",      qs.queryTerm},
-            {"accessCount",    qs.accessCount},
-            {"lastAccessTime", std::chrono::system_clock::to_time_t(qs.lastAccessTime)}
-        });
+    for (const auto & [_, qs] : queryTermStats_s) {
+        queryTerms.push_back({{"queryTerm", qs.queryTerm},
+                              {"accessCount", qs.accessCount},
+                              {"lastAccessTime", std::chrono::system_clock::to_time_t(qs.lastAccessTime)}});
     }
 
     dataLock_s.releaseRead();
@@ -208,7 +187,7 @@ AccessTracker::serializeJson ()
 
 
 string
-AccessTracker::serializeText ()
+AccessTracker::serializeText()
 {
     std::ostringstream out;
 
@@ -216,33 +195,24 @@ AccessTracker::serializeText ()
 
     out << "=== Resource Access Statistics ===\n";
 
-    for (const auto & [_, rs] : resourceStats_s)
-    {
+    for (const auto & [_, rs] : resourceStats_s) {
         double mb = static_cast<double>(rs.totalBytesRead) / (1024.0 * 1024.0);
-        out << "Resource " << rs.resourceId
-            << " (peerId: " << rs.peerId << "): \""
-            << rs.description << "\" — "
-            << rs.accessCount << " accesses, "
-            << std::fixed << std::setprecision(1) << mb << " MB read\n";
+        out << "Resource " << rs.resourceId << " (peerId: " << rs.peerId << "): \"" << rs.description << "\" — "
+            << rs.accessCount << " accesses, " << std::fixed << std::setprecision(1) << mb << " MB read\n";
     }
 
     out << "\n=== Peer Access Statistics ===\n";
 
-    for (const auto & [_, ps] : peerStats_s)
-    {
+    for (const auto & [_, ps] : peerStats_s) {
         double mb = static_cast<double>(ps.aggregateBytesRead) / (1024.0 * 1024.0);
-        out << "Peer " << ps.peerId << ": "
-            << ps.aggregateAccessCount << " accesses, "
-            << ps.distinctResourcesAccessed << " resources, "
-            << std::fixed << std::setprecision(1) << mb << " MB read\n";
+        out << "Peer " << ps.peerId << ": " << ps.aggregateAccessCount << " accesses, " << ps.distinctResourcesAccessed
+            << " resources, " << std::fixed << std::setprecision(1) << mb << " MB read\n";
     }
 
     out << "\n=== Query Term Statistics ===\n";
 
-    for (const auto & [_, qs] : queryTermStats_s)
-    {
-        out << "\"" << qs.queryTerm << "\": "
-            << qs.accessCount << " accesses\n";
+    for (const auto & [_, qs] : queryTermStats_s) {
+        out << "\"" << qs.queryTerm << "\": " << qs.accessCount << " accesses\n";
     }
 
     dataLock_s.releaseRead();
@@ -251,9 +221,8 @@ AccessTracker::serializeText ()
 }
 
 
-
 void
-AccessTracker::reset ()
+AccessTracker::reset()
 {
     dataLock_s.acquireWrite();
     resourceStats_s.clear();

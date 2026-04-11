@@ -1,0 +1,55 @@
+# Docker compose override for CI cluster tests.
+#
+# This file is used as a second `-f` argument to docker compose so it
+# merges onto docker/docker-compose.yml. It intentionally only overrides
+# fields that must change for CI:
+#
+#   1. Multicast discovery is disabled because Linux docker bridge
+#      networks do not forward IP multicast between container interfaces.
+#      Nodes in compose.ci still discover each other via the UDP broadcast
+#      beacon on port 8089.
+#
+#   2. Healthcheck start_period is bumped to 30 seconds for slow cold
+#      starts (fresh image, cold caches, warm-up of the alpine stack).
+#
+# Invocation:
+#   docker compose \
+#     -f docker/docker-compose.yml \
+#     -f test/docker/compose.ci.yml \
+#     up -d
+#
+# See run_cluster_tests.sh for the full CI driver.
+
+services:
+  node1:
+    environment:
+      WIFI_MULTICAST_GROUP: ""
+      WIFI_DISCOVERY_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/status"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 6
+
+  node2:
+    environment:
+      WIFI_MULTICAST_GROUP: ""
+      WIFI_DISCOVERY_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/status"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 6
+
+  node3:
+    environment:
+      WIFI_MULTICAST_GROUP: ""
+      WIFI_DISCOVERY_ENABLED: "false"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/status"]
+      interval: 5s
+      timeout: 3s
+      start_period: 30s
+      retries: 6

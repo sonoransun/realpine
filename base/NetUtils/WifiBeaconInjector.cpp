@@ -1,25 +1,24 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
+#include <Log.h>
 #include <WifiBeaconInjector.h>
 #include <WifiDiscovery.h>
-#include <Log.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
 #ifdef __linux__
-#include <net/if.h>
-#include <sys/ioctl.h>
-#include <linux/if_packet.h>
 #include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
 #include <netinet/in.h>
+#include <sys/ioctl.h>
 #endif
 
 
-
-WifiBeaconInjector::WifiBeaconInjector ()
+WifiBeaconInjector::WifiBeaconInjector()
     :
 #ifdef __linux__
       rawFd_(-1),
@@ -36,8 +35,7 @@ WifiBeaconInjector::WifiBeaconInjector ()
 }
 
 
-
-WifiBeaconInjector::~WifiBeaconInjector ()
+WifiBeaconInjector::~WifiBeaconInjector()
 {
     stop();
 
@@ -48,25 +46,27 @@ WifiBeaconInjector::~WifiBeaconInjector ()
 }
 
 
-
 #ifdef __linux__
 
 bool
-WifiBeaconInjector::initialize (const string & interfaceName, const string & peerId,
-                                const string & ipAddress, ushort port, ushort restPort,
-                                uint capabilities, int beaconIntervalMs)
+WifiBeaconInjector::initialize(const string & interfaceName,
+                               const string & peerId,
+                               const string & ipAddress,
+                               ushort port,
+                               ushort restPort,
+                               uint capabilities,
+                               int beaconIntervalMs)
 {
-    interfaceName_    = interfaceName;
-    peerId_           = peerId;
-    ipAddress_        = ipAddress;
-    port_             = port;
-    restPort_         = restPort;
-    capabilities_     = capabilities;
+    interfaceName_ = interfaceName;
+    peerId_ = peerId;
+    ipAddress_ = ipAddress;
+    port_ = port;
+    restPort_ = restPort;
+    capabilities_ = capabilities;
     beaconIntervalMs_ = beaconIntervalMs;
 
     if (!openRawSocket()) {
-        Log::Error("WifiBeaconInjector: Failed to open raw socket on "s +
-                   interfaceName_);
+        Log::Error("WifiBeaconInjector: Failed to open raw socket on "s + interfaceName_);
         return false;
     }
 
@@ -75,9 +75,8 @@ WifiBeaconInjector::initialize (const string & interfaceName, const string & pee
 }
 
 
-
 bool
-WifiBeaconInjector::openRawSocket ()
+WifiBeaconInjector::openRawSocket()
 {
     rawFd_ = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
@@ -92,8 +91,7 @@ WifiBeaconInjector::openRawSocket ()
     strncpy(ifr.ifr_name, interfaceName_.c_str(), IFNAMSIZ - 1);
 
     if (ioctl(rawFd_, SIOCGIFINDEX, &ifr) < 0) {
-        Log::Error("WifiBeaconInjector: Failed to get interface index for "s +
-                   interfaceName_);
+        Log::Error("WifiBeaconInjector: Failed to get interface index for "s + interfaceName_);
         ::close(rawFd_);
         rawFd_ = -1;
         return false;
@@ -103,8 +101,7 @@ WifiBeaconInjector::openRawSocket ()
 
     // Get MAC address
     if (ioctl(rawFd_, SIOCGIFHWADDR, &ifr) < 0) {
-        Log::Error("WifiBeaconInjector: Failed to get MAC address for "s +
-                   interfaceName_);
+        Log::Error("WifiBeaconInjector: Failed to get MAC address for "s + interfaceName_);
         ::close(rawFd_);
         rawFd_ = -1;
         return false;
@@ -115,8 +112,8 @@ WifiBeaconInjector::openRawSocket ()
     // Bind to interface
     struct sockaddr_ll sll;
     memset(&sll, 0, sizeof(sll));
-    sll.sll_family   = AF_PACKET;
-    sll.sll_ifindex  = ifIndex_;
+    sll.sll_family = AF_PACKET;
+    sll.sll_ifindex = ifIndex_;
     sll.sll_protocol = htons(ETH_P_ALL);
 
     if (bind(rawFd_, (struct sockaddr *)&sll, sizeof(sll)) < 0) {
@@ -130,27 +127,25 @@ WifiBeaconInjector::openRawSocket ()
 }
 
 
-
 void
-WifiBeaconInjector::threadMain ()
+WifiBeaconInjector::threadMain()
 {
     Log::Info("WifiBeaconInjector: Thread started.");
 
     int ticksPerBeacon = beaconIntervalMs_ / POLL_TIMEOUT_MS;
-    if (ticksPerBeacon < 1) ticksPerBeacon = 1;
+    if (ticksPerBeacon < 1)
+        ticksPerBeacon = 1;
     int tickCount = ticksPerBeacon;  // send immediately on start
 
-    while (isActive())
-    {
+    while (isActive()) {
         struct pollfd pfd;
-        pfd.fd      = rawFd_;
-        pfd.events  = POLLIN;
+        pfd.fd = rawFd_;
+        pfd.events = POLLIN;
         pfd.revents = 0;
 
         int ret = alpine_poll(&pfd, 1, POLL_TIMEOUT_MS);
 
-        if (ret > 0 && (pfd.revents & POLLIN))
-        {
+        if (ret > 0 && (pfd.revents & POLLIN)) {
             byte buffer[4096];
             ssize_t bytesRead = recv(rawFd_, buffer, sizeof(buffer), 0);
 
@@ -180,9 +175,8 @@ WifiBeaconInjector::threadMain ()
 }
 
 
-
 uint
-WifiBeaconInjector::buildBeaconFrame (byte * buffer, uint bufferSize)
+WifiBeaconInjector::buildBeaconFrame(byte * buffer, uint bufferSize)
 {
     if (bufferSize < 200)
         return 0;
@@ -241,18 +235,18 @@ WifiBeaconInjector::buildBeaconFrame (byte * buffer, uint bufferSize)
 }
 
 
-
 uint
-WifiBeaconInjector::buildVendorIE (byte * buffer, uint offset)
+WifiBeaconInjector::buildVendorIE(byte * buffer, uint offset)
 {
     uint peerIdLen = static_cast<uint>(peerId_.length());
-    if (peerIdLen > 64) peerIdLen = 64;
+    if (peerIdLen > 64)
+        peerIdLen = 64;
 
     // IE payload length = 3(OUI) + 1(type) + 1(version) + 1(caps) +
     //                     4(ip) + 2(port) + 2(restPort) + 1(idLen) + idLen
     uint payloadLen = 3 + 1 + 1 + 1 + 4 + 2 + 2 + 1 + peerIdLen;
 
-    buffer[offset++] = 0xDD;                // tag: vendor-specific
+    buffer[offset++] = 0xDD;  // tag: vendor-specific
     buffer[offset++] = static_cast<byte>(payloadLen);
 
     // OUI: 02:A1:E1
@@ -294,9 +288,8 @@ WifiBeaconInjector::buildVendorIE (byte * buffer, uint offset)
 }
 
 
-
 void
-WifiBeaconInjector::parseBeaconFrame (const byte * data, uint length)
+WifiBeaconInjector::parseBeaconFrame(const byte * data, uint length)
 {
     // Minimum: radiotap(8) + mac(24) + fixed(12) = 44
     if (length < 44)
@@ -322,7 +315,7 @@ WifiBeaconInjector::parseBeaconFrame (const byte * data, uint length)
 
     // Iterate tagged parameters
     while (ieOffset + 2 <= length) {
-        byte tag    = data[ieOffset];
+        byte tag = data[ieOffset];
         byte tagLen = data[ieOffset + 1];
 
         if (ieOffset + 2 + tagLen > length)
@@ -337,9 +330,8 @@ WifiBeaconInjector::parseBeaconFrame (const byte * data, uint length)
 }
 
 
-
 bool
-WifiBeaconInjector::parseVendorIE (const byte * ie, uint ieLen)
+WifiBeaconInjector::parseVendorIE(const byte * ie, uint ieLen)
 {
     // Minimum: OUI(3) + type(1) + version(1) + caps(1) + ip(4) + port(2) + restPort(2) + idLen(1) = 15
     if (ieLen < 15)
@@ -354,7 +346,7 @@ WifiBeaconInjector::parseVendorIE (const byte * ie, uint ieLen)
         return false;
 
     uint protoVersion = ie[4];
-    uint caps         = ie[5];
+    uint caps = ie[5];
 
     // IPv4 address
     struct in_addr inAddr;
@@ -386,13 +378,13 @@ WifiBeaconInjector::parseVendorIE (const byte * ie, uint ieLen)
         return false;
 
     WifiDiscovery::t_DiscoveredPeer peer;
-    peer.peerId          = peerId;
-    peer.ipAddress       = ipStr;
-    peer.port            = peerPort;
-    peer.restPort        = peerRestPort;
+    peer.peerId = peerId;
+    peer.ipAddress = ipStr;
+    peer.port = peerPort;
+    peer.restPort = peerRestPort;
     peer.protocolVersion = protoVersion;
-    peer.capabilities    = caps;
-    peer.lastSeen        = std::chrono::steady_clock::now();
+    peer.capabilities = caps;
+    peer.lastSeen = std::chrono::steady_clock::now();
 
     WifiDiscovery::reportPeer(peer);
     return true;
@@ -403,9 +395,13 @@ WifiBeaconInjector::parseVendorIE (const byte * ie, uint ieLen)
 
 
 bool
-WifiBeaconInjector::initialize (const string & interfaceName, const string & peerId,
-                                const string & ipAddress, ushort port, ushort restPort,
-                                uint capabilities, int beaconIntervalMs)
+WifiBeaconInjector::initialize(const string & interfaceName,
+                               const string & peerId,
+                               const string & ipAddress,
+                               ushort port,
+                               ushort restPort,
+                               uint capabilities,
+                               int beaconIntervalMs)
 {
     (void)interfaceName;
     (void)peerId;
@@ -420,9 +416,8 @@ WifiBeaconInjector::initialize (const string & interfaceName, const string & pee
 }
 
 
-
 void
-WifiBeaconInjector::threadMain ()
+WifiBeaconInjector::threadMain()
 {
     // Non-Linux stub: should never be called since initialize() returns false
 }

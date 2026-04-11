@@ -1,23 +1,21 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpineRatingEngine.h>
 #include <AlpinePeerProfile.h>
+#include <AlpineRatingEngine.h>
 #include <Configuration.h>
-#include <ReadLock.h>
-#include <WriteLock.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
+#include <WriteLock.h>
 #include <algorithm>
 #include <cmath>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 
-
-std::unordered_map<ulong, AlpineRatingEngine::t_PeerRating>  AlpineRatingEngine::ratings_s;
-ReadWriteSem                                                  AlpineRatingEngine::lock_s;
-
+std::unordered_map<ulong, AlpineRatingEngine::t_PeerRating> AlpineRatingEngine::ratings_s;
+ReadWriteSem AlpineRatingEngine::lock_s;
 
 
 // ---------------------------------------------------------------------------
@@ -25,7 +23,7 @@ ReadWriteSem                                                  AlpineRatingEngine
 // ---------------------------------------------------------------------------
 
 ulong
-AlpineRatingEngine::getPeerId (AlpinePeerProfile * profile)
+AlpineRatingEngine::getPeerId(AlpinePeerProfile * profile)
 {
     ulong peerId = 0;
     if (profile)
@@ -34,15 +32,14 @@ AlpineRatingEngine::getPeerId (AlpinePeerProfile * profile)
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Helper — apply time-based decay toward kDecayTarget (1% per hour)
 // ---------------------------------------------------------------------------
 
 double
-AlpineRatingEngine::applyDecay (t_PeerRating & rating)
+AlpineRatingEngine::applyDecay(t_PeerRating & rating)
 {
-    auto now     = std::chrono::steady_clock::now();
+    auto now = std::chrono::steady_clock::now();
     auto elapsed = std::chrono::duration<double, std::ratio<3600>>(now - rating.lastUpdate);
     double hours = elapsed.count();
 
@@ -56,14 +53,13 @@ AlpineRatingEngine::applyDecay (t_PeerRating & rating)
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Helper — EMA update: score = (1 - alpha) * score + alpha * (score + delta)
 //           Simplified: score = score + alpha * delta
 // ---------------------------------------------------------------------------
 
 double
-AlpineRatingEngine::applyDelta (t_PeerRating & rating, double delta, bool isSuccess)
+AlpineRatingEngine::applyDelta(t_PeerRating & rating, double delta, bool isSuccess)
 {
     applyDecay(rating);
 
@@ -81,17 +77,15 @@ AlpineRatingEngine::applyDelta (t_PeerRating & rating, double delta, bool isSucc
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  Helper — clamp score to [0.0, 1.0]
 // ---------------------------------------------------------------------------
 
 double
-AlpineRatingEngine::clampScore (double score)
+AlpineRatingEngine::clampScore(double score)
 {
     return std::clamp(score, kMinScore, kMaxScore);
 }
-
 
 
 // ---------------------------------------------------------------------------
@@ -99,11 +93,10 @@ AlpineRatingEngine::clampScore (double score)
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::queryResponseEvent (AlpinePeerProfile *  profile,
-                                        short &              qualityDelta)
+AlpineRatingEngine::queryResponseEvent(AlpinePeerProfile * profile, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::queryResponseEvent invoked.");
+    Log::Debug("AlpineRatingEngine::queryResponseEvent invoked.");
 #endif
 
     if (!profile)
@@ -120,17 +113,15 @@ AlpineRatingEngine::queryResponseEvent (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  badPacketEvent — -0.3 penalty
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::badPacketEvent (AlpinePeerProfile *  profile,
-                                    short &              qualityDelta)
+AlpineRatingEngine::badPacketEvent(AlpinePeerProfile * profile, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::badPacketEvent invoked.");
+    Log::Debug("AlpineRatingEngine::badPacketEvent invoked.");
 #endif
 
     if (!profile)
@@ -147,17 +138,15 @@ AlpineRatingEngine::badPacketEvent (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  transferFailureEvent — -0.2 penalty
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::transferFailureEvent (AlpinePeerProfile *  profile,
-                                          short &              qualityDelta)
+AlpineRatingEngine::transferFailureEvent(AlpinePeerProfile * profile, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::transferFailureEvent invoked.");
+    Log::Debug("AlpineRatingEngine::transferFailureEvent invoked.");
 #endif
 
     if (!profile)
@@ -174,17 +163,15 @@ AlpineRatingEngine::transferFailureEvent (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  naResourceEvent — -0.05 minor penalty
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::naResourceEvent (AlpinePeerProfile *  profile,
-                                     short &              qualityDelta)
+AlpineRatingEngine::naResourceEvent(AlpinePeerProfile * profile, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::naResourceEvent invoked.");
+    Log::Debug("AlpineRatingEngine::naResourceEvent invoked.");
 #endif
 
     if (!profile)
@@ -201,17 +188,15 @@ AlpineRatingEngine::naResourceEvent (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  deceptiveResourceEvent — -0.5 severe penalty
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::deceptiveResourceEvent (AlpinePeerProfile *  profile,
-                                            short &              qualityDelta)
+AlpineRatingEngine::deceptiveResourceEvent(AlpinePeerProfile * profile, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::deceptiveResourceEvent invoked.");
+    Log::Debug("AlpineRatingEngine::deceptiveResourceEvent invoked.");
 #endif
 
     if (!profile)
@@ -228,39 +213,36 @@ AlpineRatingEngine::deceptiveResourceEvent (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  clientResourceEvaluation — variable delta based on user feedback
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::clientResourceEvaluation (AlpinePeerProfile *  profile,
-                                              t_ResourceRating     rating,
-                                              short &              qualityDelta)
+AlpineRatingEngine::clientResourceEvaluation(AlpinePeerProfile * profile, t_ResourceRating rating, short & qualityDelta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::clientResourceEvaluation invoked.");
+    Log::Debug("AlpineRatingEngine::clientResourceEvaluation invoked.");
 #endif
 
     if (!profile)
         return false;
 
     double delta = 0.0;
-    bool   isSuccess = true;
+    bool isSuccess = true;
 
     switch (rating) {
-        case t_ResourceRating::Low:
-            delta     = -0.2;
-            isSuccess = false;
-            break;
-        case t_ResourceRating::Average:
-            delta     = 0.0;
-            isSuccess = true;
-            break;
-        case t_ResourceRating::High:
-            delta     = 0.15;
-            isSuccess = true;
-            break;
+    case t_ResourceRating::Low:
+        delta = -0.2;
+        isSuccess = false;
+        break;
+    case t_ResourceRating::Average:
+        delta = 0.0;
+        isSuccess = true;
+        break;
+    case t_ResourceRating::High:
+        delta = 0.15;
+        isSuccess = true;
+        break;
     }
 
     ulong peerId = getPeerId(profile);
@@ -274,13 +256,12 @@ AlpineRatingEngine::clientResourceEvaluation (AlpinePeerProfile *  profile,
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  getScore — read-only score lookup for external consumers
 // ---------------------------------------------------------------------------
 
 double
-AlpineRatingEngine::getScore (ulong peerId)
+AlpineRatingEngine::getScore(ulong peerId)
 {
     ReadLock lock(lock_s);
 
@@ -291,9 +272,9 @@ AlpineRatingEngine::getScore (ulong peerId)
     // Apply decay on read (const_cast-style via mutable copy not needed
     // since we hold only a read lock — return decayed estimate without writing)
     auto & rating = it->second;
-    auto   now    = std::chrono::steady_clock::now();
-    auto   elapsed = std::chrono::duration<double, std::ratio<3600>>(now - rating.lastUpdate);
-    double hours  = elapsed.count();
+    auto now = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration<double, std::ratio<3600>>(now - rating.lastUpdate);
+    double hours = elapsed.count();
 
     if (hours <= 0.0)
         return rating.score;
@@ -303,13 +284,12 @@ AlpineRatingEngine::getScore (ulong peerId)
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  getTopScores — return top N peer scores sorted by interaction count
 // ---------------------------------------------------------------------------
 
 vector<AlpineRatingEngine::t_ScoreEntry>
-AlpineRatingEngine::getTopScores (size_t maxEntries)
+AlpineRatingEngine::getTopScores(size_t maxEntries)
 {
     ReadLock lock(lock_s);
 
@@ -322,8 +302,8 @@ AlpineRatingEngine::getTopScores (size_t maxEntries)
             continue;
 
         t_ScoreEntry entry;
-        entry.peerId       = peerId;
-        entry.score        = rating.score;
+        entry.peerId = peerId;
+        entry.score = rating.score;
         entry.interactions = interactions;
         entries.push_back(entry);
     }
@@ -332,9 +312,7 @@ AlpineRatingEngine::getTopScores (size_t maxEntries)
     std::partial_sort(entries.begin(),
                       entries.begin() + std::min(maxEntries, entries.size()),
                       entries.end(),
-                      [](const t_ScoreEntry & a, const t_ScoreEntry & b) {
-                          return a.interactions > b.interactions;
-                      });
+                      [](const t_ScoreEntry & a, const t_ScoreEntry & b) { return a.interactions > b.interactions; });
 
     if (entries.size() > maxEntries)
         entries.resize(maxEntries);
@@ -343,14 +321,12 @@ AlpineRatingEngine::getTopScores (size_t maxEntries)
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  mergeRemoteScores — weighted average merge from gossip
 // ---------------------------------------------------------------------------
 
 void
-AlpineRatingEngine::mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores,
-                                       ulong minInteractions)
+AlpineRatingEngine::mergeRemoteScores(const vector<t_ScoreEntry> & remoteScores, ulong minInteractions)
 {
     WriteLock lock(lock_s);
 
@@ -362,10 +338,10 @@ AlpineRatingEngine::mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores
         if (it == ratings_s.end()) {
             // No local data — adopt remote score directly
             t_PeerRating rating;
-            rating.score        = clampScore(remote.score);
+            rating.score = clampScore(remote.score);
             rating.successCount = 0;
             rating.failureCount = 0;
-            rating.lastUpdate   = std::chrono::steady_clock::now();
+            rating.lastUpdate = std::chrono::steady_clock::now();
             ratings_s[remote.peerId] = rating;
         } else {
             // Weighted average: local weight = local interactions,
@@ -375,16 +351,14 @@ AlpineRatingEngine::mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores
 
             if (localInteractions < minInteractions) {
                 // Not enough local data — adopt remote with 50% weight
-                local.score = clampScore(
-                    local.score * 0.5 + remote.score * 0.5);
+                local.score = clampScore(local.score * 0.5 + remote.score * 0.5);
             } else {
                 // Weighted average based on interaction counts
                 double totalWeight = static_cast<double>(localInteractions + remote.interactions);
                 double localWeight = static_cast<double>(localInteractions) / totalWeight;
                 double remoteWeight = static_cast<double>(remote.interactions) / totalWeight;
 
-                local.score = clampScore(
-                    local.score * localWeight + remote.score * remoteWeight);
+                local.score = clampScore(local.score * localWeight + remote.score * remoteWeight);
             }
             local.lastUpdate = std::chrono::steady_clock::now();
         }
@@ -392,16 +366,15 @@ AlpineRatingEngine::mergeRemoteScores (const vector<t_ScoreEntry> & remoteScores
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  persist — save ratings to Configuration
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::persist ()
+AlpineRatingEngine::persist()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::persist invoked.");
+    Log::Debug("AlpineRatingEngine::persist invoked.");
 #endif
 
     ReadLock lock(lock_s);
@@ -413,9 +386,7 @@ AlpineRatingEngine::persist ()
             serialized += ";";
 
         std::ostringstream oss;
-        oss << peerId << ":"
-            << std::fixed << std::setprecision(6) << rating.score << ":"
-            << rating.successCount << ":"
+        oss << peerId << ":" << std::fixed << std::setprecision(6) << rating.score << ":" << rating.successCount << ":"
             << rating.failureCount;
         serialized += oss.str();
     }
@@ -424,16 +395,15 @@ AlpineRatingEngine::persist ()
 }
 
 
-
 // ---------------------------------------------------------------------------
 //  load — restore ratings from Configuration
 // ---------------------------------------------------------------------------
 
 bool
-AlpineRatingEngine::load ()
+AlpineRatingEngine::load()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpineRatingEngine::load invoked.");
+    Log::Debug("AlpineRatingEngine::load invoked.");
 #endif
 
     string serialized;
@@ -459,27 +429,29 @@ AlpineRatingEngine::load ()
 
         // Parse peerId:score:successCount:failureCount
         size_t c1 = entry.find(':');
-        if (c1 == string::npos) continue;
+        if (c1 == string::npos)
+            continue;
         size_t c2 = entry.find(':', c1 + 1);
-        if (c2 == string::npos) continue;
+        if (c2 == string::npos)
+            continue;
         size_t c3 = entry.find(':', c2 + 1);
-        if (c3 == string::npos) continue;
+        if (c3 == string::npos)
+            continue;
 
         try {
-            ulong  peerId       = std::stoul(entry.substr(0, c1));
-            double score        = std::stod(entry.substr(c1 + 1, c2 - c1 - 1));
-            ulong  successCount = std::stoul(entry.substr(c2 + 1, c3 - c2 - 1));
-            ulong  failureCount = std::stoul(entry.substr(c3 + 1));
+            ulong peerId = std::stoul(entry.substr(0, c1));
+            double score = std::stod(entry.substr(c1 + 1, c2 - c1 - 1));
+            ulong successCount = std::stoul(entry.substr(c2 + 1, c3 - c2 - 1));
+            ulong failureCount = std::stoul(entry.substr(c3 + 1));
 
             t_PeerRating rating;
-            rating.score        = clampScore(score);
+            rating.score = clampScore(score);
             rating.successCount = successCount;
             rating.failureCount = failureCount;
-            rating.lastUpdate   = std::chrono::steady_clock::now();
+            rating.lastUpdate = std::chrono::steady_clock::now();
 
             ratings_s[peerId] = rating;
-        }
-        catch (...) {
+        } catch (...) {
             Log::Error("AlpineRatingEngine::load — failed to parse entry: "s + entry);
         }
     }
@@ -487,5 +459,3 @@ AlpineRatingEngine::load ()
     Log::Info("AlpineRatingEngine::load — restored "s + std::to_string(ratings_s.size()) + " peer ratings."s);
     return true;
 }
-
-

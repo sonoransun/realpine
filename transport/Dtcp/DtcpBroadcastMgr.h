@@ -3,9 +3,9 @@
 
 #pragma once
 #include <Common.h>
+#include <OptHash.h>
 #include <ReadWriteSem.h>
 #include <list>
-#include <OptHash.h>
 
 
 class DtcpBaseUdpTransport;
@@ -24,13 +24,11 @@ class StackLinkInterface;
 class DtcpBroadcastMgr
 {
   public:
-
-    DtcpBroadcastMgr () = default;
-    ~DtcpBroadcastMgr () = default;
-
+    DtcpBroadcastMgr() = default;
+    ~DtcpBroadcastMgr() = default;
 
 
-    static bool  initialize ();
+    static bool initialize();
 
 
     // Internal types
@@ -41,22 +39,21 @@ class DtcpBroadcastMgr
     using t_TransportList = list<DtcpBaseConnTransport *>;
 
     using t_UdpTransportIndex = std::unordered_map<void *,  // DtcpBaseUdpTransport *
-                     t_TransportList *,
-                     OptHash<void *>,
-                     equal_to<void *> >;
+                                                   t_TransportList *,
+                                                   OptHash<void *>,
+                                                   equal_to<void *>>;
 
     using t_UdpTransportIndexPair = std::pair<void *, t_TransportList *>;
 
 
-
-    // Index to map DtcpBaseUdpTransport pointer addresses to 
+    // Index to map DtcpBaseUdpTransport pointer addresses to
     // the DtcpBroadcastStates object handling broadcasts for
     // the transport.
     //
     using t_BroadcastStatesIndex = std::unordered_map<void *,  // DtcpBaseUdpTransport *
-                     DtcpBroadcastStates *,
-                     OptHash<void *>,
-                     equal_to<void *> >;
+                                                      DtcpBroadcastStates *,
+                                                      OptHash<void *>,
+                                                      equal_to<void *>>;
 
     using t_BroadcastStatesIndexPair = std::pair<void *, DtcpBroadcastStates *>;
 
@@ -66,64 +63,53 @@ class DtcpBroadcastMgr
     //
     using t_BroadcastStatesList = list<DtcpBroadcastStates *>;
 
-    struct t_BroadcastRequest {
-        ulong                    requestId;
-        DtcpBroadcast *          requestor;
-        StackLinkInterface *     packet;
-        ulong                    totalPackets;
-        ulong                    packetsSent;
-        t_BroadcastStatesList *  memberStatesList;
+    struct t_BroadcastRequest
+    {
+        ulong requestId;
+        DtcpBroadcast * requestor;
+        StackLinkInterface * packet;
+        ulong totalPackets;
+        ulong packetsSent;
+        t_BroadcastStatesList * memberStatesList;
     };
-       
+
 
     // Index to map request ID's to their respective
     // t_BroadcastRequest objects
     //
-    using t_RequestIdIndex = std::unordered_map<ulong,
-                     t_BroadcastRequest *,
-                     OptHash<ulong>,
-                     equal_to<ulong> >;
+    using t_RequestIdIndex = std::unordered_map<ulong, t_BroadcastRequest *, OptHash<ulong>, equal_to<ulong>>;
 
     using t_RequestIdIndexPair = std::pair<ulong, t_BroadcastRequest *>;
 
 
- 
   private:
-
-    static bool                        initialized_s;
-    static ulong                       currRequestId_s;
-    static t_BroadcastStatesIndex *    broadcastStatesIndex_s;
-    static t_RequestIdIndex *          requestIdIndex_s;
-    static ReadWriteSem                dataLock_s;
-
+    static bool initialized_s;
+    static ulong currRequestId_s;
+    static t_BroadcastStatesIndex * broadcastStatesIndex_s;
+    static t_RequestIdIndex * requestIdIndex_s;
+    static ReadWriteSem dataLock_s;
 
 
-    static bool  sendPacket (DtcpBroadcast *      requestor,
-                             StackLinkInterface * packet,
-                             DtcpBroadcastSet *   destinations,
-                             ulong &              requestId);
+    static bool sendPacket(DtcpBroadcast * requestor,
+                           StackLinkInterface * packet,
+                           DtcpBroadcastSet * destinations,
+                           ulong & requestId);
 
-    static bool  populateTransportIndex (DtcpBroadcastSet *     destinations,
-                                         t_UdpTransportIndex *  index);
+    static bool populateTransportIndex(DtcpBroadcastSet * destinations, t_UdpTransportIndex * index);
 
-    static bool  getStatus (ulong    requestId,
-                            ulong &  packetsSent);           
+    static bool getStatus(ulong requestId, ulong & packetsSent);
 
-    static bool  cancel (ulong  requestId);
+    static bool cancel(ulong requestId);
 
 
     // Used by DtcpSendQueue to obtain its BroadcastStates object
     //
-    static bool  getBroadcastStates (DtcpBaseUdpTransport *  transport,
-                                     DtcpBroadcastStates *&  broadcastStates);
+    static bool getBroadcastStates(DtcpBaseUdpTransport * transport, DtcpBroadcastStates *& broadcastStates);
 
-    static bool  packetSent (ulong  requestId,
-                             ulong  transportId);
-
+    static bool packetSent(ulong requestId, ulong transportId);
 
 
     friend class DtcpBroadcast;
     friend class DtcpBroadcastStates;
     friend class DtcpSendQueue;
 };
-

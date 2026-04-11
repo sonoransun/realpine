@@ -6,24 +6,24 @@
 #include <StringUtils.h>
 
 
-static const int  linkEnd = -1;
+static const int linkEnd = -1;
 
 
-AgedQueue::AgedQueue (t_Size reserve)
+AgedQueue::AgedQueue(t_Size reserve)
 {
     (reserve <= 0) ? size_ = 1024 : size_ = reserve;
-    numRecords_   = 0;
-    newestIndex_  = linkEnd;
-    oldestIndex_  = linkEnd;
+    numRecords_ = 0;
+    newestIndex_ = linkEnd;
+    oldestIndex_ = linkEnd;
 
 
     // Initialize containers...
     //
-    recordList_.resize (size_);
+    recordList_.resize(size_);
 
-    t_Size  i;
+    t_Size i;
     for (i = 0; i < size_; i++) {
-        freeIndexList_.push_back (i);
+        freeIndexList_.push_back(i);
         recordList_[i].reference = nullptr;
         recordList_[i].next = linkEnd;
         recordList_[i].prev = linkEnd;
@@ -31,24 +31,23 @@ AgedQueue::AgedQueue (t_Size reserve)
 }
 
 
-
 bool
-AgedQueue::clear ()
+AgedQueue::clear()
 {
-    numRecords_   = 0;
-    newestIndex_  = linkEnd;
-    oldestIndex_  = linkEnd;
+    numRecords_ = 0;
+    newestIndex_ = linkEnd;
+    oldestIndex_ = linkEnd;
 
-    recordList_.clear ();
-    recordList_.resize (size_);
+    recordList_.clear();
+    recordList_.resize(size_);
 
-    freeIndexList_.clear ();
+    freeIndexList_.clear();
 
-    ageIndex_.clear ();
+    ageIndex_.clear();
 
-    t_Size  i;
+    t_Size i;
     for (i = 0; i < size_; i++) {
-        freeIndexList_.push_back (i);
+        freeIndexList_.push_back(i);
         recordList_[i].reference = nullptr;
         recordList_[i].next = linkEnd;
         recordList_[i].prev = linkEnd;
@@ -59,39 +58,37 @@ AgedQueue::clear ()
 }
 
 
-
 AgedQueue::t_Size
-AgedQueue::size ()
+AgedQueue::size()
 {
     return numRecords_;
 }
 
 
-
 bool
-AgedQueue::add (void * reference)
+AgedQueue::add(void * reference)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AgedQueue::add invoked.");
+    Log::Debug("AgedQueue::add invoked.");
 #endif
 
-    if (exists (reference)) {
+    if (exists(reference)) {
         return false;
     }
 
     // Resize if needed...
     //
     if (numRecords_ >= size_) {
-        resize (size_ * 2);
+        resize(size_ * 2);
     }
 
-    t_Size         currIndex   =  freeIndexList_.front ();
-    freeIndexList_.pop_front ();
-    t_AgeRecord *  currRecord  = &recordList_[currIndex];
+    t_Size currIndex = freeIndexList_.front();
+    freeIndexList_.pop_front();
+    t_AgeRecord * currRecord = &recordList_[currIndex];
 
     currRecord->reference = reference;
 
-    ageIndex_.insert ( t_AgeIndexPair(reference, currIndex) );
+    ageIndex_.insert(t_AgeIndexPair(reference, currIndex));
 
     if (numRecords_ == 0) {
 
@@ -109,7 +106,7 @@ AgedQueue::add (void * reference)
 
     // Not the first one...
     //
-    t_AgeRecord *  newestRecord = &recordList_[newestIndex_];
+    t_AgeRecord * newestRecord = &recordList_[newestIndex_];
 
     newestRecord->next = currIndex;
     currRecord->next = linkEnd;
@@ -123,17 +120,16 @@ AgedQueue::add (void * reference)
 }
 
 
-
 bool
-AgedQueue::touch (void * reference)
+AgedQueue::touch(void * reference)
 {
-    if (!exists (reference)) {
+    if (!exists(reference)) {
         return false;
     }
 
     // touch == Move this record to the front of the age queue.
     //
-    auto indexIter = ageIndex_.find (reference);
+    auto indexIter = ageIndex_.find(reference);
     t_Size currIndex = (*indexIter).second;
 
 
@@ -143,9 +139,9 @@ AgedQueue::touch (void * reference)
         return true;
     }
 
-    t_AgeRecord *  currRecord   = &recordList_[currIndex];
-    t_AgeRecord *  prevRecord;
-    t_AgeRecord *  nextRecord;
+    t_AgeRecord * currRecord = &recordList_[currIndex];
+    t_AgeRecord * prevRecord;
+    t_AgeRecord * nextRecord;
 
 
     // If this is the oldest record, update oldest index.
@@ -169,7 +165,7 @@ AgedQueue::touch (void * reference)
 
     // Push updated record to front of age queue...
     //
-    t_AgeRecord *  newestRecord = &recordList_[newestIndex_];
+    t_AgeRecord * newestRecord = &recordList_[newestIndex_];
 
     newestRecord->next = currIndex;
     currRecord->next = linkEnd;
@@ -182,23 +178,22 @@ AgedQueue::touch (void * reference)
 }
 
 
-
 bool
-AgedQueue::remove (void * reference)
+AgedQueue::remove(void * reference)
 {
     if (numRecords_ == 0) {
         return false;
     }
 
-    auto indexIter = ageIndex_.find (reference);
+    auto indexIter = ageIndex_.find(reference);
     t_Size currIndex = (*indexIter).second;
 
-    ageIndex_.erase (reference);
+    ageIndex_.erase(reference);
 
 
-    t_AgeRecord *  currRecord   = &recordList_[currIndex];
-    t_AgeRecord *  prevRecord;
-    t_AgeRecord *  nextRecord;
+    t_AgeRecord * currRecord = &recordList_[currIndex];
+    t_AgeRecord * prevRecord;
+    t_AgeRecord * nextRecord;
 
 
     // If this is the oldest or newest record, update respective index.
@@ -222,7 +217,7 @@ AgedQueue::remove (void * reference)
         nextRecord->prev = currRecord->prev;
     }
 
-    freeIndexList_.push_back (currIndex);
+    freeIndexList_.push_back(currIndex);
     numRecords_--;
 
 
@@ -230,67 +225,63 @@ AgedQueue::remove (void * reference)
 }
 
 
-
 bool
-AgedQueue::exists (void * reference)
+AgedQueue::exists(void * reference)
 {
     if (numRecords_ == 0) {
         return false;
     }
 
-    return ageIndex_.find (reference) != ageIndex_.end();
+    return ageIndex_.find(reference) != ageIndex_.end();
 }
 
 
-
 bool
-AgedQueue::newest (void *& reference)
+AgedQueue::newest(void *& reference)
 {
     if (numRecords_ == 0) {
         return false;
     }
 
-    t_AgeRecord *  currRecord = &recordList_[newestIndex_];
+    t_AgeRecord * currRecord = &recordList_[newestIndex_];
     reference = currRecord->reference;
 
     return true;
 }
 
 
-
 bool
-AgedQueue::oldest (void *& reference)
+AgedQueue::oldest(void *& reference)
 {
     if (numRecords_ == 0) {
         return false;
     }
 
-    t_AgeRecord *  currRecord = &recordList_[oldestIndex_];
+    t_AgeRecord * currRecord = &recordList_[oldestIndex_];
     reference = currRecord->reference;
 
     return true;
 }
 
 
-
 bool
-AgedQueue::next (void *& reference)
+AgedQueue::next(void *& reference)
 {
-    if (!exists (reference)) {
+    if (!exists(reference)) {
         return false;
     }
 
-    auto indexIter = ageIndex_.find (reference);
+    auto indexIter = ageIndex_.find(reference);
     t_Size currIndex = (*indexIter).second;
 
-    t_AgeRecord *  currRecord = &recordList_[currIndex];
+    t_AgeRecord * currRecord = &recordList_[currIndex];
 
     if (currRecord->next == linkEnd) {
         // End of list...
         return false;
     }
 
-    t_AgeRecord *  nextRecord = &recordList_[currRecord->next];
+    t_AgeRecord * nextRecord = &recordList_[currRecord->next];
     reference = nextRecord->reference;
 
 
@@ -298,25 +289,24 @@ AgedQueue::next (void *& reference)
 }
 
 
-
 bool
-AgedQueue::prev (void *& reference)
+AgedQueue::prev(void *& reference)
 {
-    if (!exists (reference)) {
+    if (!exists(reference)) {
         return false;
     }
 
-    auto indexIter = ageIndex_.find (reference);
+    auto indexIter = ageIndex_.find(reference);
     t_Size currIndex = (*indexIter).second;
 
-    t_AgeRecord *  currRecord = &recordList_[currIndex];
+    t_AgeRecord * currRecord = &recordList_[currIndex];
 
     if (currRecord->prev == linkEnd) {
         // End of list...
         return false;
     }
 
-    t_AgeRecord *  prevRecord = &recordList_[currRecord->prev];
+    t_AgeRecord * prevRecord = &recordList_[currRecord->prev];
     reference = prevRecord->reference;
 
 
@@ -324,18 +314,17 @@ AgedQueue::prev (void *& reference)
 }
 
 
-
 bool
-AgedQueue::resize (t_Size size)
+AgedQueue::resize(t_Size size)
 {
     // Resize containers...
     // This method should only be called when the current containers are FULL
     //
 
-    t_AgeRecordList  newRecordList;
-    newRecordList.resize (size);
+    t_AgeRecordList newRecordList;
+    newRecordList.resize(size);
 
-    t_FreeIndexList  newFreeIndexList;
+    t_FreeIndexList newFreeIndexList;
 
     // Copy existing data...
     //
@@ -348,7 +337,7 @@ AgedQueue::resize (t_Size size)
 
     // Initialize remaining records...
     for (i = size_; i < size; i++) {
-        newFreeIndexList.push_back (i);
+        newFreeIndexList.push_back(i);
         newRecordList[i].reference = nullptr;
         newRecordList[i].prev = linkEnd;
         newRecordList[i].next = linkEnd;
@@ -356,12 +345,9 @@ AgedQueue::resize (t_Size size)
 
     size_ = size;
 
-    recordList_ = std::move (newRecordList);
-    freeIndexList_ = std::move (newFreeIndexList);
+    recordList_ = std::move(newRecordList);
+    freeIndexList_ = std::move(newFreeIndexList);
 
 
     return true;
 }
-
-
-

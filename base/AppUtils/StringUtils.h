@@ -12,5 +12,3 @@ class StringUtils
   public:
     static string sanitizeForLog(std::string_view input);
 };
-
-

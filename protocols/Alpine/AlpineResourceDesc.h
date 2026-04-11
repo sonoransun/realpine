@@ -13,15 +13,13 @@ class AlpineQueryOptionData;
 class AlpineResourceDesc
 {
   public:
+    AlpineResourceDesc();
 
-    AlpineResourceDesc ();
+    AlpineResourceDesc(const AlpineResourceDesc & copy);
 
-    AlpineResourceDesc (const AlpineResourceDesc & copy);
+    ~AlpineResourceDesc();
 
-    ~AlpineResourceDesc ();
-
-    AlpineResourceDesc & operator = (const AlpineResourceDesc & copy);
-
+    AlpineResourceDesc & operator=(const AlpineResourceDesc & copy);
 
 
     // Public Types
@@ -31,40 +29,36 @@ class AlpineResourceDesc
 
     // Public Methods
     //
-    void  setMatchId (ulong  matchId);
+    void setMatchId(ulong matchId);
 
-    ulong  getMatchId ();
+    ulong getMatchId();
 
-    void  setSize (ulong  size);
+    void setSize(ulong size);
 
-    ulong  getSize ();
+    ulong getSize();
 
-    void  setLocatorList (const t_LocatorList &  locatorList);
+    void setLocatorList(const t_LocatorList & locatorList);
 
-    void  getLocatorList (t_LocatorList &  locatorList);
+    void getLocatorList(t_LocatorList & locatorList);
 
-    void  setDescription (const string &  description);
+    void setDescription(const string & description);
 
-    void  getDescription (string &  description);
+    void getDescription(string & description);
 
-    bool  setOptionId (ulong  optionId);
+    bool setOptionId(ulong optionId);
 
-    ulong  getOptionId ();
+    ulong getOptionId();
 
-    bool  setOptionData (AlpineQueryOptionData *  optionData);
+    bool setOptionData(AlpineQueryOptionData * optionData);
 
-    bool  getOptionData (AlpineQueryOptionData *&  optionData);
-
+    bool getOptionData(AlpineQueryOptionData *& optionData);
 
 
   private:
-
-    ulong                    matchId_;
-    ulong                    size_;
-    t_LocatorList            locatorList_;
-    string                   description_;
-    ulong                    optionId_;
-    AlpineQueryOptionData *  optionData_;
-
+    ulong matchId_;
+    ulong size_;
+    t_LocatorList locatorList_;
+    string description_;
+    ulong optionId_;
+    AlpineQueryOptionData * optionData_;
 };
-

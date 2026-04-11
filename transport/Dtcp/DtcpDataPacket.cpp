@@ -1,57 +1,55 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpDataPacket.h>
 #include <DataBuffer.h>
+#include <DtcpDataPacket.h>
 #include <Log.h>
 #include <StringUtils.h>
 
+#include <cstring>
 
-DtcpDataPacket::DtcpDataPacket ()
+
+DtcpDataPacket::DtcpDataPacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket constructor invoked.");
+    Log::Debug("DtcpDataPacket constructor invoked.");
 #endif
 
-    parent_        = nullptr;
-    setData_       = nullptr;
+    parent_ = nullptr;
+    setData_ = nullptr;
     setDataLength_ = 0;
-    getData_       = nullptr;
+    getData_ = nullptr;
     getDataLength_ = 0;
 }
 
 
-
-DtcpDataPacket::DtcpDataPacket (StackLinkInterface * parent)
+DtcpDataPacket::DtcpDataPacket(StackLinkInterface * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket stack link constructor invoked.");
+    Log::Debug("DtcpDataPacket stack link constructor invoked.");
 #endif
 
-    parent_        = parent;
-    setData_       = nullptr;
+    parent_ = parent;
+    setData_ = nullptr;
     setDataLength_ = 0;
-    getData_       = nullptr;
+    getData_ = nullptr;
     getDataLength_ = 0;
 }
 
 
-
-DtcpDataPacket::~DtcpDataPacket ()
+DtcpDataPacket::~DtcpDataPacket()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket destructor invoked.");
+    Log::Debug("DtcpDataPacket destructor invoked.");
 #endif
-
 }
 
 
-
-bool  
-DtcpDataPacket::setParent (StackLinkInterface *  parent)
+bool
+DtcpDataPacket::setParent(StackLinkInterface * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::setParent invoked.");
+    Log::Debug("DtcpDataPacket::setParent invoked.");
 #endif
 
     parent_ = parent;
@@ -60,32 +58,30 @@ DtcpDataPacket::setParent (StackLinkInterface *  parent)
 }
 
 
-
-void  
-DtcpDataPacket::unsetParent ()
+void
+DtcpDataPacket::unsetParent()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::unsetParent invoked.");
+    Log::Debug("DtcpDataPacket::unsetParent invoked.");
 #endif
 
     parent_ = nullptr;
 }
 
 
-
-bool  
-DtcpDataPacket::writeData (DataBuffer * linkBuffer)
+bool
+DtcpDataPacket::writeData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::writeData invoked.");
+    Log::Debug("DtcpDataPacket::writeData invoked.");
 #endif
 
-    bool   status;
+    bool status;
     byte * buffer;
-    uint   bufferSize;
-    uint   writeLength = 0;
+    uint bufferSize;
+    uint writeLength = 0;
 
-    status = linkBuffer->getWriteBuffer (buffer, bufferSize);
+    status = linkBuffer->getWriteBuffer(buffer, bufferSize);
 
     if (!status) {
         // no room left to write to?
@@ -96,19 +92,18 @@ DtcpDataPacket::writeData (DataBuffer * linkBuffer)
         return false;
     }
     writeLength = setDataLength_;
-    memcpy (buffer, setData_, writeLength);
+    memcpy(buffer, setData_, writeLength);
 
-    linkBuffer->addWriteBytes (writeLength);
+    linkBuffer->addWriteBytes(writeLength);
 
 
     if (parent_) {
         // We have a parent link set, have parent write data,
         //
-        status = parent_->writeData (linkBuffer);
+        status = parent_->writeData(linkBuffer);
 
         if (!status) {
             return false;
-
         }
         return false;
     }
@@ -118,21 +113,20 @@ DtcpDataPacket::writeData (DataBuffer * linkBuffer)
 }
 
 
-
-bool  
-DtcpDataPacket::readData (DataBuffer * linkBuffer)
+bool
+DtcpDataPacket::readData(DataBuffer * linkBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::readData invoked.");
+    Log::Debug("DtcpDataPacket::readData invoked.");
 #endif
 
 
-    bool   status;
+    bool status;
     byte * buffer;
-    uint   bufferSize;
-    uint   readLength = 0;
+    uint bufferSize;
+    uint readLength = 0;
 
-    status = linkBuffer->getReadBuffer (buffer, bufferSize);
+    status = linkBuffer->getReadBuffer(buffer, bufferSize);
 
     if (!status) {
         // nothing left to read?
@@ -142,16 +136,15 @@ DtcpDataPacket::readData (DataBuffer * linkBuffer)
     getDataLength_ = bufferSize;
     readLength = bufferSize;
 
-    linkBuffer->addReadBytes (readLength);
+    linkBuffer->addReadBytes(readLength);
 
 
     if (parent_) {
         // We have a parent link set, have parent read data...
-        status = parent_->readData (linkBuffer);
+        status = parent_->readData(linkBuffer);
 
         if (!status) {
             return false;
-
         }
         return false;
     }
@@ -161,13 +154,11 @@ DtcpDataPacket::readData (DataBuffer * linkBuffer)
 }
 
 
-
-bool  
-DtcpDataPacket::setPacketData (const byte * data,
-                               const uint   dataLength)
+bool
+DtcpDataPacket::setPacketData(const byte * data, const uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::setPacketData invoked.");
+    Log::Debug("DtcpDataPacket::setPacketData invoked.");
 #endif
 
     setData_ = data;
@@ -178,13 +169,11 @@ DtcpDataPacket::setPacketData (const byte * data,
 }
 
 
-
-bool  
-DtcpDataPacket::getPacketData (byte *& data,
-                               uint &  dataLength)
+bool
+DtcpDataPacket::getPacketData(byte *& data, uint & dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpDataPacket::getPacketData invoked.");
+    Log::Debug("DtcpDataPacket::getPacketData invoked.");
 #endif
 
     data = getData_;
@@ -193,6 +182,3 @@ DtcpDataPacket::getPacketData (byte *& data,
 
     return true;
 }
-
-
-

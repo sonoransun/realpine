@@ -1,81 +1,78 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
+#include <Log.h>
 #include <TcpClientThread.h>
 #include <TcpTransport.h>
-#include <Log.h>
+
+#include <cstring>
 
 
-TcpClientThread::TcpClientThread (TcpTransport *  transport)
+TcpClientThread::TcpClientThread(TcpTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpClientThread constructor invoked.");
+    Log::Debug("TcpClientThread constructor invoked.");
 #endif
 
     transport_ = transport;
 }
 
 
-
-TcpClientThread::~TcpClientThread ()
+TcpClientThread::~TcpClientThread()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpClientThread destructor invoked.");
+    Log::Debug("TcpClientThread destructor invoked.");
 #endif
 }
 
 
-
-void 
-TcpClientThread::threadMain ()
+void
+TcpClientThread::threadMain()
 {
 #ifdef _VERBOSE
-    Log::Debug ("TcpClientThread::threadMain invoked.");
+    Log::Debug("TcpClientThread::threadMain invoked.");
 #endif
 
     // The sole purpose in the life of this thread is to send and receive as much as possible.
     //
-    bool  status;
-    int   fd;
+    bool status;
+    int fd;
 
-    fd = transport_->getFd ();
+    fd = transport_->getFd();
 
-    status = transport_->blocking ();
+    status = transport_->blocking();
 
     if (!status) {
-        Log::Error ("Could not put transport in blocking mode!");
+        Log::Error("Could not put transport in blocking mode!");
         delete transport_;
         return;
     }
 
     byte * buffer;
-    ulong  bufferSize = 1024;
-    ulong  dataLength;
+    ulong bufferSize = 1024;
+    ulong dataLength;
 
     buffer = new byte[bufferSize];
-    memset (buffer, '*', bufferSize);
+    memset(buffer, '*', bufferSize);
 
 
     // Loop forever performing one send, then one receive, ad infinitum
     //
     while (true) {
-        status = transport_->send (buffer, bufferSize);
+        status = transport_->send(buffer, bufferSize);
 
         if (!status) {
-            Log::Error ("Transport send failed!");
+            Log::Error("Transport send failed!");
             delete transport_;
             return;
         }
 
-        status = transport_->receive (buffer, bufferSize, dataLength);
+        status = transport_->receive(buffer, bufferSize, dataLength);
 
         if (!status) {
-            Log::Error ("Transport receive failed!");
+            Log::Error("Transport receive failed!");
             delete transport_;
             return;
         }
     }
 }
-
-
-

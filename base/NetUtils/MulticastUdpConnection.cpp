@@ -1,56 +1,49 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <MulticastUdpConnection.h>
 #include <Log.h>
+#include <MulticastUdpConnection.h>
 #include <NetUtils.h>
 
 #include <Platform.h>
 #include <cstring>
 
 
-
-MulticastUdpConnection::MulticastUdpConnection (const string & multicastGroup,
-                                                  ushort multicastPort)
+MulticastUdpConnection::MulticastUdpConnection(const string & multicastGroup, ushort multicastPort)
     : multicastGroup_(multicastGroup),
       multicastPort_(multicastPort),
       isIPv6_(false)
 {
-    memset(&groupAddr_,  0, sizeof(groupAddr_));
+    memset(&groupAddr_, 0, sizeof(groupAddr_));
     memset(&groupAddr6_, 0, sizeof(groupAddr6_));
     isIPv6_ = isIPv6Group();
 }
 
 
-
-MulticastUdpConnection::~MulticastUdpConnection ()
+MulticastUdpConnection::~MulticastUdpConnection()
 {
     close();
 }
 
 
-
 bool
-MulticastUdpConnection::isIPv6Group () const
+MulticastUdpConnection::isIPv6Group() const
 {
     return multicastGroup_.contains(':');
 }
 
 
-
 bool
-MulticastUdpConnection::createIPv4 (int fd)
+MulticastUdpConnection::createIPv4(int fd)
 {
     struct ip_mreq mreq;
     mreq.imr_multiaddr.s_addr = inet_addr(multicastGroup_.c_str());
     mreq.imr_interface.s_addr = htonl(INADDR_ANY);
 
-    if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-                   &mreq, sizeof(mreq)) < 0) {
+    if (setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
         string errorCode;
         NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
-        Log::Error("Failed to join multicast group "s + multicastGroup_ +
-                   ": " + errorCode +
+        Log::Error("Failed to join multicast group "s + multicastGroup_ + ": " + errorCode +
                    " in MulticastUdpConnection::create.");
         return false;
     }
@@ -62,17 +55,16 @@ MulticastUdpConnection::createIPv4 (int fd)
     setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop));
 
     memset(&groupAddr_, 0, sizeof(groupAddr_));
-    groupAddr_.sin_family      = AF_INET;
+    groupAddr_.sin_family = AF_INET;
     groupAddr_.sin_addr.s_addr = inet_addr(multicastGroup_.c_str());
-    groupAddr_.sin_port        = htons(multicastPort_);
+    groupAddr_.sin_port = htons(multicastPort_);
 
     return true;
 }
 
 
-
 bool
-MulticastUdpConnection::createIPv6 (int fd)
+MulticastUdpConnection::createIPv6(int fd)
 {
     struct sockaddr_in6 mcastAddr;
     memset(&mcastAddr, 0, sizeof(mcastAddr));
@@ -85,12 +77,10 @@ MulticastUdpConnection::createIPv6 (int fd)
     mreq6.ipv6mr_multiaddr = mcastAddr.sin6_addr;
     mreq6.ipv6mr_interface = 0;
 
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-                   &mreq6, sizeof(mreq6)) < 0) {
+    if (setsockopt(fd, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mreq6, sizeof(mreq6)) < 0) {
         string errorCode;
         NetUtils::socketErrorAsString(alpine_socket_errno(), errorCode);
-        Log::Error("Failed to join IPv6 multicast group "s + multicastGroup_ +
-                   ": " + errorCode +
+        Log::Error("Failed to join IPv6 multicast group "s + multicastGroup_ + ": " + errorCode +
                    " in MulticastUdpConnection::create.");
         return false;
     }
@@ -103,16 +93,15 @@ MulticastUdpConnection::createIPv6 (int fd)
 
     memset(&groupAddr6_, 0, sizeof(groupAddr6_));
     groupAddr6_.sin6_family = AF_INET6;
-    groupAddr6_.sin6_addr   = mcastAddr.sin6_addr;
-    groupAddr6_.sin6_port   = htons(multicastPort_);
+    groupAddr6_.sin6_addr = mcastAddr.sin6_addr;
+    groupAddr6_.sin6_port = htons(multicastPort_);
 
     return true;
 }
 
 
-
 bool
-MulticastUdpConnection::create (ulong ipAddress, ushort port)
+MulticastUdpConnection::create(ulong ipAddress, ushort port)
 {
     // Create the base UDP socket bound to INADDR_ANY on the multicast port.
     // ipAddress param is ignored — multicast binds to INADDR_ANY.
@@ -134,35 +123,29 @@ MulticastUdpConnection::create (ulong ipAddress, ushort port)
             Log::Info("MulticastUdpConnection: IPv6 multicast join failed, "
                       "continuing with IPv4 only.");
         } else {
-            Log::Info("MulticastUdpConnection: Joined IPv6 group "s +
-                      multicastGroup_ + ":" + std::to_string(multicastPort_));
+            Log::Info("MulticastUdpConnection: Joined IPv6 group "s + multicastGroup_ + ":" +
+                      std::to_string(multicastPort_));
         }
-    }
-    else {
+    } else {
         if (!createIPv4(fd)) {
             close();
             return false;
         }
 
-        Log::Info("MulticastUdpConnection: Joined group "s + multicastGroup_ +
-                  ":" + std::to_string(multicastPort_));
+        Log::Info("MulticastUdpConnection: Joined group "s + multicastGroup_ + ":" + std::to_string(multicastPort_));
     }
 
     return true;
 }
 
 
-
 bool
-MulticastUdpConnection::sendData (const ulong    destIpAddress,
-                                   const ushort   destPort,
-                                   const byte *   dataBuffer,
-                                   const uint     dataLength)
+MulticastUdpConnection::sendData(const ulong destIpAddress,
+                                 const ushort destPort,
+                                 const byte * dataBuffer,
+                                 const uint dataLength)
 {
     // Always send to the multicast group address, ignoring the
     // destination parameters (which come from DTCP's IP/port addressing)
-    return UdpConnection::sendData(groupAddr_.sin_addr.s_addr,
-                                   groupAddr_.sin_port,
-                                   dataBuffer,
-                                   dataLength);
+    return UdpConnection::sendData(groupAddr_.sin_addr.s_addr, groupAddr_.sin_port, dataBuffer, dataLength);
 }

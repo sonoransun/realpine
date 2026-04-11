@@ -11,15 +11,11 @@
 class ApiDocsHandler
 {
   public:
-
-    static void  registerRoutes (HttpRouter & router);
+    static void registerRoutes(HttpRouter & router);
 
 
   private:
+    static HttpRouter * router_s;
 
-    static HttpRouter *  router_s;
-
-    static HttpResponse  getApiDocs (const HttpRequest & request,
-                                     const std::unordered_map<string, string> & params);
-
+    static HttpResponse getApiDocs(const HttpRequest & request, const std::unordered_map<string, string> & params);
 };

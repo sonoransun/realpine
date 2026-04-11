@@ -4,21 +4,19 @@
 #include <TcpClientConfig.h>
 
 
-
-const string                            TcpClientConfig::configFile_s ("client.cfg");
-ConfigData::t_ConfigElementList *       TcpClientConfig::configElements_s = nullptr;
-
+const string TcpClientConfig::configFile_s("client.cfg");
+ConfigData::t_ConfigElementList * TcpClientConfig::configElements_s = nullptr;
 
 
-void  
-TcpClientConfig::createConfigElements ()
+void
+TcpClientConfig::createConfigElements()
 {
     if (configElements_s)
         return;
 
     configElements_s = new ConfigData::t_ConfigElementList;
 
-    ConfigData::t_ConfigElement *  currElement;
+    ConfigData::t_ConfigElement * currElement;
 
 
     // add configuration elements for test application
@@ -26,52 +24,49 @@ TcpClientConfig::createConfigElements ()
 
     // IP Address
     currElement = new ConfigData::t_ConfigElement;
-    currElement->elementName   = "IP Address";
+    currElement->elementName = "IP Address";
     currElement->argOptionName = "ipAddress";
     currElement->envOptionName = "IP_ADDRESS";
-    currElement->optionType    = ConfigData::t_ElementType::String;
-    currElement->required      = true;
-    configElements_s->push_back (currElement);
+    currElement->optionType = ConfigData::t_ElementType::String;
+    currElement->required = true;
+    configElements_s->push_back(currElement);
 
     // Port
     currElement = new ConfigData::t_ConfigElement;
-    currElement->elementName   = "Port";
+    currElement->elementName = "Port";
     currElement->argOptionName = "port";
     currElement->envOptionName = "PORT";
-    currElement->optionType    = ConfigData::t_ElementType::String;
-    currElement->required      = true;
-    configElements_s->push_back (currElement);
+    currElement->optionType = ConfigData::t_ElementType::String;
+    currElement->required = true;
+    configElements_s->push_back(currElement);
 
     // Num TCP transport to create
     currElement = new ConfigData::t_ConfigElement;
-    currElement->elementName   = "Transports";
+    currElement->elementName = "Transports";
     currElement->argOptionName = "transports";
     currElement->envOptionName = "TRANSPORTS";
-    currElement->optionType    = ConfigData::t_ElementType::String;
-    currElement->required      = true;
-    configElements_s->push_back (currElement);
+    currElement->optionType = ConfigData::t_ElementType::String;
+    currElement->required = true;
+    configElements_s->push_back(currElement);
 
     // Connector style
     currElement = new ConfigData::t_ConfigElement;
-    currElement->elementName   = "Method";
+    currElement->elementName = "Method";
     currElement->argOptionName = "method";
     currElement->envOptionName = "METHOD";
-    currElement->optionType    = ConfigData::t_ElementType::String;
-    currElement->required      = true;
-    configElements_s->push_back (currElement);
+    currElement->optionType = ConfigData::t_ElementType::String;
+    currElement->required = true;
+    configElements_s->push_back(currElement);
 }
 
 
-
-void  
-TcpClientConfig::getConfigElements (ConfigData::t_ConfigElementList *& configElements)
+void
+TcpClientConfig::getConfigElements(ConfigData::t_ConfigElementList *& configElements)
 {
     if (!configElements_s) {
-        createConfigElements ();
+        createConfigElements();
         return;
     }
 
     configElements = configElements_s;
 }
-
-

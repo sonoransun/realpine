@@ -7,22 +7,17 @@
 #include <StringUtils.h>
 
 
-
 // Ctor defaulted in header
 
 
-AlpineServiceThread::~AlpineServiceThread () = default;
+AlpineServiceThread::~AlpineServiceThread() = default;
 
 
-
-void 
-AlpineServiceThread::threadMain ()
+void
+AlpineServiceThread::threadMain()
 {
     // Let the AlpineStack perform processing as desired.  This should never return
     // until application termination.
     //
-    AlpineStack::processEvents ();
+    AlpineStack::processEvents();
 }
-
-
-

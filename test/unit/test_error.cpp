@@ -1,7 +1,7 @@
 /// Unit tests for AlpineError, Result<T>, and Status
 
-#include <catch2/catch_test_macros.hpp>
 #include <Error.h>
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 

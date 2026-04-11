@@ -11,40 +11,35 @@ class AlpineQueryOptionData;
 class AlpineQueryRequest
 {
   public:
+    AlpineQueryRequest();
 
-    AlpineQueryRequest ();
+    AlpineQueryRequest(const AlpineQueryRequest & copy);
 
-    AlpineQueryRequest (const AlpineQueryRequest &  copy);
+    ~AlpineQueryRequest();
 
-    ~AlpineQueryRequest ();
-
-    AlpineQueryRequest & operator = (const AlpineQueryRequest &  copy);
+    AlpineQueryRequest & operator=(const AlpineQueryRequest & copy);
 
 
-    bool  setQueryId (ulong  queryId);
+    bool setQueryId(ulong queryId);
 
-    ulong  getQueryId ();
+    ulong getQueryId();
 
-    bool  setQueryString (const string &  queryString);
+    bool setQueryString(const string & queryString);
 
-    string  getQueryString ();
+    string getQueryString();
 
-    bool  setOptionId (ulong  optionId);
+    bool setOptionId(ulong optionId);
 
-    ulong  getOptionId ();
+    ulong getOptionId();
 
-    bool  setOptionData (AlpineQueryOptionData *  optionData);
+    bool setOptionData(AlpineQueryOptionData * optionData);
 
-    bool  getOptionData (AlpineQueryOptionData *&  optionData);
-
+    bool getOptionData(AlpineQueryOptionData *& optionData);
 
 
   private:
-
-    ulong                          queryId_;
-    string                         queryString_;
-    ulong                          optionId_;
-    AlpineQueryOptionData *        optionData_;
-
+    ulong queryId_;
+    string queryString_;
+    ulong optionId_;
+    AlpineQueryOptionData * optionData_;
 };
-

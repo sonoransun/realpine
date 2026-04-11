@@ -1,92 +1,86 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpBroadcastStates.h>
-#include <DtcpBroadcastMgr.h>
 #include <DtcpBaseConnTransport.h>
-#include <ReadLock.h>
-#include <WriteLock.h>
+#include <DtcpBroadcastMgr.h>
+#include <DtcpBroadcastStates.h>
 #include <Log.h>
+#include <ReadLock.h>
 #include <StringUtils.h>
+#include <WriteLock.h>
 
 
-
-DtcpBroadcastStates::DtcpBroadcastStates ()
+DtcpBroadcastStates::DtcpBroadcastStates()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBroadcastStates constructor invoked.");
+    Log::Debug("DtcpBroadcastStates constructor invoked.");
 #endif
 
     totalRequests_ = 0;
-    requestList_.clear ();
+    requestList_.clear();
 }
 
 
-
-DtcpBroadcastStates::~DtcpBroadcastStates ()
+DtcpBroadcastStates::~DtcpBroadcastStates()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBroadcastStates destructor invoked.");
+    Log::Debug("DtcpBroadcastStates destructor invoked.");
 #endif
 }
 
 
-
-bool 
-DtcpBroadcastStates::addState (ulong                 requestId,
-                               StackLinkInterface *  packet,
-                               t_TransportList *     destinations)
+bool
+DtcpBroadcastStates::addState(ulong requestId, StackLinkInterface * packet, t_TransportList * destinations)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBroadcastStates::addState invoked.");
+    Log::Debug("DtcpBroadcastStates::addState invoked.");
 #endif
 
-    WriteLock  lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    if (destinations->size () <= 0) {
+    if (destinations->size() <= 0) {
         // We must have at least one destination
         //
-        Log::Error ("No destinations given in call to DtcpBroadcastStates::addState!");
+        Log::Error("No destinations given in call to DtcpBroadcastStates::addState!");
         return false;
     }
 
-    t_RequestData *  newRequest;
+    t_RequestData * newRequest;
     newRequest = new t_RequestData;
 
-    newRequest->requestId             = requestId;
-    newRequest->packet                = packet;
+    newRequest->requestId = requestId;
+    newRequest->packet = packet;
     newRequest->remainingDestinations = destinations;
 
-    requestList_.push_back (newRequest);
+    requestList_.push_back(newRequest);
 
-    totalRequests_ += destinations->size ();
+    totalRequests_ += destinations->size();
 
 
     return true;
 }
 
 
-
-bool 
-DtcpBroadcastStates::removeState (ulong  requestId)
+bool
+DtcpBroadcastStates::removeState(ulong requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBroadcastStates::removeState invoked.");
+    Log::Debug("DtcpBroadcastStates::removeState invoked.");
 #endif
 
-    WriteLock  lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     // Attempt to locate the state with this ID.
     //
-    bool  found = false;
-    t_RequestData *  currRequest;
+    bool found = false;
+    t_RequestData * currRequest;
 
-    for (auto iter = requestList_.begin (); iter != requestList_.end (); ++iter) {
+    for (auto iter = requestList_.begin(); iter != requestList_.end(); ++iter) {
         currRequest = (*iter);
 
         if (currRequest->requestId == requestId) {
-            requestList_.erase (iter);
-            totalRequests_ -= currRequest->remainingDestinations->size ();
+            requestList_.erase(iter);
+            totalRequests_ -= currRequest->remainingDestinations->size();
             found = true;
             break;
         }
@@ -97,64 +91,57 @@ DtcpBroadcastStates::removeState (ulong  requestId)
 }
 
 
-
-ulong  
-DtcpBroadcastStates::requestsPending ()
+ulong
+DtcpBroadcastStates::requestsPending()
 {
     return totalRequests_;
 }
 
 
-
-bool  
-DtcpBroadcastStates::getCurrentRequest (StackLinkInterface *&     packet,
-                                        DtcpBaseConnTransport *&  destination)
+bool
+DtcpBroadcastStates::getCurrentRequest(StackLinkInterface *& packet, DtcpBaseConnTransport *& destination)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBroadcastStates::getCurrentRequest invoked.");
+    Log::Debug("DtcpBroadcastStates::getCurrentRequest invoked.");
 #endif
 
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
     // Pop first available request from list.
     //
-    if (requestList_.size () <= 0) {
+    if (requestList_.size() <= 0) {
         return false;
     }
 
-    t_RequestData *  currRequest;
-    ulong  requestId;
+    t_RequestData * currRequest;
+    ulong requestId;
 
-    currRequest = requestList_.front ();
-    requestList_.pop_front ();
+    currRequest = requestList_.front();
+    requestList_.pop_front();
 
-    packet      = currRequest->packet;
-    requestId   = currRequest->requestId;
-    destination = currRequest->remainingDestinations->front ();
-    currRequest->remainingDestinations->pop_front ();
+    packet = currRequest->packet;
+    requestId = currRequest->requestId;
+    destination = currRequest->remainingDestinations->front();
+    currRequest->remainingDestinations->pop_front();
 
-    if (currRequest->remainingDestinations->size () == 0) {
+    if (currRequest->remainingDestinations->size() == 0) {
         // We have completed sending packets for this request,
         // remove this request from our list of active requests.
         //
         delete currRequest;
-    }
-    else {
-        requestList_.push_back (currRequest);
+    } else {
+        requestList_.push_back(currRequest);
     }
 
-    ulong  transportId;
-    destination->getTransportId (transportId);
+    ulong transportId;
+    destination->getTransportId(transportId);
 
     // Let the broadcast manager know that we have sent another packet
     //
-    DtcpBroadcastMgr::packetSent (requestId, transportId);
+    DtcpBroadcastMgr::packetSent(requestId, transportId);
 
     totalRequests_--;
 
 
     return true;
 }
-
-
-

@@ -2,22 +2,20 @@
 
 
 #include "QueryCache.h"
-#include <WriteLock.h>
-#include <ReadLock.h>
 #include <Log.h>
+#include <ReadLock.h>
+#include <WriteLock.h>
 
 
-ReadWriteSem                                          QueryCache::lock_s;
-QueryCache::t_EntryList                               QueryCache::entries_s;
-std::unordered_map<string, QueryCache::t_EntryIterator>  QueryCache::index_s;
-ulong                                                 QueryCache::maxEntries_s  = 1000;
-ulong                                                 QueryCache::ttlSeconds_s  = 300;
-
+ReadWriteSem QueryCache::lock_s;
+QueryCache::t_EntryList QueryCache::entries_s;
+std::unordered_map<string, QueryCache::t_EntryIterator> QueryCache::index_s;
+ulong QueryCache::maxEntries_s = 1000;
+ulong QueryCache::ttlSeconds_s = 300;
 
 
 void
-QueryCache::configure (ulong maxEntries,
-                       ulong ttlSeconds)
+QueryCache::configure(ulong maxEntries, ulong ttlSeconds)
 {
     WriteLock lock(lock_s);
     maxEntries_s = maxEntries;
@@ -25,9 +23,8 @@ QueryCache::configure (ulong maxEntries,
 }
 
 
-
 std::optional<string>
-QueryCache::lookup (const string & queryKey)
+QueryCache::lookup(const string & queryKey)
 {
     WriteLock lock(lock_s);
 
@@ -52,10 +49,8 @@ QueryCache::lookup (const string & queryKey)
 }
 
 
-
 void
-QueryCache::store (const string & queryKey,
-                   const string & results)
+QueryCache::store(const string & queryKey, const string & results)
 {
     WriteLock lock(lock_s);
 
@@ -79,9 +74,8 @@ QueryCache::store (const string & queryKey,
 }
 
 
-
 void
-QueryCache::invalidate (const string & queryKey)
+QueryCache::invalidate(const string & queryKey)
 {
     WriteLock lock(lock_s);
 
@@ -93,9 +87,8 @@ QueryCache::invalidate (const string & queryKey)
 }
 
 
-
 void
-QueryCache::clear ()
+QueryCache::clear()
 {
     WriteLock lock(lock_s);
     entries_s.clear();
@@ -103,18 +96,16 @@ QueryCache::clear ()
 }
 
 
-
 ulong
-QueryCache::size ()
+QueryCache::size()
 {
     ReadLock lock(lock_s);
     return entries_s.size();
 }
 
 
-
 void
-QueryCache::evictExpired ()
+QueryCache::evictExpired()
 {
     auto now = std::chrono::steady_clock::now();
 

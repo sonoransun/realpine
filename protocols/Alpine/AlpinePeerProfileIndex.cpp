@@ -1,65 +1,62 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <AlpinePeerProfileIndex.h>
 #include <AlpinePeerProfile.h>
+#include <AlpinePeerProfileIndex.h>
 #include <AlpineRatingEngine.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <ReadLock.h>
+#include <StringUtils.h>
 #include <WriteLock.h>
 #include <algorithm>
 #include <cmath>
 #include <queue>
 
 
-
-static const long  linkEnd = -1L;
-static const long  minReserve = 128;
-static const long  defaultReserve = 1024;
-
+static const long linkEnd = -1L;
+static const long minReserve = 128;
+static const long defaultReserve = 1024;
 
 
-AlpinePeerProfileIndex::AlpinePeerProfileIndex (long  reserve)
+AlpinePeerProfileIndex::AlpinePeerProfileIndex(long reserve)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex constructor invoked.  Reserve: "s +
-                std::to_string (reserve));
+    Log::Debug("AlpinePeerProfileIndex constructor invoked.  Reserve: "s + std::to_string(reserve));
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     if (reserve < minReserve) {  // invalid value
         reserve = defaultReserve;
     }
 
-    size_                 = reserve;
-    numRecords_           = 0;
-    highestQualityIndex_  = linkEnd;
-    lowestQualityIndex_   = linkEnd;
-    baseIndex_            = linkEnd;
+    size_ = reserve;
+    numRecords_ = 0;
+    highestQualityIndex_ = linkEnd;
+    lowestQualityIndex_ = linkEnd;
+    baseIndex_ = linkEnd;
 
 
     // Allocate and initialize profile containers
     //
-    profileArray_   = nullptr;
-    freeIndexList_  = nullptr;
-    profileIndex_   = nullptr;
+    profileArray_ = nullptr;
+    freeIndexList_ = nullptr;
+    profileIndex_ = nullptr;
 
     profileArray_ = new t_ProfileRecordArray;
-    profileArray_->clear ();
-    profileArray_->resize (size_);
+    profileArray_->clear();
+    profileArray_->resize(size_);
 
     freeIndexList_ = new t_FreeIndexList;
-    freeIndexList_->clear ();
+    freeIndexList_->clear();
 
     profileIndex_ = new t_ProfileIndex;
-    profileIndex_->clear ();
+    profileIndex_->clear();
 
 
-    long  i;
+    long i;
     for (i = 0; i < size_; i++) {
-        freeIndexList_->push_back (i);
+        freeIndexList_->push_back(i);
         (*profileArray_)[i].profile = nullptr;
         (*profileArray_)[i].next = linkEnd;
         (*profileArray_)[i].prev = linkEnd;
@@ -67,11 +64,10 @@ AlpinePeerProfileIndex::AlpinePeerProfileIndex (long  reserve)
 }
 
 
-
-AlpinePeerProfileIndex::~AlpinePeerProfileIndex ()
+AlpinePeerProfileIndex::~AlpinePeerProfileIndex()
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex destructor invoked.");
+    Log::Debug("AlpinePeerProfileIndex destructor invoked.");
 #endif
 
     delete profileArray_;
@@ -82,56 +78,54 @@ AlpinePeerProfileIndex::~AlpinePeerProfileIndex ()
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::create (ulong  peerId)
+bool
+AlpinePeerProfileIndex::create(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::create invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::create invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     // Make sure we dont aready have this peer ID
     //
     {
-        ReadLock  lock(dataLock_);
+        ReadLock lock(dataLock_);
 
-        if (profileIndex_->find (peerId) != profileIndex_->end ()) {
-            Log::Error ("Attempt to create duplicate profile for peer in "
-                                 "AlpinePeerProfileIndex::create!");
+        if (profileIndex_->find(peerId) != profileIndex_->end()) {
+            Log::Error("Attempt to create duplicate profile for peer in "
+                       "AlpinePeerProfileIndex::create!");
 
             return false;
         }
     }
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     // Resize if needed...
     //
     if (numRecords_ >= size_) {
-        resize (size_ * 2);
+        resize(size_ * 2);
     }
 
-    long currIndex = freeIndexList_->front ();
-    freeIndexList_->pop_front ();
+    long currIndex = freeIndexList_->front();
+    freeIndexList_->pop_front();
 
     t_ProfileRecord * newRecord;
-    newRecord = &( (*profileArray_)[currIndex] );
+    newRecord = &((*profileArray_)[currIndex]);
 
-    newRecord->profile = new AlpinePeerProfile (peerId);
+    newRecord->profile = new AlpinePeerProfile(peerId);
 
 
     // Add to ID index
     //
-    profileIndex_->emplace (peerId, currIndex);
+    profileIndex_->emplace(peerId, currIndex);
 
     if (numRecords_ == 0) {
 
         // First profile, initialize some pointers
         //
         highestQualityIndex_ = currIndex;
-        lowestQualityIndex_  = currIndex;
-        baseIndex_           = currIndex;
+        lowestQualityIndex_ = currIndex;
+        baseIndex_ = currIndex;
 
         newRecord->next = linkEnd;
         newRecord->prev = linkEnd;
@@ -142,11 +136,11 @@ AlpinePeerProfileIndex::create (ulong  peerId)
     }
     // Not first profile, update links as required
     //
-    t_ProfileRecord *  baseRecord;
-    short              quality;
+    t_ProfileRecord * baseRecord;
+    short quality;
 
-    baseRecord = &( (*profileArray_)[baseIndex_] );
-    baseRecord->profile->getRelativeQuality (quality);
+    baseRecord = &((*profileArray_)[baseIndex_]);
+    baseRecord->profile->getRelativeQuality(quality);
 
     // We want to place this record at the base quality level, so if our current base
     // has been reduced, we place it before, otherwise after.
@@ -156,24 +150,23 @@ AlpinePeerProfileIndex::create (ulong  peerId)
         newRecord->next = baseRecord->next;
 
         if (baseRecord->next != linkEnd) {
-            t_ProfileRecord *  nextRecord;
-            nextRecord = &( (*profileArray_)[baseRecord->next] );
+            t_ProfileRecord * nextRecord;
+            nextRecord = &((*profileArray_)[baseRecord->next]);
             nextRecord->prev = currIndex;
         }
-        
+
         baseRecord->next = currIndex;
 
         if (highestQualityIndex_ == baseIndex_) {
             highestQualityIndex_ = currIndex;
         }
-    }
-    else {
+    } else {
         newRecord->next = baseIndex_;
         newRecord->prev = baseRecord->prev;
 
         if (baseRecord->prev != linkEnd) {
-            t_ProfileRecord *  prevRecord;
-            prevRecord = &( (*profileArray_)[baseRecord->prev] );
+            t_ProfileRecord * prevRecord;
+            prevRecord = &((*profileArray_)[baseRecord->prev]);
             prevRecord->next = currIndex;
         }
 
@@ -192,43 +185,41 @@ AlpinePeerProfileIndex::create (ulong  peerId)
 }
 
 
-
 bool
-AlpinePeerProfileIndex::erase (ulong  peerId)
+AlpinePeerProfileIndex::erase(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::erase invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::erase invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
     if (numRecords_ == 0) {
         return false;
     }
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to erase non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::erase!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to erase non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::erase!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
 
-    profileIndex_->erase (peerId);
+    profileIndex_->erase(peerId);
 
-    t_ProfileRecord *  currRecord;
-    currRecord  = &( (*profileArray_)[currIndex] );
-    t_ProfileRecord *  prevRecord;
-    t_ProfileRecord *  nextRecord;
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
+    t_ProfileRecord * prevRecord;
+    t_ProfileRecord * nextRecord;
 
 
     // Update quality indexes if required
     //
-    highestQualityIndex_  = linkEnd;
-    lowestQualityIndex_   = linkEnd;
-    
+    highestQualityIndex_ = linkEnd;
+    lowestQualityIndex_ = linkEnd;
+
     if (highestQualityIndex_ == currIndex) {
         highestQualityIndex_ = currRecord->prev;
     }
@@ -238,8 +229,7 @@ AlpinePeerProfileIndex::erase (ulong  peerId)
     if (baseIndex_ == currIndex) {
         if (currRecord->prev != linkEnd) {
             baseIndex_ = currRecord->prev;
-        }
-        else {
+        } else {
             baseIndex_ = currRecord->next;
         }
     }
@@ -248,15 +238,15 @@ AlpinePeerProfileIndex::erase (ulong  peerId)
     // Pull from doubly linked profile list
     //
     if (currRecord->prev != linkEnd) {
-        prevRecord = &( (*profileArray_)[currRecord->prev] );
+        prevRecord = &((*profileArray_)[currRecord->prev]);
         prevRecord->next = currRecord->next;
     }
     if (currRecord->next != linkEnd) {
-        nextRecord = &( (*profileArray_)[currRecord->next] );
+        nextRecord = &((*profileArray_)[currRecord->next]);
         nextRecord->prev = currRecord->prev;
     }
 
-    freeIndexList_->push_back (currIndex);
+    freeIndexList_->push_back(currIndex);
     numRecords_--;
 
 
@@ -264,55 +254,49 @@ AlpinePeerProfileIndex::erase (ulong  peerId)
 }
 
 
-
-long  
-AlpinePeerProfileIndex::size ()
+long
+AlpinePeerProfileIndex::size()
 {
     return numRecords_;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::exists (ulong  peerId)
+bool
+AlpinePeerProfileIndex::exists(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::exists invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::exists invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock   lock(dataLock_);
+    ReadLock lock(dataLock_);
 
-    if (profileIndex_->find (peerId) == profileIndex_->end ()) {
+    if (profileIndex_->find(peerId) == profileIndex_->end()) {
         return false;
     }
     return true;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::locate (ulong                 peerId,
-                                AlpinePeerProfile *&  profile)
+bool
+AlpinePeerProfileIndex::locate(ulong peerId, AlpinePeerProfile *& profile)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::locate invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::locate invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    ReadLock   lock(dataLock_);
+    ReadLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to locate non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::locate!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to locate non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::locate!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
 
     profile = currRecord->profile;
 
@@ -321,283 +305,268 @@ AlpinePeerProfileIndex::locate (ulong                 peerId,
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::adjustQuality (ulong  peerId,
-                                       short  delta)
+bool
+AlpinePeerProfileIndex::adjustQuality(ulong peerId, short delta)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::adjustQuality invoked.  Values:"s +
-                "\n Peer ID: "s + std::to_string (peerId) +
-                "\n Q Delta: "s + std::to_string (delta) +
-                "\n");
+    Log::Debug("AlpinePeerProfileIndex::adjustQuality invoked.  Values:"s + "\n Peer ID: "s + std::to_string(peerId) +
+               "\n Q Delta: "s + std::to_string(delta) + "\n");
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to adjust non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::adjustQuality!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to adjust non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::adjustQuality!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
 
-    AlpinePeerProfile *  profile;
+    AlpinePeerProfile * profile;
     profile = currRecord->profile;
 
     short value;
-    profile->modifyRelativeQuality (delta);
-    profile->getRelativeQuality (value);
+    profile->modifyRelativeQuality(delta);
+    profile->getRelativeQuality(value);
 
-    relocate (currIndex, currRecord, value);
-
-
-    return true;
-}
-
-
-
-bool  
-AlpinePeerProfileIndex::querySent (ulong  peerId)
-{
-#ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::querySent invoked.  Peer ID: "s +
-                std::to_string (peerId));
-#endif
-
-    WriteLock   lock(dataLock_);
-
-    auto indexIter = profileIndex_->find (peerId);
-
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to update non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::querySent!");
-
-        return false;
-    }
-    long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
-
-    AlpinePeerProfile *  profile;
-    profile = currRecord->profile;
-    profile->incrTotalQueries ();
+    relocate(currIndex, currRecord, value);
 
 
     return true;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::responseReceived (ulong  peerId)
+bool
+AlpinePeerProfileIndex::querySent(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::responseReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::querySent invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to update non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::responseReceived!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to update non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::querySent!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
 
-    AlpinePeerProfile *  profile;
+    AlpinePeerProfile * profile;
     profile = currRecord->profile;
-    profile->incrTotalQueries ();
+    profile->incrTotalQueries();
 
-    bool   status;
-    short  delta;
-    status = AlpineRatingEngine::queryResponseEvent (profile, delta);
+
+    return true;
+}
+
+
+bool
+AlpinePeerProfileIndex::responseReceived(ulong peerId)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpinePeerProfileIndex::responseReceived invoked.  Peer ID: "s + std::to_string(peerId));
+#endif
+
+    WriteLock lock(dataLock_);
+
+    auto indexIter = profileIndex_->find(peerId);
+
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to update non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::responseReceived!");
+
+        return false;
+    }
+    long currIndex = (*indexIter).second;
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
+
+    AlpinePeerProfile * profile;
+    profile = currRecord->profile;
+    profile->incrTotalQueries();
+
+    bool status;
+    short delta;
+    status = AlpineRatingEngine::queryResponseEvent(profile, delta);
 
     if (!status) {
-        Log::Error ("Computing quality delta for query response event failed in "
-                             "AlpinePeerProfileIndex::responseReceived!");
+        Log::Error("Computing quality delta for query response event failed in "
+                   "AlpinePeerProfileIndex::responseReceived!");
         return false;
     }
     short value;
-    profile->modifyRelativeQuality (delta);
-    profile->getRelativeQuality (value);
+    profile->modifyRelativeQuality(delta);
+    profile->getRelativeQuality(value);
 
-    relocate (currIndex, currRecord, value);
+    relocate(currIndex, currRecord, value);
 
 
     return true;
 }
 
 
- 
-bool  
-AlpinePeerProfileIndex::badPacketReceived (ulong  peerId)
+bool
+AlpinePeerProfileIndex::badPacketReceived(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::badPacketReceived invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::badPacketReceived invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to update non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::badPacketReceived!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to update non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::badPacketReceived!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
 
-    AlpinePeerProfile *  profile;
+    AlpinePeerProfile * profile;
     profile = currRecord->profile;
 
-    bool   status;
-    short  delta;
-    status = AlpineRatingEngine::badPacketEvent (profile, delta);
+    bool status;
+    short delta;
+    status = AlpineRatingEngine::badPacketEvent(profile, delta);
 
     if (!status) {
-        Log::Error ("Computing quality delta for bad packet event failed in "
-                             "AlpinePeerProfileIndex::badPacketReceived!");
+        Log::Error("Computing quality delta for bad packet event failed in "
+                   "AlpinePeerProfileIndex::badPacketReceived!");
         return false;
     }
     short value;
-    profile->modifyRelativeQuality (delta);
-    profile->getRelativeQuality (value);
+    profile->modifyRelativeQuality(delta);
+    profile->getRelativeQuality(value);
 
-    relocate (currIndex, currRecord, value);
+    relocate(currIndex, currRecord, value);
 
 
     return true;
 }
 
 
- 
-bool  
-AlpinePeerProfileIndex::reliableTransferFailed (ulong  peerId)
+bool
+AlpinePeerProfileIndex::reliableTransferFailed(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::reliableTransferFailed invoked.  Peer ID: "s +
-                std::to_string (peerId));
+    Log::Debug("AlpinePeerProfileIndex::reliableTransferFailed invoked.  Peer ID: "s + std::to_string(peerId));
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
-    auto indexIter = profileIndex_->find (peerId);
+    auto indexIter = profileIndex_->find(peerId);
 
-    if (indexIter == profileIndex_->end ()) {
-        Log::Error ("Attempt to update non existant peer ID profile in "
-                             "AlpinePeerProfileIndex::reliableTransferFailed!");
+    if (indexIter == profileIndex_->end()) {
+        Log::Error("Attempt to update non existant peer ID profile in "
+                   "AlpinePeerProfileIndex::reliableTransferFailed!");
 
         return false;
     }
     long currIndex = (*indexIter).second;
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[currIndex] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[currIndex]);
 
-    AlpinePeerProfile *  profile;
+    AlpinePeerProfile * profile;
     profile = currRecord->profile;
 
-    bool   status;
-    short  delta;
-    status = AlpineRatingEngine::transferFailureEvent (profile, delta);
+    bool status;
+    short delta;
+    status = AlpineRatingEngine::transferFailureEvent(profile, delta);
 
     if (!status) {
-        Log::Error ("Computing quality delta for transfer failuere event failed in "
-                             "AlpinePeerProfileIndex::reliableTransferFailed!");
+        Log::Error("Computing quality delta for transfer failuere event failed in "
+                   "AlpinePeerProfileIndex::reliableTransferFailed!");
         return false;
     }
     short value;
-    profile->modifyRelativeQuality (delta);
-    profile->getRelativeQuality (value);
+    profile->modifyRelativeQuality(delta);
+    profile->getRelativeQuality(value);
 
-    relocate (currIndex, currRecord, value);
+    relocate(currIndex, currRecord, value);
 
 
     return true;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::highestQuality (ulong &  peerId)
+bool
+AlpinePeerProfileIndex::highestQuality(ulong & peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::highestQuality invoked.");
+    Log::Debug("AlpinePeerProfileIndex::highestQuality invoked.");
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     if (numRecords_ == 0) {
         return false;
     }
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[highestQualityIndex_] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[highestQualityIndex_]);
 
-    currRecord->profile->getPeerId (peerId);
+    currRecord->profile->getPeerId(peerId);
 
 
     return true;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::lowestQuality (ulong &  peerId)
+bool
+AlpinePeerProfileIndex::lowestQuality(ulong & peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::lowestQuality invoked.");
+    Log::Debug("AlpinePeerProfileIndex::lowestQuality invoked.");
 #endif
 
-    WriteLock   lock(dataLock_);
+    WriteLock lock(dataLock_);
 
     if (numRecords_ == 0) {
-        return false; 
+        return false;
     }
-    t_ProfileRecord *  currRecord;
-    currRecord = &( (*profileArray_)[lowestQualityIndex_] );
+    t_ProfileRecord * currRecord;
+    currRecord = &((*profileArray_)[lowestQualityIndex_]);
 
-    currRecord->profile->getPeerId (peerId);
+    currRecord->profile->getPeerId(peerId);
 
 
     return true;
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::getAllPeers (t_PeerIdList &  peerIdList)
+bool
+AlpinePeerProfileIndex::getAllPeers(t_PeerIdList & peerIdList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::getAllPeers invoked.");
+    Log::Debug("AlpinePeerProfileIndex::getAllPeers invoked.");
 #endif
 
-    ReadLock  lock(dataLock_);
+    ReadLock lock(dataLock_);
 
-    peerIdList.clear ();
+    peerIdList.clear();
 
     if (numRecords_ == 0) {
         return true;
     }
     ulong currId;
 
-    for (const auto& item : *profileIndex_) {
+    for (const auto & item : *profileIndex_) {
         currId = item.first;
-        peerIdList.push_back (currId);
+        peerIdList.push_back(currId);
     }
 
 
@@ -605,13 +574,11 @@ AlpinePeerProfileIndex::getAllPeers (t_PeerIdList &  peerIdList)
 }
 
 
-
 bool
-AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
-                                             ulong           limit)
+AlpinePeerProfileIndex::getWeightedPeerList(t_PeerIdList & peerIdList, ulong limit)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::getWeightedPeerList invoked.");
+    Log::Debug("AlpinePeerProfileIndex::getWeightedPeerList invoked.");
 #endif
 
     peerIdList.clear();
@@ -624,16 +591,17 @@ AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
     // Collect peer IDs and their weights from the rating engine
     // Weight = score^2 (amplifies good peers, suppresses bad)
     //
-    static constexpr double  kBanThreshold     = 0.1;
-    static constexpr double  kUnscoredWeight   = 0.25;
+    static constexpr double kBanThreshold = 0.1;
+    static constexpr double kUnscoredWeight = 0.25;
 
-    struct t_WeightedPeer {
-        ulong   peerId;
-        double  weight;
+    struct t_WeightedPeer
+    {
+        ulong peerId;
+        double weight;
     };
 
-    vector<t_WeightedPeer>  scoredPeers;
-    vector<ulong>           unscoredPeers;
+    vector<t_WeightedPeer> scoredPeers;
+    vector<ulong> unscoredPeers;
 
     for (const auto & [peerId, arrayIndex] : *profileIndex_) {
         double score = AlpineRatingEngine::getScore(peerId);
@@ -660,18 +628,17 @@ AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
     // Min-heap of (key, peerId) — keeps the top-N highest keys
     //
     using t_KeyPeer = std::pair<double, ulong>;
-    std::priority_queue<t_KeyPeer, vector<t_KeyPeer>, std::greater<t_KeyPeer>>  reservoir;
+    std::priority_queue<t_KeyPeer, vector<t_KeyPeer>, std::greater<t_KeyPeer>> reservoir;
 
-    thread_local std::mt19937  rng(std::random_device{}());
-    std::uniform_real_distribution<double>  dist(0.0001, 1.0);
+    thread_local std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<double> dist(0.0001, 1.0);
 
     for (const auto & peer : scoredPeers) {
         double key = std::pow(dist(rng), 1.0 / peer.weight);
 
         if (reservoir.size() < selectCount) {
             reservoir.push({key, peer.peerId});
-        }
-        else if (key > reservoir.top().first) {
+        } else if (key > reservoir.top().first) {
             reservoir.pop();
             reservoir.push({key, peer.peerId});
         }
@@ -685,8 +652,7 @@ AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
 
             if (reservoir.size() < selectCount) {
                 reservoir.push({key, peerId});
-            }
-            else if (key > reservoir.top().first) {
+            } else if (key > reservoir.top().first) {
                 reservoir.pop();
                 reservoir.push({key, peerId});
             }
@@ -706,24 +672,23 @@ AlpinePeerProfileIndex::getWeightedPeerList (t_PeerIdList &  peerIdList,
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::resize (long size)
+bool
+AlpinePeerProfileIndex::resize(long size)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::resize invoked.");
+    Log::Debug("AlpinePeerProfileIndex::resize invoked.");
 #endif
 
     // Allocate new larger containers.  MUST be called only when all records in use (full)
     //
-    t_ProfileRecordArray *  newProfileRecordArray;
+    t_ProfileRecordArray * newProfileRecordArray;
     newProfileRecordArray = new t_ProfileRecordArray;
 
-    newProfileRecordArray->clear ();
-    newProfileRecordArray->resize (size);
+    newProfileRecordArray->clear();
+    newProfileRecordArray->resize(size);
 
     // There should not be anything in here anyway...
-    freeIndexList_->clear ();
+    freeIndexList_->clear();
 
     // Copy current profile records
     //
@@ -737,14 +702,14 @@ AlpinePeerProfileIndex::resize (long size)
     // Initialize remaining records.
     //
     for (i = size_; i < size; i++) {
-        freeIndexList_->push_back (i);
+        freeIndexList_->push_back(i);
         (*newProfileRecordArray)[i].profile = nullptr;
         (*newProfileRecordArray)[i].prev = linkEnd;
         (*newProfileRecordArray)[i].next = linkEnd;
     }
 
     delete profileArray_;
-    size_         = size;
+    size_ = size;
     profileArray_ = newProfileRecordArray;
 
 
@@ -752,48 +717,45 @@ AlpinePeerProfileIndex::resize (long size)
 }
 
 
-
-bool  
-AlpinePeerProfileIndex::relocate (long               currIndex,
-                                  t_ProfileRecord *  currRecord,
-                                  short              currValue)
+bool
+AlpinePeerProfileIndex::relocate(long currIndex, t_ProfileRecord * currRecord, short currValue)
 {
 #ifdef _VERBOSE
-    Log::Debug ("AlpinePeerProfileIndex::relocate invoked.");
+    Log::Debug("AlpinePeerProfileIndex::relocate invoked.");
 #endif
 
-    t_ProfileRecord *  prevRecord = nullptr;
-    t_ProfileRecord *  nextRecord = nullptr;
+    t_ProfileRecord * prevRecord = nullptr;
+    t_ProfileRecord * nextRecord = nullptr;
 
     // Determine which way, if any, we will shift this record
     //
     if (currRecord->prev != linkEnd) {
-        prevRecord = &( (*profileArray_)[currRecord->prev] );
+        prevRecord = &((*profileArray_)[currRecord->prev]);
     }
     if (currRecord->next != linkEnd) {
-        nextRecord = &( (*profileArray_)[currRecord->next] );
+        nextRecord = &((*profileArray_)[currRecord->next]);
     }
 
-    short  nextQuality = currValue; // for movement check
-    short  prevQuality = currValue;
+    short nextQuality = currValue;  // for movement check
+    short prevQuality = currValue;
 
     if (nextRecord) {
-        nextRecord->profile->getRelativeQuality (nextQuality);
+        nextRecord->profile->getRelativeQuality(nextQuality);
     }
     if (prevRecord) {
-        prevRecord->profile->getRelativeQuality (prevQuality);
+        prevRecord->profile->getRelativeQuality(prevQuality);
     }
 
-    if ( (currValue <= nextQuality) && (currValue >= prevQuality) ) {
+    if ((currValue <= nextQuality) && (currValue >= prevQuality)) {
         // No change in relative position, we're done.
         //
         return true;
     }
     // Remove this profile record from current position.
     //
-    highestQualityIndex_  = linkEnd;
-    lowestQualityIndex_   = linkEnd;
-    
+    highestQualityIndex_ = linkEnd;
+    lowestQualityIndex_ = linkEnd;
+
     if (highestQualityIndex_ == currIndex) {
         highestQualityIndex_ = currRecord->prev;
     }
@@ -803,8 +765,7 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
     if (baseIndex_ == currIndex) {
         if (currRecord->prev != linkEnd) {
             baseIndex_ = currRecord->prev;
-        }
-        else {
+        } else {
             baseIndex_ = currRecord->next;
         }
     }
@@ -816,9 +777,9 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
         nextRecord->prev = currRecord->prev;
     }
 
-    long  nextIndex;
-    long  prevIndex;
-    bool  insertPointFound = false;
+    long nextIndex;
+    long prevIndex;
+    bool insertPointFound = false;
 
     if (currValue > nextQuality) {
         // Increase in quality, move higher
@@ -836,13 +797,13 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
 
         // iterate up the list until we find record of greater quality
         //
-        long  insertIndex = nextIndex;
+        long insertIndex = nextIndex;
 
         while (!insertPointFound) {
-            nextRecord = &( (*profileArray_)[nextIndex] );
+            nextRecord = &((*profileArray_)[nextIndex]);
             insertIndex = nextIndex;
             nextIndex = nextRecord->next;
-            nextRecord->profile->getRelativeQuality (nextQuality);
+            nextRecord->profile->getRelativeQuality(nextQuality);
 
             if (nextQuality >= currValue) {
                 // Found our higher block
@@ -863,7 +824,7 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
             //
             short currDistance = abs(currValue);
             if (baseIndex_ == insertIndex) {
-                nextRecord->profile->getRelativeQuality (prevQuality);
+                nextRecord->profile->getRelativeQuality(prevQuality);
                 short baseDistance = abs(prevQuality);
 
                 if (currDistance < baseDistance) {
@@ -876,7 +837,7 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
         // Insert into current location
         //
         long prevIndex = nextRecord->prev;
-        prevRecord = &( (*profileArray_)[prevIndex] );
+        prevRecord = &((*profileArray_)[prevIndex]);
         nextRecord->prev = currIndex;
         prevRecord->next = currIndex;
         currRecord->next = insertIndex;
@@ -886,23 +847,21 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
         //
         short currDistance = abs(currValue);
         if (baseIndex_ == prevIndex) {
-            prevRecord->profile->getRelativeQuality (prevQuality);
+            prevRecord->profile->getRelativeQuality(prevQuality);
             short baseDistance = abs(prevQuality);
 
             if (currDistance < baseDistance) {
                 baseIndex_ = currIndex;
             }
-        }
-        else if (baseIndex_ == insertIndex) {
-            nextRecord->profile->getRelativeQuality (nextQuality);
+        } else if (baseIndex_ == insertIndex) {
+            nextRecord->profile->getRelativeQuality(nextQuality);
             short baseDistance = abs(nextQuality);
 
             if (currDistance < baseDistance) {
                 baseIndex_ = currIndex;
             }
         }
-    }
-    else {
+    } else {
         // Decrease in quality, move lower
         //
         prevIndex = prevRecord->prev;
@@ -918,13 +877,13 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
 
         // iterate down the list until we find record of lesser quality
         //
-        long  insertIndex = prevIndex;
+        long insertIndex = prevIndex;
 
         while (!insertPointFound) {
-            prevRecord = &( (*profileArray_)[prevIndex] );
+            prevRecord = &((*profileArray_)[prevIndex]);
             insertIndex = prevIndex;
             prevIndex = prevRecord->prev;
-            prevRecord->profile->getRelativeQuality (prevQuality);
+            prevRecord->profile->getRelativeQuality(prevQuality);
 
             if (prevQuality < currValue) {
                 // Found lower quality profile
@@ -945,7 +904,7 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
             //
             short currDistance = abs(currValue);
             if (baseIndex_ == insertIndex) {
-                prevRecord->profile->getRelativeQuality (prevQuality);
+                prevRecord->profile->getRelativeQuality(prevQuality);
                 short baseDistance = abs(prevQuality);
 
                 if (currDistance < baseDistance) {
@@ -958,7 +917,7 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
         // Insert into current location
         //
         long nextIndex = prevRecord->next;
-        nextRecord = &( (*profileArray_)[nextIndex] );
+        nextRecord = &((*profileArray_)[nextIndex]);
         prevRecord->next = currIndex;
         nextRecord->prev = currIndex;
         currRecord->prev = insertIndex;
@@ -968,15 +927,14 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
         //
         short currDistance = abs(currValue);
         if (baseIndex_ == nextIndex) {
-            nextRecord->profile->getRelativeQuality (nextQuality);
+            nextRecord->profile->getRelativeQuality(nextQuality);
             short baseDistance = abs(nextQuality);
 
             if (currDistance < baseDistance) {
                 baseIndex_ = currIndex;
             }
-        }
-        else if (baseIndex_ == insertIndex) {
-            prevRecord->profile->getRelativeQuality (prevQuality);
+        } else if (baseIndex_ == insertIndex) {
+            prevRecord->profile->getRelativeQuality(prevQuality);
             short baseDistance = abs(prevQuality);
 
             if (currDistance < baseDistance) {
@@ -988,6 +946,3 @@ AlpinePeerProfileIndex::relocate (long               currIndex,
 
     return true;
 }
-
-
-

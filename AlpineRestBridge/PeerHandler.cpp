@@ -1,11 +1,11 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <PeerHandler.h>
-#include <DtcpStackInterface.h>
 #include <AlpineRatingEngine.h>
+#include <DtcpStackInterface.h>
 #include <JsonWriter.h>
 #include <Log.h>
+#include <PeerHandler.h>
 #include <SafeParse.h>
 
 #ifdef ALPINE_TRACING_ENABLED
@@ -14,23 +14,22 @@
 
 
 void
-PeerHandler::registerRoutes (HttpRouter & router)
+PeerHandler::registerRoutes(HttpRouter & router)
 {
-    router.addRoute("GET", "/peers",     getAllPeers);
+    router.addRoute("GET", "/peers", getAllPeers);
     router.addRoute("GET", "/peers/:id", getPeer);
 }
 
 
 HttpResponse
-PeerHandler::getAllPeers (const HttpRequest & request,
-                         const std::unordered_map<string, string> & params)
+PeerHandler::getAllPeers(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("peer.getAll"s);
 #endif
 
     // Parse pagination parameters
-    ulong limit  = 100;
+    ulong limit = 100;
     ulong offset = 0;
 
     auto limitIt = request.queryParams.find("limit");
@@ -67,17 +66,17 @@ PeerHandler::getAllPeers (const HttpRequest & request,
         return HttpResponse::serverError("Failed to get peer list");
 
     // Apply filters and collect matching peers
-    struct PeerEntry {
-        ulong                               peerId;
+    struct PeerEntry
+    {
+        ulong peerId;
         DtcpStackInterface::t_DtcpPeerStatus status;
-        double                              score;
+        double score;
     };
 
     vector<PeerEntry> filtered;
     filtered.reserve(peerIds.size());
 
-    for (const auto& peerId : peerIds)
-    {
+    for (const auto & peerId : peerIds) {
         DtcpStackInterface::t_DtcpPeerStatus status;
         if (!DtcpStackInterface::getDtcpPeerStatus(peerId, status))
             continue;
@@ -103,16 +102,15 @@ PeerHandler::getAllPeers (const HttpRequest & request,
 
     // Apply pagination
     ulong startIdx = std::min(offset, total);
-    ulong endIdx   = std::min(startIdx + limit, total);
+    ulong endIdx = std::min(startIdx + limit, total);
 
     JsonWriter writer;
     writer.beginObject();
     writer.key("data");
     writer.beginArray();
 
-    for (ulong i = startIdx; i < endIdx; ++i)
-    {
-        const auto& entry = filtered[i];
+    for (ulong i = startIdx; i < endIdx; ++i) {
+        const auto & entry = filtered[i];
 
         writer.beginObject();
         writer.key("peerId");
@@ -146,8 +144,7 @@ PeerHandler::getAllPeers (const HttpRequest & request,
 
 
 HttpResponse
-PeerHandler::getPeer (const HttpRequest & request,
-                      const std::unordered_map<string, string> & params)
+PeerHandler::getPeer(const HttpRequest & request, const std::unordered_map<string, string> & params)
 {
 #ifdef ALPINE_TRACING_ENABLED
     ScopedSpan span("peer.get"s);

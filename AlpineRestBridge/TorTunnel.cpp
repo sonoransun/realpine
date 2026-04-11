@@ -1,23 +1,23 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <TorTunnel.h>
+#include <JsonReader.h>
+#include <JsonWriter.h>
+#include <Log.h>
+#include <SafeParse.h>
+#include <StringUtils.h>
 #include <TcpConnector.h>
 #include <TcpTransport.h>
 #include <TorSocksProxy.h>
-#include <JsonReader.h>
-#include <JsonWriter.h>
-#include <SafeParse.h>
-#include <StringUtils.h>
-#include <Log.h>
+#include <TorTunnel.h>
 
 #include <Platform.h>
-#include <functional>
 #include <cstring>
 #include <ctime>
+#include <functional>
 
 
-TorTunnel::~TorTunnel ()
+TorTunnel::~TorTunnel()
 {
     stop();
     connections_.clear();
@@ -25,16 +25,14 @@ TorTunnel::~TorTunnel ()
 }
 
 
-
 bool
-TorTunnel::initialize (ushort listenPort, ushort socksPort,
-                       const string & peerList,
-                       const string & onionAddress, ushort restPort)
+TorTunnel::initialize(
+    ushort listenPort, ushort socksPort, const string & peerList, const string & onionAddress, ushort restPort)
 {
-    listenPort_   = listenPort;
-    socksPort_    = socksPort;
+    listenPort_ = listenPort;
+    socksPort_ = socksPort;
     onionAddress_ = onionAddress;
-    restPort_     = restPort;
+    restPort_ = restPort;
 
     // Parse comma-separated peer list
     if (!peerList.empty()) {
@@ -54,7 +52,7 @@ TorTunnel::initialize (ushort listenPort, ushort socksPort,
 
             // Trim whitespace
             auto start = peer.find_first_not_of(" \t");
-            auto end   = peer.find_last_not_of(" \t");
+            auto end = peer.find_last_not_of(" \t");
 
             if (start != string::npos && end != string::npos) {
                 peer = peer.substr(start, end - start + 1);
@@ -65,8 +63,7 @@ TorTunnel::initialize (ushort listenPort, ushort socksPort,
 
     // Bind acceptor to localhost only
     if (!acceptor_.create(htonl(INADDR_LOOPBACK), htons(listenPort_))) {
-        Log::Error("TorTunnel: Failed to create TCP acceptor on port "s +
-                   std::to_string(listenPort_));
+        Log::Error("TorTunnel: Failed to create TCP acceptor on port "s + std::to_string(listenPort_));
         return false;
     }
 
@@ -78,21 +75,20 @@ TorTunnel::initialize (ushort listenPort, ushort socksPort,
     auto hashVal = std::hash<string>{}(hostname);
     responderId_ = "tor-bridge-"s + std::to_string(hashVal & 0xFFFFFF);
 
-    Log::Info("TorTunnel: Listening on port "s + std::to_string(listenPort_) +
-              " with " + std::to_string(configuredPeers_.size()) + " configured peers");
+    Log::Info("TorTunnel: Listening on port "s + std::to_string(listenPort_) + " with " +
+              std::to_string(configuredPeers_.size()) + " configured peers");
     return true;
 }
 
 
-
 void
-TorTunnel::threadMain ()
+TorTunnel::threadMain()
 {
     Log::Info("TorTunnel: Thread started.");
 
     connectToConfiguredPeers();
 
-    time_t lastBeaconTime    = 0;
+    time_t lastBeaconTime = 0;
     time_t lastReconnectTime = time(nullptr);
 
     while (isActive()) {
@@ -134,8 +130,7 @@ TorTunnel::threadMain ()
                 if (recvFramedMessage(*connections_[i].transport, json))
                     handleMessage(connections_[i], json);
                 else {
-                    Log::Info("TorTunnel: Connection to "s +
-                              connections_[i].onionAddress + " closed.");
+                    Log::Info("TorTunnel: Connection to "s + connections_[i].onionAddress + " closed.");
                     connections_[i].transport.reset();
                 }
             }
@@ -167,9 +162,8 @@ TorTunnel::threadMain ()
 }
 
 
-
 void
-TorTunnel::connectToConfiguredPeers ()
+TorTunnel::connectToConfiguredPeers()
 {
     for (const auto & peerAddr : configuredPeers_) {
 
@@ -182,8 +176,7 @@ TorTunnel::connectToConfiguredPeers ()
             addr = peerAddr.substr(0, colonPos);
             auto portOpt = parseUshort(peerAddr.substr(colonPos + 1));
             if (!portOpt) {
-                Log::Error("TorTunnel: Invalid port in peer address: "s +
-                           StringUtils::sanitizeForLog(peerAddr));
+                Log::Error("TorTunnel: Invalid port in peer address: "s + StringUtils::sanitizeForLog(peerAddr));
                 continue;
             }
             port = *portOpt;
@@ -210,28 +203,23 @@ TorTunnel::connectToConfiguredPeers ()
             pc.outbound = true;
             connections_.push_back(std::move(pc));
 
-            Log::Info("TorTunnel: Connected to "s + addr + ":" +
-                      std::to_string(port) + " via SOCKS5");
+            Log::Info("TorTunnel: Connected to "s + addr + ":" + std::to_string(port) + " via SOCKS5");
         } else {
-            Log::Debug("TorTunnel: Failed to connect to "s + addr + ":" +
-                       std::to_string(port) + " via SOCKS5");
+            Log::Debug("TorTunnel: Failed to connect to "s + addr + ":" + std::to_string(port) + " via SOCKS5");
         }
     }
 }
 
 
-
 bool
-TorTunnel::connectViaSocks5 (const string & onionAddr, ushort port,
-                             std::unique_ptr<TcpTransport> & transport)
+TorTunnel::connectViaSocks5(const string & onionAddr, ushort port, std::unique_ptr<TcpTransport> & transport)
 {
     return TorSocksProxy::connect(socksPort_, onionAddr, port, transport);
 }
 
 
-
 void
-TorTunnel::acceptInboundConnection ()
+TorTunnel::acceptInboundConnection()
 {
     std::unique_ptr<TcpTransport> transport;
 
@@ -248,9 +236,8 @@ TorTunnel::acceptInboundConnection ()
 }
 
 
-
 void
-TorTunnel::removeDeadConnections ()
+TorTunnel::removeDeadConnections()
 {
     auto it = connections_.begin();
     while (it != connections_.end()) {
@@ -262,9 +249,8 @@ TorTunnel::removeDeadConnections ()
 }
 
 
-
 bool
-TorTunnel::sendFramedMessage (TcpTransport & conn, const string & json)
+TorTunnel::sendFramedMessage(TcpTransport & conn, const string & json)
 {
     uint32_t payloadLen = static_cast<uint32_t>(json.size());
 
@@ -283,9 +269,8 @@ TorTunnel::sendFramedMessage (TcpTransport & conn, const string & json)
 }
 
 
-
 bool
-TorTunnel::recvFramedMessage (TcpTransport & conn, string & json)
+TorTunnel::recvFramedMessage(TcpTransport & conn, string & json)
 {
     // Read 4-byte length header
     byte header[4];
@@ -294,10 +279,8 @@ TorTunnel::recvFramedMessage (TcpTransport & conn, string & json)
     if (!conn.receive(header, sizeof(header), bytesRead) || bytesRead != 4)
         return false;
 
-    uint32_t payloadLen = (static_cast<uint32_t>(header[0]) << 24) |
-                          (static_cast<uint32_t>(header[1]) << 16) |
-                          (static_cast<uint32_t>(header[2]) << 8)  |
-                          (static_cast<uint32_t>(header[3]));
+    uint32_t payloadLen = (static_cast<uint32_t>(header[0]) << 24) | (static_cast<uint32_t>(header[1]) << 16) |
+                          (static_cast<uint32_t>(header[2]) << 8) | (static_cast<uint32_t>(header[3]));
 
     if (payloadLen == 0 || payloadLen > MAX_MESSAGE_SIZE) {
         Log::Error("TorTunnel: Invalid message length: "s + std::to_string(payloadLen));
@@ -310,8 +293,7 @@ TorTunnel::recvFramedMessage (TcpTransport & conn, string & json)
 
     while (totalRead < payloadLen) {
         ulong chunkRead = 0;
-        if (!conn.receive(buffer.data() + totalRead,
-                          payloadLen - totalRead, chunkRead))
+        if (!conn.receive(buffer.data() + totalRead, payloadLen - totalRead, chunkRead))
             return false;
 
         if (chunkRead == 0)
@@ -325,9 +307,8 @@ TorTunnel::recvFramedMessage (TcpTransport & conn, string & json)
 }
 
 
-
 void
-TorTunnel::handleMessage (PeerConnection & peer, const string & json)
+TorTunnel::handleMessage(PeerConnection & peer, const string & json)
 {
     JsonReader reader(json);
 
@@ -355,13 +336,12 @@ TorTunnel::handleMessage (PeerConnection & peer, const string & json)
 }
 
 
-
 void
-TorTunnel::handleQuery (PeerConnection & peer, const string & json)
+TorTunnel::handleQuery(PeerConnection & peer, const string & json)
 {
     JsonReader reader(json);
 
-    ulong  queryId = 0;
+    ulong queryId = 0;
     string senderId;
     string queryString;
 
@@ -377,8 +357,7 @@ TorTunnel::handleQuery (PeerConnection & peer, const string & json)
 
     reader.getString("senderId", senderId);
 
-    Log::Info("TorTunnel: Received query "s + std::to_string(queryId) +
-              " from " + senderId + ": " + queryString);
+    Log::Info("TorTunnel: Received query "s + std::to_string(queryId) + " from " + senderId + ": " + queryString);
 
     AlpineStackInterface::t_QueryOptions options;
     reader.getString("groupName", options.groupName);
@@ -401,8 +380,7 @@ TorTunnel::handleQuery (PeerConnection & peer, const string & json)
     ulong alpineQueryId = 0;
 
     if (!AlpineStackInterface::startQuery(options, queryString, alpineQueryId)) {
-        Log::Error("TorTunnel: Failed to start query for request "s +
-                   std::to_string(queryId));
+        Log::Error("TorTunnel: Failed to start query for request "s + std::to_string(queryId));
         return;
     }
 
@@ -423,14 +401,13 @@ TorTunnel::handleQuery (PeerConnection & peer, const string & json)
 
     AlpineStackInterface::cancelQuery(alpineQueryId);
 
-    Log::Info("TorTunnel: Completed query "s + std::to_string(queryId) +
-              " with " + std::to_string(results.size()) + " peers");
+    Log::Info("TorTunnel: Completed query "s + std::to_string(queryId) + " with " + std::to_string(results.size()) +
+              " peers");
 }
 
 
-
 void
-TorTunnel::handleCancel (const string & json)
+TorTunnel::handleCancel(const string & json)
 {
     JsonReader reader(json);
 
@@ -440,30 +417,35 @@ TorTunnel::handleCancel (const string & json)
     reader.getUlong("queryId", queryId);
     reader.getString("senderId", senderId);
 
-    Log::Info("TorTunnel: Cancel request for query "s +
-              std::to_string(queryId) + " from " + senderId);
+    Log::Info("TorTunnel: Cancel request for query "s + std::to_string(queryId) + " from " + senderId);
 }
 
 
-
 void
-TorTunnel::sendResponse (PeerConnection & peer, ulong queryId,
-                         const AlpineStackInterface::t_PeerResourcesIndex & results)
+TorTunnel::sendResponse(PeerConnection & peer,
+                        ulong queryId,
+                        const AlpineStackInterface::t_PeerResourcesIndex & results)
 {
     JsonWriter writer;
     writer.beginObject();
-    writer.key("type");        writer.value("alpine_response");
-    writer.key("queryId");     writer.value(queryId);
-    writer.key("responderId"); writer.value(responderId_);
+    writer.key("type");
+    writer.value("alpine_response");
+    writer.key("queryId");
+    writer.value(queryId);
+    writer.key("responderId");
+    writer.value(responderId_);
     writer.key("resources");
     writer.beginArray();
 
     for (const auto & [peerId, peerResources] : results) {
         for (const auto & res : peerResources.resourceDescList) {
             writer.beginObject();
-            writer.key("resourceId");   writer.value(res.resourceId);
-            writer.key("size");         writer.value(res.size);
-            writer.key("description");  writer.value(res.description);
+            writer.key("resourceId");
+            writer.value(res.resourceId);
+            writer.key("size");
+            writer.value(res.size);
+            writer.key("description");
+            writer.value(res.description);
             writer.key("locators");
             writer.beginArray();
 
@@ -483,23 +465,28 @@ TorTunnel::sendResponse (PeerConnection & peer, ulong queryId,
     if (!sendFramedMessage(*peer.transport, payload))
         Log::Error("TorTunnel: Failed to send response to "s + peer.onionAddress);
     else
-        Log::Debug("TorTunnel: Sent response to "s + peer.onionAddress +
-                   " (" + std::to_string(payload.size()) + " bytes)");
+        Log::Debug("TorTunnel: Sent response to "s + peer.onionAddress + " (" + std::to_string(payload.size()) +
+                   " bytes)");
 }
 
 
-
 void
-TorTunnel::sendDiscoveryBeacon (PeerConnection & peer)
+TorTunnel::sendDiscoveryBeacon(PeerConnection & peer)
 {
     JsonWriter writer;
     writer.beginObject();
-    writer.key("type");           writer.value("alpine_discovery");
-    writer.key("service");        writer.value("alpine-bridge");
-    writer.key("version");        writer.value("1");
-    writer.key("restPort");       writer.value(static_cast<ulong>(restPort_));
-    writer.key("bridgeVersion");  writer.value("devel-00019");
-    writer.key("onionAddress");   writer.value(onionAddress_);
+    writer.key("type");
+    writer.value("alpine_discovery");
+    writer.key("service");
+    writer.value("alpine-bridge");
+    writer.key("version");
+    writer.value("1");
+    writer.key("restPort");
+    writer.value(static_cast<ulong>(restPort_));
+    writer.key("bridgeVersion");
+    writer.value("devel-00019");
+    writer.key("onionAddress");
+    writer.value(onionAddress_);
     writer.endObject();
 
     auto payload = writer.result();

@@ -12,48 +12,39 @@ class DataBuffer;
 class DtcpDataPacket : public StackLinkInterface
 {
   public:
+    DtcpDataPacket();
 
-    DtcpDataPacket ();
+    DtcpDataPacket(StackLinkInterface * parent);
 
-    DtcpDataPacket (StackLinkInterface * parent);
-
-    virtual ~DtcpDataPacket ();
-
+    virtual ~DtcpDataPacket();
 
 
     ////
     //
     // StackLink operations
     //
-    virtual bool  setParent (StackLinkInterface *  parent);
+    virtual bool setParent(StackLinkInterface * parent);
 
-    virtual void  unsetParent ();
+    virtual void unsetParent();
 
-    virtual bool  writeData (DataBuffer * linkBuffer);
+    virtual bool writeData(DataBuffer * linkBuffer);
 
-    virtual bool  readData (DataBuffer * linkBuffer);
+    virtual bool readData(DataBuffer * linkBuffer);
 
 
-    
     ////
     //
     // Data packet operations
     //
-    virtual bool  setPacketData (const byte * data,
-                                 const uint   dataLength);
+    virtual bool setPacketData(const byte * data, const uint dataLength);
 
-    virtual bool  getPacketData (byte *& data,
-                                 uint &  dataLength);
+    virtual bool getPacketData(byte *& data, uint & dataLength);
 
 
   protected:
-
     StackLinkInterface * parent_;
-    const byte *         setData_;
-    uint                 setDataLength_;
-    byte *               getData_;
-    uint                 getDataLength_;
-
+    const byte * setData_;
+    uint setDataLength_;
+    byte * getData_;
+    uint getDataLength_;
 };
-
-

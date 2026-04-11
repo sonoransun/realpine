@@ -19,41 +19,38 @@
 class AlpineTransportInterface
 {
   public:
-
-    AlpineTransportInterface () {};
-    virtual ~AlpineTransportInterface () {};
+    AlpineTransportInterface(){};
+    virtual ~AlpineTransportInterface(){};
 
 
     // Each transport must have a unqiue 4 byte unsigned identifier
     //
-    virtual ulong  getId () = 0;
+    virtual ulong getId() = 0;
 
 
     // Duplication of existing transports (handles)
     //
-    virtual AlpineTransportInterface *  duplicate () = 0;
+    virtual AlpineTransportInterface * duplicate() = 0;
 
 
     // Status
     //
-    virtual float  averageBandwidth () = 0;
+    virtual float averageBandwidth() = 0;
 
-    virtual float  peakBandwidth () = 0;
+    virtual float peakBandwidth() = 0;
 
-    virtual ulong  totalDataSize () = 0;
+    virtual ulong totalDataSize() = 0;
 
-    virtual ulong  xferDataSize () = 0;
+    virtual ulong xferDataSize() = 0;
 
 
     // Control
     //
-    virtual bool  isActive () = 0;
+    virtual bool isActive() = 0;
 
-    virtual bool  cancel () = 0;
+    virtual bool cancel() = 0;
 
-    virtual bool  pause () = 0;
+    virtual bool pause() = 0;
 
-    virtual bool  resume () = 0;
-
+    virtual bool resume() = 0;
 };
-

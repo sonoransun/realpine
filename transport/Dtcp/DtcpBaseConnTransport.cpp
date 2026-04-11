@@ -1,16 +1,15 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-
+#include <DataBuffer.h>
+#include <DtcpBaseConnMux.h>
 #include <DtcpBaseConnTransport.h>
 #include <DtcpBaseUdpTransport.h>
-#include <DtcpBaseConnMux.h>
 #include <DtcpConnPacket.h>
 #include <DtcpDataPacket.h>
-#include <DataBuffer.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <Platform.h>
+#include <StringUtils.h>
 
 #ifdef ALPINE_TLS_ENABLED
 #include <DtlsWrapper.h>
@@ -18,39 +17,36 @@
 #endif
 
 
-
-ulong            DtcpBaseConnTransport::currSequenceNum_s = 0;
-
+ulong DtcpBaseConnTransport::currSequenceNum_s = 0;
 
 
-DtcpBaseConnTransport::DtcpBaseConnTransport ()
+DtcpBaseConnTransport::DtcpBaseConnTransport()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport constructor invoked.");
+    Log::Debug("DtcpBaseConnTransport constructor invoked.");
 #endif
 
-    parentTransport_  = nullptr;
-    mux_              = nullptr;
-    lastRecv_.tv_sec  = 0;
+    parentTransport_ = nullptr;
+    mux_ = nullptr;
+    lastRecv_.tv_sec = 0;
     lastRecv_.tv_usec = 0;
-    lastSend_.tv_sec  = 0;
+    lastSend_.tv_sec = 0;
     lastSend_.tv_usec = 0;
-    peerId_           = 0;
-    myId_             = 0;
-    peerIpAddress_    = 0;
-    peerPort_         = 0;
-    pendingAck_       = false;
-    requestId_        = 0;
-    sendSequenceNum_  = 0;
-    recvSequenceNum_  = 0;
+    peerId_ = 0;
+    myId_ = 0;
+    peerIpAddress_ = 0;
+    peerPort_ = 0;
+    pendingAck_ = false;
+    requestId_ = 0;
+    sendSequenceNum_ = 0;
+    recvSequenceNum_ = 0;
 }
 
 
-
-DtcpBaseConnTransport::~DtcpBaseConnTransport ()
+DtcpBaseConnTransport::~DtcpBaseConnTransport()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport destructor invoked.");
+    Log::Debug("DtcpBaseConnTransport destructor invoked.");
 #endif
 
 #ifdef ALPINE_TLS_ENABLED
@@ -60,51 +56,46 @@ DtcpBaseConnTransport::~DtcpBaseConnTransport ()
 }
 
 
-
-bool 
-DtcpBaseConnTransport::setParent (DtcpBaseUdpTransport * parent)
+bool
+DtcpBaseConnTransport::setParent(DtcpBaseUdpTransport * parent)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setParent invoked.");
+    Log::Debug("DtcpBaseConnTransport::setParent invoked.");
 #endif
 
-    parentTransport_  = parent;
+    parentTransport_ = parent;
 
     return true;
 }
 
 
-
 bool
-DtcpBaseConnTransport::getParent (DtcpBaseUdpTransport *& parent)
+DtcpBaseConnTransport::getParent(DtcpBaseUdpTransport *& parent)
 {
     parent = parentTransport_;
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::getDataBuffer (DataBuffer *& dataBuffer)
+bool
+DtcpBaseConnTransport::getDataBuffer(DataBuffer *& dataBuffer)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getDataBuffer invoked.");
+    Log::Debug("DtcpBaseConnTransport::getDataBuffer invoked.");
 #endif
 
     bool status;
-    status = parentTransport_->getDataBuffer (dataBuffer);
+    status = parentTransport_->getDataBuffer(dataBuffer);
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::processData (const byte * data,
-                                    uint         dataLength)
+bool
+DtcpBaseConnTransport::processData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::processData invoked.");
+    Log::Debug("DtcpBaseConnTransport::processData invoked.");
 #endif
 
 
@@ -112,44 +103,42 @@ DtcpBaseConnTransport::processData (const byte * data,
 }
 
 
-
-bool 
-DtcpBaseConnTransport::processPacket (StackLinkInterface * packet)
+bool
+DtcpBaseConnTransport::processPacket(StackLinkInterface * packet)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::processPacket invoked.");
+    Log::Debug("DtcpBaseConnTransport::processPacket invoked.");
 #endif
 
-  
+
     DtcpConnPacket * connPacket;
     connPacket = dynamic_cast<DtcpConnPacket *>(packet);
 
     if (!connPacket) {
-        Log::Error ("Invalid packet type passed to DtcpBaseConnTransport::processPacket.");
+        Log::Error("Invalid packet type passed to DtcpBaseConnTransport::processPacket.");
 
         return false;
     }
     DataBuffer * dataBuffer;
-    parentTransport_->getDataBuffer (dataBuffer);
+    parentTransport_->getDataBuffer(dataBuffer);
 
-    DtcpPacket::t_PacketType  packetType;
-    packetType = connPacket->getPacketType ();    
+    DtcpPacket::t_PacketType packetType;
+    packetType = connPacket->getPacketType();
 
-    if ( (packetType == DtcpPacket::t_PacketType::connData) ||
-         (packetType == DtcpPacket::t_PacketType::connReliableData) ) {
+    if ((packetType == DtcpPacket::t_PacketType::connData) ||
+        (packetType == DtcpPacket::t_PacketType::connReliableData)) {
         // send incoming data to derived handler
         //
         byte * data;
-        uint   dataLength;
+        uint dataLength;
 
-        dataBuffer->getReadBuffer (data, dataLength);
+        dataBuffer->getReadBuffer(data, dataLength);
 
-        handleData (data, dataLength);
-    }
-    else {
+        handleData(data, dataLength);
+    } else {
         // MRP_TEMP complete handlers
         //
-        Log::Debug ("Unhandled packet type passed to DtcpBaseConnTransport::processPacket.");
+        Log::Debug("Unhandled packet type passed to DtcpBaseConnTransport::processPacket.");
         return false;
     }
 
@@ -158,98 +147,92 @@ DtcpBaseConnTransport::processPacket (StackLinkInterface * packet)
 }
 
 
-
-bool 
-DtcpBaseConnTransport::sendData (const byte * data,
-                                 uint         dataLength)
+bool
+DtcpBaseConnTransport::sendData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::sendData invoked.");
+    Log::Debug("DtcpBaseConnTransport::sendData invoked.");
 #endif
 
 
     // Create a DtcpDataPacket to pass this down the link chain.
     //
     DtcpDataPacket * dataPacket;
-    dataPacket =  new DtcpDataPacket ();
+    dataPacket = new DtcpDataPacket();
 
-    dataPacket->setPacketData (data, dataLength);
+    dataPacket->setPacketData(data, dataLength);
 
     bool status;
-    status = sendPacket (dataPacket);
+    status = sendPacket(dataPacket);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::sendPacket (StackLinkInterface * packet)
+bool
+DtcpBaseConnTransport::sendPacket(StackLinkInterface * packet)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::sendPacket invoked.");
+    Log::Debug("DtcpBaseConnTransport::sendPacket invoked.");
 #endif
 
     // Set packet links for packet transfer
     //
     bool status;
 
-    DtcpConnPacket * dtcpConnPacket = new DtcpConnPacket ();
+    DtcpConnPacket * dtcpConnPacket = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    dtcpPacket->setParent (dtcpConnPacket);
-    dtcpConnPacket->setParent (packet);
+    dtcpPacket->setParent(dtcpConnPacket);
+    dtcpConnPacket->setParent(packet);
 
-    dtcpConnPacket->setPeerLocation (peerIpAddress_, peerPort_);
-    dtcpConnPacket->setMyId (myId_);
-    dtcpConnPacket->setPacketType (DtcpPacket::t_PacketType::connData);
+    dtcpConnPacket->setPeerLocation(peerIpAddress_, peerPort_);
+    dtcpConnPacket->setMyId(myId_);
+    dtcpConnPacket->setPacketType(DtcpPacket::t_PacketType::connData);
 
-    status = parentTransport_->sendPacket (dtcpPacket);
+    status = parentTransport_->sendPacket(dtcpPacket);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::sendReliableData (const byte * data,
-                                         uint         dataLength)
+bool
+DtcpBaseConnTransport::sendReliableData(const byte * data, uint dataLength)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::sendReliableData invoked.");
+    Log::Debug("DtcpBaseConnTransport::sendReliableData invoked.");
 #endif
 
     // Create a DtcpDataPacket to pass this down the link chain.
     //
     DtcpDataPacket * dataPacket;
-    dataPacket =  new DtcpDataPacket ();
+    dataPacket = new DtcpDataPacket();
 
-    dataPacket->setPacketData (data, dataLength);
+    dataPacket->setPacketData(data, dataLength);
 
     bool status;
-    status = sendReliablePacket (dataPacket);
+    status = sendReliablePacket(dataPacket);
 
 
     return status;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::sendReliablePacket (StackLinkInterface * packet)
+bool
+DtcpBaseConnTransport::sendReliablePacket(StackLinkInterface * packet)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::sendReliablePacket invoked.");
+    Log::Debug("DtcpBaseConnTransport::sendReliablePacket invoked.");
 #endif
 
     // Cannot send multiple reliable packets over the same transport
     // at one time.  (Requires use of a higher level transport)
     //
     if (pendingAck_) {
-        Log::Debug ("Unable to send reliable packet; awaiting previously reply "
-                             "in DtcpBaseConnTransport::sendReliableData.");
+        Log::Debug("Unable to send reliable packet; awaiting previously reply "
+                   "in DtcpBaseConnTransport::sendReliableData.");
 
         return false;
     }
@@ -261,27 +244,26 @@ DtcpBaseConnTransport::sendReliablePacket (StackLinkInterface * packet)
 
     // the sequence number should never be zero
     //
-    if (!currSequenceNum_s) currSequenceNum_s++;
+    if (!currSequenceNum_s)
+        currSequenceNum_s++;
 
 
     // Set packet links for packet transfer
     //
     bool status;
 
-    DtcpConnPacket * dtcpConnPacket = new DtcpConnPacket ();
+    DtcpConnPacket * dtcpConnPacket = new DtcpConnPacket();
     DtcpPacket * dtcpPacket = new DtcpPacket();
 
-    dtcpPacket->setParent (dtcpConnPacket);
-    dtcpConnPacket->setParent (packet);
+    dtcpPacket->setParent(dtcpConnPacket);
+    dtcpConnPacket->setParent(packet);
 
-    dtcpConnPacket->setPeerLocation (peerIpAddress_, peerPort_);
-    dtcpConnPacket->setMyId (myId_);
-    dtcpConnPacket->setPacketType (DtcpPacket::t_PacketType::connReliableData);
-    dtcpConnPacket->setSequenceNum (sendSequenceNum_);
+    dtcpConnPacket->setPeerLocation(peerIpAddress_, peerPort_);
+    dtcpConnPacket->setMyId(myId_);
+    dtcpConnPacket->setPacketType(DtcpPacket::t_PacketType::connReliableData);
+    dtcpConnPacket->setSequenceNum(sendSequenceNum_);
 
-    status = parentTransport_->sendReliablePacket (dtcpPacket,
-                                                   this,
-                                                   requestId_);
+    status = parentTransport_->sendReliablePacket(dtcpPacket, this, requestId_);
 
     if (status) {
         pendingAck_ = true;
@@ -292,87 +274,82 @@ DtcpBaseConnTransport::sendReliablePacket (StackLinkInterface * packet)
 }
 
 
-
-bool 
-DtcpBaseConnTransport::pendingAck ()
+bool
+DtcpBaseConnTransport::pendingAck()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::pendingAck invoked.");
+    Log::Debug("DtcpBaseConnTransport::pendingAck invoked.");
 #endif
 
     return pendingAck_;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::acknowledgeTransfer ()
+bool
+DtcpBaseConnTransport::acknowledgeTransfer()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::acknowledgeTransfer invoked.");
+    Log::Debug("DtcpBaseConnTransport::acknowledgeTransfer invoked.");
 #endif
 
     if (!pendingAck_) {
         return false;
     }
     pendingAck_ = false;
-    mux_->acknowledgeTransfer (this);
+    mux_->acknowledgeTransfer(this);
 
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::handleSendFailure (ulong  id)
+bool
+DtcpBaseConnTransport::handleSendFailure(ulong id)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::handleSendFailure invoked.");
+    Log::Debug("DtcpBaseConnTransport::handleSendFailure invoked.");
 #endif
 
     if (id != requestId_) {
-        Log::Error ("Invalid request ID passed back to DtcpBaseConnTransport::handleSendFailure!");
+        Log::Error("Invalid request ID passed back to DtcpBaseConnTransport::handleSendFailure!");
         return false;
     }
     pendingAck_ = false;
 
     bool status;
-    status = handleSendFailure ();
+    status = handleSendFailure();
 
 
     return status;
 }
-
-
-
-bool 
-DtcpBaseConnTransport::handleSendReceived (ulong  id)
-{
-#ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::handleSendReceived invoked.");
-#endif
-
-    if (id != requestId_) { 
-        Log::Error ("Invalid request ID passed back to DtcpBaseConnTransport::handleSendFailure!");
-        return false;
-    }
-    pendingAck_ = false;
-
-    bool status;
-    status = handleSendReceived ();
-
-
-    return status;
-}
-
 
 
 bool
-DtcpBaseConnTransport::setTransportId (ulong transportId)
+DtcpBaseConnTransport::handleSendReceived(ulong id)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setTransportId invoked.");
+    Log::Debug("DtcpBaseConnTransport::handleSendReceived invoked.");
+#endif
+
+    if (id != requestId_) {
+        Log::Error("Invalid request ID passed back to DtcpBaseConnTransport::handleSendFailure!");
+        return false;
+    }
+    pendingAck_ = false;
+
+    bool status;
+    status = handleSendReceived();
+
+
+    return status;
+}
+
+
+bool
+DtcpBaseConnTransport::setTransportId(ulong transportId)
+{
+#ifdef _VERBOSE
+    Log::Debug("DtcpBaseConnTransport::setTransportId invoked.");
 #endif
 
     transportId_ = transportId;
@@ -381,12 +358,11 @@ DtcpBaseConnTransport::setTransportId (ulong transportId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::getTransportId (ulong & transportId)
+DtcpBaseConnTransport::getTransportId(ulong & transportId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getTransportId invoked.");
+    Log::Debug("DtcpBaseConnTransport::getTransportId invoked.");
 #endif
 
     transportId = transportId_;
@@ -395,12 +371,11 @@ DtcpBaseConnTransport::getTransportId (ulong & transportId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::setPeerId (ulong peerId)
+DtcpBaseConnTransport::setPeerId(ulong peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setPeerId invoked.");
+    Log::Debug("DtcpBaseConnTransport::setPeerId invoked.");
 #endif
 
     peerId_ = peerId;
@@ -409,12 +384,11 @@ DtcpBaseConnTransport::setPeerId (ulong peerId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::getPeerId (ulong & peerId)
+DtcpBaseConnTransport::getPeerId(ulong & peerId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getPeerId invoked.");
+    Log::Debug("DtcpBaseConnTransport::getPeerId invoked.");
 #endif
 
     peerId = peerId_;
@@ -423,12 +397,11 @@ DtcpBaseConnTransport::getPeerId (ulong & peerId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::setMyId (ulong myId)
+DtcpBaseConnTransport::setMyId(ulong myId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setMyId invoked.");
+    Log::Debug("DtcpBaseConnTransport::setMyId invoked.");
 #endif
 
     myId_ = myId;
@@ -437,12 +410,11 @@ DtcpBaseConnTransport::setMyId (ulong myId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::getMyId (ulong & myId)
+DtcpBaseConnTransport::getMyId(ulong & myId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getMyId invoked.");
+    Log::Debug("DtcpBaseConnTransport::getMyId invoked.");
 #endif
 
     myId = myId_;
@@ -451,13 +423,11 @@ DtcpBaseConnTransport::getMyId (ulong & myId)
 }
 
 
-
 bool
-DtcpBaseConnTransport::getPeerLocation (ulong &   ipAddress,
-                                        ushort &  port)
+DtcpBaseConnTransport::getPeerLocation(ulong & ipAddress, ushort & port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getPeerLocation invoked.");
+    Log::Debug("DtcpBaseConnTransport::getPeerLocation invoked.");
 #endif
 
     if (!peerIpAddress_) {
@@ -470,12 +440,11 @@ DtcpBaseConnTransport::getPeerLocation (ulong &   ipAddress,
 }
 
 
-
-bool 
-DtcpBaseConnTransport::setMux (DtcpBaseConnMux *  mux)
+bool
+DtcpBaseConnTransport::setMux(DtcpBaseConnMux * mux)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setMux invoked.");
+    Log::Debug("DtcpBaseConnTransport::setMux invoked.");
 #endif
 
     mux_ = mux;
@@ -484,13 +453,11 @@ DtcpBaseConnTransport::setMux (DtcpBaseConnMux *  mux)
 }
 
 
-
 bool
-DtcpBaseConnTransport::setPeerLocation (ulong   ipAddress,
-                                        ushort  port)
+DtcpBaseConnTransport::setPeerLocation(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setPeerLocation invoked.");
+    Log::Debug("DtcpBaseConnTransport::setPeerLocation invoked.");
 #endif
 
     peerIpAddress_ = ipAddress;
@@ -500,42 +467,39 @@ DtcpBaseConnTransport::setPeerLocation (ulong   ipAddress,
 }
 
 
-
-bool 
-DtcpBaseConnTransport::getLastRecvTime (struct timeval & lastRecv)
+bool
+DtcpBaseConnTransport::getLastRecvTime(struct timeval & lastRecv)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getLastRecvTime invoked.");
+    Log::Debug("DtcpBaseConnTransport::getLastRecvTime invoked.");
 #endif
 
-    lastRecv.tv_sec  = lastRecv_.tv_sec;
+    lastRecv.tv_sec = lastRecv_.tv_sec;
     lastRecv.tv_usec = lastRecv_.tv_usec;
-    
+
     return true;
 }
 
 
-
 bool
-DtcpBaseConnTransport::getLastSendTime (struct timeval & lastSend)
+DtcpBaseConnTransport::getLastSendTime(struct timeval & lastSend)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getLastSendTime invoked.");
+    Log::Debug("DtcpBaseConnTransport::getLastSendTime invoked.");
 #endif
 
-    lastSend.tv_sec  = lastSend_.tv_sec;
+    lastSend.tv_sec = lastSend_.tv_sec;
     lastSend.tv_usec = lastSend_.tv_usec;
 
     return true;
 }
 
 
-
-bool 
-DtcpBaseConnTransport::getRequestId (ulong & requestId)
+bool
+DtcpBaseConnTransport::getRequestId(ulong & requestId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getRequestId invoked.");
+    Log::Debug("DtcpBaseConnTransport::getRequestId invoked.");
 #endif
 
     requestId = requestId_;
@@ -544,12 +508,11 @@ DtcpBaseConnTransport::getRequestId (ulong & requestId)
 }
 
 
-
-bool 
-DtcpBaseConnTransport::getSendSequenceNum (ulong & sendSequenceNum)
+bool
+DtcpBaseConnTransport::getSendSequenceNum(ulong & sendSequenceNum)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getSendSequenceNum invoked.");
+    Log::Debug("DtcpBaseConnTransport::getSendSequenceNum invoked.");
 #endif
 
     sendSequenceNum = sendSequenceNum_;
@@ -558,26 +521,24 @@ DtcpBaseConnTransport::getSendSequenceNum (ulong & sendSequenceNum)
 }
 
 
-
-bool 
-DtcpBaseConnTransport::getRecvSequenceNum (ulong & recvSequenceNum)
+bool
+DtcpBaseConnTransport::getRecvSequenceNum(ulong & recvSequenceNum)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::getRecvSequenceNum invoked.");
+    Log::Debug("DtcpBaseConnTransport::getRecvSequenceNum invoked.");
 #endif
 
-    recvSequenceNum = recvSequenceNum_;    
+    recvSequenceNum = recvSequenceNum_;
 
     return true;
 }
 
 
-    
-bool 
-DtcpBaseConnTransport::setRecvSequenceNum (ulong recvSequenceNum)
+bool
+DtcpBaseConnTransport::setRecvSequenceNum(ulong recvSequenceNum)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::setRecvSequenceNum invoked.");
+    Log::Debug("DtcpBaseConnTransport::setRecvSequenceNum invoked.");
 #endif
 
     recvSequenceNum_ = recvSequenceNum;
@@ -586,13 +547,12 @@ DtcpBaseConnTransport::setRecvSequenceNum (ulong recvSequenceNum)
 }
 
 
-
 #ifdef ALPINE_TLS_ENABLED
 bool
-DtcpBaseConnTransport::enableTls (TlsContext & tlsCtx)
+DtcpBaseConnTransport::enableTls(TlsContext & tlsCtx)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::enableTls invoked.");
+    Log::Debug("DtcpBaseConnTransport::enableTls invoked.");
 #endif
 
     if (dtlsWrapper_) {
@@ -619,7 +579,7 @@ DtcpBaseConnTransport::enableTls (TlsContext & tlsCtx)
 
 
 bool
-DtcpBaseConnTransport::isTlsEnabled () const
+DtcpBaseConnTransport::isTlsEnabled() const
 {
     return dtlsWrapper_ && dtlsWrapper_->isInitialized();
 }
@@ -627,10 +587,10 @@ DtcpBaseConnTransport::isTlsEnabled () const
 
 
 bool
-DtcpBaseConnTransport::close ()
+DtcpBaseConnTransport::close()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpBaseConnTransport::close invoked.");
+    Log::Debug("DtcpBaseConnTransport::close invoked.");
 #endif
 
 #ifdef ALPINE_TLS_ENABLED
@@ -644,6 +604,3 @@ DtcpBaseConnTransport::close ()
 
     return true;
 }
-
-
-

@@ -3,8 +3,8 @@
 
 #ifdef ALPINE_UPNP_ENABLED
 
-#include <UpnpPortMapper.h>
 #include <Log.h>
+#include <UpnpPortMapper.h>
 
 #include <miniupnpc.h>
 #include <upnpcommands.h>
@@ -13,19 +13,18 @@
 #include <cstring>
 
 
-ReadWriteSem                            UpnpPortMapper::semaphore_;
+ReadWriteSem UpnpPortMapper::semaphore_;
 std::vector<UpnpPortMapper::PortMapping> UpnpPortMapper::activeMappings_;
-bool                                    UpnpPortMapper::available_ = false;
-UpnpPortMapper::RenewalThread *         UpnpPortMapper::renewalThread_ = nullptr;
-void *                                  UpnpPortMapper::devList_ = nullptr;
-char                                    UpnpPortMapper::lanAddr_[64] = {};
-void *                                  UpnpPortMapper::urls_ = nullptr;
-void *                                  UpnpPortMapper::igdData_ = nullptr;
-
+bool UpnpPortMapper::available_ = false;
+UpnpPortMapper::RenewalThread * UpnpPortMapper::renewalThread_ = nullptr;
+void * UpnpPortMapper::devList_ = nullptr;
+char UpnpPortMapper::lanAddr_[64] = {};
+void * UpnpPortMapper::urls_ = nullptr;
+void * UpnpPortMapper::igdData_ = nullptr;
 
 
 bool
-UpnpPortMapper::initialize ()
+UpnpPortMapper::initialize()
 {
     semaphore_.acquireWrite();
 
@@ -45,12 +44,10 @@ UpnpPortMapper::initialize ()
     std::memset(urls, 0, sizeof(UPNPUrls));
     std::memset(igdData, 0, sizeof(IGDdatas));
 
-    int status = UPNP_GetValidIGD(devList, urls, igdData,
-                                   lanAddr_, sizeof(lanAddr_));
+    int status = UPNP_GetValidIGD(devList, urls, igdData, lanAddr_, sizeof(lanAddr_));
 
     if (status != 1) {
-        Log::Info("UpnpPortMapper: No valid IGD found (status="s +
-                  std::to_string(status) + ").");
+        Log::Info("UpnpPortMapper: No valid IGD found (status="s + std::to_string(status) + ").");
         delete urls;
         delete igdData;
         freeUPNPDevlist(devList);
@@ -74,11 +71,11 @@ UpnpPortMapper::initialize ()
 }
 
 
-
 bool
-UpnpPortMapper::addMapping (ushort externalPort, ushort internalPort,
-                             const string & protocol,
-                             const string & description)
+UpnpPortMapper::addMapping(ushort externalPort,
+                           ushort internalPort,
+                           const string & protocol,
+                           const string & description)
 {
     semaphore_.acquireWrite();
 
@@ -92,23 +89,20 @@ UpnpPortMapper::addMapping (ushort externalPort, ushort internalPort,
 
     string extPortStr = std::to_string(externalPort);
     string intPortStr = std::to_string(internalPort);
-    string leaseStr   = std::to_string(LEASE_DURATION_SEC);
+    string leaseStr = std::to_string(LEASE_DURATION_SEC);
 
-    int result = UPNP_AddPortMapping(
-        urls->controlURL,
-        igdData->first.servicetype,
-        extPortStr.c_str(),
-        intPortStr.c_str(),
-        lanAddr_,
-        description.c_str(),
-        protocol.c_str(),
-        nullptr,            // remote host (any)
-        leaseStr.c_str()
-    );
+    int result = UPNP_AddPortMapping(urls->controlURL,
+                                     igdData->first.servicetype,
+                                     extPortStr.c_str(),
+                                     intPortStr.c_str(),
+                                     lanAddr_,
+                                     description.c_str(),
+                                     protocol.c_str(),
+                                     nullptr,  // remote host (any)
+                                     leaseStr.c_str());
 
     if (result != UPNPCOMMAND_SUCCESS) {
-        Log::Error("UpnpPortMapper: Failed to add port mapping "s +
-                   extPortStr + " -> " + intPortStr + " " + protocol +
+        Log::Error("UpnpPortMapper: Failed to add port mapping "s + extPortStr + " -> " + intPortStr + " " + protocol +
                    " (error " + std::to_string(result) + ")");
         semaphore_.releaseWrite();
         return false;
@@ -117,21 +111,20 @@ UpnpPortMapper::addMapping (ushort externalPort, ushort internalPort,
     PortMapping mapping;
     mapping.externalPort = externalPort;
     mapping.internalPort = internalPort;
-    mapping.protocol     = protocol;
-    mapping.description  = description;
+    mapping.protocol = protocol;
+    mapping.description = description;
     activeMappings_.push_back(mapping);
 
-    Log::Info("UpnpPortMapper: Added mapping "s + extPortStr + " -> " +
-              intPortStr + " " + protocol + " (" + description + ")");
+    Log::Info("UpnpPortMapper: Added mapping "s + extPortStr + " -> " + intPortStr + " " + protocol + " (" +
+              description + ")");
 
     semaphore_.releaseWrite();
     return true;
 }
 
 
-
 bool
-UpnpPortMapper::removeMapping (ushort externalPort, const string & protocol)
+UpnpPortMapper::removeMapping(ushort externalPort, const string & protocol)
 {
     semaphore_.acquireWrite();
 
@@ -145,12 +138,11 @@ UpnpPortMapper::removeMapping (ushort externalPort, const string & protocol)
 
     string extPortStr = std::to_string(externalPort);
 
-    int result = UPNP_DeletePortMapping(
-        urls->controlURL,
-        igdData->first.servicetype,
-        extPortStr.c_str(),
-        protocol.c_str(),
-        nullptr             // remote host
+    int result = UPNP_DeletePortMapping(urls->controlURL,
+                                        igdData->first.servicetype,
+                                        extPortStr.c_str(),
+                                        protocol.c_str(),
+                                        nullptr  // remote host
     );
 
     // Remove from tracking regardless of result
@@ -165,9 +157,8 @@ UpnpPortMapper::removeMapping (ushort externalPort, const string & protocol)
     semaphore_.releaseWrite();
 
     if (result != UPNPCOMMAND_SUCCESS) {
-        Log::Debug("UpnpPortMapper: Failed to remove mapping "s +
-                   extPortStr + " " + protocol +
-                   " (error " + std::to_string(result) + ")");
+        Log::Debug("UpnpPortMapper: Failed to remove mapping "s + extPortStr + " " + protocol + " (error " +
+                   std::to_string(result) + ")");
         return false;
     }
 
@@ -176,9 +167,8 @@ UpnpPortMapper::removeMapping (ushort externalPort, const string & protocol)
 }
 
 
-
 string
-UpnpPortMapper::getExternalIpAddress ()
+UpnpPortMapper::getExternalIpAddress()
 {
     semaphore_.acquireRead();
 
@@ -191,11 +181,7 @@ UpnpPortMapper::getExternalIpAddress ()
     auto * igdData = static_cast<IGDdatas *>(igdData_);
 
     char externalAddr[40] = {};
-    int result = UPNP_GetExternalIPAddress(
-        urls->controlURL,
-        igdData->first.servicetype,
-        externalAddr
-    );
+    int result = UPNP_GetExternalIPAddress(urls->controlURL, igdData->first.servicetype, externalAddr);
 
     semaphore_.releaseRead();
 
@@ -206,9 +192,8 @@ UpnpPortMapper::getExternalIpAddress ()
 }
 
 
-
 bool
-UpnpPortMapper::isAvailable ()
+UpnpPortMapper::isAvailable()
 {
     semaphore_.acquireRead();
     bool avail = available_;
@@ -217,9 +202,8 @@ UpnpPortMapper::isAvailable ()
 }
 
 
-
 void
-UpnpPortMapper::shutdown ()
+UpnpPortMapper::shutdown()
 {
     semaphore_.acquireWrite();
 
@@ -239,15 +223,9 @@ UpnpPortMapper::shutdown ()
             string extPortStr = std::to_string(mapping.externalPort);
 
             UPNP_DeletePortMapping(
-                urls->controlURL,
-                igdData->first.servicetype,
-                extPortStr.c_str(),
-                mapping.protocol.c_str(),
-                nullptr
-            );
+                urls->controlURL, igdData->first.servicetype, extPortStr.c_str(), mapping.protocol.c_str(), nullptr);
 
-            Log::Debug("UpnpPortMapper: Removed mapping "s + extPortStr +
-                       " " + mapping.protocol + " during shutdown");
+            Log::Debug("UpnpPortMapper: Removed mapping "s + extPortStr + " " + mapping.protocol + " during shutdown");
         }
 
         activeMappings_.clear();
@@ -272,9 +250,8 @@ UpnpPortMapper::shutdown ()
 }
 
 
-
 void
-UpnpPortMapper::renewLeases ()
+UpnpPortMapper::renewLeases()
 {
     semaphore_.acquireRead();
 
@@ -295,33 +272,28 @@ UpnpPortMapper::renewLeases ()
         string extPortStr = std::to_string(mapping.externalPort);
         string intPortStr = std::to_string(mapping.internalPort);
 
-        int result = UPNP_AddPortMapping(
-            urls->controlURL,
-            igdData->first.servicetype,
-            extPortStr.c_str(),
-            intPortStr.c_str(),
-            lanAddr_,
-            mapping.description.c_str(),
-            mapping.protocol.c_str(),
-            nullptr,
-            leaseStr.c_str()
-        );
+        int result = UPNP_AddPortMapping(urls->controlURL,
+                                         igdData->first.servicetype,
+                                         extPortStr.c_str(),
+                                         intPortStr.c_str(),
+                                         lanAddr_,
+                                         mapping.description.c_str(),
+                                         mapping.protocol.c_str(),
+                                         nullptr,
+                                         leaseStr.c_str());
 
         if (result != UPNPCOMMAND_SUCCESS) {
-            Log::Error("UpnpPortMapper: Lease renewal failed for "s +
-                       extPortStr + " " + mapping.protocol +
-                       " (error " + std::to_string(result) + ")");
+            Log::Error("UpnpPortMapper: Lease renewal failed for "s + extPortStr + " " + mapping.protocol + " (error " +
+                       std::to_string(result) + ")");
         }
     }
 
-    Log::Debug("UpnpPortMapper: Lease renewal completed for "s +
-               std::to_string(mappings.size()) + " mappings");
+    Log::Debug("UpnpPortMapper: Lease renewal completed for "s + std::to_string(mappings.size()) + " mappings");
 }
 
 
-
 void
-UpnpPortMapper::RenewalThread::threadMain ()
+UpnpPortMapper::RenewalThread::threadMain()
 {
     Log::Debug("UpnpPortMapper: Renewal thread started.");
 

@@ -6,23 +6,18 @@
 #include <stdexcept>
 
 
-std::unordered_map<string, ConfigSchema::t_FieldSpec>  ConfigSchema::schema_s;
-
+std::unordered_map<string, ConfigSchema::t_FieldSpec> ConfigSchema::schema_s;
 
 
 void
-ConfigSchema::addField (const string &       name,
-                        const t_FieldSpec &   spec)
+ConfigSchema::addField(const string & name, const t_FieldSpec & spec)
 {
     schema_s[name] = spec;
 }
 
 
-
 bool
-ConfigSchema::validate (const string &  name,
-                        const string &  value,
-                        string &        errorMsg)
+ConfigSchema::validate(const string & name, const string & value, string & errorMsg)
 {
     auto it = schema_s.find(name);
     if (it == schema_s.end())
@@ -36,22 +31,20 @@ ConfigSchema::validate (const string &  name,
     }
 
     switch (spec.type) {
-        case t_ValueType::Number:
-            return validateNumber(value, spec, errorMsg);
-        case t_ValueType::Boolean:
-            return validateBoolean(value, errorMsg);
-        case t_ValueType::String:
-            break;
+    case t_ValueType::Number:
+        return validateNumber(value, spec, errorMsg);
+    case t_ValueType::Boolean:
+        return validateBoolean(value, errorMsg);
+    case t_ValueType::String:
+        break;
     }
 
     return true;
 }
 
 
-
 bool
-ConfigSchema::validateAll (const std::unordered_map<string, string> &  values,
-                           vector<string> &                            errors)
+ConfigSchema::validateAll(const std::unordered_map<string, string> & values, vector<string> & errors)
 {
     bool allValid = true;
 
@@ -76,19 +69,15 @@ ConfigSchema::validateAll (const std::unordered_map<string, string> &  values,
 }
 
 
-
 void
-ConfigSchema::clear ()
+ConfigSchema::clear()
 {
     schema_s.clear();
 }
 
 
-
 bool
-ConfigSchema::validateNumber (const string &       value,
-                              const t_FieldSpec &  spec,
-                              string &             errorMsg)
+ConfigSchema::validateNumber(const string & value, const t_FieldSpec & spec, string & errorMsg)
 {
     long long numValue;
     try {
@@ -118,14 +107,10 @@ ConfigSchema::validateNumber (const string &       value,
 }
 
 
-
 bool
-ConfigSchema::validateBoolean (const string &  value,
-                               string &        errorMsg)
+ConfigSchema::validateBoolean(const string & value, string & errorMsg)
 {
-    if (value == "true" || value == "false" ||
-        value == "1" || value == "0" ||
-        value == "yes" || value == "no") {
+    if (value == "true" || value == "false" || value == "1" || value == "0" || value == "yes" || value == "no") {
         return true;
     }
 

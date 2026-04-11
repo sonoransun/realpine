@@ -8,24 +8,28 @@ using namespace std::string_view_literals;
 
 
 HttpRouter::HttpMethod
-HttpRouter::parseMethod (std::string_view method)
+HttpRouter::parseMethod(std::string_view method)
 {
-    if (method == "GET"sv)     return HttpMethod::GET;
-    if (method == "POST"sv)    return HttpMethod::POST;
-    if (method == "PUT"sv)     return HttpMethod::PUT;
-    if (method == "DELETE"sv)  return HttpMethod::DELETE_;
-    if (method == "PATCH"sv)   return HttpMethod::PATCH;
-    if (method == "HEAD"sv)    return HttpMethod::HEAD;
-    if (method == "OPTIONS"sv) return HttpMethod::OPTIONS;
+    if (method == "GET"sv)
+        return HttpMethod::GET;
+    if (method == "POST"sv)
+        return HttpMethod::POST;
+    if (method == "PUT"sv)
+        return HttpMethod::PUT;
+    if (method == "DELETE"sv)
+        return HttpMethod::DELETE_;
+    if (method == "PATCH"sv)
+        return HttpMethod::PATCH;
+    if (method == "HEAD"sv)
+        return HttpMethod::HEAD;
+    if (method == "OPTIONS"sv)
+        return HttpMethod::OPTIONS;
     return HttpMethod::UNKNOWN;
 }
 
 
 void
-HttpRouter::addRoute (const string &  method,
-                      const string &  pattern,
-                      RouteHandler    handler,
-                      const string &  description)
+HttpRouter::addRoute(const string & method, const string & pattern, RouteHandler handler, const string & description)
 {
     routes_.push_back({method, pattern, description});
     addRoute(method, pattern, handler);
@@ -33,11 +37,8 @@ HttpRouter::addRoute (const string &  method,
 
 
 void
-HttpRouter::addRoute (const string &  method,
-                      const string &  pattern,
-                      RouteHandler    handler,
-                      const string &  description,
-                      bool            slow)
+HttpRouter::addRoute(
+    const string & method, const string & pattern, RouteHandler handler, const string & description, bool slow)
 {
     routes_.push_back({method, pattern, description});
 
@@ -64,8 +65,7 @@ HttpRouter::addRoute (const string &  method,
             auto key = string(segment);
             auto it = node->children.find(key);
             if (it == node->children.end()) {
-                auto [inserted, _] = node->children.emplace(std::move(key),
-                                                             std::make_unique<TrieNode>());
+                auto [inserted, _] = node->children.emplace(std::move(key), std::make_unique<TrieNode>());
                 node = inserted->second.get();
             } else {
                 node = it->second.get();
@@ -83,16 +83,14 @@ HttpRouter::addRoute (const string &  method,
 
 
 const vector<RouteInfo> &
-HttpRouter::getRoutes () const
+HttpRouter::getRoutes() const
 {
     return routes_;
 }
 
 
 void
-HttpRouter::addRoute (const string &  method,
-                      const string &  pattern,
-                      RouteHandler    handler)
+HttpRouter::addRoute(const string & method, const string & pattern, RouteHandler handler)
 {
     auto httpMethod = parseMethod(method);
 
@@ -105,34 +103,25 @@ HttpRouter::addRoute (const string &  method,
     if (!sv.empty() && sv.front() == '/')
         sv.remove_prefix(1);
 
-    while (!sv.empty())
-    {
+    while (!sv.empty()) {
         auto slash = sv.find('/');
         auto segment = sv.substr(0, slash);
 
-        if (!segment.empty() && segment.front() == ':')
-        {
+        if (!segment.empty() && segment.front() == ':') {
             // Parameterized segment — use wildcard child
-            if (!node->paramChild)
-            {
+            if (!node->paramChild) {
                 node->paramChild = std::make_unique<TrieNode>();
                 node->paramChild->paramName = string(segment.substr(1));
             }
             node = node->paramChild.get();
-        }
-        else
-        {
+        } else {
             // Literal segment
             auto key = string(segment);
             auto it = node->children.find(key);
-            if (it == node->children.end())
-            {
-                auto [inserted, _] = node->children.emplace(std::move(key),
-                                                             std::make_unique<TrieNode>());
+            if (it == node->children.end()) {
+                auto [inserted, _] = node->children.emplace(std::move(key), std::make_unique<TrieNode>());
                 node = inserted->second.get();
-            }
-            else
-            {
+            } else {
                 node = it->second.get();
             }
         }
@@ -148,14 +137,14 @@ HttpRouter::addRoute (const string &  method,
 
 
 void
-HttpRouter::setAuthMiddleware (AuthMiddleware middleware)
+HttpRouter::setAuthMiddleware(AuthMiddleware middleware)
 {
     authMiddleware_ = std::move(middleware);
 }
 
 
 HttpResponse
-HttpRouter::dispatch (const HttpRequest & request)
+HttpRouter::dispatch(const HttpRequest & request)
 {
     // Handle OPTIONS preflight for CORS
     if (request.method == "OPTIONS"s)
@@ -178,10 +167,8 @@ HttpRouter::dispatch (const HttpRequest & request)
     std::unordered_map<string, string> params;
     bool pathMatched = false;
 
-    while (true)
-    {
-        if (path.empty())
-        {
+    while (true) {
+        if (path.empty()) {
             // Reached the end of the path — check for handlers
             if (!node->handlers.empty())
                 pathMatched = true;
@@ -194,12 +181,9 @@ HttpRouter::dispatch (const HttpRequest & request)
         // Try literal child first
         const TrieNode * next = nullptr;
         auto it = node->children.find(string(segment));
-        if (it != node->children.end())
-        {
+        if (it != node->children.end()) {
             next = it->second.get();
-        }
-        else if (node->paramChild)
-        {
+        } else if (node->paramChild) {
             // Try parameterized child
             params[node->paramChild->paramName] = string(segment);
             next = node->paramChild.get();
@@ -210,8 +194,7 @@ HttpRouter::dispatch (const HttpRequest & request)
 
         node = next;
 
-        if (slash == std::string_view::npos)
-        {
+        if (slash == std::string_view::npos) {
             // Last segment — check for handlers
             if (!node->handlers.empty())
                 pathMatched = true;
@@ -229,8 +212,7 @@ HttpRouter::dispatch (const HttpRequest & request)
         return HttpResponse::methodNotAllowed();
 
     // Run auth middleware only if set
-    if (authMiddleware_)
-    {
+    if (authMiddleware_) {
         HttpResponse authResp(401, "Unauthorized"s);
         if (!authMiddleware_(request, authResp))
             return authResp;
@@ -241,7 +223,7 @@ HttpRouter::dispatch (const HttpRequest & request)
 
 
 bool
-HttpRouter::isSlowRoute (const HttpRequest & request) const
+HttpRouter::isSlowRoute(const HttpRequest & request) const
 {
     auto httpMethod = parseMethod(request.method);
 

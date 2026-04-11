@@ -6,62 +6,57 @@
 #include <StringUtils.h>
 
 
-
-DynamicLoader::DynamicLoader ()
+DynamicLoader::DynamicLoader()
 {
-    libPath_         = "";
-    symbolScope_     = t_SymbolScope::Private;
-    bindingMethod_   = t_BindingMethod::Now;
-    dlFlags_         = RTLD_NOW;
-    dlHandle_        = {};
+    libPath_ = "";
+    symbolScope_ = t_SymbolScope::Private;
+    bindingMethod_ = t_BindingMethod::Now;
+    dlFlags_ = RTLD_NOW;
+    dlHandle_ = {};
 }
 
 
-
-DynamicLoader::~DynamicLoader ()
+DynamicLoader::~DynamicLoader()
 {
     if (dlHandle_)
         alpine_dlclose(dlHandle_);
 }
 
 
-
-bool  
-DynamicLoader::setSymbolScope (t_SymbolScope  scope)
+bool
+DynamicLoader::setSymbolScope(t_SymbolScope scope)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DynamicLoader::setSymbolScope invoked.");
+    Log::Debug("DynamicLoader::setSymbolScope invoked.");
 #endif
 
-    if ( (scope != t_SymbolScope::Private) && (scope != t_SymbolScope::Global) ) {
-        Log::Error ("Invalid symbol scope value passed in call to DynamicLoader::setSymbolScope!");
+    if ((scope != t_SymbolScope::Private) && (scope != t_SymbolScope::Global)) {
+        Log::Error("Invalid symbol scope value passed in call to DynamicLoader::setSymbolScope!");
         return false;
     }
-   
+
     symbolScope_ = scope;
 
     return true;
 }
 
 
-
-DynamicLoader::t_SymbolScope  
-DynamicLoader::getSymbolScope ()
+DynamicLoader::t_SymbolScope
+DynamicLoader::getSymbolScope()
 {
     return symbolScope_;
 }
 
 
-
-bool  
-DynamicLoader::setBindingMethod (t_BindingMethod  method)
+bool
+DynamicLoader::setBindingMethod(t_BindingMethod method)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DynamicLoader::setBindingMethod invoked.");
+    Log::Debug("DynamicLoader::setBindingMethod invoked.");
 #endif
 
-    if ( (method != t_BindingMethod::Now) && (method != t_BindingMethod::Lazy) ) {
-        Log::Debug ("Invalid binding method value passed in call to DynamicLoader::setBindingMethod!");
+    if ((method != t_BindingMethod::Now) && (method != t_BindingMethod::Lazy)) {
+        Log::Debug("Invalid binding method value passed in call to DynamicLoader::setBindingMethod!");
         return false;
     }
 
@@ -71,29 +66,28 @@ DynamicLoader::setBindingMethod (t_BindingMethod  method)
 }
 
 
-
-DynamicLoader::t_BindingMethod  
-DynamicLoader::getBindingMethod ()
+DynamicLoader::t_BindingMethod
+DynamicLoader::getBindingMethod()
 {
     return bindingMethod_;
 }
 
 
-
-bool  
-DynamicLoader::load (const string &  libPath)
+bool
+DynamicLoader::load(const string & libPath)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DynamicLoader::load invoked.  Library Path:"s + libPath);
+    Log::Debug("DynamicLoader::load invoked.  Library Path:"s + libPath);
 #endif
 
-    libPath_      = libPath;
+    libPath_ = libPath;
 
     dlHandle_ = alpine_dlopen(libPath_.c_str(), dlFlags_);
 
     if (!dlHandle_) {
-        Log::Error ("Error opening library: "s + libPath_ + " in call to "
-                             "DynamicLoader::load!");
+        Log::Error("Error opening library: "s + libPath_ +
+                   " in call to "
+                   "DynamicLoader::load!");
         return false;
     }
 
@@ -102,26 +96,24 @@ DynamicLoader::load (const string &  libPath)
 }
 
 
-
-bool  
-DynamicLoader::getFunctionHandle (const string &  functionName,
-                                  void *&         functionHandle)
+bool
+DynamicLoader::getFunctionHandle(const string & functionName, void *& functionHandle)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DynamicLoader::getFunctionHandle invoked.  Function Name: "s + functionName);
+    Log::Debug("DynamicLoader::getFunctionHandle invoked.  Function Name: "s + functionName);
 #endif
 
     if (!dlHandle_) {
-        Log::Error ("Library not initialized in call to "
-                             "DynamicLoader::getFunctionHandle!");
+        Log::Error("Library not initialized in call to "
+                   "DynamicLoader::getFunctionHandle!");
         return false;
     }
 
     functionHandle = alpine_dlsym(dlHandle_, functionName.c_str());
 
     if (!functionHandle) {
-        Log::Error ("Error locating symbol: "s + functionName + " in library: " +
-                             libPath_ + " in call to DynamicLoader::getFunctionHandle!");
+        Log::Error("Error locating symbol: "s + functionName + " in library: " + libPath_ +
+                   " in call to DynamicLoader::getFunctionHandle!");
 
         return false;
     }
@@ -131,12 +123,11 @@ DynamicLoader::getFunctionHandle (const string &  functionName,
 }
 
 
-
-bool  
-DynamicLoader::close ()
+bool
+DynamicLoader::close()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DynamicLoader::close invoked.");
+    Log::Debug("DynamicLoader::close invoked.");
 #endif
 
     if (dlHandle_) {
@@ -148,9 +139,8 @@ DynamicLoader::close ()
 }
 
 
-
 void
-DynamicLoader::setFlags ()
+DynamicLoader::setFlags()
 {
     dlFlags_ = 0;
 
@@ -162,6 +152,3 @@ DynamicLoader::setFlags ()
     else
         dlFlags_ = dlFlags_ | RTLD_LAZY;
 }
-
-
-

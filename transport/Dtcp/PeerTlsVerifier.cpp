@@ -2,18 +2,18 @@
 
 #ifdef ALPINE_TLS_ENABLED
 
-#include <PeerTlsVerifier.h>
 #include <Configuration.h>
 #include <Log.h>
+#include <PeerTlsVerifier.h>
 
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
-#include <openssl/err.h>
 
 
 bool
-PeerTlsVerifier::verifyPeer (SSL * ssl, ulong expectedPeerId)
+PeerTlsVerifier::verifyPeer(SSL * ssl, ulong expectedPeerId)
 {
     if (!ssl) {
         Log::Error("PeerTlsVerifier: null SSL session");
@@ -30,8 +30,7 @@ PeerTlsVerifier::verifyPeer (SSL * ssl, ulong expectedPeerId)
     // Verify the certificate chain
     long verifyResult = SSL_get_verify_result(ssl);
     if (verifyResult != X509_V_OK) {
-        Log::Error("PeerTlsVerifier: certificate verification failed: "s +
-                   X509_verify_cert_error_string(verifyResult));
+        Log::Error("PeerTlsVerifier: certificate verification failed: "s + X509_verify_cert_error_string(verifyResult));
         X509_free(peerCert);
         return false;
     }
@@ -42,8 +41,8 @@ PeerTlsVerifier::verifyPeer (SSL * ssl, ulong expectedPeerId)
     if (!verifyCertificateIdentity(peerCert, expectedIdentity)) {
         // Also try matching without specific peer ID — allow any valid cert
         // if the CN/SAN contains an alpine-compatible identifier
-        Log::Info("PeerTlsVerifier: CN/SAN did not match peer ID "s +
-                  expectedIdentity + ", accepting valid certificate"s);
+        Log::Info("PeerTlsVerifier: CN/SAN did not match peer ID "s + expectedIdentity +
+                  ", accepting valid certificate"s);
     }
 
     X509_free(peerCert);
@@ -52,7 +51,7 @@ PeerTlsVerifier::verifyPeer (SSL * ssl, ulong expectedPeerId)
 
 
 bool
-PeerTlsVerifier::verifyCertificateIdentity (X509 * cert, const string & expectedIdentity)
+PeerTlsVerifier::verifyCertificateIdentity(X509 * cert, const string & expectedIdentity)
 {
     if (!cert)
         return false;
@@ -71,7 +70,7 @@ PeerTlsVerifier::verifyCertificateIdentity (X509 * cert, const string & expected
 
 
 bool
-PeerTlsVerifier::isMutualTlsEnabled ()
+PeerTlsVerifier::isMutualTlsEnabled()
 {
     string value;
     if (Configuration::getValue(CONFIG_MTLS_ENABLED, value))
@@ -81,7 +80,7 @@ PeerTlsVerifier::isMutualTlsEnabled ()
 
 
 string
-PeerTlsVerifier::getCaCertificatePath ()
+PeerTlsVerifier::getCaCertificatePath()
 {
     string value;
     if (Configuration::getValue(CONFIG_CA_CERT_PATH, value))
@@ -91,7 +90,7 @@ PeerTlsVerifier::getCaCertificatePath ()
 
 
 string
-PeerTlsVerifier::extractCommonName (X509 * cert)
+PeerTlsVerifier::extractCommonName(X509 * cert)
 {
     if (!cert)
         return {};
@@ -125,14 +124,13 @@ PeerTlsVerifier::extractCommonName (X509 * cert)
 
 
 vector<string>
-PeerTlsVerifier::extractSubjectAltNames (X509 * cert)
+PeerTlsVerifier::extractSubjectAltNames(X509 * cert)
 {
     vector<string> names;
     if (!cert)
         return names;
 
-    auto * sanNames = static_cast<GENERAL_NAMES *>(
-        X509_get_ext_d2i(cert, NID_subject_alt_name, nullptr, nullptr));
+    auto * sanNames = static_cast<GENERAL_NAMES *>(X509_get_ext_d2i(cert, NID_subject_alt_name, nullptr, nullptr));
 
     if (!sanNames)
         return names;
@@ -141,13 +139,12 @@ PeerTlsVerifier::extractSubjectAltNames (X509 * cert)
     for (int i = 0; i < count; ++i) {
         GENERAL_NAME * entry = sk_GENERAL_NAME_value(sanNames, i);
         if (entry->type == GEN_DNS) {
-            const char * dnsName = reinterpret_cast<const char *>(
-                ASN1_STRING_get0_data(entry->d.dNSName));
+            const char * dnsName = reinterpret_cast<const char *>(ASN1_STRING_get0_data(entry->d.dNSName));
             if (dnsName)
                 names.emplace_back(dnsName);
         } else if (entry->type == GEN_URI) {
-            const char * uri = reinterpret_cast<const char *>(
-                ASN1_STRING_get0_data(entry->d.uniformResourceIdentifier));
+            const char * uri =
+                reinterpret_cast<const char *>(ASN1_STRING_get0_data(entry->d.uniformResourceIdentifier));
             if (uri)
                 names.emplace_back(uri);
         }
@@ -157,4 +154,4 @@ PeerTlsVerifier::extractSubjectAltNames (X509 * cert)
     return names;
 }
 
-#endif // ALPINE_TLS_ENABLED
+#endif  // ALPINE_TLS_ENABLED

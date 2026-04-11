@@ -3,67 +3,56 @@
 
 #pragma once
 #include <Common.h>
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 
 class DataBuffer
 {
   public:
+    DataBuffer(uint bufferSize);
 
-    DataBuffer (uint bufferSize);
+    DataBuffer(const DataBuffer & copy);
 
-    DataBuffer (const DataBuffer & copy);
+    DataBuffer(const byte * data, uint dataLength);
 
-    DataBuffer (const byte * data,
-                uint         dataLength);
+    virtual ~DataBuffer();
 
-    virtual ~DataBuffer ();
-
-    virtual DataBuffer & operator = (const DataBuffer & copy);
+    virtual DataBuffer & operator=(const DataBuffer & copy);
 
 
     ////
     //
     // DataBuffer operations
     //
-    virtual bool  resize (uint size);
+    virtual bool resize(uint size);
 
-    virtual void  clear ();
+    virtual void clear();
 
-    virtual void  readReset ();
+    virtual void readReset();
 
-    virtual void  writeReset ();
+    virtual void writeReset();
 
-    virtual bool  setData (const byte * data,
-                           uint         dataLength);
+    virtual bool setData(const byte * data, uint dataLength);
 
-    virtual bool  getData (byte *& data,
-                           uint &  dataLength);
+    virtual bool getData(byte *& data, uint & dataLength);
 
-    virtual bool  getReadBuffer (byte *& buffer,
-                                 uint &  bufferSize);
+    virtual bool getReadBuffer(byte *& buffer, uint & bufferSize);
 
-    virtual bool  addReadBytes (uint  bytes);
+    virtual bool addReadBytes(uint bytes);
 
-    virtual bool  getWriteBuffer (byte *& buffer,
-                                  uint &  bufferSize);
+    virtual bool getWriteBuffer(byte *& buffer, uint & bufferSize);
 
-    virtual bool  addWriteBytes (uint bytes);
-
+    virtual bool addWriteBytes(uint bytes);
 
 
   private:
+    std::vector<uint8_t> buffer_;
+    uint dataSize_;
 
-    std::vector<uint8_t>  buffer_;
-    uint    dataSize_;
+    uint readOffset_;
+    uint readRemaining_;
 
-    uint    readOffset_;
-    uint    readRemaining_;
-
-    uint    writeOffset_;
-    uint    writeRemaining_;
-
+    uint writeOffset_;
+    uint writeRemaining_;
 };
-
-

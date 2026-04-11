@@ -1,9 +1,9 @@
 /// Unit tests for CircuitBreaker
 
-#include <catch2/catch_test_macros.hpp>
 #include <CircuitBreaker.h>
-#include <thread>
+#include <catch2/catch_test_macros.hpp>
 #include <chrono>
+#include <thread>
 
 
 TEST_CASE("Default state is Closed for unknown peers", "[CircuitBreaker]")

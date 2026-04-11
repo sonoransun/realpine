@@ -1,33 +1,32 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
-#include <DtcpStack.h>
-#include <DtcpBaseUdpTransport.h>
-#include <DtcpBaseConnTransport.h>
 #include <DtcpBaseConnConnector.h>
+#include <DtcpBaseConnTransport.h>
+#include <DtcpBaseUdpTransport.h>
 #include <DtcpBroadcastMgr.h>
-#include <WriteLock.h>
-#include <ReadLock.h>
+#include <DtcpStack.h>
 #include <Log.h>
-#include <StringUtils.h>
 #include <NetUtils.h>
+#include <ReadLock.h>
+#include <StringUtils.h>
+#include <WriteLock.h>
 
 
-DtcpBaseUdpTransport *                  DtcpStack::udpTransport_s = nullptr;
-DtcpBaseConnMux *                       DtcpStack::connMux_s = nullptr;
-ulong                                   DtcpStack::currTransportId_s = 0;
-ReadWriteSem                            DtcpStack::dataLock_s;
+DtcpBaseUdpTransport * DtcpStack::udpTransport_s = nullptr;
+DtcpBaseConnMux * DtcpStack::connMux_s = nullptr;
+ulong DtcpStack::currTransportId_s = 0;
+ReadWriteSem DtcpStack::dataLock_s;
 
-std::vector<DtcpBaseUdpTransport *>     DtcpStack::additionalTransports_s;
-std::vector<DtcpBaseConnMux *>          DtcpStack::additionalMuxes_s;
+std::vector<DtcpBaseUdpTransport *> DtcpStack::additionalTransports_s;
+std::vector<DtcpBaseConnMux *> DtcpStack::additionalMuxes_s;
 
-std::unique_ptr<DtcpStack::t_IpAddressSet>        DtcpStack::ipAddressFilter_s;
-std::unique_ptr<DtcpStack::t_SubnetAddressIndex>  DtcpStack::subnetFilter_s;
-ReadWriteSem                            DtcpStack::filterLock_s;
+std::unique_ptr<DtcpStack::t_IpAddressSet> DtcpStack::ipAddressFilter_s;
+std::unique_ptr<DtcpStack::t_SubnetAddressIndex> DtcpStack::subnetFilter_s;
+ReadWriteSem DtcpStack::filterLock_s;
 
-std::unique_ptr<DtcpStack::t_ConnTransportIndex>  DtcpStack::transportIndex_s;
-ReadWriteSem                            DtcpStack::transportIndexLock_s;
-
+std::unique_ptr<DtcpStack::t_ConnTransportIndex> DtcpStack::transportIndex_s;
+ReadWriteSem DtcpStack::transportIndexLock_s;
 
 
 // Ctor defaulted in header
@@ -36,54 +35,52 @@ ReadWriteSem                            DtcpStack::transportIndexLock_s;
 // Dtor defaulted in header
 
 
-
-bool  
-DtcpStack::initialize ()
+bool
+DtcpStack::initialize()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::initialize invoked.");
+    Log::Debug("DtcpStack::initialize invoked.");
 #endif
 
-    WriteLock  filterLock(filterLock_s);
-    WriteLock  transLock(transportIndexLock_s);
+    WriteLock filterLock(filterLock_s);
+    WriteLock transLock(transportIndexLock_s);
 
 
     // Initialize the broadcast manager
     //
     bool status;
-    status = DtcpBroadcastMgr::initialize ();
+    status = DtcpBroadcastMgr::initialize();
 
     if (!status) {
-        Log::Error ("initialization of DtcpBroadcastMgr failed in DtcpStack::initialize!");
+        Log::Error("initialization of DtcpBroadcastMgr failed in DtcpStack::initialize!");
         return false;
     }
     if (ipAddressFilter_s) {
-        Log::Error ("Invalid duplicate call to DtcpStack::initialize.");
+        Log::Error("Invalid duplicate call to DtcpStack::initialize.");
         return false;
     }
-    ipAddressFilter_s  = std::make_unique<t_IpAddressSet>();
-    subnetFilter_s     = std::make_unique<t_SubnetAddressIndex>();
-    transportIndex_s   = std::make_unique<t_ConnTransportIndex>();
-    
+    ipAddressFilter_s = std::make_unique<t_IpAddressSet>();
+    subnetFilter_s = std::make_unique<t_SubnetAddressIndex>();
+    transportIndex_s = std::make_unique<t_ConnTransportIndex>();
+
 
     return true;
 }
 
 
-
-uint  
-DtcpStack::numConnTransports ()
+uint
+DtcpStack::numConnTransports()
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::numConnTransports invoked.");
+    Log::Debug("DtcpStack::numConnTransports invoked.");
 #endif
 
     uint transportCount = 0;
 
-    ReadLock  lock(transportIndexLock_s);
+    ReadLock lock(transportIndexLock_s);
 
     if (transportIndex_s) {
-        transportCount = transportIndex_s->size ();
+        transportCount = transportIndex_s->size();
     }
 
 
@@ -91,27 +88,23 @@ DtcpStack::numConnTransports ()
 }
 
 
-
-bool  
-DtcpStack::exists (ulong   ipAddress,
-                   ushort  port)
+bool
+DtcpStack::exists(ulong ipAddress, ushort port)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::exists invoked.");
+    Log::Debug("DtcpStack::exists invoked.");
 #endif
 
 
     return true;
 }
-
 
 
 bool
-DtcpStack::exists (ulong  transportId)
+DtcpStack::exists(ulong transportId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::exists invoked.  Transport ID: "s +
-                std::to_string(transportId));
+    Log::Debug("DtcpStack::exists invoked.  Transport ID: "s + std::to_string(transportId));
 #endif
 
 
@@ -119,21 +112,20 @@ DtcpStack::exists (ulong  transportId)
 }
 
 
-
-bool  
-DtcpStack::getAllConnTransports (t_ConnTransportList & transportList)
+bool
+DtcpStack::getAllConnTransports(t_ConnTransportList & transportList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::getAllConnTransports invoked.");
+    Log::Debug("DtcpStack::getAllConnTransports invoked.");
 #endif
 
-    transportList.clear ();
+    transportList.clear();
 
-    ReadLock  lock(transportIndexLock_s);
+    ReadLock lock(transportIndexLock_s);
 
     if (transportIndex_s) {
-        for (auto& [key, value] : *transportIndex_s) {
-            transportList.push_back (value);
+        for (auto & [key, value] : *transportIndex_s) {
+            transportList.push_back(value);
         }
     }
 
@@ -142,23 +134,21 @@ DtcpStack::getAllConnTransports (t_ConnTransportList & transportList)
 }
 
 
-
-bool  
-DtcpStack::locateTransport (ulong                    transportId,
-                            DtcpBaseConnTransport *& transport)
+bool
+DtcpStack::locateTransport(ulong transportId, DtcpBaseConnTransport *& transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::locateTransport invoked.");
+    Log::Debug("DtcpStack::locateTransport invoked.");
 #endif
 
-    ReadLock  lock(transportIndexLock_s);
+    ReadLock lock(transportIndexLock_s);
 
     if (!transportIndex_s) {
         return false;
     }
-    auto iter = transportIndex_s->find (transportId);
+    auto iter = transportIndex_s->find(transportId);
 
-    if (iter == transportIndex_s->end ()) {
+    if (iter == transportIndex_s->end()) {
         return false;
     }
     transport = (*iter).second;
@@ -168,19 +158,14 @@ DtcpStack::locateTransport (ulong                    transportId,
 }
 
 
-
-bool  
-DtcpStack::locateTransport (ulong                    ipAddress,
-                            ushort                   port,
-                            DtcpBaseConnTransport *& transport)
+bool
+DtcpStack::locateTransport(ulong ipAddress, ushort port, DtcpBaseConnTransport *& transport)
 {
 #ifdef _VERBOSE
-    string  ipAddressStr;
-    NetUtils::longIpToString (ipAddress, ipAddressStr);
-    Log::Debug ("DtcpStack::locateTransport invoked."s +
-                "\nIP Address: "s + ipAddressStr +
-                "\nPort: "s + std::to_string (ntohs(port)) +
-                "\n");
+    string ipAddressStr;
+    NetUtils::longIpToString(ipAddress, ipAddressStr);
+    Log::Debug("DtcpStack::locateTransport invoked."s + "\nIP Address: "s + ipAddressStr + "\nPort: "s +
+               std::to_string(ntohs(port)) + "\n");
 #endif
 
 
@@ -188,35 +173,30 @@ DtcpStack::locateTransport (ulong                    ipAddress,
 }
 
 
-
-bool  
-DtcpStack::createTransport  (ulong                    ipAddress,
-                             ushort                   port,
-                             DtcpBaseConnTransport *& transport)
+bool
+DtcpStack::createTransport(ulong ipAddress, ushort port, DtcpBaseConnTransport *& transport)
 {
 #ifdef _VERBOSE
-    string  ipAddressStr;
-    NetUtils::longIpToString (ipAddress, ipAddressStr);
-    Log::Debug ("DtcpStack::createTransport invoked."s +
-                "\nIP Address: "s + ipAddressStr +
-                "\nPort: "s + std::to_string (ntohs(port)) +
-                "\n");
+    string ipAddressStr;
+    NetUtils::longIpToString(ipAddress, ipAddressStr);
+    Log::Debug("DtcpStack::createTransport invoked."s + "\nIP Address: "s + ipAddressStr + "\nPort: "s +
+               std::to_string(ntohs(port)) + "\n");
 #endif
 
     // Try creating transport with connector
     //
-    bool  status;
+    bool status;
     DtcpBaseConnConnector * connector;
-    status = udpTransport_s->createConnector (connector);
+    status = udpTransport_s->createConnector(connector);
 
     if (!status) {
-        Log::Error ("Call to createConnector failed in DtcpStack::createTransport!");
+        Log::Error("Call to createConnector failed in DtcpStack::createTransport!");
         return false;
     }
-    status = connector->requestConnection (ipAddress, port);
+    status = connector->requestConnection(ipAddress, port);
 
     if (!status) {
-        Log::Error ("Connector requestConnection failed in DtcpStack::createTransport!");
+        Log::Error("Connector requestConnection failed in DtcpStack::createTransport!");
         return false;
     }
     // MRP_TEMP should wait for completion
@@ -226,12 +206,11 @@ DtcpStack::createTransport  (ulong                    ipAddress,
 }
 
 
-
-bool  
-DtcpStack::hostIsExcluded (ulong  ipAddress)
+bool
+DtcpStack::hostIsExcluded(ulong ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::hostIsExcluded invoked.");
+    Log::Debug("DtcpStack::hostIsExcluded invoked.");
 #endif
 
 
@@ -239,12 +218,11 @@ DtcpStack::hostIsExcluded (ulong  ipAddress)
 }
 
 
-
-bool  
-DtcpStack::subnetIsExcluded (ulong  subnetIpAddress)
+bool
+DtcpStack::subnetIsExcluded(ulong subnetIpAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::subnetIsExcluded invoked.");
+    Log::Debug("DtcpStack::subnetIsExcluded invoked.");
 #endif
 
 
@@ -252,12 +230,11 @@ DtcpStack::subnetIsExcluded (ulong  subnetIpAddress)
 }
 
 
-
-bool  
-DtcpStack::excludeHost (ulong ipAddress)
+bool
+DtcpStack::excludeHost(ulong ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::excludeHost invoked.");
+    Log::Debug("DtcpStack::excludeHost invoked.");
 #endif
 
 
@@ -265,13 +242,11 @@ DtcpStack::excludeHost (ulong ipAddress)
 }
 
 
-
-bool  
-DtcpStack::excludeSubnet (ulong  subnetIpAddress,
-                          ulong  subnetMask)
+bool
+DtcpStack::excludeSubnet(ulong subnetIpAddress, ulong subnetMask)
 {
-#ifdef _VERBOSE  
-    Log::Debug ("DtcpStack::excludeSubnet invoked.");
+#ifdef _VERBOSE
+    Log::Debug("DtcpStack::excludeSubnet invoked.");
 #endif
 
 
@@ -279,12 +254,11 @@ DtcpStack::excludeSubnet (ulong  subnetIpAddress,
 }
 
 
-
-bool  
-DtcpStack::allowHost (ulong ipAddress)
+bool
+DtcpStack::allowHost(ulong ipAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::allowHost invoked.");
+    Log::Debug("DtcpStack::allowHost invoked.");
 #endif
 
 
@@ -292,12 +266,11 @@ DtcpStack::allowHost (ulong ipAddress)
 }
 
 
-
-bool  
-DtcpStack::allowSubnet (ulong  subnetIpAddress)
+bool
+DtcpStack::allowSubnet(ulong subnetIpAddress)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::allowHost invoked.");
+    Log::Debug("DtcpStack::allowHost invoked.");
 #endif
 
 
@@ -305,12 +278,11 @@ DtcpStack::allowSubnet (ulong  subnetIpAddress)
 }
 
 
-
-bool  
-DtcpStack::getAllExcludedHosts (t_IpAddressList & ipAddressList)
+bool
+DtcpStack::getAllExcludedHosts(t_IpAddressList & ipAddressList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::getAllExcludedHosts invoked.");
+    Log::Debug("DtcpStack::getAllExcludedHosts invoked.");
 #endif
 
 
@@ -318,28 +290,26 @@ DtcpStack::getAllExcludedHosts (t_IpAddressList & ipAddressList)
 }
 
 
-
-bool  
-DtcpStack::getAllExcludedSubnets (t_SubnetAddressList & subnetList)
+bool
+DtcpStack::getAllExcludedSubnets(t_SubnetAddressList & subnetList)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::getAllExcludedSubnets invoked.");
+    Log::Debug("DtcpStack::getAllExcludedSubnets invoked.");
 #endif
-    
-    
+
+
     return true;
-}                      
-    
-    
+}
 
-bool  
-DtcpStack::getNextTransportId (ulong & transportId)
+
+bool
+DtcpStack::getNextTransportId(ulong & transportId)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::getNextTransportId invoked.");
+    Log::Debug("DtcpStack::getNextTransportId invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock lock(dataLock_s);
 
     transportId = currTransportId_s++;
 
@@ -348,95 +318,86 @@ DtcpStack::getNextTransportId (ulong & transportId)
 }
 
 
-
-bool  
-DtcpStack::registerUdpTransport (DtcpBaseUdpTransport * udpTransport,
-                                 DtcpBaseConnMux *      connMux)
+bool
+DtcpStack::registerUdpTransport(DtcpBaseUdpTransport * udpTransport, DtcpBaseConnMux * connMux)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::registerUdpTransport invoked.");
+    Log::Debug("DtcpStack::registerUdpTransport invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock lock(dataLock_s);
 
     if (udpTransport_s) {
         // only one transport is allowed!
-        Log::Error ("Duplicate call to DtcpStack::registerUdpTransport.  Multiple UdpTransports?");
+        Log::Error("Duplicate call to DtcpStack::registerUdpTransport.  Multiple UdpTransports?");
         return false;
     }
     udpTransport_s = udpTransport;
-    connMux_s      = connMux;
+    connMux_s = connMux;
 
 
     return true;
 }
 
 
-
 bool
-DtcpStack::registerAdditionalUdpTransport (DtcpBaseUdpTransport * transport,
-                                            DtcpBaseConnMux *      connMux)
+DtcpStack::registerAdditionalUdpTransport(DtcpBaseUdpTransport * transport, DtcpBaseConnMux * connMux)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::registerAdditionalUdpTransport invoked.");
+    Log::Debug("DtcpStack::registerAdditionalUdpTransport invoked.");
 #endif
 
-    WriteLock  lock(dataLock_s);
+    WriteLock lock(dataLock_s);
 
     if (!udpTransport_s) {
-        Log::Error ("No primary transport registered in DtcpStack::registerAdditionalUdpTransport.");
+        Log::Error("No primary transport registered in DtcpStack::registerAdditionalUdpTransport.");
         return false;
     }
-    additionalTransports_s.push_back (transport);
-    additionalMuxes_s.push_back (connMux);
+    additionalTransports_s.push_back(transport);
+    additionalMuxes_s.push_back(connMux);
 
-    Log::Info ("Additional UDP transport registered with DtcpStack.");
+    Log::Info("Additional UDP transport registered with DtcpStack.");
 
     return true;
 }
 
 
-
 bool
-DtcpStack::registerConnTransport (DtcpBaseConnTransport * transport)
+DtcpStack::registerConnTransport(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::registerConnTransport invoked.");
+    Log::Debug("DtcpStack::registerConnTransport invoked.");
 #endif
 
     ulong transportId;
-    bool  status;
+    bool status;
 
-    status = transport->getTransportId (transportId);
+    status = transport->getTransportId(transportId);
 
     if (!status) {
-        Log::Error ("getTransportId failed in DtcpStack::registerConnTransport.");
+        Log::Error("getTransportId failed in DtcpStack::registerConnTransport.");
         return false;
     }
-    auto iter = transportIndex_s->find (transportId);
+    auto iter = transportIndex_s->find(transportId);
 
-    if (iter != transportIndex_s->end ()) {
-        Log::Error ("Duplicate transport ID encountered in DtcpStack::registerConnTransport.");
+    if (iter != transportIndex_s->end()) {
+        Log::Error("Duplicate transport ID encountered in DtcpStack::registerConnTransport.");
         return false;
     }
     transportIndex_s->emplace(transportId, transport);
-    
+
 
     return true;
 }
 
 
-
-bool  
-DtcpStack::deactivateConnTransport (DtcpBaseConnTransport * transport)
+bool
+DtcpStack::deactivateConnTransport(DtcpBaseConnTransport * transport)
 {
 #ifdef _VERBOSE
-    Log::Debug ("DtcpStack::deactivateConnTransport invoked.");
+    Log::Debug("DtcpStack::deactivateConnTransport invoked.");
 #endif
 
 
     return true;
 }
-
-
-

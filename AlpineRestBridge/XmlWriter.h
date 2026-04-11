@@ -8,30 +8,27 @@
 class XmlWriter
 {
   public:
+    string result();
 
-    string  result ();
+    void declaration();
 
-    void  declaration ();
+    void beginElement(const string & name);
+    void beginElement(const string & name, const string & ns);
+    void endElement(const string & name);
 
-    void  beginElement (const string & name);
-    void  beginElement (const string & name, const string & ns);
-    void  endElement (const string & name);
+    void attribute(const string & name, const string & value);
+    void text(const string & content);
+    void selfClosing(const string & name);
+    void rawXml(const string & xml);
 
-    void  attribute (const string & name, const string & value);
-    void  text (const string & content);
-    void  selfClosing (const string & name);
-    void  rawXml (const string & xml);
-
-    void  simpleElement (const string & name, const string & content);
+    void simpleElement(const string & name, const string & content);
 
 
   private:
+    static string escape(const string & s);
 
-    static string  escape (const string & s);
+    void closeOpenTag();
 
-    void  closeOpenTag ();
-
-    string  buffer_;
-    bool    inOpenTag_ = false;
-
+    string buffer_;
+    bool inOpenTag_ = false;
 };

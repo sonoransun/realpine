@@ -1,9 +1,9 @@
 /// Copyright (C) 2026 sonoransun — see LICENCE.txt
 
 
+#include <Log.h>
 #include <MediaStreamer.h>
 #include <SafeParse.h>
-#include <Log.h>
 
 #include <Platform.h>
 #include <cstdio>
@@ -14,16 +14,15 @@
 
 
 static void
-sendErrorResponse (int socketFd, int status, const char * statusText)
+sendErrorResponse(int socketFd, int status, const char * statusText)
 {
-    string resp = "HTTP/1.1 "s + std::to_string(status) + " " + statusText +
-                  "\r\nContent-Length: 0\r\n\r\n";
+    string resp = "HTTP/1.1 "s + std::to_string(status) + " " + statusText + "\r\nContent-Length: 0\r\n\r\n";
     ::send(socketFd, resp.c_str(), resp.length(), 0);
 }
 
 
 static bool
-sendAllBytes (int socketFd, const byte * data, ulong len)
+sendAllBytes(int socketFd, const byte * data, ulong len)
 {
     ulong totalSent = 0;
 
@@ -41,8 +40,7 @@ sendAllBytes (int socketFd, const byte * data, ulong len)
 
 
 bool
-MediaStreamer::serveFile (int socketFd, ContentStore & store,
-                          const string & mediaId, const string & rangeHeader)
+MediaStreamer::serveFile(int socketFd, ContentStore & store, const string & mediaId, const string & rangeHeader)
 {
     ContentStore::MediaItem item;
 
@@ -66,17 +64,15 @@ MediaStreamer::serveFile (int socketFd, ContentStore & store,
     }
 
     ulong rangeStart = 0;
-    ulong rangeEnd   = item.fileSize - 1;
-    bool  hasRange   = !rangeHeader.empty() &&
-                       parseRange(rangeHeader, item.fileSize, rangeStart, rangeEnd);
+    ulong rangeEnd = item.fileSize - 1;
+    bool hasRange = !rangeHeader.empty() && parseRange(rangeHeader, item.fileSize, rangeStart, rangeEnd);
 
     if (hasRange) {
         ulong contentLen = rangeEnd - rangeStart + 1;
-        sendFileHeaders(socketFd, 206, "Partial Content", item.mimeType,
-                        contentLen, rangeStart, rangeEnd, item.fileSize);
+        sendFileHeaders(
+            socketFd, 206, "Partial Content", item.mimeType, contentLen, rangeStart, rangeEnd, item.fileSize);
     } else {
-        sendFileHeaders(socketFd, 200, "OK", item.mimeType,
-                        item.fileSize, 0, 0, item.fileSize);
+        sendFileHeaders(socketFd, 200, "OK", item.mimeType, item.fileSize, 0, 0, item.fileSize);
     }
 
     fseek(fp, rangeStart, SEEK_SET);
@@ -84,8 +80,7 @@ MediaStreamer::serveFile (int socketFd, ContentStore & store,
     byte buffer[SEND_BUFFER_SIZE];
     ulong remaining = rangeEnd - rangeStart + 1;
 
-    while (remaining > 0)
-    {
+    while (remaining > 0) {
         ulong toRead = (remaining < SEND_BUFFER_SIZE) ? remaining : SEND_BUFFER_SIZE;
         ulong bytesRead = fread(buffer, 1, toRead, fp);
 
@@ -104,8 +99,7 @@ MediaStreamer::serveFile (int socketFd, ContentStore & store,
 
 
 bool
-MediaStreamer::serveTranscode (int socketFd, ContentStore & store,
-                               const string & mediaId)
+MediaStreamer::serveTranscode(int socketFd, ContentStore & store, const string & mediaId)
 {
     ContentStore::MediaItem item;
 
@@ -148,13 +142,23 @@ MediaStreamer::serveTranscode (int socketFd, ContentStore & store,
             close(devNull);
         }
 
-        const char * argv[] = {
-            "ffmpeg", "-i", item.path.c_str(),
-            "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
-            "-c:a", "aac", "-b:a", "128k",
-            "-f", "mpegts", "pipe:1",
-            nullptr
-        };
+        const char * argv[] = {"ffmpeg",
+                               "-i",
+                               item.path.c_str(),
+                               "-c:v",
+                               "libx264",
+                               "-preset",
+                               "veryfast",
+                               "-crf",
+                               "23",
+                               "-c:a",
+                               "aac",
+                               "-b:a",
+                               "128k",
+                               "-f",
+                               "mpegts",
+                               "pipe:1",
+                               nullptr};
 
         execvp(argv[0], const_cast<char * const *>(argv));
         _exit(1);
@@ -167,8 +171,7 @@ MediaStreamer::serveTranscode (int socketFd, ContentStore & store,
     byte buffer[SEND_BUFFER_SIZE];
     ssize_t bytesRead;
 
-    while ((bytesRead = read(pipefd[0], buffer, SEND_BUFFER_SIZE)) > 0)
-    {
+    while ((bytesRead = read(pipefd[0], buffer, SEND_BUFFER_SIZE)) > 0) {
         if (!sendAllBytes(socketFd, buffer, (ulong)bytesRead))
             break;
     }
@@ -183,8 +186,7 @@ MediaStreamer::serveTranscode (int socketFd, ContentStore & store,
 
 
 bool
-MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
-                           ulong & start, ulong & end)
+MediaStreamer::parseRange(const string & rangeHeader, ulong fileSize, ulong & start, ulong & end)
 {
     if (fileSize == 0)
         return false;
@@ -201,7 +203,7 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
         return false;
 
     string startStr = range.substr(0, dashPos);
-    string endStr   = range.substr(dashPos + 1);
+    string endStr = range.substr(dashPos + 1);
 
     if (startStr.empty() && !endStr.empty()) {
         auto suffixOpt = parseUlong(endStr);
@@ -213,9 +215,8 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
             suffix = fileSize;
 
         start = fileSize - suffix;
-        end   = fileSize - 1;
-    }
-    else if (!startStr.empty()) {
+        end = fileSize - 1;
+    } else if (!startStr.empty()) {
         auto startOpt = parseUlong(startStr);
         if (!startOpt)
             return false;
@@ -235,8 +236,7 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
 
         if (end >= fileSize)
             end = fileSize - 1;
-    }
-    else {
+    } else {
         return false;
     }
 
@@ -245,20 +245,31 @@ MediaStreamer::parseRange (const string & rangeHeader, ulong fileSize,
 
 
 void
-MediaStreamer::sendFileHeaders (int fd, int status, const string & statusText,
-                                const string & mime, ulong contentLen,
-                                ulong rangeStart, ulong rangeEnd, ulong totalSize)
+MediaStreamer::sendFileHeaders(int fd,
+                               int status,
+                               const string & statusText,
+                               const string & mime,
+                               ulong contentLen,
+                               ulong rangeStart,
+                               ulong rangeEnd,
+                               ulong totalSize)
 {
-    string headers = "HTTP/1.1 "s + std::to_string(status) + " " + statusText + "\r\n"
-        "Content-Type: " + mime + "\r\n"
-        "Content-Length: " + std::to_string(contentLen) + "\r\n"
+    string headers =
+        "HTTP/1.1 "s + std::to_string(status) + " " + statusText +
+        "\r\n"
+        "Content-Type: " +
+        mime +
+        "\r\n"
+        "Content-Length: " +
+        std::to_string(contentLen) +
+        "\r\n"
         "Accept-Ranges: bytes\r\n"
         "transferMode.dlna.org: Streaming\r\n"
         "contentFeatures.dlna.org: DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\r\n";
 
     if (status == 206) {
-        headers += "Content-Range: bytes "s + std::to_string(rangeStart) + "-" +
-                   std::to_string(rangeEnd) + "/" + std::to_string(totalSize) + "\r\n";
+        headers += "Content-Range: bytes "s + std::to_string(rangeStart) + "-" + std::to_string(rangeEnd) + "/" +
+                   std::to_string(totalSize) + "\r\n";
     }
 
     headers += "Connection: close\r\n\r\n";
@@ -268,10 +279,13 @@ MediaStreamer::sendFileHeaders (int fd, int status, const string & statusText,
 
 
 void
-MediaStreamer::sendStreamHeaders (int fd, const string & mime)
+MediaStreamer::sendStreamHeaders(int fd, const string & mime)
 {
-    string headers = "HTTP/1.1 200 OK\r\n"
-        "Content-Type: "s + mime + "\r\n"
+    string headers =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: "s +
+        mime +
+        "\r\n"
         "Transfer-Encoding: chunked\r\n"
         "transferMode.dlna.org: Streaming\r\n"
         "contentFeatures.dlna.org: DLNA.ORG_OP=00;DLNA.ORG_CI=1;DLNA.ORG_FLAGS=01700000000000000000000000000000\r\n"

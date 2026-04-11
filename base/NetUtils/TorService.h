@@ -11,36 +11,35 @@ class TcpTransport;
 class TorService
 {
   public:
+    TorService() = default;
+    ~TorService();
 
-    TorService () = default;
-    ~TorService ();
+    bool initialize(ushort torControlPort, const string & controlAuth);
 
-    bool initialize (ushort torControlPort, const string & controlAuth);
+    bool addPortMapping(ushort virtualPort, ushort localTargetPort);
 
-    bool addPortMapping (ushort virtualPort, ushort localTargetPort);
+    bool createService();
 
-    bool createService ();
+    void shutdown();
 
-    void shutdown ();
-
-    const string & onionAddress () const;
-    bool isActive () const;
+    const string & onionAddress() const;
+    bool isActive() const;
 
 
   private:
-
-    struct PortMapping {
+    struct PortMapping
+    {
         ushort virtualPort;
         ushort targetPort;
     };
 
-    bool authenticate (const string & auth);
-    bool sendCommand (const string & command, string & response);
-    bool readResponse (string & response);
+    bool authenticate(const string & auth);
+    bool sendCommand(const string & command, string & response);
+    bool readResponse(string & response);
 
-    TcpTransport *              controlConn_{nullptr};
-    string                      serviceId_;
-    string                      onionAddress_;
-    bool                        active_{false};
-    std::vector<PortMapping>    pendingMappings_;
+    TcpTransport * controlConn_{nullptr};
+    string serviceId_;
+    string onionAddress_;
+    bool active_{false};
+    std::vector<PortMapping> pendingMappings_;
 };

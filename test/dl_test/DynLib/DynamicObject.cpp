@@ -6,41 +6,32 @@
 #include <StringUtils.h>
 
 
-
-ulong      DynamicObject::currMethodNum_s = 1;
-
+ulong DynamicObject::currMethodNum_s = 1;
 
 
 extern "C" {
 
-void *  createDynamicObject ()
+void *
+createDynamicObject()
 {
-    DynamicObject *  retObject;
-    retObject = new DynamicObject (DynamicObject::currMethodNum_s++);
+    DynamicObject * retObject;
+    retObject = new DynamicObject(DynamicObject::currMethodNum_s++);
 
     return retObject;
 }
-
 }
 
 
-
-DynamicObject::DynamicObject (ulong  id)
+DynamicObject::DynamicObject(ulong id)
     : myId_(id)
+{}
+
+
+DynamicObject::~DynamicObject() = default;
+
+
+void
+DynamicObject::testMethod()
 {
+    Log::Info("DynamicObject::testMethod invoked on Object ID: "s + std::to_string(myId_));
 }
-
-
-
-DynamicObject::~DynamicObject () = default;
-
-
-
-void 
-DynamicObject::testMethod ()
-{
-    Log::Info ("DynamicObject::testMethod invoked on Object ID: "s + std::to_string(myId_));
-}
-
-
-

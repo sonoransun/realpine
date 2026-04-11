@@ -27,10 +27,12 @@
 #include <NetUtils.h>
 #include <RawWifiConnection.h>
 
+#include <chrono>
 #include <cstring>
-#include <unistd.h>
-#include <sys/wait.h>
 #include <poll.h>
+#include <sys/wait.h>
+#include <thread>
+#include <unistd.h>
 
 
 // Magic payload to verify frame integrity
@@ -38,27 +40,26 @@ static const char MAGIC[] = "ALPINE_RAW_TEST_FRAME";
 static constexpr uint MAGIC_LEN = sizeof(MAGIC);
 
 // Test payload sizes: small, medium, MTU-ish
-static constexpr uint TEST_SIZES[] = { 64, 512, 1400 };
+static constexpr uint TEST_SIZES[] = {64, 512, 1400};
 static constexpr uint NUM_SIZES = 3;
 
 // Timeout for receiving a frame (milliseconds)
 static constexpr int RECV_TIMEOUT_MS = 3000;
 
 
-
 static bool
-runSender (const string & ifaceName)
+runSender(const string & ifaceName)
 {
-    Log::Info ("Sender: Creating RawWifiConnection on "s + ifaceName);
+    Log::Info("Sender: Creating RawWifiConnection on "s + ifaceName);
 
     RawWifiConnection conn(ifaceName);
 
     if (!conn.create()) {
-        Log::Error ("Sender: Failed to create connection.");
+        Log::Error("Sender: Failed to create connection.");
         return false;
     }
 
-    Log::Info ("Sender: Connection created, fd="s + std::to_string(conn.getFd()));
+    Log::Info("Sender: Connection created, fd="s + std::to_string(conn.getFd()));
 
     // Give the receiver time to set up
     usleep(500000);  // 500ms
@@ -75,55 +76,51 @@ runSender (const string & ifaceName)
         }
 
         // Use dummy IP/port (RawWifiConnection encodes these in payload prefix)
-        ulong destIp = htonl(0x0A370001);   // 10.55.0.1
+        ulong destIp = htonl(0x0A370001);  // 10.55.0.1
         ushort destPort = htons(44100);
 
-        Log::Info ("Sender: Sending frame "s + std::to_string(i) +
-                   ", size=" + std::to_string(payloadLen));
+        Log::Info("Sender: Sending frame "s + std::to_string(i) + ", size=" + std::to_string(payloadLen));
 
         if (!conn.sendData(destIp, destPort, payload.data(), payloadLen)) {
-            Log::Error ("Sender: sendData failed for frame "s + std::to_string(i));
+            Log::Error("Sender: sendData failed for frame "s + std::to_string(i));
             return false;
         }
 
         usleep(100000);  // 100ms between frames
     }
 
-    Log::Info ("Sender: All frames sent.");
+    Log::Info("Sender: All frames sent.");
     return true;
 }
 
 
-
 static bool
-runReceiver (const string & ifaceName)
+runReceiver(const string & ifaceName)
 {
-    Log::Info ("Receiver: Creating RawWifiConnection on "s + ifaceName);
+    Log::Info("Receiver: Creating RawWifiConnection on "s + ifaceName);
 
     RawWifiConnection conn(ifaceName);
 
     if (!conn.create()) {
-        Log::Error ("Receiver: Failed to create connection.");
+        Log::Error("Receiver: Failed to create connection.");
         return false;
     }
 
-    Log::Info ("Receiver: Connection created, fd="s + std::to_string(conn.getFd()));
+    Log::Info("Receiver: Connection created, fd="s + std::to_string(conn.getFd()));
 
     uint framesReceived = 0;
-    int  fd = conn.getFd();
+    int fd = conn.getFd();
 
     // Try to receive all test frames within a generous timeout
-    auto deadline = std::chrono::steady_clock::now() +
-                    std::chrono::milliseconds(RECV_TIMEOUT_MS * NUM_SIZES);
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(RECV_TIMEOUT_MS * NUM_SIZES);
 
     while (framesReceived < NUM_SIZES) {
-        auto remaining = std::chrono::duration_cast<std::chrono::milliseconds>(
-                             deadline - std::chrono::steady_clock::now()).count();
+        auto remaining =
+            std::chrono::duration_cast<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now()).count();
 
         if (remaining <= 0) {
-            Log::Error ("Receiver: Timeout waiting for frames. Got "s +
-                        std::to_string(framesReceived) + " of " +
-                        std::to_string(NUM_SIZES));
+            Log::Error("Receiver: Timeout waiting for frames. Got "s + std::to_string(framesReceived) + " of " +
+                       std::to_string(NUM_SIZES));
             return false;
         }
 
@@ -132,7 +129,7 @@ runReceiver (const string & ifaceName)
         pfd.events = POLLIN;
         pfd.revents = 0;
 
-        int ret = poll(&pfd, 1, static_cast<int>(std::min(remaining, (long long)1000)));
+        int ret = poll(&pfd, 1, static_cast<int>(std::min<long long>(remaining, 1000LL)));
 
         if (ret <= 0) {
             continue;  // timeout or error, retry
@@ -164,9 +161,8 @@ runReceiver (const string & ifaceName)
 
         uint expectedLen = TEST_SIZES[testIdx];
         if (dataLen != expectedLen) {
-            Log::Error ("Receiver: Frame "s + std::to_string(testIdx) +
-                        " size mismatch: expected " + std::to_string(expectedLen) +
-                        ", got " + std::to_string(dataLen));
+            Log::Error("Receiver: Frame "s + std::to_string(testIdx) + " size mismatch: expected " +
+                       std::to_string(expectedLen) + ", got " + std::to_string(dataLen));
             return false;
         }
 
@@ -174,8 +170,8 @@ runReceiver (const string & ifaceName)
         bool payloadOk = true;
         for (uint j = MAGIC_LEN + 1; j < dataLen; ++j) {
             if (buffer[j] != static_cast<byte>(j & 0xFF)) {
-                Log::Error ("Receiver: Frame "s + std::to_string(testIdx) +
-                            " payload mismatch at byte " + std::to_string(j));
+                Log::Error("Receiver: Frame "s + std::to_string(testIdx) + " payload mismatch at byte " +
+                           std::to_string(j));
                 payloadOk = false;
                 break;
             }
@@ -186,38 +182,36 @@ runReceiver (const string & ifaceName)
         }
 
         framesReceived++;
-        Log::Info ("Receiver: Frame "s + std::to_string(testIdx) +
-                   " OK (size=" + std::to_string(dataLen) + ")");
+        Log::Info("Receiver: Frame "s + std::to_string(testIdx) + " OK (size=" + std::to_string(dataLen) + ")");
     }
 
-    Log::Info ("Receiver: All "s + std::to_string(framesReceived) + " frames received and verified.");
+    Log::Info("Receiver: All "s + std::to_string(framesReceived) + " frames received and verified.");
     return true;
 }
 
 
-
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     if (argc != 3) {
         fprintf(stderr, "Usage: %s <sender_iface> <receiver_iface>\n", argv[0]);
         return 1;
     }
 
-    string senderIface  = argv[1];
+    string senderIface = argv[1];
     string receiverIface = argv[2];
 
     Log::initialize("/tmp/alpine_wifi_tests/raw_conn_test.log", Log::t_LogLevel::Debug);
 
-    Log::Info ("=== RawWifiConnection Frame Exchange Test ===");
-    Log::Info ("Sender interface:   "s + senderIface);
-    Log::Info ("Receiver interface: "s + receiverIface);
+    Log::Info("=== RawWifiConnection Frame Exchange Test ===");
+    Log::Info("Sender interface:   "s + senderIface);
+    Log::Info("Receiver interface: "s + receiverIface);
 
     // Fork: child = receiver, parent = sender
     pid_t pid = fork();
 
     if (pid < 0) {
-        Log::Error ("fork() failed.");
+        Log::Error("fork() failed.");
         return 1;
     }
 
@@ -236,13 +230,15 @@ main (int argc, char * argv[])
     bool recvOk = WIFEXITED(status) && WEXITSTATUS(status) == 0;
 
     if (sendOk && recvOk) {
-        Log::Info ("=== TEST PASSED ===");
+        Log::Info("=== TEST PASSED ===");
         return 0;
     }
 
-    if (!sendOk) Log::Error ("Sender failed.");
-    if (!recvOk) Log::Error ("Receiver failed.");
-    Log::Error ("=== TEST FAILED ===");
+    if (!sendOk)
+        Log::Error("Sender failed.");
+    if (!recvOk)
+        Log::Error("Receiver failed.");
+    Log::Error("=== TEST FAILED ===");
     return 1;
 }
 
@@ -253,7 +249,7 @@ main (int argc, char * argv[])
 #include <cstdio>
 
 int
-main (int argc, char * argv[])
+main(int argc, char * argv[])
 {
     fprintf(stderr, "SKIP: Raw 802.11 tests require Linux.\n");
     return 77;  // autotools-style skip
