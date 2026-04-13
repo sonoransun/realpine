@@ -88,6 +88,32 @@ The `ClusterCoordinator` (`AlpineRestBridge/ClusterCoordinator.h`) provides dist
 
 Stale nodes are evicted after an adaptive timeout (35-120 seconds). **Split-brain detection** triggers when >50% of known nodes become unreachable, causing health probes to return 503. **Query deduplication** across the cluster uses an 8-shard hash map with a 30-second window. **Load-aware routing** redirects queries to less-loaded nodes when the local node is overloaded.
 
+```mermaid
+sequenceDiagram
+    participant A as Node A
+    participant B as Node B
+    participant C as Node C
+
+    loop Every 10s
+        A->>B: heartbeat (nodeId, load, RTT)
+        A->>C: heartbeat (nodeId, load, RTT)
+        B->>A: heartbeat
+        C->>A: heartbeat
+    end
+
+    alt Normal Operation
+        Note over A,C: All heartbeats received — update RTT, CPU load, membership
+    else Stale Node (B unresponsive)
+        Note over B: No heartbeat for 35-120s (adaptive)
+        A--xB: heartbeat (no response)
+        Note over A: Evict Node B from membership
+    else Split-Brain (>50% unreachable)
+        A--xB: heartbeat (no response)
+        A--xC: heartbeat (no response)
+        Note over A: >50% nodes unreachable<br/>Flag isolated = true<br/>/health/live returns 503
+    end
+```
+
 ---
 
 ## Transport Stack Architecture
@@ -337,6 +363,19 @@ The payload carries an addressing prefix (`destIp`, `destPort`, `srcIp`, `srcPor
 2. **ARP table lookup** (fallback) -- Parses `/proc/net/arp` to find the MAC for a given IP address.
 3. **External injection** -- The discovery system or manual configuration can call `setDestinationMac(ip, mac)` to pre-populate the cache.
 
+```mermaid
+flowchart TD
+    START["Need to send to peer IP"] --> CACHE{"MAC in cache?\n(TTL < 300s)"}
+    CACHE -->|"Yes"| SEND["Send directed\n802.11 frame"]
+    CACHE -->|"No"| FRAME{"Seen in received frame?\n(Address 2, offset radiotapLen+10)"}
+    FRAME -->|"Yes"| CACHE_SEND["Cache MAC → Send\ndirected frame"]
+    FRAME -->|"No"| ARP{"Found in\n/proc/net/arp?"}
+    ARP -->|"Yes"| CACHE_SEND
+    ARP -->|"No"| EXT{"Externally injected?\nsetDestinationMac()"}
+    EXT -->|"Yes"| CACHE_SEND
+    EXT -->|"No"| BCAST["Fallback:\nbroadcast delivery"]
+```
+
 The MAC cache uses a 300-second TTL. If no MAC can be resolved, the frame falls back to broadcast delivery (graceful degradation).
 
 ### CovertChannel Integration
@@ -346,7 +385,22 @@ When enabled, `CovertChannel` applies two-stage obfuscation to the payload befor
 1. **XOR cipher** -- Each payload byte is XORed with a rotating key byte
 2. **Fisher-Yates shuffle** -- Byte positions are permuted using an FNV-1a seeded PRNG (`xorshift32`)
 
-This provides traffic camouflage on the wire but is not cryptographic security. Use DTLS for encryption.
+```mermaid
+flowchart LR
+    subgraph SEND["Send Path"]
+        PT["Plaintext\nPayload"] --> XOR1["XOR Cipher\n(rotating key byte)"]
+        XOR1 --> SHUF["Fisher-Yates Shuffle\n(FNV-1a seeded xorshift32)"]
+        SHUF --> WIRE1["Obfuscated\nWire Data"]
+    end
+
+    subgraph RECV["Receive Path"]
+        WIRE2["Obfuscated\nWire Data"] --> UNSHUF["Reverse Shuffle\n(replay permutation)"]
+        UNSHUF --> XOR2["XOR Cipher\n(self-inverse)"]
+        XOR2 --> PT2["Plaintext\nPayload"]
+    end
+```
+
+> **Note:** This provides traffic camouflage on the wire but is not cryptographic security. Use DTLS for encryption.
 
 ---
 

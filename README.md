@@ -41,37 +41,28 @@ Alpine's discovery model operates without a central index. Every node is both a 
 4. **Adaptive quality** — A built-in rating engine tracks peer reliability using exponential moving averages, circuit breakers, and gossip-based score sharing. Unreliable peers are automatically deprioritized.
 5. **Cluster coordination** — Nodes in the same cluster share heartbeats, deduplicate queries across the group, and federate searches to peer clusters — ensuring no wasted work and fast convergence.
 
-```
-                  ┌────────────┐
-                  │   Client   │
-                  │ (REST/CLI) │
-                  └──────┬─────┘
-                         │ POST /query
-                         ▼
-  ┌──────────────────────────────────────────┐
-  │             Node A  (Bridge)             │
-  │  ┌────────┐  ┌──────────┐  ┌──────────┐ │
-  │  │ Router │→ │ QueryMgr │→ │ RatingEng│ │
-  │  └────────┘  └────┬─────┘  └──────────┘ │
-  └───────────────────┼──────────────────────┘
-         queryDiscover│          queryDiscover
-           ┌──────────┼──────────────┐
-           ▼                         ▼
-    ┌────────────┐            ┌────────────┐
-    │   Node B   │            │   Node C   │
-    │  (Peer)    │            │  (Peer)    │
-    └──────┬─────┘            └──────┬─────┘
-           │ queryOffer              │ queryOffer
-           └──────────┐  ┌──────────┘
-                      ▼  ▼
-               Node A aggregates
-            queryRequest → queryReply
-                      │
-                      ▼
-              ┌──────────────┐
-              │  Aggregated  │
-              │   Results    │  → SSE stream / webhook / REST poll
-              └──────────────┘
+```mermaid
+flowchart TD
+    CLIENT["Client\n(REST / CLI)"] -->|"POST /query"| ROUTER
+
+    subgraph NODE_A["Node A (Bridge)"]
+        ROUTER["Router"] --> QM["QueryMgr"]
+        QM --> RE["RatingEngine"]
+    end
+
+    QM -->|"queryDiscover"| NB["Node B\n(Peer)"]
+    QM -->|"queryDiscover"| NC["Node C\n(Peer)"]
+
+    NB -->|"queryOffer\n(hitCount=12)"| RE
+    NC -->|"queryOffer\n(hitCount=5)"| RE
+
+    RE -->|"queryRequest"| NB
+    RE -->|"queryRequest"| NC
+
+    NB -->|"queryReply"| AGG["Aggregated\nResults"]
+    NC -->|"queryReply"| AGG
+
+    AGG --> OUT["SSE stream / webhook / REST poll"]
 ```
 
 ### Query Lifecycle
@@ -97,18 +88,22 @@ When multiple Alpine nodes share a network, the `ClusterCoordinator` provides:
 - **Split-brain detection** — If more than 50% of known nodes become unreachable, the node flags itself as isolated and health probes return 503.
 - **Federated search** — Queries can be forwarded across cluster boundaries, with results aggregated from remote nodes via HTTP.
 
-```
-  Region: us-west                        Region: eu-central
- ┌─────────────────────┐                ┌─────────────────────┐
- │  ┌───┐  ┌───┐       │  Heartbeats   │       ┌───┐  ┌───┐  │
- │  │ A │←→│ B │       │◄────────────► │       │ D │←→│ E │  │
- │  └─┬─┘  └─┬─┘       │               │       └─┬─┘  └─┬─┘  │
- │    └───┬───┘         │               │         └───┬───┘    │
- │      ┌─┴─┐           │  Federated    │           ┌─┴─┐     │
- │      │ C │           │  queries ────►│           │ F │     │
- │      └───┘           │               │           └───┘     │
- └─────────────────────┘                └─────────────────────┘
-      3 nodes, 1 cluster                    3 nodes, 1 cluster
+```mermaid
+flowchart LR
+    subgraph US["Region: us-west\n(3 nodes, 1 cluster)"]
+        A["Node A"] <--> B["Node B"]
+        A <--> C["Node C"]
+        B <--> C
+    end
+
+    subgraph EU["Region: eu-central\n(3 nodes, 1 cluster)"]
+        D["Node D"] <--> E["Node E"]
+        D <--> F["Node F"]
+        E <--> F
+    end
+
+    US <-->|"Heartbeats"| EU
+    US -->|"Federated queries"| EU
 ```
 
 ---
@@ -214,31 +209,16 @@ alpc --serverAddress localhost --serverPort 9000 --command beginQuery \
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        REST / CLI / GUI                         │
-│  AlpineRestBridge      AlpineCmdIf         AlpineGui            │
-│  (HTTP/SSE/WS)         (interactive)       (ImGui)              │
-├─────────────────────────────────────────────────────────────────┤
-│                       Interfaces Layer                          │
-│  AlpineStackInterface          DtcpStackInterface               │
-├─────────────────────────────────────────────────────────────────┤
-│                    Application Core (ApplCore)                  │
-│  Lifecycle · Signals · Configuration · Logging · Tracing        │
-├─────────────────────────────────────────────────────────────────┤
-│                    Protocol Layer (AlpineProtocol)              │
-│  QueryMgr         PeerMgr          GroupMgr      ModuleMgr     │
-│  RatingEngine     CircuitBreaker   PacketAuth    IpFilter       │
-│  QueryCache       AlpineRatingEngine                            │
-├─────────────────────────────────────────────────────────────────┤
-│                   Transport Layer (AlpineTransport)             │
-│  UDP Unicast · Multicast · Broadcast · Raw WiFi · Unicast WiFi  │
-│  RTL-SDR Receive · DTCP Reliable · DTLS · SendQueue             │
-├─────────────────────────────────────────────────────────────────┤
-│                       Base Libraries                            │
-│  AppUtils    SysUtils    ThreadUtils    NetUtils                 │
-│  ConfigUtils VfsUtils    Tracing        Platform                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    L1["REST / CLI / GUI\nAlpineRestBridge · AlpineCmdIf · AlpineGui\n(HTTP/SSE/WS · interactive · ImGui)"]
+    L2["Interfaces Layer\nAlpineStackInterface · DtcpStackInterface"]
+    L3["Application Core (ApplCore)\nLifecycle · Signals · Configuration · Logging · Tracing"]
+    L4["Protocol Layer (AlpineProtocol)\nQueryMgr · PeerMgr · GroupMgr · ModuleMgr\nRatingEngine · CircuitBreaker · PacketAuth · IpFilter · QueryCache"]
+    L5["Transport Layer (AlpineTransport)\nUDP Unicast · Multicast · Broadcast · Raw WiFi · Unicast WiFi\nRTL-SDR Receive · DTCP Reliable · DTLS · SendQueue"]
+    L6["Base Libraries\nAppUtils · SysUtils · ThreadUtils · NetUtils\nConfigUtils · VfsUtils · Tracing · Platform"]
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6
 ```
 
 ### Key Binaries
@@ -255,6 +235,22 @@ alpc --serverAddress localhost --serverPort 9000 --command beginQuery \
 - **RAII Guards** — `ConnectionGuard` for HTTP connections, `ReadLock`/`WriteLock` for shared state, `unique_ptr` with custom deleters for system resources.
 - **Sharded Locking** — IP rate limiting (16 shards), query deduplication (8 shards), and connection tracking use shard arrays for low contention under high concurrency.
 - **Dynamic Thread Pool** — HTTP server scales from 4 to 32 worker threads based on load. Idle threads exit after 30 seconds; new threads spawn when all workers are busy.
+
+```mermaid
+flowchart TD
+    CONN["New connection arrives"] --> BUSY{"All workers\nbusy?"}
+    BUSY -->|"No"| HANDLE["Worker handles connection"]
+    BUSY -->|"Yes"| UNDER{"activeWorkers\n< maxThreads (32)?"}
+    UNDER -->|"Yes"| SPAWN["Spawn new worker"] --> HANDLE
+    UNDER -->|"No"| QFULL{"Connection queue\nfull (128)?"}
+    QFULL -->|"No"| ENQUEUE["Queue connection"]
+    QFULL -->|"Yes"| REJECT["503 Service Unavailable"]
+
+    IDLE["Worker idle > 30s"] --> MIN{"activeWorkers\n> minThreads (4)?"}
+    MIN -->|"Yes"| EXIT["Worker exits"]
+    MIN -->|"No"| WAIT["Worker waits"]
+```
+
 - **Circuit Breaker** — Per-peer fault tolerance with Closed/Open/HalfOpen state machine. Configurable failure thresholds and recovery timeouts prevent cascading failures.
 - **Protocol Versioning** — Zero-marker format allows new nodes to detect version while old nodes gracefully ignore unknown packets.
 
@@ -262,22 +258,38 @@ alpc --serverAddress localhost --serverPort 9000 --command beginQuery \
 
 `AlpineRestBridge` starts services in this sequence, with each optional service following the non-fatal pattern (log and continue on failure):
 
-```
-1. ApplCore + Configuration
-2. Alpine Stack (protocol + transport)
-3. REST route registration (QueryHandler, PeerHandler, StatusHandler, AuthHandler,
-   MetricsHandler, AdminHandler, ClusterCoordinator, ApiDocsHandler)
-4. API key authentication middleware
-5. OpenTelemetry tracing (optional)
-6. FUSE virtual filesystem (optional)
-7. Discovery beacon (UDP broadcast)
-8. Cluster coordinator (heartbeats + listener)
-9. Broadcast query handler
-10. WiFi multicast discovery
-11. UPnP port mapping (optional)
-12. Tor hidden service + tunnel (optional)
-13. DLNA media server + SSDP + mDNS (optional)
-14. HTTP server (blocking accept loop)
+```mermaid
+flowchart TD
+    subgraph CORE["Core Initialization"]
+        S1["1. ApplCore + Configuration"]
+        S2["2. Alpine Stack\n(protocol + transport)"]
+        S3["3. REST Route Registration\nQueryHandler · PeerHandler · StatusHandler\nAuthHandler · MetricsHandler · AdminHandler\nClusterCoordinator · ApiDocsHandler"]
+        S4["4. API Key Auth Middleware"]
+        S1 --> S2 --> S3 --> S4
+    end
+
+    subgraph OPT["Optional Services (log and continue on failure)"]
+        S5["5. OpenTelemetry Tracing"]
+        S6["6. FUSE Virtual Filesystem"]
+        S4 --> S5 --> S6
+    end
+
+    subgraph NET["Network Services"]
+        S7["7. Discovery Beacon\n(UDP broadcast)"]
+        S8["8. Cluster Coordinator\n(heartbeats + listener)"]
+        S9["9. Broadcast Query Handler"]
+        S10["10. WiFi Multicast Discovery"]
+        S6 --> S7 --> S8 --> S9 --> S10
+    end
+
+    subgraph EXTRA["Additional Optional Services"]
+        S11["11. UPnP Port Mapping"]
+        S12["12. Tor Hidden Service + Tunnel"]
+        S13["13. DLNA Media Server\n+ SSDP + mDNS"]
+        S10 --> S11 --> S12 --> S13
+    end
+
+    S13 --> S14["14. HTTP Server\n(blocking accept loop)"]
 ```
 
 Shutdown proceeds in reverse order with a configurable drain period (default 5 seconds) for in-flight requests.
@@ -485,25 +497,27 @@ alpc-unblock <ip>                         # Unblock an IP
 
 ### Query Lifecycle
 
-```
-  Originator                    Peer B                    Peer C
-      │                           │                         │
-      │──── queryDiscover ───────►│                         │
-      │──── queryDiscover ────────┼────────────────────────►│
-      │                           │                         │
-      │◄──── queryOffer ──────────│  (hitCount=12)          │
-      │◄──── queryOffer ──────────┼─────────────────────────│  (hitCount=5)
-      │                           │                         │
-      │  [RatingEngine selects    │                         │
-      │   best peers by score]    │                         │
-      │                           │                         │
-      │──── queryRequest ────────►│                         │
-      │──── queryRequest ─────────┼────────────────────────►│
-      │                           │                         │
-      │◄──── queryReply ──────────│  (resource descriptors) │
-      │◄──── queryReply ──────────┼─────────────────────────│
-      │                           │                         │
-      ▼ Aggregate & deliver       │                         │
+```mermaid
+sequenceDiagram
+    participant O as Originator
+    participant B as Peer B
+    participant C as Peer C
+
+    O->>B: queryDiscover
+    O->>C: queryDiscover
+
+    B-->>O: queryOffer (hitCount=12)
+    C-->>O: queryOffer (hitCount=5)
+
+    Note over O: RatingEngine selects<br/>best peers by score
+
+    O->>B: queryRequest
+    O->>C: queryRequest
+
+    B-->>O: queryReply (resource descriptors)
+    C-->>O: queryReply (resource descriptors)
+
+    Note over O: Aggregate & deliver
 ```
 
 ### Protocol Versioning
@@ -531,16 +545,28 @@ The `AlpineRatingEngine` tracks per-peer quality scores using:
   - **HalfOpen** → **Closed**: on successful probe
   - **HalfOpen** → **Open**: on failed probe
 
+```mermaid
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open : N consecutive failures (default 5)
+    Open --> HalfOpen : Timeout expires (default 30s)
+    HalfOpen --> Closed : Probe succeeds
+    HalfOpen --> Open : Probe fails
+```
+
 ### Peer Exchange
 
-```
-peerListRequest ──► peerListOffer ──► peerListGet ──► peerListData
+```mermaid
+flowchart LR
+    A["peerListRequest"] --> B["peerListOffer"] --> C["peerListGet"] --> D["peerListData"]
 ```
 
 ### Proxy Routing
 
-```
-proxyRequest ──► proxyAccepted / proxyHalt
+```mermaid
+flowchart LR
+    PR["proxyRequest"] --> PA["proxyAccepted"]
+    PR --> PH["proxyHalt"]
 ```
 
 ### Transport Types
@@ -629,6 +655,20 @@ All settings follow the precedence: config file > command-line args > environmen
 ---
 
 ## Security
+
+```mermaid
+flowchart TD
+    REQ["Incoming HTTP Request"] --> TLS["TLS Termination"]
+    TLS --> IP{"IP Filter\n(allowlist / blocklist)"}
+    IP -->|"Blocked"| R403A["403 Forbidden"]
+    IP -->|"Allowed"| RL{"Rate Limiter\n(token bucket, 16 shards)"}
+    RL -->|"Exceeded"| R429["429 Too Many Requests"]
+    RL -->|"OK"| AUTH{"API Key / JWT\nAuthentication"}
+    AUTH -->|"Invalid"| R401["401 Unauthorized"]
+    AUTH -->|"Valid"| RBAC{"RBAC Policy\nCheck"}
+    RBAC -->|"Denied"| R403B["403 Forbidden"]
+    RBAC -->|"Granted"| HANDLER["Route Handler"]
+```
 
 ### Authentication
 
@@ -721,6 +761,25 @@ docker-compose -f docker/docker-compose.yml up
 docker-compose -f docker/docker-compose.yml --profile bench up
 ```
 
+```mermaid
+flowchart LR
+    subgraph NET["alpine-net (172.28.0.0/16)"]
+        N1["node1\n172.28.1.1\n:8080"]
+        N2["node2\n172.28.1.2\n:8080"]
+        N3["node3\n172.28.1.3\n:8080"]
+        N1 <-->|"UDP beacon\n+ multicast"| N2
+        N1 <-->|"UDP beacon\n+ multicast"| N3
+        N2 <-->|"UDP beacon\n+ multicast"| N3
+    end
+
+    H1["localhost:8081"] --> N1
+    H2["localhost:8082"] --> N2
+    H3["localhost:8083"] --> N3
+
+    N1 -.->|"depends_on:\nservice_healthy"| N2
+    N1 -.->|"depends_on:\nservice_healthy"| N3
+```
+
 Network layout:
 
 | Node | IP | REST Port | Protocol Port |
@@ -740,6 +799,24 @@ helm install alpine k8s/helm/alpine/ \
   --set replicaCount=3 \
   --set config.logLevel=Info \
   --set autoscaling.enabled=true
+```
+
+```mermaid
+flowchart TD
+    SVC["Service\n(ClusterIP / LoadBalancer)"] --> DEP["Deployment"]
+    HPA["HPA\n2-10 replicas\n70% CPU target"] --> DEP
+    PDB["PDB\nmaxUnavailable: 1"] --> DEP
+
+    DEP --> POD1["Pod"]
+    DEP --> POD2["Pod"]
+    DEP --> POD3["Pod"]
+
+    POD1 --- PORTS["Ports: 8080 (REST)\n8089 (beacon) · 8090 (broadcast)\n9000 (protocol)"]
+
+    READY["/health/ready\n(readiness probe)"] -.-> POD1
+    LIVE["/health/live\n(liveness probe)"] -.-> POD1
+    PROM["Prometheus\nGET /metrics"] -.-> POD1
+    PVC["PVC (optional)\nSQLite + rating state"] -.-> POD1
 ```
 
 Features:
@@ -887,18 +964,21 @@ Modules implement the `AlpineModuleInterface` and are managed by `AlpineModuleMg
 
 When compiled with `ALPINE_ENABLE_FUSE=ON`, Alpine mounts a virtual filesystem exposing queries, peers, and statistics as files:
 
-```
-/alpine/
-  queries/
-    <query_id>/
-      status    <- query status JSON
-      results   <- query results JSON
-  peers/
-    <peer_id>   <- peer info JSON
-  stats/
-    access      <- access statistics
-    popular     <- popular resources
-    recent      <- recent queries
+```mermaid
+flowchart TD
+    ROOT["/alpine/"] --> Q["queries/"]
+    ROOT --> P["peers/"]
+    ROOT --> S["stats/"]
+
+    Q --> QID["&lt;query_id&gt;/"]
+    QID --> QS["status\n(query status JSON)"]
+    QID --> QR["results\n(query results JSON)"]
+
+    P --> PID["&lt;peer_id&gt;\n(peer info JSON)"]
+
+    S --> SA["access\n(access statistics)"]
+    S --> SP["popular\n(popular resources)"]
+    S --> SR["recent\n(recent queries)"]
 ```
 
 The `QueryCache` provides an LRU cache with configurable TTL for query results. The `AccessTracker` records per-resource, per-peer, and per-query-term access statistics, serializable as JSON or plain text.
