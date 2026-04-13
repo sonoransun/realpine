@@ -15,6 +15,7 @@ add_library(AlpineTransport
     AlpineDtcpUdpTransport.cpp
     AlpineMulticastUdpTransport.cpp
     AlpineRawWifiUdpTransport.cpp
+    AlpineUnicastWifiUdpTransport.cpp
 )
 add_library(Alpine::AlpineTransport ALIAS AlpineTransport)
 target_include_directories(AlpineTransport PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -24,3 +25,7 @@ target_link_libraries(AlpineTransport PUBLIC
     Alpine::NetUtils
     AlpineProtocolHeaders
 )
+
+if(ALPINE_ENABLE_RTLSDR)
+    target_sources(AlpineTransport PRIVATE AlpineRtlSdrUdpTransport.cpp)
+endif()

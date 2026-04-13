@@ -51,6 +51,20 @@ class AlpineStackConfig
     bool getRawWifiInterface(string & interfaceName);
     bool rawWifiEnabled();
 
+    // Unicast 802.11 transport (Linux only)
+    //
+    bool setUnicastWifiInterface(const string & interfaceName);
+    bool getUnicastWifiInterface(string & interfaceName);
+    bool unicastWifiEnabled();
+
+    // RTL-SDR receive-only transport
+    //
+#ifdef ALPINE_RTLSDR_ENABLED
+    bool setRtlSdrConfig(uint centerFreqHz, uint sampleRate, int gainTenths, const string & modulation);
+    bool getRtlSdrConfig(uint & centerFreqHz, uint & sampleRate, int & gainTenths, string & modulation);
+    bool rtlSdrEnabled();
+#endif
+
 
   private:
     ulong localIpAddress_;
@@ -69,4 +83,17 @@ class AlpineStackConfig
     // Raw 802.11
     bool rawWifiEnabled_;
     string rawWifiInterface_;
+
+    // Unicast 802.11
+    bool unicastWifiEnabled_;
+    string unicastWifiInterface_;
+
+    // RTL-SDR
+#ifdef ALPINE_RTLSDR_ENABLED
+    bool rtlSdrEnabled_;
+    uint rtlSdrCenterFreqHz_;
+    uint rtlSdrSampleRate_;
+    int rtlSdrGainTenths_;
+    string rtlSdrModulation_;
+#endif
 };

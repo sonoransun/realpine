@@ -13,6 +13,8 @@ set(NETUTILS_SOURCES
     TorService.cpp
     TorSocksProxy.cpp
     UdpConnection.cpp
+    SdrDemodulator.cpp
+    UnicastWifiConnection.cpp
     WifiBeaconInjector.cpp
     WifiDiscovery.cpp
 )
@@ -23,6 +25,13 @@ endif()
 
 if(ALPINE_ENABLE_UPNP)
     list(APPEND NETUTILS_SOURCES UpnpPortMapper.cpp)
+endif()
+
+if(ALPINE_ENABLE_RTLSDR)
+    list(APPEND NETUTILS_SOURCES
+        GfskDemodulator.cpp
+        RtlSdrConnection.cpp
+    )
 endif()
 
 add_library(NetUtils ${NETUTILS_SOURCES})
@@ -38,4 +47,9 @@ endif()
 if(ALPINE_ENABLE_UPNP)
     target_link_libraries(NetUtils PUBLIC libminiupnpc-static)
     target_compile_definitions(NetUtils PUBLIC ALPINE_UPNP_ENABLED)
+endif()
+
+if(ALPINE_ENABLE_RTLSDR)
+    target_link_libraries(NetUtils PUBLIC LibRTLSDR::LibRTLSDR)
+    target_compile_definitions(NetUtils PUBLIC ALPINE_RTLSDR_ENABLED)
 endif()

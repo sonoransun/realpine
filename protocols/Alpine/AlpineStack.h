@@ -41,6 +41,10 @@ class AlpineStack
     static DtcpBaseUdpTransport * multicastTransport_s;
     static DtcpBaseUdpTransport * broadcastTransport_s;
     static DtcpBaseUdpTransport * rawWifiTransport_s;
+    static DtcpBaseUdpTransport * unicastWifiTransport_s;
+#ifdef ALPINE_RTLSDR_ENABLED
+    static DtcpBaseUdpTransport * rtlSdrTransport_s;
+#endif
     static ReadWriteSem dataLock_s;
 
     static std::condition_variable eventCV_s;

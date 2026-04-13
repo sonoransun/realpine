@@ -324,3 +324,32 @@ target_link_libraries(test_rating_engine PRIVATE
     Alpine::ThreadUtils
 )
 catch_discover_tests(test_rating_engine)
+
+# --- UnicastWifiConnection tests ---
+add_executable(test_unicast_wifi_connection test_unicast_wifi_connection.cpp)
+target_link_libraries(test_unicast_wifi_connection PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::NetUtils
+    Alpine::AppUtils
+)
+catch_discover_tests(test_unicast_wifi_connection)
+
+# --- SDR radio frame encoding/decoding tests ---
+add_executable(test_sdr_radio_frame test_sdr_radio_frame.cpp)
+target_link_libraries(test_sdr_radio_frame PRIVATE
+    Catch2::Catch2WithMain
+    Alpine::NetUtils
+    Alpine::AppUtils
+)
+catch_discover_tests(test_sdr_radio_frame)
+
+# --- GfskDemodulator tests (requires RTL-SDR build option) ---
+if(ALPINE_ENABLE_RTLSDR)
+    add_executable(test_gfsk_demodulator test_gfsk_demodulator.cpp)
+    target_link_libraries(test_gfsk_demodulator PRIVATE
+        Catch2::Catch2WithMain
+        Alpine::NetUtils
+        Alpine::AppUtils
+    )
+    catch_discover_tests(test_gfsk_demodulator)
+endif()

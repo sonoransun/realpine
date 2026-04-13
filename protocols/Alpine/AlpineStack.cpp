@@ -15,6 +15,11 @@
 #include <AlpineRatingEngine.h>
 #include <AlpineRawWifiUdpTransport.h>
 #include <AlpineServiceThread.h>
+#include <AlpineUnicastWifiUdpTransport.h>
+
+#ifdef ALPINE_RTLSDR_ENABLED
+#include <AlpineRtlSdrUdpTransport.h>
+#endif
 #include <AlpineStack.h>
 #include <DataBuffer.h>
 #include <DtcpStack.h>
@@ -39,6 +44,10 @@ AlpineDtcpUdpTransport * AlpineStack::baseUdpTransport_s = nullptr;
 DtcpBaseUdpTransport * AlpineStack::multicastTransport_s = nullptr;
 DtcpBaseUdpTransport * AlpineStack::broadcastTransport_s = nullptr;
 DtcpBaseUdpTransport * AlpineStack::rawWifiTransport_s = nullptr;
+DtcpBaseUdpTransport * AlpineStack::unicastWifiTransport_s = nullptr;
+#ifdef ALPINE_RTLSDR_ENABLED
+DtcpBaseUdpTransport * AlpineStack::rtlSdrTransport_s = nullptr;
+#endif
 ReadWriteSem AlpineStack::dataLock_s;
 std::condition_variable AlpineStack::eventCV_s;
 std::mutex AlpineStack::eventMutex_s;
@@ -227,6 +236,55 @@ AlpineStack::initialize(AlpineStackConfig & configuration)
         }
     }
 
+    if (configuration.unicastWifiEnabled()) {
+        string ifName;
+        configuration.getUnicastWifiInterface(ifName);
+
+        unicastWifiTransport_s = new AlpineUnicastWifiUdpTransport(localIp, localPort, ifName);
+
+        status = unicastWifiTransport_s->initialize();
+
+        if (status) {
+            status = unicastWifiTransport_s->activate();
+        }
+
+        if (status) {
+            Log::Info("Unicast 802.11 transport activated on interface "s + ifName);
+        } else {
+            Log::Error("Failed to activate unicast 802.11 transport.");
+            delete unicastWifiTransport_s;
+            unicastWifiTransport_s = nullptr;
+        }
+    }
+
+#ifdef ALPINE_RTLSDR_ENABLED
+    if (configuration.rtlSdrEnabled()) {
+        uint centerFreqHz;
+        uint sampleRate;
+        int gainTenths;
+        string modulation;
+        configuration.getRtlSdrConfig(centerFreqHz, sampleRate, gainTenths, modulation);
+
+        rtlSdrTransport_s =
+            new AlpineRtlSdrUdpTransport(localIp, localPort, centerFreqHz, sampleRate, gainTenths, modulation);
+
+        status = rtlSdrTransport_s->initialize();
+
+        if (status) {
+            status = rtlSdrTransport_s->activate();
+        }
+
+        if (status) {
+            Log::Info("RTL-SDR transport activated (freq="s + std::to_string(centerFreqHz) +
+                      " Hz, rate=" + std::to_string(sampleRate) + ", mod=" + modulation + ")");
+        } else {
+            Log::Error("Failed to activate RTL-SDR transport.");
+            delete rtlSdrTransport_s;
+            rtlSdrTransport_s = nullptr;
+        }
+    }
+#endif
+
     return true;
 }
 
@@ -339,6 +397,20 @@ AlpineStack::cleanUp()
         broadcastTransport_s->shutdown();
         delete broadcastTransport_s;
         broadcastTransport_s = nullptr;
+    }
+
+#ifdef ALPINE_RTLSDR_ENABLED
+    if (rtlSdrTransport_s) {
+        rtlSdrTransport_s->shutdown();
+        delete rtlSdrTransport_s;
+        rtlSdrTransport_s = nullptr;
+    }
+#endif
+
+    if (unicastWifiTransport_s) {
+        unicastWifiTransport_s->shutdown();
+        delete unicastWifiTransport_s;
+        unicastWifiTransport_s = nullptr;
     }
 
     if (rawWifiTransport_s) {

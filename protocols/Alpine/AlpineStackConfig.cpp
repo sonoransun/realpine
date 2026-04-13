@@ -22,6 +22,13 @@ AlpineStackConfig::AlpineStackConfig()
     broadcastEnabled_ = false;
     broadcastPort_ = 0;
     rawWifiEnabled_ = false;
+    unicastWifiEnabled_ = false;
+#ifdef ALPINE_RTLSDR_ENABLED
+    rtlSdrEnabled_ = false;
+    rtlSdrCenterFreqHz_ = 0;
+    rtlSdrSampleRate_ = 0;
+    rtlSdrGainTenths_ = 0;
+#endif
 }
 
 
@@ -42,6 +49,15 @@ AlpineStackConfig::AlpineStackConfig(const AlpineStackConfig & copy)
     broadcastPort_ = copy.broadcastPort_;
     rawWifiEnabled_ = copy.rawWifiEnabled_;
     rawWifiInterface_ = copy.rawWifiInterface_;
+    unicastWifiEnabled_ = copy.unicastWifiEnabled_;
+    unicastWifiInterface_ = copy.unicastWifiInterface_;
+#ifdef ALPINE_RTLSDR_ENABLED
+    rtlSdrEnabled_ = copy.rtlSdrEnabled_;
+    rtlSdrCenterFreqHz_ = copy.rtlSdrCenterFreqHz_;
+    rtlSdrSampleRate_ = copy.rtlSdrSampleRate_;
+    rtlSdrGainTenths_ = copy.rtlSdrGainTenths_;
+    rtlSdrModulation_ = copy.rtlSdrModulation_;
+#endif
 }
 
 
@@ -70,6 +86,15 @@ AlpineStackConfig::operator=(const AlpineStackConfig & copy)
     broadcastPort_ = copy.broadcastPort_;
     rawWifiEnabled_ = copy.rawWifiEnabled_;
     rawWifiInterface_ = copy.rawWifiInterface_;
+    unicastWifiEnabled_ = copy.unicastWifiEnabled_;
+    unicastWifiInterface_ = copy.unicastWifiInterface_;
+#ifdef ALPINE_RTLSDR_ENABLED
+    rtlSdrEnabled_ = copy.rtlSdrEnabled_;
+    rtlSdrCenterFreqHz_ = copy.rtlSdrCenterFreqHz_;
+    rtlSdrSampleRate_ = copy.rtlSdrSampleRate_;
+    rtlSdrGainTenths_ = copy.rtlSdrGainTenths_;
+    rtlSdrModulation_ = copy.rtlSdrModulation_;
+#endif
 
     return *this;
 }
@@ -330,3 +355,103 @@ AlpineStackConfig::rawWifiEnabled()
 {
     return rawWifiEnabled_;
 }
+
+
+bool
+AlpineStackConfig::setUnicastWifiInterface(const string & interfaceName)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpineStackConfig::setUnicastWifiInterface invoked.");
+#endif
+
+    if (interfaceName.empty()) {
+        Log::Error("Invalid interface name in AlpineStackConfig::setUnicastWifiInterface!");
+        return false;
+    }
+
+    unicastWifiInterface_ = interfaceName;
+    unicastWifiEnabled_ = true;
+
+    return true;
+}
+
+
+bool
+AlpineStackConfig::getUnicastWifiInterface(string & interfaceName)
+{
+    if (!unicastWifiEnabled_) {
+        return false;
+    }
+
+    interfaceName = unicastWifiInterface_;
+
+    return true;
+}
+
+
+bool
+AlpineStackConfig::unicastWifiEnabled()
+{
+    return unicastWifiEnabled_;
+}
+
+
+#ifdef ALPINE_RTLSDR_ENABLED
+
+
+bool
+AlpineStackConfig::setRtlSdrConfig(uint centerFreqHz, uint sampleRate, int gainTenths, const string & modulation)
+{
+#ifdef _VERBOSE
+    Log::Debug("AlpineStackConfig::setRtlSdrConfig invoked.");
+#endif
+
+    if (centerFreqHz == 0) {
+        Log::Error("Invalid center frequency in AlpineStackConfig::setRtlSdrConfig!");
+        return false;
+    }
+
+    if (sampleRate == 0) {
+        Log::Error("Invalid sample rate in AlpineStackConfig::setRtlSdrConfig!");
+        return false;
+    }
+
+    if (modulation.empty()) {
+        Log::Error("Invalid modulation in AlpineStackConfig::setRtlSdrConfig!");
+        return false;
+    }
+
+    rtlSdrCenterFreqHz_ = centerFreqHz;
+    rtlSdrSampleRate_ = sampleRate;
+    rtlSdrGainTenths_ = gainTenths;
+    rtlSdrModulation_ = modulation;
+    rtlSdrEnabled_ = true;
+
+    return true;
+}
+
+
+bool
+AlpineStackConfig::getRtlSdrConfig(uint & centerFreqHz, uint & sampleRate, int & gainTenths, string & modulation)
+{
+    if (!rtlSdrEnabled_) {
+        return false;
+    }
+
+    centerFreqHz = rtlSdrCenterFreqHz_;
+    sampleRate = rtlSdrSampleRate_;
+    gainTenths = rtlSdrGainTenths_;
+    modulation = rtlSdrModulation_;
+
+    return true;
+}
+
+
+bool
+AlpineStackConfig::rtlSdrEnabled()
+{
+    return rtlSdrEnabled_;
+}
+
+
+#endif  // ALPINE_RTLSDR_ENABLED

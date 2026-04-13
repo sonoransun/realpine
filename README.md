@@ -15,6 +15,7 @@ Alpine enables autonomous nodes to discover each other, share resource metadata,
 - [REST API Reference](#rest-api-reference)
 - [CLI Reference](#cli-reference)
 - [Protocol Stack](#protocol-stack)
+- [Discovery & Communication Deep Dive](docs/COMMUNICATION.md)
 - [Configuration](#configuration)
 - [Security](#security)
 - [Observability](#observability)
@@ -231,8 +232,8 @@ alpc --serverAddress localhost --serverPort 9000 --command beginQuery \
 │  QueryCache       AlpineRatingEngine                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                   Transport Layer (AlpineTransport)             │
-│  UDP Unicast · Multicast · Broadcast · WiFi Direct              │
-│  DTCP Reliable · DTLS Wrapper · SendQueue                       │
+│  UDP Unicast · Multicast · Broadcast · Raw WiFi · Unicast WiFi  │
+│  RTL-SDR Receive · DTCP Reliable · DTLS · SendQueue             │
 ├─────────────────────────────────────────────────────────────────┤
 │                       Base Libraries                            │
 │  AppUtils    SysUtils    ThreadUtils    NetUtils                 │
@@ -541,6 +542,19 @@ peerListRequest ──► peerListOffer ──► peerListGet ──► peerList
 ```
 proxyRequest ──► proxyAccepted / proxyHalt
 ```
+
+### Transport Types
+
+Alpine supports six transport backends, all built on the DTCP reliable layer. For detailed wire formats, handshake sequences, frame diagrams, and security layer integration, see [docs/COMMUNICATION.md](docs/COMMUNICATION.md).
+
+| Transport | Direction | Medium | Platform |
+|-----------|-----------|--------|----------|
+| UDP Unicast | Bidirectional | Standard UDP socket | All |
+| Multicast | Bidirectional | IP multicast group (IGMP) | All |
+| Broadcast | Bidirectional | LAN broadcast | All |
+| Raw WiFi (802.11) | Bidirectional | AF_PACKET raw 802.11 frames | Linux (`CAP_NET_RAW`) |
+| Unicast WiFi | Bidirectional | Directed 802.11 with MAC cache | Linux (`CAP_NET_RAW`) |
+| RTL-SDR | Receive-only | GFSK digital radio via RTL2832U | Linux (`ALPINE_ENABLE_RTLSDR`) |
 
 ---
 

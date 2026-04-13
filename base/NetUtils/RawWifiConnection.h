@@ -24,7 +24,7 @@ class RawWifiConnection : public UdpConnection
                      ushort & sourcePort,
                      uint & dataLength) override;
 
-  private:
+  protected:
 #ifdef __linux__
     int rawFd_;
     int ifIndex_;
