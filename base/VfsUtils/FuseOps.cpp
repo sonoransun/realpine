@@ -3,8 +3,6 @@
 
 #include <AccessTracker.h>
 #include <AlpineFuse.h>
-#include <AlpinePeerProfileIndex.h>
-#include <AlpineRatingEngine.h>
 #include <AlpineStackInterface.h>
 #include <DtcpStackInterface.h>
 #include <FuseOps.h>
@@ -504,20 +502,12 @@ FuseOps::fuseOpen(const char * path, struct fuse_file_info * fi)
 
     node->accessedAt = std::chrono::system_clock::now();
 
-    // Record access and check feedback threshold
-    if (node->resourceId != 0) {
+    // Implicit-feedback wiring used to live here.  Feedback now flows from
+    // the FsObserve subsystem (kernel-level observation of the on-disk
+    // ResourceStore), so FUSE no longer participates in reputation updates.
+    // AccessTracker stats below feed only the /vfs/stats debug surface.
+    if (node->resourceId != 0)
         AccessTracker::recordResourceAccess(node->resourceId, node->peerId, node->name);
-
-        AccessTracker::t_ResourceStats stats{};
-        if (AccessTracker::getResourceStats(node->resourceId, stats)) {
-            if (stats.accessCount >= AlpineFuse::feedbackThreshold()) {
-                AlpinePeerProfile * profile = nullptr;
-                short qualityDelta = 0;
-                AlpineRatingEngine::clientResourceEvaluation(
-                    profile, AlpineRatingEngine::t_ResourceRating::Average, qualityDelta);
-            }
-        }
-    }
 
     return 0;
 }

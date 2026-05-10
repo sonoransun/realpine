@@ -146,6 +146,8 @@ eventName(t_Event event)
         return "QueryProgress"s;
     case t_Event::GroupChanged:
         return "GroupChanged"s;
+    case t_Event::ResourceAccessed:
+        return "ResourceAccessed"s;
     }
     return "Unknown"s;
 }

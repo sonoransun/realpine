@@ -10,7 +10,7 @@
 #include <vector>
 
 
-enum class t_Event : uint { PeerDiscovered, PeerDisconnected, QueryCompleted, QueryProgress, GroupChanged };
+enum class t_Event : uint { PeerDiscovered, PeerDisconnected, QueryCompleted, QueryProgress, GroupChanged, ResourceAccessed };
 
 
 class EventBus

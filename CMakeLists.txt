@@ -28,6 +28,47 @@ option(ALPINE_WARNINGS_AS_ERRORS "Promote compiler warnings to errors (CI uses t
 option(ALPINE_ENABLE_LTO "Enable link-time optimization for Release builds" OFF)
 option(ALPINE_ENABLE_RTLSDR "Enable RTL-SDR receive transport" OFF)
 option(ALPINE_INSTALL_SYSTEMD "Install systemd unit file (Linux only)" OFF)
+
+# Filesystem-observation backends used by AlpineFeedbackAggregator to feed
+# the rating engine with implicit usage signals.  Umbrella defaults ON on
+# Linux, macOS, and Windows so the always-available backend for each
+# platform is present without explicit opt-in.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux"
+   OR CMAKE_SYSTEM_NAME STREQUAL "Darwin"
+   OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    option(ALPINE_ENABLE_FSOBSERVE "Enable kernel-level filesystem observation for implicit feedback" ON)
+else()
+    option(ALPINE_ENABLE_FSOBSERVE "Enable kernel-level filesystem observation for implicit feedback" OFF)
+endif()
+
+# Per-backend defaults: enable a backend only when (a) the umbrella is on
+# AND (b) the host platform supports it.  Privileged backends
+# (audit / ebpf / endpointsec / etw) stay opt-in.
+if(ALPINE_ENABLE_FSOBSERVE AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(_ALPINE_FSOBSERVE_LINUX_DEFAULT ON)
+else()
+    set(_ALPINE_FSOBSERVE_LINUX_DEFAULT OFF)
+endif()
+if(ALPINE_ENABLE_FSOBSERVE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(_ALPINE_FSOBSERVE_DARWIN_DEFAULT ON)
+else()
+    set(_ALPINE_FSOBSERVE_DARWIN_DEFAULT OFF)
+endif()
+if(ALPINE_ENABLE_FSOBSERVE AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(_ALPINE_FSOBSERVE_WINDOWS_DEFAULT ON)
+else()
+    set(_ALPINE_FSOBSERVE_WINDOWS_DEFAULT OFF)
+endif()
+
+option(ALPINE_ENABLE_FSOBSERVE_INOTIFY "Build inotify FsObserve backend (Linux)" ${_ALPINE_FSOBSERVE_LINUX_DEFAULT})
+option(ALPINE_ENABLE_FSOBSERVE_FANOTIFY "Build fanotify FsObserve backend (Linux)" ${_ALPINE_FSOBSERVE_LINUX_DEFAULT})
+option(ALPINE_ENABLE_FSOBSERVE_AUDIT "Build libaudit FsObserve backend (Linux, opt-in)" OFF)
+option(ALPINE_ENABLE_FSOBSERVE_EBPF "Build eBPF FsObserve backend, parent + alpine-fsprobe sidecar (Linux, opt-in)" OFF)
+option(ALPINE_ENABLE_FSOBSERVE_KQUEUE "Build kqueue FsObserve backend (macOS / BSD)" ${_ALPINE_FSOBSERVE_DARWIN_DEFAULT})
+option(ALPINE_ENABLE_FSOBSERVE_FSEVENTS "Build FSEvents FsObserve backend (macOS)" ${_ALPINE_FSOBSERVE_DARWIN_DEFAULT})
+option(ALPINE_ENABLE_FSOBSERVE_ENDPOINTSEC "Build EndpointSecurity FsObserve backend (macOS, opt-in; needs entitlement)" OFF)
+option(ALPINE_ENABLE_FSOBSERVE_READDIRCHANGES "Build ReadDirectoryChangesW FsObserve backend (Windows)" ${_ALPINE_FSOBSERVE_WINDOWS_DEFAULT})
+option(ALPINE_ENABLE_FSOBSERVE_ETW "Build ETW FsObserve backend (Windows, opt-in; needs admin)" OFF)
 set(ALPINE_SANITIZER "" CACHE STRING
     "Enable sanitizer instrumentation (address, undefined, thread, memory, or comma-separated combo)")
 
@@ -399,6 +440,10 @@ add_subdirectory(base/ThreadUtils)
 add_subdirectory(base/NetUtils)
 add_subdirectory(base/ConfigUtils)
 add_subdirectory(base/Tracing)
+if(ALPINE_ENABLE_FSOBSERVE)
+    add_subdirectory(base/ResourceStore)
+    add_subdirectory(base/FsObserve)
+endif()
 if(ALPINE_ENABLE_FUSE)
     add_subdirectory(base/VfsUtils)
 endif()
@@ -448,6 +493,9 @@ add_subdirectory(AlpineServer)
 add_subdirectory(AlpineCmdIf)
 add_subdirectory(AlpineRestBridge)
 add_subdirectory(AlpineGui)
+if(ALPINE_ENABLE_FSOBSERVE_EBPF)
+    add_subdirectory(bin/fsprobe-sidecar)
+endif()
 
 # Tests
 if(ALPINE_BUILD_TESTS)
@@ -571,6 +619,12 @@ if(ALPINE_INSTALL_SYSTEMD AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
         DESTINATION lib/systemd/system
         COMPONENT runtime
     )
+    if(ALPINE_ENABLE_FSOBSERVE_EBPF)
+        install(FILES packaging/systemd/alpine-fsprobe.service
+            DESTINATION lib/systemd/system
+            COMPONENT runtime
+        )
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------
@@ -603,6 +657,9 @@ endif()
 if(ALPINE_ENABLE_FUSE)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libfuse3-3")
 endif()
+if(ALPINE_ENABLE_FSOBSERVE_AUDIT)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libaudit1")
+endif()
 if(ALPINE_ENABLE_RTLSDR)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, librtlsdr0")
 endif()
@@ -618,6 +675,9 @@ if(ALPINE_ENABLE_TLS)
 endif()
 if(ALPINE_ENABLE_FUSE)
     set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, fuse3-libs")
+endif()
+if(ALPINE_ENABLE_FSOBSERVE_AUDIT)
+    set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, audit-libs")
 endif()
 if(ALPINE_ENABLE_RTLSDR)
     set(CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, rtl-sdr")

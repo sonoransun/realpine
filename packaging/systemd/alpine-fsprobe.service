@@ -1,0 +1,48 @@
+[Unit]
+Description=Alpine fsprobe — privileged eBPF sidecar for FsObserve backend
+Documentation=https://github.com/sonoransun/alpine
+After=alpine-rest-bridge.service
+PartOf=alpine-rest-bridge.service
+
+[Service]
+Type=simple
+# Started by AlpineRestBridge via fork+exec when ALPINE_FSOBSERVE_BACKEND=ebpf
+# is selected; this unit is for operators who prefer to run the sidecar as a
+# managed service and connect to it via UDS.  Set ALPINE_FSPROBE_FD and
+# ALPINE_FSPROBE_ROOT in the [Service] Environment= block before enabling.
+ExecStart=/usr/bin/alpine-fsprobe
+Restart=on-failure
+RestartSec=2s
+
+# --- Hardening ----------------------------------------------------------
+# CAP_BPF and CAP_PERFMON are required to load BPF programs and attach
+# kprobes on modern (>= 5.8) kernels.  CAP_SYS_PTRACE allows reading
+# task->mm to resolve full paths from struct file* in the BPF program.
+# Mirrors the CAP_NET_RAW pattern in alpine-rest-bridge.service:44-47.
+DynamicUser=no
+User=root
+NoNewPrivileges=yes
+AmbientCapabilities=CAP_BPF CAP_PERFMON CAP_SYS_PTRACE
+CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_PTRACE
+
+ProtectSystem=strict
+ProtectHome=yes
+ProtectHostname=yes
+ProtectClock=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+PrivateTmp=yes
+RemoveIPC=yes
+
+RestrictAddressFamilies=AF_UNIX
+
+# BPF programs allocate locked memory; raise the limit.
+MemoryMax=256M
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

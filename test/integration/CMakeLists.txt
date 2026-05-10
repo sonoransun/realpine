@@ -2,6 +2,20 @@
 
 set(REST_SRC_DIR ${CMAKE_SOURCE_DIR}/AlpineRestBridge)
 
+# --- FsObserve end-to-end test ---
+if(ALPINE_ENABLE_FSOBSERVE AND ALPINE_ENABLE_FSOBSERVE_INOTIFY)
+    add_executable(test_observer_to_rating test_observer_to_rating.cpp)
+    target_link_libraries(test_observer_to_rating PRIVATE
+        Catch2::Catch2WithMain
+        Alpine::Stack
+        Alpine::ResourceStore
+        Alpine::FsObserve
+        Alpine::ConfigUtils
+        Alpine::ThreadUtils
+    )
+    catch_discover_tests(test_observer_to_rating)
+endif()
+
 # --- Query lifecycle integration test ---
 add_executable(test_rest_query_lifecycle
     test_rest_query_lifecycle.cpp

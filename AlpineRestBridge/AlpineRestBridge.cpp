@@ -49,6 +49,12 @@
 #include <VfsStatsHandler.h>
 #endif
 
+#ifdef ALPINE_FSOBSERVE_ENABLED
+#include <AlpineFeedbackAggregator.h>
+#include <FsObserverFactory.h>
+#include <ResourceStore.h>
+#endif
+
 #ifdef ALPINE_TRACING_ENABLED
 #include <Tracing.h>
 #endif
@@ -251,11 +257,9 @@ main(int argc, char * argv[])
     string fuseEnabledStr;
     string fuseMountPointStr;
     string fuseCacheTtlStr;
-    string fuseFeedbackThresholdStr;
     bool fuseEnabled = false;
     string fuseMountPoint = alpine_temp_dir() + "/alpine"s;
     ulong fuseCacheTtl = 60;
-    ulong fuseFeedbackThreshold = 5;
 
     status = Configuration::getValue("FUSE Enabled", fuseEnabledStr);
     if (status && (fuseEnabledStr == "true" || fuseEnabledStr == "1"))
@@ -268,11 +272,7 @@ main(int argc, char * argv[])
         if (Configuration::getValue("FUSE Cache TTL", fuseCacheTtlStr) && !fuseCacheTtlStr.empty())
             fuseCacheTtl = parseUlong(fuseCacheTtlStr).value_or(fuseCacheTtl);
 
-        if (Configuration::getValue("FUSE Feedback Threshold", fuseFeedbackThresholdStr) &&
-            !fuseFeedbackThresholdStr.empty())
-            fuseFeedbackThreshold = parseUlong(fuseFeedbackThresholdStr).value_or(fuseFeedbackThreshold);
-
-        if (AlpineFuse::initialize(fuseMountPoint, fuseCacheTtl, fuseFeedbackThreshold)) {
+        if (AlpineFuse::initialize(fuseMountPoint, fuseCacheTtl)) {
             if (AlpineFuse::run()) {
                 Log::Info("FUSE virtual filesystem mounted at "s + fuseMountPoint);
                 VfsStatsHandler::registerRoutes(router);
@@ -284,6 +284,55 @@ main(int argc, char * argv[])
         }
     } else {
         Log::Info("FUSE virtual filesystem disabled by configuration.");
+    }
+#endif
+
+
+    // Start filesystem observer + feedback aggregator (non-fatal).  Replaces
+    // the now-removed FUSE-side implicit feedback wiring with kernel-level
+    // observation of the on-disk ResourceStore.
+    //
+#ifdef ALPINE_FSOBSERVE_ENABLED
+    string fsObserveEnabledStr;
+    string fsObserveRootStr;
+    bool fsObserveEnabled = true;
+    string fsObserveRoot = alpine_temp_dir() + "/alpine-resources"s;
+
+    status = Configuration::getValue("FsObserve Enabled", fsObserveEnabledStr);
+    if (status && (fsObserveEnabledStr == "false" || fsObserveEnabledStr == "0"))
+        fsObserveEnabled = false;
+
+    if (Configuration::getValue("FsObserve Root", fsObserveRootStr) && !fsObserveRootStr.empty())
+        fsObserveRoot = fsObserveRootStr;
+
+    if (const char * envRoot = std::getenv("ALPINE_FSOBSERVE_ROOT"); envRoot && *envRoot)
+        fsObserveRoot = string(envRoot);
+
+    ResourceStore * resourceStore = nullptr;
+    AlpineFeedbackAggregator * feedbackAggregator = nullptr;
+    std::unique_ptr<FsObserver> fsObserver;
+
+    if (fsObserveEnabled) {
+        resourceStore = new ResourceStore();
+        if (!resourceStore->initialize(fsObserveRoot)) {
+            Log::Error("FsObserve: ResourceStore failed to initialize (continuing without implicit feedback)."s);
+            delete resourceStore;
+            resourceStore = nullptr;
+        } else {
+            feedbackAggregator =
+                new AlpineFeedbackAggregator(*resourceStore, AlpineFeedbackAggregator::configFromEnvironment());
+            fsObserver = FsObserverFactory::detectAndStart(
+                resourceStore->root(), [agg = feedbackAggregator](const FsEvent & ev) { agg->onEvent(ev); });
+            if (!fsObserver) {
+                Log::Error("FsObserve: no backend started (continuing without implicit feedback)."s);
+                delete feedbackAggregator;
+                feedbackAggregator = nullptr;
+                delete resourceStore;
+                resourceStore = nullptr;
+            }
+        }
+    } else {
+        Log::Info("FsObserve disabled by configuration."s);
     }
 #endif
 
@@ -612,6 +661,17 @@ main(int argc, char * argv[])
         if (AlpineFuse::isRunning())
             AlpineFuse::shutdown();
 #endif
+#ifdef ALPINE_FSOBSERVE_ENABLED
+        if (fsObserver)
+            fsObserver->stop();
+        delete feedbackAggregator;
+        feedbackAggregator = nullptr;
+        if (resourceStore) {
+            resourceStore->shutdown();
+            delete resourceStore;
+            resourceStore = nullptr;
+        }
+#endif
         WifiDiscovery::shutdown();
         if (mdnsService) {
             mdnsService->stop();
@@ -690,6 +750,17 @@ main(int argc, char * argv[])
 #ifdef ALPINE_FUSE_ENABLED
     if (AlpineFuse::isRunning())
         AlpineFuse::shutdown();
+#endif
+#ifdef ALPINE_FSOBSERVE_ENABLED
+    if (fsObserver)
+        fsObserver->stop();
+    delete feedbackAggregator;
+    feedbackAggregator = nullptr;
+    if (resourceStore) {
+        resourceStore->shutdown();
+        delete resourceStore;
+        resourceStore = nullptr;
+    }
 #endif
 
     WifiDiscovery::shutdown();

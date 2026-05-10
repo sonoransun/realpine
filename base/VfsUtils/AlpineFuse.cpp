@@ -16,7 +16,6 @@ std::unique_ptr<VfsNode> AlpineFuse::root_s;
 std::unique_ptr<AlpineFuse::FuseThread> AlpineFuse::fuseThread_s;
 string AlpineFuse::mountPoint_s;
 ulong AlpineFuse::cacheTtlSeconds_s = 60;
-ulong AlpineFuse::feedbackThreshold_s = 5;
 bool AlpineFuse::running_s = false;
 ReadWriteSem AlpineFuse::dataLock_s;
 
@@ -26,13 +25,12 @@ ReadWriteSem AlpineFuse::dataLock_s;
 // ---------------------------------------------------------------------------
 
 bool
-AlpineFuse::initialize(const string & mountPoint, ulong cacheTtlSeconds, ulong feedbackThresholdVal)
+AlpineFuse::initialize(const string & mountPoint, ulong cacheTtlSeconds)
 {
     dataLock_s.acquireWrite();
 
     mountPoint_s = mountPoint;
     cacheTtlSeconds_s = cacheTtlSeconds;
-    feedbackThreshold_s = feedbackThresholdVal;
 
     dataLock_s.releaseWrite();
 
@@ -140,20 +138,6 @@ VfsNode *
 AlpineFuse::rootNode()
 {
     return root_s.get();
-}
-
-
-// ---------------------------------------------------------------------------
-// feedbackThreshold
-// ---------------------------------------------------------------------------
-
-ulong
-AlpineFuse::feedbackThreshold()
-{
-    dataLock_s.acquireRead();
-    ulong result = feedbackThreshold_s;
-    dataLock_s.releaseRead();
-    return result;
 }
 
 

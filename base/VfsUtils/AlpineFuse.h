@@ -17,7 +17,7 @@ class AlpineFuse
     ~AlpineFuse() = default;
 
 
-    static bool initialize(const string & mountPoint, ulong cacheTtlSeconds = 60, ulong feedbackThreshold = 5);
+    static bool initialize(const string & mountPoint, ulong cacheTtlSeconds = 60);
 
     static bool run();
 
@@ -28,8 +28,6 @@ class AlpineFuse
     static const string & getMountPoint();
 
     static VfsNode * rootNode();
-
-    static ulong feedbackThreshold();
 
 
   private:
@@ -48,7 +46,6 @@ class AlpineFuse
     static std::unique_ptr<FuseThread> fuseThread_s;
     static string mountPoint_s;
     static ulong cacheTtlSeconds_s;
-    static ulong feedbackThreshold_s;
     static bool running_s;
     static ReadWriteSem dataLock_s;
 };

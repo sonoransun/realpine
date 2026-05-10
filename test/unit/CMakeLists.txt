@@ -343,6 +343,36 @@ target_link_libraries(test_sdr_radio_frame PRIVATE
 )
 catch_discover_tests(test_sdr_radio_frame)
 
+# --- ResourceStore + FsObserve tests (Linux-only, gated on the build flag) ---
+if(ALPINE_ENABLE_FSOBSERVE)
+    add_executable(test_resource_store test_resource_store.cpp)
+    target_link_libraries(test_resource_store PRIVATE
+        Catch2::Catch2WithMain
+        Alpine::ResourceStore
+    )
+    catch_discover_tests(test_resource_store)
+
+    add_executable(test_feedback_aggregator test_feedback_aggregator.cpp)
+    target_link_libraries(test_feedback_aggregator PRIVATE
+        Catch2::Catch2WithMain
+        Alpine::Stack
+        Alpine::ResourceStore
+        Alpine::FsObserve
+        Alpine::ConfigUtils
+        Alpine::ThreadUtils
+    )
+    catch_discover_tests(test_feedback_aggregator)
+
+    if(ALPINE_ENABLE_FSOBSERVE_INOTIFY)
+        add_executable(test_fs_observer_inotify test_fs_observer_inotify.cpp)
+        target_link_libraries(test_fs_observer_inotify PRIVATE
+            Catch2::Catch2WithMain
+            Alpine::FsObserve
+        )
+        catch_discover_tests(test_fs_observer_inotify)
+    endif()
+endif()
+
 # --- GfskDemodulator tests (requires RTL-SDR build option) ---
 if(ALPINE_ENABLE_RTLSDR)
     add_executable(test_gfsk_demodulator test_gfsk_demodulator.cpp)

@@ -13,6 +13,7 @@ target_link_libraries(VfsUtils PUBLIC
     Alpine::AppUtils Alpine::ThreadUtils
     Alpine::AlpineStackInterface Alpine::DtcpStackInterface
     Alpine::AlpineProtocol
+    nlohmann_json::nlohmann_json
     FUSE::FUSE
 )
 target_compile_definitions(VfsUtils PUBLIC ALPINE_FUSE_ENABLED)

@@ -34,6 +34,7 @@ add_library(AlpineProtocol
     AlpineQueryResults.cpp
     AlpineQueryStatus.cpp
     AlpineRatingEngine.cpp
+    AlpineFeedbackAggregator.cpp
     AlpineResourceDesc.cpp
     AlpineResourceDescSet.cpp
     AlpineServiceThread.cpp
@@ -53,6 +54,11 @@ target_link_libraries(AlpineProtocol PUBLIC
     Alpine::TransBase
     AlpineTransportHeaders
 )
+
+if(ALPINE_ENABLE_FSOBSERVE)
+    target_link_libraries(AlpineProtocol PUBLIC Alpine::FsObserve Alpine::ResourceStore)
+    target_compile_definitions(AlpineProtocol PUBLIC ALPINE_FSOBSERVE_ENABLED)
+endif()
 
 if(ALPINE_ENABLE_TLS)
     target_link_libraries(AlpineProtocol PRIVATE OpenSSL::Crypto)
